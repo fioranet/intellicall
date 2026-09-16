@@ -1,0 +1,112 @@
+{
+  "title": "SIP-Trunks",
+  "subtitle": "Verbinden Sie sich mit lokalen Telekom-Anbietern (STC, Mobily, Zain) oder jedem SIP-kompatiblen Carrier.",
+  "actions": {
+    "debug": "Debuggen",
+    "reloadAsterisk": "Asterisk neu laden",
+    "addTrunk": "SIP-Trunk hinzufügen"
+  },
+  "status": {
+    "connected": "Asterisk verbunden",
+    "offline": "Asterisk offline",
+    "activeCalls": "{count, plural, one {# aktiver SIP-Anruf} other {# aktive SIP-Anrufe}}",
+    "trunksConfigured": "{count, plural, one {# Trunk konfiguriert} other {# Trunks konfiguriert}}"
+  },
+  "list": {
+    "title": "Konfigurierte Trunks",
+    "description": "Jeder Trunk steht für eine Verbindung zu einem SIP-Anbieter. Hinterlegen Sie die Zugangsdaten Ihres Carriers, um Anrufe zu starten.",
+    "emptyTitle": "Keine SIP-Trunks konfiguriert",
+    "emptyDescription": "Fügen Sie einen SIP-Trunk hinzu, um sich mit Ihrem Telekom-Anbieter zu verbinden und kostengünstig zu telefonieren."
+  },
+  "table": {
+    "trunk": "Trunk",
+    "host": "Host",
+    "provider": "Anbieter / Region",
+    "status": "Status",
+    "lastTest": "Letzter Test",
+    "test": "Testen",
+    "actions": "Aktionen",
+    "port": "{transport} · Port {port}",
+    "never": "Nie",
+    "edit": "Bearbeiten",
+    "delete": "Löschen"
+  },
+  "info": {
+    "title": "So funktionieren SIP-Trunks",
+    "body": "Ein SIP-Trunk verbindet {appName} mit Ihrem Telekom-Anbieter (z. B. STC, Mobily oder Zain in Saudi-Arabien oder globale Anbieter wie Telnyx und Bandwidth). Nach der Konfiguration weisen Sie ihn auf der Seite <b>Telefonnummern</b> einer Rufnummer zu; Ihre KI-Agenten tätigen und empfangen Anrufe dann über den Trunk, ganz ohne Twilio.",
+    "requirements": "<b>Voraussetzungen:</b> Asterisk muss auf Ihrem Server installiert sein. Klicken Sie nach dem Hinzufügen oder Ändern von Trunks auf <b>„Asterisk neu laden“</b>, um die Konfiguration zu übernehmen."
+  },
+  "dialog": {
+    "quickSetup": "Schnelleinrichtung",
+    "manual": "Manuell eingeben",
+    "manualHint": "Host, Port und Zugangsdaten ohne Voreinstellung konfigurieren.",
+    "nameLabel": "Trunk-Name *",
+    "namePlaceholder": "STC Business-Leitung",
+    "providerLabel": "Anbietername",
+    "providerPlaceholder": "STC, Mobily, Telnyx...",
+    "hostLabel": "SIP-Host / Registrar *",
+    "hostPlaceholder": "sip.stc.com.sa",
+    "portLabel": "Port",
+    "transportLabel": "Transport",
+    "transportPlaceholder": "Transport auswählen",
+    "udp": "UDP (am häufigsten)",
+    "tcp": "TCP (zuverlässig)",
+    "tls": "TLS (verschlüsselt)",
+    "transportHint": "Prüfen Sie die Dokumentation Ihres Anbieters. Die meisten verwenden UDP.",
+    "usernameLabel": "Benutzername",
+    "passwordLabel": "Passwort",
+    "authRealmLabel": "Auth-Realm",
+    "authRealmPlaceholder": "sip.anbieter.com",
+    "ipAuth": "IP-basierte Authentifizierung verwenden (Benutzername/Passwort löschen)",
+    "callerIdLabel": "Standard-Rufnummernanzeige",
+    "regionLabel": "Region",
+    "regionPlaceholder": "Saudi-Arabien, US East...",
+    "codecsLabel": "Codecs",
+    "codecsPlaceholder": "PCMU,PCMA,G729",
+    "codecsHint": "Durch Komma getrennte Audio-Codecs",
+    "dialPrefixLabel": "Wählpräfix",
+    "dialPrefixPlaceholder": "999",
+    "dialPrefixHint": "Optionales Technik-Präfix, das vor der Nummer gewählt wird"
+  },
+  "debug": {
+    "registration": {
+      "registered": "Registriert",
+      "failed": "Registrierung fehlgeschlagen",
+      "missing": "Keine Registrierung",
+      "pending": "Wird registriert…",
+      "ipAuth": "IP-Auth",
+      "unknown": "Unbekannt"
+    },
+    "title": "SIP-Debugging",
+    "description": "Diagnostizieren Sie SIP-Probleme ohne SSH-Zugriff — die Prüfungen laufen auf dem Server, und Anrufereignisse erscheinen unten.",
+    "tabHealth": "Systemprüfungen",
+    "tabLogs": "Live-Protokolle",
+    "rerun": "Erneut ausführen",
+    "fix": "Lösung:",
+    "trunkStatus": "Trunk-Status in Asterisk",
+    "noTrunks": "Noch keine SIP-Trunks konfiguriert.",
+    "endpointLoaded": "Endpoint in Asterisk geladen",
+    "endpointNotLoaded": "Endpoint nicht geladen — Anrufe schlagen mit „Allocation failed“ fehl. Klicken Sie auf „Asterisk neu laden“.",
+    "endpointUnknown": "Endpoint-Status unbekannt (CLI nicht verfügbar)",
+    "providerReachable": "Anbieter erreichbar (Qualify OK)",
+    "providerUnreachable": "Anbieter nicht erreichbar — Anrufe schlagen mit „Allocation failed“ fehl. Meist liegt ein falscher Transport bzw. Port für diesen Anbieter vor (z. B. benötigt Twilio UDP 5060 oder TLS 5061, nicht TCP).",
+    "providerNotQualified": "Anbieter noch nicht qualifiziert (kein OPTIONS-Ping-Ergebnis)",
+    "noContact": "Für diesen Trunk ist in Asterisk kein Kontakt registriert. Klicken Sie auf „Asterisk neu laden“.",
+    "providerUnknown": "Erreichbarkeit des Anbieters unbekannt (CLI nicht verfügbar)",
+    "healthFailed": "Systemprüfungen konnten nicht geladen werden. Läuft das Backend?",
+    "autoRefresh": "Aktualisiert sich alle {seconds} s automatisch, solange geöffnet",
+    "clearView": "Ansicht leeren",
+    "noEvents": "Noch keine SIP-Ereignisse. Tätigen Sie einen Testanruf oder laden Sie Asterisk neu — Ereignisse erscheinen hier."
+  },
+  "toast": {
+    "loadFailed": "SIP-Trunks konnten nicht geladen werden",
+    "deleted": "SIP-Trunk gelöscht",
+    "deleteFailed": "Löschen fehlgeschlagen",
+    "testFailed": "Test fehlgeschlagen",
+    "configWarnings": "Konfiguration mit Warnungen geschrieben",
+    "reloadFailed": "Neuladen fehlgeschlagen",
+    "updated": "SIP-Trunk aktualisiert",
+    "created": "SIP-Trunk erstellt",
+    "saveFailed": "SIP-Trunk konnte nicht gespeichert werden"
+  }
+}

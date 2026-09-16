@@ -1,0 +1,28 @@
+{
+  "title": "Dashboard",
+  "newCampaign": "Neue Kampagne",
+  "overview": {
+    "title": "Übersicht",
+    "description": "Verteilung des Anrufvolumens der letzten 7 Tage.",
+    "callsTooltip": "{count} Anrufe"
+  },
+  "recentActivity": {
+    "title": "Letzte Aktivität",
+    "description": "Aktuelle Systeminteraktionen und Netzwerkantworten.",
+    "systemEvent": "Systemereignis",
+    "withAgent": "mit {agent}",
+    "inbound": "Eingehend",
+    "viewAllLogs": "Alle Protokolle anzeigen"
+  },
+  "counts": {
+    "leads": "Leads",
+    "contacted": "{count} kontaktiert",
+    "uncontacted": "{count} nicht kontaktiert",
+    "manageLeads": "Leads verwalten",
+    "agents": "KI-Agenten",
+    "configureAgents": "Intelligenz konfigurieren",
+    "campaigns": "Kampagnen",
+    "reviewCampaigns": "Vorgänge prüfen"
+  },
+  "toast": { "loadFailed": "Dashboard-Kennzahlen konnten nicht geladen werden" }
+}

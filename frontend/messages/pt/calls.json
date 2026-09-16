@@ -1,0 +1,93 @@
+{
+  "title": "Registros de chamadas",
+  "subtitle": "Histórico abrangente de todas as interações telefônicas de IA.",
+  "filters": {
+    "qualification": "Qualificação",
+    "allLeads": "Todos os leads",
+    "qualified": "Qualificado",
+    "unqualified": "Não qualificado",
+    "direction": "Direção",
+    "allDirections": "Todas as direções",
+    "inbound": "Entrada",
+    "outbound": "Saída",
+    "campaign": "Campanha",
+    "allCampaigns": "Todas as campanhas",
+    "refresh": "Atualizar",
+    "export": "Exportar"
+  },
+  "table": {
+    "lead": "Liderar",
+    "context": "Contexto/Agente",
+    "dateTime": "Data e hora",
+    "duration": "Duração",
+    "status": "Status",
+    "score": "Pontuação de IA",
+    "recording": "Gravação de chamadas",
+    "action": "Ação",
+    "noLogs": "Nenhum registro encontrado.",
+    "pending": "Pendente",
+    "notAvailable": "Não disponível",
+    "details": "Detalhes"
+  },
+  "detail": {
+    "title": "Detalhes do registro de chamadas",
+    "description": "Análise aprofundada e histórico completo de conversas.",
+    "tabSummary": "Resumo",
+    "tabTranscript": "Transcrição",
+    "date": "Data",
+    "time": "Tempo",
+    "duration": "Duração",
+    "issuesDetected": "Problemas de chamada detectados",
+    "aiIntelligence": "Inteligência de IA",
+    "conversationSummary": "Resumo da conversa",
+    "score": "Pontuação de IA",
+    "estimatedBudget": "Orçamento estimado",
+    "timeline": "Linha do tempo",
+    "reasoning": "Lógica e Raciocínio",
+    "nextSteps": "Próximas etapas recomendadas",
+    "noAnalysis": "Nenhuma análise de IA disponível",
+    "noAnalysisHint": "A geração de análise usa OpenRouter para qualificar o lead e resumir o diálogo.",
+    "roleAgent": "AGENTE DE IA",
+    "roleLead": "LIDERAR",
+    "roleSystem": "SISTEMA",
+    "voiceQuality": {
+      "title": "Qualidade de voz",
+      "turns": "Voltas",
+      "interruptions": "Interrupções",
+      "falseVad": "Eventos falsos de VAD",
+      "rtpDrops": "Fila RTP cai",
+      "ttsChunks": "Pedaços TTS",
+      "llmFirstToken": "Primeiro token LLM",
+      "ttsFirstText": "Primeiro texto TTS",
+      "firstAudio": "Primeiro áudio (média)",
+      "maxFirstAudio": "Primeiro áudio (máx.)"
+    },
+    "transfers": {
+      "title": "Transferências Humanas",
+      "destination": "Destino",
+      "outcome": "Resultado",
+      "attempt": "Tentar",
+      "ringTime": "Toque",
+      "talkTime": "Com o humano",
+      "sipCause": "Causa SIP",
+      "status": {
+        "ringing": "Toque",
+        "connected": "Conectado",
+        "completed": "Concluído",
+        "busy": "Ocupado",
+        "no_answer": "Sem resposta",
+        "rejected": "Recusado",
+        "unavailable": "Indisponível",
+        "failed": "Fracassado"
+      }
+    }
+  },
+  "toast": {
+    "analysisComplete": "Análise concluída",
+    "analysisFailed": "Falha ao analisar a chamada",
+    "updated": "Registros atualizados",
+    "fetchFailed": "Falha ao buscar registros de chamadas",
+    "noExportData": "Não há dados para exportar",
+    "exported": "Exportado com sucesso"
+  }
+}

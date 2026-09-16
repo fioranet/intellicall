@@ -1,0 +1,93 @@
+{
+  "title": "Journal d'appels",
+  "subtitle": "Historique complet de toutes les interactions téléphoniques de l'IA.",
+  "filters": {
+    "qualification": "Qualification",
+    "allLeads": "Tous les prospects",
+    "qualified": "Qualifié",
+    "unqualified": "Non qualifié",
+    "direction": "Sens",
+    "allDirections": "Tous les sens",
+    "inbound": "Entrant",
+    "outbound": "Sortant",
+    "campaign": "Campagne",
+    "allCampaigns": "Toutes les campagnes",
+    "refresh": "Actualiser",
+    "export": "Exporter"
+  },
+  "table": {
+    "lead": "Prospect",
+    "context": "Contexte / Agent",
+    "dateTime": "Date et heure",
+    "duration": "Durée",
+    "status": "Statut",
+    "score": "Score IA",
+    "recording": "Enregistrement",
+    "action": "Action",
+    "noLogs": "Aucun journal trouvé.",
+    "pending": "En attente",
+    "notAvailable": "Non disponible",
+    "details": "Détails"
+  },
+  "detail": {
+    "title": "Détails de l'appel",
+    "description": "Analyse approfondie et historique complet de la conversation.",
+    "tabSummary": "Résumé",
+    "tabTranscript": "Transcription",
+    "date": "Date",
+    "time": "Heure",
+    "duration": "Durée",
+    "issuesDetected": "Problèmes détectés durant l'appel",
+    "aiIntelligence": "Intelligence IA",
+    "conversationSummary": "Résumé de la conversation",
+    "score": "Score IA",
+    "estimatedBudget": "Budget estimé",
+    "timeline": "Échéance",
+    "reasoning": "Logique et raisonnement",
+    "nextSteps": "Prochaines étapes recommandées",
+    "noAnalysis": "Aucune analyse IA disponible",
+    "noAnalysisHint": "La génération de l'analyse utilise OpenRouter pour qualifier le prospect et résumer le dialogue.",
+    "roleAgent": "AGENT IA",
+    "roleLead": "PROSPECT",
+    "roleSystem": "SYSTÈME",
+    "voiceQuality": {
+      "title": "Qualité vocale",
+      "turns": "Tours",
+      "interruptions": "Interruptions",
+      "falseVad": "Faux événements VAD",
+      "rtpDrops": "Pertes file RTP",
+      "ttsChunks": "Segments TTS",
+      "llmFirstToken": "Premier jeton LLM",
+      "ttsFirstText": "Premier texte TTS",
+      "firstAudio": "Premier audio (moy.)",
+      "maxFirstAudio": "Premier audio (max.)"
+    },
+    "transfers": {
+      "title": "Transferts vers une personne",
+      "destination": "Destination",
+      "outcome": "Résultat",
+      "attempt": "Tentative",
+      "ringTime": "Sonnerie",
+      "talkTime": "Avec la personne",
+      "sipCause": "Cause SIP",
+      "status": {
+        "ringing": "Sonnerie",
+        "connected": "Connecté",
+        "completed": "Terminé",
+        "busy": "Occupé",
+        "no_answer": "Sans réponse",
+        "rejected": "Refusé",
+        "unavailable": "Indisponible",
+        "failed": "Échec"
+      }
+    }
+  },
+  "toast": {
+    "analysisComplete": "Analyse terminée",
+    "analysisFailed": "Échec de l'analyse de l'appel",
+    "updated": "Journaux mis à jour",
+    "fetchFailed": "Échec de la récupération des journaux d'appels",
+    "noExportData": "Aucune donnée à exporter",
+    "exported": "Exportation réussie"
+  }
+}

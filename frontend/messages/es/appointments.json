@@ -1,0 +1,40 @@
+{
+  "title": "Citas",
+  "subtitle": "Gestiona las sesiones programadas y define tu disponibilidad.",
+  "tabs": { "appointments": "Citas", "availability": "Disponibilidad y franjas" },
+  "card": {
+    "client": "Cliente", "agent": "Agente: {name}", "deletedAgent": "Agente eliminado",
+    "complete": "Completar", "cancel": "Cancelar", "edit": "Editar"
+  },
+  "table": {
+    "dateTime": "Fecha y hora", "lead": "Contacto", "phone": "Teléfono",
+    "agent": "Agente", "status": "Estado", "actions": "Acciones",
+    "editTitle": "Editar cita", "completeTitle": "Marcar como completada",
+    "cancelTitle": "Cancelar cita", "empty": "No se encontraron citas."
+  },
+  "edit": {
+    "trigger": "Editar", "title": "Editar cita",
+    "description": "Actualiza los detalles de la cita. Los cambios se sincronizan con Google Calendar si está conectado.",
+    "dateTimeLabel": "Fecha y hora", "durationLabel": "Duración (minutos)",
+    "clientNameLabel": "Nombre del cliente", "clientNamePlaceholder": "Ana García",
+    "phoneLabel": "Teléfono", "notesLabel": "Notas",
+    "notesPlaceholder": "Notas opcionales para esta cita", "save": "Guardar cambios"
+  },
+  "availability": {
+    "title": "Horario de trabajo",
+    "description": "Define tus franjas horarias disponibles durante la semana.",
+    "save": "Guardar cambios", "noSlots": "Sin disponibilidad configurada", "addSlot": "Añadir franja"
+  },
+  "toast": {
+    "loadFailed": "No se pudieron cargar las citas",
+    "statusUpdated": "Cita {status}",
+    "statusFailed": "No se pudo actualizar el estado",
+    "pickDateTime": "Selecciona una fecha y una hora",
+    "invalidDateTime": "Fecha u hora no válida",
+    "updated": "Cita actualizada",
+    "updateFailed": "No se pudo actualizar la cita",
+    "slotsLoadFailed": "No se pudieron cargar las franjas de disponibilidad",
+    "availabilityUpdated": "Disponibilidad actualizada correctamente",
+    "availabilityFailed": "No se pudo guardar la disponibilidad"
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "title": "Agenda",
+  "subtitle": "Gerencie sessões agendadas e defina sua disponibilidade.",
+  "tabs": {
+    "appointments": "Agenda",
+    "availability": "Disponibilidade e slots"
+  },
+  "card": {
+    "client": "Cliente",
+    "agent": "Agente: {name}",
+    "deletedAgent": "Agente excluído",
+    "complete": "Completo",
+    "cancel": "Cancelar",
+    "edit": "Editar"
+  },
+  "table": {
+    "dateTime": "Data e hora",
+    "lead": "Lead",
+    "phone": "Telefone",
+    "agent": "Agente",
+    "status": "Status",
+    "actions": "Ações",
+    "editTitle": "Editar agendamento",
+    "completeTitle": "Marcar como concluído",
+    "cancelTitle": "Cancelar agendamento",
+    "empty": "Nenhum agendamento encontrado."
+  },
+  "edit": {
+    "trigger": "Editar",
+    "title": "Editar agendamento",
+    "description": "Atualize os detalhes do compromisso. As alterações são sincronizadas com o Google Agenda, se conectado.",
+    "dateTimeLabel": "Data e hora",
+    "durationLabel": "Duração (minutos)",
+    "clientNameLabel": "Nome do cliente",
+    "clientNamePlaceholder": "Jane Doe",
+    "phoneLabel": "Telefone",
+    "notesLabel": "Notas",
+    "notesPlaceholder": "Notas opcionais para este compromisso",
+    "save": "Salvar alterações"
+  },
+  "availability": {
+    "title": "Horário de trabalho",
+    "description": "Defina seus horários disponíveis para a semana.",
+    "save": "Salvar alterações",
+    "noSlots": "Nenhuma disponibilidade definida",
+    "addSlot": "Adicionar slot"
+  },
+  "toast": {
+    "loadFailed": "Falha ao carregar agendamentos",
+    "statusUpdated": "consulte {status}",
+    "statusFailed": "Falha ao atualizar o status",
+    "pickDateTime": "Escolha uma data e hora",
+    "invalidDateTime": "Data/hora inválida",
+    "updated": "Agendamento atualizado",
+    "updateFailed": "Falha ao atualizar agendamento",
+    "slotsLoadFailed": "Falha ao carregar slots de disponibilidade",
+    "availabilityUpdated": "Disponibilidade atualizada com sucesso",
+    "availabilityFailed": "Falha ao salvar disponibilidade"
+  }
+}

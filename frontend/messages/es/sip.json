@@ -1,0 +1,112 @@
+{
+  "title": "Troncales SIP",
+  "subtitle": "Conecta con operadores locales (STC, Mobily, Zain) o con cualquier operador compatible con SIP.",
+  "actions": {
+    "debug": "Depurar",
+    "reloadAsterisk": "Recargar Asterisk",
+    "addTrunk": "Añadir troncal SIP"
+  },
+  "status": {
+    "connected": "Asterisk conectado",
+    "offline": "Asterisk desconectado",
+    "activeCalls": "{count, plural, one {# llamada SIP activa} other {# llamadas SIP activas}}",
+    "trunksConfigured": "{count, plural, one {# troncal configurada} other {# troncales configuradas}}"
+  },
+  "list": {
+    "title": "Troncales configuradas",
+    "description": "Cada troncal representa una conexión con un proveedor SIP. Añade las credenciales de tu operador para empezar a llamar.",
+    "emptyTitle": "No hay troncales SIP configuradas",
+    "emptyDescription": "Añade una troncal SIP para conectar con tu operador y empezar a hacer llamadas rentables."
+  },
+  "table": {
+    "trunk": "Troncal",
+    "host": "Host",
+    "provider": "Proveedor / Región",
+    "status": "Estado",
+    "lastTest": "Última prueba",
+    "test": "Probar",
+    "actions": "Acciones",
+    "port": "{transport} · Puerto {port}",
+    "never": "Nunca",
+    "edit": "Editar",
+    "delete": "Eliminar"
+  },
+  "info": {
+    "title": "Cómo funcionan las troncales SIP",
+    "body": "Una troncal SIP conecta {appName} con tu operador de telecomunicaciones (p. ej. STC, Mobily o Zain en Arabia Saudí, o proveedores globales como Telnyx y Bandwidth). Una vez configurada, asígnala a un número de teléfono en la página <b>Números de teléfono</b>; a partir de ahí, tus agentes de IA harán y recibirán llamadas a través de la troncal, sin necesidad de Twilio.",
+    "requirements": "<b>Requisitos:</b> Asterisk debe estar instalado en tu servidor. Después de añadir o modificar troncales, pulsa <b>«Recargar Asterisk»</b> para aplicar la configuración."
+  },
+  "dialog": {
+    "quickSetup": "Configuración rápida",
+    "manual": "Introducir manualmente",
+    "manualHint": "Configura el host, el puerto y las credenciales sin usar una preselección.",
+    "nameLabel": "Nombre de la troncal *",
+    "namePlaceholder": "Línea empresarial STC",
+    "providerLabel": "Nombre del proveedor",
+    "providerPlaceholder": "STC, Mobily, Telnyx...",
+    "hostLabel": "Host / registrador SIP *",
+    "hostPlaceholder": "sip.stc.com.sa",
+    "portLabel": "Puerto",
+    "transportLabel": "Transporte",
+    "transportPlaceholder": "Selecciona el transporte",
+    "udp": "UDP (el más común)",
+    "tcp": "TCP (fiable)",
+    "tls": "TLS (cifrado)",
+    "transportHint": "Consulta la documentación de tu proveedor. La mayoría usa UDP.",
+    "usernameLabel": "Usuario",
+    "passwordLabel": "Contraseña",
+    "authRealmLabel": "Dominio de autenticación",
+    "authRealmPlaceholder": "sip.proveedor.com",
+    "ipAuth": "Usar autenticación por IP (borrar usuario y contraseña)",
+    "callerIdLabel": "Identificador de llamada por defecto",
+    "regionLabel": "Región",
+    "regionPlaceholder": "Arabia Saudí, EE. UU. Este...",
+    "codecsLabel": "Códecs",
+    "codecsPlaceholder": "PCMU,PCMA,G729",
+    "codecsHint": "Códecs de audio separados por comas",
+    "dialPrefixLabel": "Prefijo de marcación",
+    "dialPrefixPlaceholder": "999",
+    "dialPrefixHint": "Prefijo técnico opcional que se antepone al número al marcar"
+  },
+  "debug": {
+    "registration": {
+      "registered": "Registrada",
+      "failed": "Registro fallido",
+      "missing": "Sin registro",
+      "pending": "Registrando…",
+      "ipAuth": "Autenticación por IP",
+      "unknown": "Desconocido"
+    },
+    "title": "Depuración SIP",
+    "description": "Diagnostica problemas de SIP sin acceso SSH: las comprobaciones se ejecutan en el servidor y los eventos de llamada aparecen abajo.",
+    "tabHealth": "Comprobaciones",
+    "tabLogs": "Registros en vivo",
+    "rerun": "Reejecutar",
+    "fix": "Solución:",
+    "trunkStatus": "Estado de la troncal en Asterisk",
+    "noTrunks": "Aún no hay troncales SIP configuradas.",
+    "endpointLoaded": "Endpoint cargado en Asterisk",
+    "endpointNotLoaded": "Endpoint no cargado: las llamadas fallarán con «Allocation failed». Pulsa «Recargar Asterisk».",
+    "endpointUnknown": "Estado del endpoint desconocido (CLI no disponible)",
+    "providerReachable": "Proveedor accesible (qualify correcto)",
+    "providerUnreachable": "Proveedor inaccesible: las llamadas fallarán con «Allocation failed». Normalmente se debe a un transporte o puerto incorrecto para este proveedor (p. ej. Twilio requiere UDP 5060 o TLS 5061, no TCP).",
+    "providerNotQualified": "El proveedor aún no se ha cualificado (sin resultado del ping OPTIONS)",
+    "noContact": "No hay ningún contacto registrado para esta troncal en Asterisk. Pulsa «Recargar Asterisk».",
+    "providerUnknown": "Accesibilidad del proveedor desconocida (CLI no disponible)",
+    "healthFailed": "No se pudieron cargar las comprobaciones. ¿Está el backend en marcha?",
+    "autoRefresh": "Se actualiza automáticamente cada {seconds} s mientras esté abierto",
+    "clearView": "Limpiar vista",
+    "noEvents": "Aún no hay eventos SIP. Haz una llamada de prueba o recarga Asterisk: los eventos aparecerán aquí."
+  },
+  "toast": {
+    "loadFailed": "No se pudieron cargar las troncales SIP",
+    "deleted": "Troncal SIP eliminada",
+    "deleteFailed": "No se pudo eliminar",
+    "testFailed": "La prueba falló",
+    "configWarnings": "Configuración escrita con advertencias",
+    "reloadFailed": "La recarga falló",
+    "updated": "Troncal SIP actualizada",
+    "created": "Troncal SIP creada",
+    "saveFailed": "No se pudo guardar la troncal SIP"
+  }
+}

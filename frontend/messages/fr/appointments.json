@@ -1,0 +1,40 @@
+{
+  "title": "Rendez-vous",
+  "subtitle": "Gérez les sessions planifiées et définissez vos disponibilités.",
+  "tabs": { "appointments": "Rendez-vous", "availability": "Disponibilités et créneaux" },
+  "card": {
+    "client": "Client", "agent": "Agent : {name}", "deletedAgent": "Agent supprimé",
+    "complete": "Terminer", "cancel": "Annuler", "edit": "Modifier"
+  },
+  "table": {
+    "dateTime": "Date et heure", "lead": "Prospect", "phone": "Téléphone",
+    "agent": "Agent", "status": "Statut", "actions": "Actions",
+    "editTitle": "Modifier le rendez-vous", "completeTitle": "Marquer comme terminé",
+    "cancelTitle": "Annuler le rendez-vous", "empty": "Aucun rendez-vous trouvé."
+  },
+  "edit": {
+    "trigger": "Modifier", "title": "Modifier le rendez-vous",
+    "description": "Mettez à jour les détails du rendez-vous. Les modifications sont synchronisées avec Google Agenda s'il est connecté.",
+    "dateTimeLabel": "Date et heure", "durationLabel": "Durée (minutes)",
+    "clientNameLabel": "Nom du client", "clientNamePlaceholder": "Marie Martin",
+    "phoneLabel": "Téléphone", "notesLabel": "Notes",
+    "notesPlaceholder": "Notes facultatives pour ce rendez-vous", "save": "Enregistrer les modifications"
+  },
+  "availability": {
+    "title": "Horaires de travail",
+    "description": "Définissez vos créneaux disponibles pour la semaine.",
+    "save": "Enregistrer les modifications", "noSlots": "Aucune disponibilité définie", "addSlot": "Ajouter un créneau"
+  },
+  "toast": {
+    "loadFailed": "Échec du chargement des rendez-vous",
+    "statusUpdated": "Rendez-vous {status}",
+    "statusFailed": "Échec de la mise à jour du statut",
+    "pickDateTime": "Veuillez choisir une date et une heure",
+    "invalidDateTime": "Date / heure non valide",
+    "updated": "Rendez-vous mis à jour",
+    "updateFailed": "Échec de la mise à jour du rendez-vous",
+    "slotsLoadFailed": "Échec du chargement des créneaux de disponibilité",
+    "availabilityUpdated": "Disponibilités mises à jour avec succès",
+    "availabilityFailed": "Échec de l'enregistrement des disponibilités"
+  }
+}

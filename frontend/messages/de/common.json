@@ -1,0 +1,38 @@
+{
+  "actions": {
+    "save": "Speichern", "saving": "Wird gespeichert...", "saveChanges": "Änderungen speichern",
+    "cancel": "Abbrechen", "delete": "Löschen", "deleting": "Wird gelöscht...",
+    "edit": "Bearbeiten", "create": "Erstellen", "creating": "Wird erstellt...",
+    "add": "Hinzufügen", "remove": "Entfernen", "close": "Schließen", "confirm": "Bestätigen",
+    "back": "Zurück", "next": "Weiter", "previous": "Vorherige",
+    "search": "Suchen", "filter": "Filtern", "refresh": "Aktualisieren",
+    "export": "Exportieren", "import": "Importieren", "copy": "Kopieren", "copied": "Kopiert",
+    "download": "Herunterladen", "upload": "Hochladen", "connect": "Verbinden",
+    "disconnect": "Trennen", "test": "Testen", "view": "Ansehen", "viewAll": "Alle anzeigen",
+    "duplicate": "Duplizieren", "retry": "Erneut versuchen", "done": "Fertig",
+    "apply": "Übernehmen", "reset": "Zurücksetzen", "selectAll": "Alle auswählen",
+    "clear": "Leeren", "openMenu": "Menü öffnen", "toggleTheme": "Design wechseln"
+  },
+  "states": {
+    "loading": "Wird geladen...", "noResults": "Keine Ergebnisse gefunden",
+    "noData": "Keine Daten verfügbar", "error": "Etwas ist schiefgelaufen",
+    "empty": "Hier ist noch nichts", "active": "Aktiv", "inactive": "Inaktiv",
+    "enabled": "Aktiviert", "disabled": "Deaktiviert", "connected": "Verbunden",
+    "notConnected": "Nicht verbunden", "pending": "Ausstehend", "completed": "Abgeschlossen",
+    "failed": "Fehlgeschlagen", "inProgress": "In Bearbeitung", "unknown": "Unbekannt",
+    "none": "Keine", "all": "Alle", "yes": "Ja", "no": "Nein",
+    "optional": "Optional", "required": "Erforderlich"
+  },
+  "labels": {
+    "name": "Name", "email": "E-Mail", "phone": "Telefon",
+    "status": "Status", "date": "Datum", "time": "Uhrzeit", "type": "Typ",
+    "description": "Beschreibung", "actions": "Aktionen", "createdAt": "Erstellt",
+    "updatedAt": "Aktualisiert", "notes": "Notizen", "tags": "Tags", "total": "Gesamt"
+  },
+  "language": { "label": "Sprache", "change": "Sprache ändern" },
+  "confirm": {
+    "title": "Sind Sie sicher?", "deleteTitle": "Dieses Element löschen?",
+    "deleteDescription": "Diese Aktion kann nicht rückgängig gemacht werden."
+  },
+  "selfHost": { "badge": "Self-Hosting", "buyOn": "Auf {marketplace} kaufen" }
+}

@@ -1,0 +1,112 @@
+{
+  "title": "Troncos SIP",
+  "subtitle": "Conecte-se a provedores de telecomunicações locais ou a qualquer operadora compatível com SIP.",
+  "actions": {
+    "debug": "Depurar",
+    "reloadAsterisk": "Recarregar Asterisk",
+    "addTrunk": "Adicionar tronco SIP"
+  },
+  "status": {
+    "connected": "Asterisk Conectado",
+    "offline": "Asterisk off-line",
+    "activeCalls": "{count, plural, one {# chamada SIP ativa} other {# chamadas SIP ativas}}",
+    "trunksConfigured": "{count, plural, one {# tronco configurado} other {# troncos configurados}}"
+  },
+  "list": {
+    "title": "Troncos configurados",
+    "description": "Cada tronco representa uma conexão com um provedor SIP. Adicione as credenciais da sua operadora para começar a fazer chamadas.",
+    "emptyTitle": "Nenhum tronco SIP configurado",
+    "emptyDescription": "Adicione um tronco SIP para conectar-se ao seu provedor de telecomunicações e começar a fazer chamadas econômicas."
+  },
+  "table": {
+    "trunk": "Tronco",
+    "host": "Host",
+    "provider": "Provedor/Região",
+    "status": "Status",
+    "lastTest": "Último teste",
+    "test": "Teste",
+    "actions": "Ações",
+    "port": "{transport} · Porta {port}",
+    "never": "Nunca",
+    "edit": "Editar",
+    "delete": "Excluir"
+  },
+  "info": {
+    "title": "Como funcionam os troncos SIP",
+    "body": "Um tronco SIP conecta o {appName} à sua operadora ou provedor de telecomunicações. Depois de configurado, atribua-o a um número de telefone na página <b>Números de telefone</b> e, em seguida, seus agentes de IA farão e receberão chamadas por meio do tronco, sem necessidade de Twilio.",
+    "requirements": "<b>Requisitos:</b> Asterisk deve estar instalado em seu servidor. Após adicionar ou modificar troncos, clique em <b>\"Recarregar Asterisk\"</b> para aplicar a configuração."
+  },
+  "dialog": {
+    "quickSetup": "Configuração rápida",
+    "manual": "Insira manualmente",
+    "manualHint": "Configure host, porta e credenciais sem usar uma predefinição.",
+    "nameLabel": "Nome do tronco *",
+    "namePlaceholder": "Tronco Principal",
+    "providerLabel": "Nome do provedor",
+    "providerPlaceholder": "Operadora, Provedor SIP...",
+    "hostLabel": "Host/Registrador SIP *",
+    "hostPlaceholder": "sip.provedor.com.br",
+    "portLabel": "Porta",
+    "transportLabel": "Transporte",
+    "transportPlaceholder": "Selecione o transporte",
+    "udp": "UDP (mais comum)",
+    "tcp": "TCP (confiável)",
+    "tls": "TLS (criptografado)",
+    "transportHint": "Verifique os documentos do seu provedor. A maioria usa UDP.",
+    "usernameLabel": "Nome de usuário",
+    "passwordLabel": "Senha",
+    "authRealmLabel": "Reino de autenticação",
+    "authRealmPlaceholder": "sip.provedor.com",
+    "ipAuth": "Use autenticação baseada em IP (limpar nome de usuário/senha)",
+    "callerIdLabel": "ID de chamada padrão",
+    "regionLabel": "Região",
+    "regionPlaceholder": "Brasil, América do Sul, Global...",
+    "codecsLabel": "Codecs",
+    "codecsPlaceholder": "PCMU,PCMA,G729",
+    "codecsHint": "Codecs de áudio separados por vírgula",
+    "dialPrefixLabel": "Prefixo de discagem",
+    "dialPrefixPlaceholder": "999",
+    "dialPrefixHint": "Prefixo técnico opcional adicionado antes do número ao discar"
+  },
+  "debug": {
+    "registration": {
+      "registered": "Registrado",
+      "failed": "Falha no registro",
+      "missing": "Sem registro",
+      "pending": "Registrando…",
+      "ipAuth": "Autenticação IP",
+      "unknown": "Desconhecido"
+    },
+    "title": "Depuração SIP",
+    "description": "Diagnosticar problemas SIP sem acesso SSH — verificações de integridade são executadas no servidor e fluxo de eventos de chamada abaixo.",
+    "tabHealth": "Verificações de saúde",
+    "tabLogs": "Registros ao vivo",
+    "rerun": "Executar novamente",
+    "fix": "Consertar:",
+    "trunkStatus": "Status do tronco no Asterisk",
+    "noTrunks": "Nenhum tronco SIP configurado ainda.",
+    "endpointLoaded": "Endpoint carregado no Asterisk",
+    "endpointNotLoaded": "Endpoint não carregado — as chamadas falharão com \"Falha na alocação\". Clique em \"Recarregar Asterisk\".",
+    "endpointUnknown": "Status do endpoint desconhecido (CLI indisponível)",
+    "providerReachable": "Provedor acessível (qualificação OK)",
+    "providerUnreachable": "Provedor inacessível — as chamadas falharão com \"Falha na alocação\". Geralmente, um transporte/porta errado para este provedor (por exemplo, Twilio precisa de UDP 5060 ou TLS 5061, não de TCP).",
+    "providerNotQualified": "Provedor ainda não qualificado (nenhum resultado de ping OPTIONS)",
+    "noContact": "Nenhum contato registrado para este tronco no Asterisk. Clique em \"Recarregar Asterisk\".",
+    "providerUnknown": "Acessibilidade do provedor desconhecida (CLI indisponível)",
+    "healthFailed": "Não foi possível carregar as verificações de integridade. O back-end está funcionando?",
+    "autoRefresh": "Atualiza automaticamente todos os {seconds}s enquanto abertos",
+    "clearView": "Visão clara",
+    "noEvents": "Nenhum evento SIP ainda. Faça uma chamada de teste ou recarregue o Asterisk – os eventos aparecerão aqui."
+  },
+  "toast": {
+    "loadFailed": "Falha ao carregar troncos SIP",
+    "deleted": "Tronco SIP excluído",
+    "deleteFailed": "Falha ao excluir",
+    "testFailed": "Falha no teste",
+    "configWarnings": "Configuração escrita com avisos",
+    "reloadFailed": "Falha ao recarregar",
+    "updated": "Tronco SIP atualizado",
+    "created": "Tronco SIP criado",
+    "saveFailed": "Falha ao salvar tronco SIP"
+  }
+}

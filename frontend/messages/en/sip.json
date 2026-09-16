@@ -1,0 +1,112 @@
+{
+  "title": "SIP Trunks",
+  "subtitle": "Connect to local telecom providers (STC, Mobily, Zain) or any SIP-compatible carrier.",
+  "actions": {
+    "debug": "Debug",
+    "reloadAsterisk": "Reload Asterisk",
+    "addTrunk": "Add SIP Trunk"
+  },
+  "status": {
+    "connected": "Asterisk Connected",
+    "offline": "Asterisk Offline",
+    "activeCalls": "{count, plural, one {# active SIP call} other {# active SIP calls}}",
+    "trunksConfigured": "{count, plural, one {# trunk configured} other {# trunks configured}}"
+  },
+  "list": {
+    "title": "Configured Trunks",
+    "description": "Each trunk represents a connection to a SIP provider. Add your carrier credentials to start making calls.",
+    "emptyTitle": "No SIP trunks configured",
+    "emptyDescription": "Add a SIP trunk to connect to your telecom provider and start making cost-effective calls."
+  },
+  "table": {
+    "trunk": "Trunk",
+    "host": "Host",
+    "provider": "Provider / Region",
+    "status": "Status",
+    "lastTest": "Last Test",
+    "test": "Test",
+    "actions": "Actions",
+    "port": "{transport} · Port {port}",
+    "never": "Never",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "info": {
+    "title": "How SIP Trunks Work",
+    "body": "A SIP trunk connects {appName} to your telecom provider (e.g. STC, Mobily, Zain in Saudi Arabia, or global providers like Telnyx and Bandwidth). Once configured, assign it to a phone number on the <b>Phone Numbers</b> page, then your AI agents will place and receive calls through the trunk, no Twilio required.",
+    "requirements": "<b>Requirements:</b> Asterisk must be installed on your server. After adding or modifying trunks, click <b>\"Reload Asterisk\"</b> to apply the configuration."
+  },
+  "dialog": {
+    "quickSetup": "Quick setup",
+    "manual": "Enter manually",
+    "manualHint": "Configure host, port, and credentials without using a preset.",
+    "nameLabel": "Trunk Name *",
+    "namePlaceholder": "STC Business Line",
+    "providerLabel": "Provider Name",
+    "providerPlaceholder": "STC, Mobily, Telnyx...",
+    "hostLabel": "SIP Host / Registrar *",
+    "hostPlaceholder": "sip.stc.com.sa",
+    "portLabel": "Port",
+    "transportLabel": "Transport",
+    "transportPlaceholder": "Select transport",
+    "udp": "UDP (most common)",
+    "tcp": "TCP (reliable)",
+    "tls": "TLS (encrypted)",
+    "transportHint": "Check your provider's docs. Most use UDP.",
+    "usernameLabel": "Username",
+    "passwordLabel": "Password",
+    "authRealmLabel": "Auth Realm",
+    "authRealmPlaceholder": "sip.provider.com",
+    "ipAuth": "Use IP-based authentication (clear username/password)",
+    "callerIdLabel": "Default Caller ID",
+    "regionLabel": "Region",
+    "regionPlaceholder": "Saudi Arabia, US East...",
+    "codecsLabel": "Codecs",
+    "codecsPlaceholder": "PCMU,PCMA,G729",
+    "codecsHint": "Comma-separated audio codecs",
+    "dialPrefixLabel": "Dial Prefix",
+    "dialPrefixPlaceholder": "999",
+    "dialPrefixHint": "Optional tech prefix added before the number when dialling"
+  },
+  "debug": {
+    "registration": {
+      "registered": "Registered",
+      "failed": "Registration failed",
+      "missing": "No registration",
+      "pending": "Registering…",
+      "ipAuth": "IP auth",
+      "unknown": "Unknown"
+    },
+    "title": "SIP Debug",
+    "description": "Diagnose SIP problems without SSH access — health checks run on the server, and call events stream below.",
+    "tabHealth": "Health Checks",
+    "tabLogs": "Live Logs",
+    "rerun": "Re-run",
+    "fix": "Fix:",
+    "trunkStatus": "Trunk Status in Asterisk",
+    "noTrunks": "No SIP trunks configured yet.",
+    "endpointLoaded": "Endpoint loaded in Asterisk",
+    "endpointNotLoaded": "Endpoint not loaded — calls will fail with \"Allocation failed\". Click \"Reload Asterisk\".",
+    "endpointUnknown": "Endpoint status unknown (CLI unavailable)",
+    "providerReachable": "Provider reachable (qualify OK)",
+    "providerUnreachable": "Provider unreachable — calls will fail with \"Allocation failed\". Usually a wrong transport/port for this provider (e.g. Twilio needs UDP 5060 or TLS 5061, not TCP).",
+    "providerNotQualified": "Provider not qualified yet (no OPTIONS ping result)",
+    "noContact": "No contact registered for this trunk in Asterisk. Click \"Reload Asterisk\".",
+    "providerUnknown": "Provider reachability unknown (CLI unavailable)",
+    "healthFailed": "Could not load health checks. Is the backend running?",
+    "autoRefresh": "Auto-refreshes every {seconds}s while open",
+    "clearView": "Clear view",
+    "noEvents": "No SIP events yet. Make a test call or reload Asterisk — events will appear here."
+  },
+  "toast": {
+    "loadFailed": "Failed to load SIP trunks",
+    "deleted": "SIP trunk deleted",
+    "deleteFailed": "Failed to delete",
+    "testFailed": "Test failed",
+    "configWarnings": "Config written with warnings",
+    "reloadFailed": "Reload failed",
+    "updated": "SIP trunk updated",
+    "created": "SIP trunk created",
+    "saveFailed": "Failed to save SIP trunk"
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "title": "Registro de llamadas",
+  "subtitle": "Historial completo de todas las interacciones telefónicas de la IA.",
+  "filters": {
+    "qualification": "Cualificación",
+    "allLeads": "Todos los contactos",
+    "qualified": "Cualificado",
+    "unqualified": "No cualificado",
+    "direction": "Dirección",
+    "allDirections": "Todas las direcciones",
+    "inbound": "Entrante",
+    "outbound": "Saliente",
+    "campaign": "Campaña",
+    "allCampaigns": "Todas las campañas",
+    "refresh": "Actualizar",
+    "export": "Exportar"
+  },
+  "table": {
+    "lead": "Contacto",
+    "context": "Contexto / Agente",
+    "dateTime": "Fecha y hora",
+    "duration": "Duración",
+    "status": "Estado",
+    "score": "Puntuación IA",
+    "recording": "Grabación",
+    "action": "Acción",
+    "noLogs": "No se encontraron registros.",
+    "pending": "Pendiente",
+    "notAvailable": "No disponible",
+    "details": "Detalles"
+  },
+  "detail": {
+    "title": "Detalles de la llamada",
+    "description": "Análisis detallado e historial completo de la conversación.",
+    "tabSummary": "Resumen",
+    "tabTranscript": "Transcripción",
+    "date": "Fecha",
+    "time": "Hora",
+    "duration": "Duración",
+    "issuesDetected": "Problemas detectados en la llamada",
+    "aiIntelligence": "Inteligencia de IA",
+    "conversationSummary": "Resumen de la conversación",
+    "score": "Puntuación IA",
+    "estimatedBudget": "Presupuesto estimado",
+    "timeline": "Plazos",
+    "reasoning": "Lógica y razonamiento",
+    "nextSteps": "Próximos pasos recomendados",
+    "noAnalysis": "No hay análisis de IA disponible",
+    "noAnalysisHint": "Generar el análisis usa OpenRouter para cualificar el contacto y resumir el diálogo.",
+    "roleAgent": "AGENTE IA",
+    "roleLead": "CONTACTO",
+    "roleSystem": "SISTEMA",
+    "voiceQuality": {
+      "title": "Calidad de voz",
+      "turns": "Turnos",
+      "interruptions": "Interrupciones",
+      "falseVad": "Eventos VAD falsos",
+      "rtpDrops": "Descartes de cola RTP",
+      "ttsChunks": "Fragmentos TTS",
+      "llmFirstToken": "Primer token LLM",
+      "ttsFirstText": "Primer texto TTS",
+      "firstAudio": "Primer audio (med.)",
+      "maxFirstAudio": "Primer audio (máx.)"
+    },
+    "transfers": {
+      "title": "Transferencias a personas",
+      "destination": "Destino",
+      "outcome": "Resultado",
+      "attempt": "Intento",
+      "ringTime": "Llamando",
+      "talkTime": "Con la persona",
+      "sipCause": "Causa SIP",
+      "status": {
+        "ringing": "Llamando",
+        "connected": "Conectado",
+        "completed": "Completado",
+        "busy": "Comunica",
+        "no_answer": "Sin respuesta",
+        "rejected": "Rechazada",
+        "unavailable": "No disponible",
+        "failed": "Fallida"
+      }
+    }
+  },
+  "toast": {
+    "analysisComplete": "Análisis completado",
+    "analysisFailed": "No se pudo analizar la llamada",
+    "updated": "Registros actualizados",
+    "fetchFailed": "No se pudieron obtener los registros de llamadas",
+    "noExportData": "No hay datos que exportar",
+    "exported": "Exportado correctamente"
+  }
+}

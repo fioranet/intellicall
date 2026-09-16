@@ -1,0 +1,31 @@
+{
+  "title": "Assistance",
+  "subtitle": "Créez et gérez vos tickets d'assistance.",
+  "filters": {
+    "status": "Statut", "all": "Tous les tickets", "open": "Ouvert",
+    "inProgress": "En cours", "resolved": "Résolu", "closed": "Fermé"
+  },
+  "newTicket": "Nouveau ticket",
+  "empty": {
+    "title": "Aucun ticket d'assistance pour le moment",
+    "description": "Créez un ticket pour obtenir l'aide de notre équipe."
+  },
+  "create": {
+    "title": "Nouveau ticket d'assistance",
+    "description": "Décrivez votre problème. Notre équipe répondra dès que possible.",
+    "subjectLabel": "Objet",
+    "subjectPlaceholder": "Bref résumé de votre problème",
+    "messageLabel": "Message (facultatif)",
+    "messagePlaceholder": "Ajoutez plus de détails...",
+    "submit": "Créer le ticket"
+  },
+  "reply": { "placeholder": "Saisissez votre réponse...", "send": "Envoyer la réponse" },
+  "toast": {
+    "loadFailed": "Échec du chargement des tickets",
+    "conversationFailed": "Échec du chargement de la conversation",
+    "replyFailed": "Échec de l'envoi de la réponse",
+    "subjectRequired": "Veuillez saisir un objet",
+    "created": "Ticket créé",
+    "createFailed": "Échec de la création du ticket"
+  }
+}

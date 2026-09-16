@@ -1,0 +1,64 @@
+{
+  "title": "Wissensdatenbank",
+  "subtitle": "Speichern und verwalten Sie Unternehmensinformationen für Ihre KI-Agenten",
+  "create": { "trigger": "Wissensdatenbank erstellen", "manual": "Manuell eingeben", "fromWebsite": "Von einer Website" },
+  "view": { "cards": "Karten", "list": "Liste" },
+  "badges": {
+    "basicInfo": "Basisinformationen",
+    "faqs": "{count, plural, one {# FAQ} other {# FAQs}}",
+    "faqsLabel": "FAQs", "otherInfo": "Weitere Informationen"
+  },
+  "card": {
+    "fallbackDescription": "Enthält unternehmensspezifische Daten für KI-Agenten.",
+    "created": "Erstellt am {date}", "edit": "Bearbeiten", "delete": "Löschen"
+  },
+  "table": {
+    "name": "Name", "sections": "Abschnitte", "faqs": "FAQs",
+    "createdAt": "Erstellt am", "actions": "Aktionen",
+    "items": "{count, plural, one {# Eintrag} other {# Einträge}}"
+  },
+  "empty": {
+    "title": "Noch keine Wissensdatenbanken",
+    "description": "Speichern Sie Unternehmensinformationen, FAQs und mehr, um Ihren KI-Agenten zusätzlichen Kontext zu geben."
+  },
+  "dialog": {
+    "editTitle": "Wissensdatenbank bearbeiten", "createTitle": "Wissensdatenbank erstellen",
+    "description": "Speichern Sie wiederverwendbare Informationen, die Ihre KI-Agenten während der Anrufe nutzen können.",
+    "importNotes": "Import-Hinweise",
+    "nameLabel": "Name der Wissensdatenbank",
+    "namePlaceholder": "z. B. Allgemeine Unternehmensinfos",
+    "descriptionLabel": "Beschreibung (intern)",
+    "descriptionPlaceholder": "Kurze Beschreibung, was diese Informationen abdecken",
+    "basicInfoLabel": "Basisinformationen",
+    "basicInfoPlaceholder": "Beschreiben Sie Ihr Unternehmen, Leistungen, Öffnungszeiten usw.",
+    "faqsLabel": "Häufig gestellte Fragen (FAQs)",
+    "addFaq": "FAQ hinzufügen",
+    "questionLabel": "Frage {number}",
+    "questionPlaceholder": "z. B. Wie lautet Ihre Rückerstattungsrichtlinie?",
+    "answerLabel": "Antwort",
+    "answerPlaceholder": "z. B. Wir bieten eine 30-tägige Geld-zurück-Garantie...",
+    "noFaqs": "Noch keine FAQs hinzugefügt. Klicken Sie auf „FAQ hinzufügen“, um zu beginnen.",
+    "otherInfoLabel": "Weitere Informationen",
+    "otherInfoPlaceholder": "Zusätzlicher Kontext, Preistabellen oder Spezialwissen...",
+    "updating": "Wird aktualisiert...", "creating": "Wird erstellt...",
+    "save": "Wissensdatenbank speichern", "create": "Wissensdatenbank erstellen"
+  },
+  "fromWebsite": {
+    "title": "Von einer Website importieren",
+    "description": "Wir rufen die Seite ab und nutzen KI, um Basisinformationen, FAQs und weitere Felder vorzuschlagen. Die Ergebnisse hängen von der Website ab; prüfen Sie sie immer vor dem Speichern. Erfordert einen OpenRouter-API-Schlüssel in den Einstellungen.",
+    "urlLabel": "Website-URL", "generating": "Wird generiert…", "generate": "Entwurf generieren"
+  },
+  "toast": {
+    "loadFailed": "Wissensdatenbanken konnten nicht geladen werden",
+    "deleted": "Wissensdatenbank erfolgreich gelöscht",
+    "deleteFailed": "Wissensdatenbank konnte nicht gelöscht werden",
+    "updated": "Wissensdatenbank erfolgreich aktualisiert!",
+    "created": "Wissensdatenbank erfolgreich erstellt!",
+    "generic": "Etwas ist schiefgelaufen",
+    "urlRequired": "Bitte geben Sie eine Website-URL ein",
+    "urlInvalid": "Bitte geben Sie eine gültige URL ein (z. B. https://beispiel.com)",
+    "urlScheme": "Es sind nur http- und https-URLs zulässig",
+    "draftFailed": "Entwurf konnte nicht generiert werden",
+    "draftReady": "Entwurf bereit — prüfen und Wissensdatenbank speichern"
+  }
+}

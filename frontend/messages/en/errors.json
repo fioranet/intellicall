@@ -1,0 +1,13 @@
+{
+  "generic": "Something went wrong. Please try again.",
+  "loadFailed": "Failed to load data",
+  "saveFailed": "Failed to save changes",
+  "deleteFailed": "Failed to delete",
+  "createFailed": "Failed to create",
+  "updateFailed": "Failed to update",
+  "networkError": "Network error. Check your connection and try again.",
+  "unauthorized": "You are not authorized to do that",
+  "notFound": "Not found",
+  "requiredField": "This field is required",
+  "invalidEmail": "Enter a valid email address"
+}

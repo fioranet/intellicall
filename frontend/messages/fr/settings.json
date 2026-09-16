@@ -1,0 +1,452 @@
+{
+  "loading": "Chargement…",
+  "loadingIntegrations": "Chargement des intégrations…",
+  "connected": "Connecté",
+  "disconnect": "Déconnecter",
+  "apiAccess": {
+    "title": "Accès API",
+    "active": "Active",
+    "description": "Clé API personnelle pour appeler l'API {appName} depuis n8n, Zapier ou vos propres scripts : créer des prospects, lancer des campagnes, passer des appels.",
+    "regenerate": "Régénérer",
+    "revoke": "Révoquer",
+    "generate": "Générer une clé API",
+    "copyNow": "Copiez votre clé API maintenant — elle ne sera plus affichée.",
+    "copy": "Copier",
+    "key": "Clé",
+    "created": "Créée le",
+    "lastUsed": "Dernière utilisation",
+    "never": "Jamais",
+    "usage": "Utilisation",
+    "usageHint": "Envoyez la clé dans un en-tête <code>X-API-Key</code> avec chaque requête. La liste complète des endpoints figure ci-dessous.",
+    "reference": "Référence de l'API",
+    "endpointCount": "{count, plural, one {# endpoint} other {# endpoints}}",
+    "referenceIntro": "URL de base <code>{baseUrl}</code> — tous les endpoints acceptent <code>X-API-Key</code>. Les réponses sont au format JSON <code>{shape}</code>. Pour <em>recevoir</em> des événements (prospect créé, appel terminé, …), utilisez l'onglet Webhooks ou l'intégration n8n.",
+    "required": "obligatoire",
+    "copyCurl": "Copier la commande curl"
+  },
+  "n8n": {
+    "description": "Diffusez chaque événement de la plateforme dans vos flux n8n et automatisez avec plus de 400 applications : CRM, tableurs, e-mail, messagerie, et plus encore.",
+    "howToTitle": "Comment se connecter",
+    "step1": "1. Dans votre flux n8n, ajoutez un nœud <b>Webhook</b> avec la méthode <code>POST</code> (ou importez un modèle ci-dessous : il en contient déjà un).",
+    "step2": "2. Copiez l'<b>URL de production</b> du nœud puis <b>activez le flux</b> — ou utilisez l'URL de test pendant la conception.",
+    "step3": "3. Collez l'URL ici et connectez. Les événements arrivent au format JSON : <code>{shape}</code>.",
+    "connect": "Connecter n8n",
+    "deliveringTo": "Envoi vers",
+    "sendTest": "Envoyer un test",
+    "templatesTitle": "Modèles de flux",
+    "templatesHint": "Téléchargez-les et importez-les dans n8n (menu Workflow → Import from File), puis suivez la note adhésive à l'intérieur de chacun.",
+    "download": "Télécharger",
+    "newToN8n": "Vous découvrez n8n ? C'est un outil d'automatisation gratuit et auto-hébergeable —",
+    "urlPlaceholder": "https://votre-n8n.app/webhook/intellicall-events",
+    "events": {
+      "leadCreated": {
+        "label": "Prospect créé",
+        "description": "Nouveau prospect ajouté manuellement, par import en masse ou via une campagne."
+      },
+      "leadQualified": {
+        "label": "Prospect qualifié",
+        "description": "L'IA qualifie un prospect à l'issue de l'analyse."
+      },
+      "callCompleted": {
+        "label": "Appel terminé",
+        "description": "L'appel se termine — inclut la durée, le statut et l'enregistrement."
+      },
+      "inboundCall": {
+        "label": "Appel entrant",
+        "description": "Un appel entrant arrive sur la plateforme."
+      },
+      "outboundCall": {
+        "label": "Appel sortant",
+        "description": "Un appel sortant est passé."
+      },
+      "campaignCompleted": {
+        "label": "Campagne terminée",
+        "description": "Tous les appels d'une campagne sont terminés."
+      },
+      "appointmentBooked": {
+        "label": "Rendez-vous réservé",
+        "description": "Un rendez-vous manuel ou pris par l'IA est planifié."
+      },
+      "appointmentCanceled": {
+        "label": "Rendez-vous annulé",
+        "description": "Un rendez-vous planifié est annulé."
+      },
+      "callTransferred": {
+        "label": "Appelant transféré",
+        "description": "L'appelant a été mis en relation avec une personne. Appels SIP uniquement."
+      },
+      "transferFailed": {
+        "label": "Échec du transfert",
+        "description": "La personne n'a pas pu être jointe et l'appelant est resté avec l'agent."
+      }
+    },
+    "templates": {
+      "instantCall": {
+        "name": "Appel instantané à la soumission d'un formulaire",
+        "description": "Un formulaire ou webhook se déclenche et l'IA appelle le prospect en quelques secondes. Nécessite une clé API (voir la carte Accès API)."
+      },
+      "callLogToSheets": {
+        "name": "Journal d'appels vers Google Sheets",
+        "description": "Chaque appel terminé ajoute une ligne — horodatage, numéros, durée, statut."
+      },
+      "leadQualifiedCrm": {
+        "name": "Prospect qualifié vers le CRM + notification",
+        "description": "L'IA qualifie un prospect, l'envoie vers votre CRM et prévient l'équipe."
+      }
+    }
+  },
+  "slack": {
+    "description": "Recevez des notifications en temps réel dans un canal Slack : prospect créé, appel terminé, rendez-vous réservé, et plus encore.",
+    "addToSlack": "Ajouter à Slack",
+    "notConfigured": "L'intégration Slack n'est pas configurée sur ce serveur. Demandez à l'administrateur de définir",
+    "notConfiguredSuffix": "dans l'environnement du backend.",
+    "postingTo": "Publication dans",
+    "sendTest": "Envoyer un test"
+  },
+  "hubspot": {
+    "title": "HubSpot CRM",
+    "description": "Envoyez chaque nouveau prospect dans HubSpot en tant que contact, apparié par numéro de téléphone — sans doublons.",
+    "connect": "Connecter HubSpot",
+    "notConfigured": "L'intégration HubSpot n'est pas configurée sur ce serveur. Demandez à l'administrateur de définir",
+    "notConfiguredSuffix": "dans l'environnement du backend.",
+    "connectedTo": "Connecté à",
+    "syncLeads": "Synchroniser les nouveaux prospects vers HubSpot",
+    "syncLeadsHint": "Chaque prospect créé dans {appName} (manuellement, par import en masse ou via une campagne) est créé ou mis à jour comme contact HubSpot, apparié par téléphone.",
+    "serviceKeyLabel": "Clé de service HubSpot",
+    "serviceKeyHint": "Créez-en une dans HubSpot via Paramètres → Intégrations → Clés de service (ou Développement → Clés → Clés de service) avec les portées crm.objects.contacts.read et crm.objects.contacts.write, puis collez-la ici.",
+    "serviceKeyPlaceholder": "pat-na1-…",
+    "serviceKeySave": "Connecter",
+    "serviceKeyReplace": "Remplacer la clé",
+    "serviceKeyCancel": "Annuler",
+    "serviceKeyDocs": "Comment créer une clé de service",
+    "connectedVia": "Connecté avec une clé de service se terminant par {last4}",
+    "connectedViaOAuth": "Connecté avec l'ancienne application OAuth",
+    "legacyOAuthTitle": "Ancienne application OAuth",
+    "legacyOAuthHint": "HubSpot n'autorise plus la création d'applications publiques depuis le 23 juin 2026. Cette option ne fonctionne que pour les installations ayant enregistré une application avant cette date — sinon, utilisez une clé de service."
+  },
+  "googleCalendar": {
+    "title": "Google Agenda",
+    "description": "Répercutez chaque rendez-vous réservé dans votre Google Agenda en temps réel. Les modifications et annulations sont également synchronisées.",
+    "connect": "Connecter Google Agenda",
+    "connectedAccount": "Compte connecté",
+    "syncTarget": "Les événements sont synchronisés avec votre agenda <b>principal</b>.",
+    "primaryAccount": "Compte Google principal"
+  },
+  "googleSheets": {
+    "title": "Google Sheets",
+    "description": "Importez des prospects depuis une feuille Google et gardez-les synchronisés. Le tableau de bord récupère automatiquement les nouvelles lignes à votre prochaine visite sur la page Prospects.",
+    "activeSheet": "Feuille active",
+    "lastSynced": "Dernière synchronisation",
+    "noSheet": "Compte connecté, mais aucune feuille sélectionnée pour le moment. Cliquez sur <b>Gérer la synchronisation</b> pour choisir une feuille de calcul, un onglet et le mappage des colonnes.",
+    "manageSync": "Gérer la synchronisation",
+    "connect": "Connecter Google Sheets"
+  },
+  "page": {
+    "title": "Paramètres",
+    "subtitle": "Configurez votre compte, vos identifiants API et votre abonnement.",
+    "tabs": {
+      "preferences": "Préférences",
+      "apiKeys": "Clés API",
+      "webhooks": "Webhooks",
+      "email": "E-mail",
+      "integrations": "Intégrations",
+      "billing": "Formule et facturation",
+      "transactions": "Historique des transactions"
+    }
+  },
+  "credentials": {
+    "title": "Identifiants Twilio et IA",
+    "description": "Ces clés sont nécessaires pour passer des appels téléphoniques et faire fonctionner l'agent IA.",
+    "twilioSid": "SID du compte Twilio",
+    "twilioSidPlaceholder": "ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "twilioToken": "Token d'authentification Twilio",
+    "openRouter": "Clé API OpenRouter",
+    "elevenLabs": "Clé API ElevenLabs",
+    "verifying": "Vérification...",
+    "keyErrorSuffix": "Veuillez vérifier votre clé.",
+    "validKey": "Clé API valide",
+    "deepgram": "Clé API Deepgram",
+    "deepgramHint": "Alimente la reconnaissance vocale — ainsi que le moteur à faible latence « Deepgram Voice Agent », sélectionnable par agent (qui utilise également votre voix ElevenLabs mais ne nécessite pas de clé OpenRouter).",
+    "sarvam": "Clé API Sarvam AI",
+    "sarvamHint": "Alimente le moteur autonome « Sarvam AI » pour les langues indiennes (reconnaissance vocale, raisonnement et voix entièrement sur Sarvam). Sélectionnable par agent — aucune autre clé requise.",
+    "gemini": "Clé API Gemini",
+    "geminiHint": "Alimente le moteur « Gemini Live » : un seul modèle Google écoute, réfléchit et parle, en 97 langues. Sélectionnable par agent sur les numéros SIP — aucune autre clé requise."
+  },
+  "webhooks": {
+    "title": "Configuration des webhooks",
+    "description": "Recevez des notifications en temps réel des événements de votre application via des requêtes HTTP POST.",
+    "enable": "Activer les webhooks",
+    "enableHint": "Activez pour commencer à envoyer les événements vers votre URL.",
+    "payloadUrl": "URL de destination",
+    "payloadUrlHint": "Les événements seront envoyés à cette URL sous forme de requêtes POST en JSON.",
+    "signingSecret": "Secret de signature",
+    "regenerate": "Régénérer",
+    "signingSecretHint": "Sécurise votre webhook en signant la charge utile avec HMAC-SHA256.",
+    "triggerEvents": "Événements déclencheurs",
+    "save": "Enregistrer la configuration des webhooks",
+    "sendTest": "Envoyer un événement de test"
+  },
+  "emailNotifications": {
+    "title": "Notifications par e-mail",
+    "description": "Recevez des alertes en temps réel sur les rendez-vous et les événements d'appel par e-mail via Brevo.",
+    "enable": "Activer les notifications par e-mail",
+    "enableHint": "Activez pour commencer à recevoir des e-mails pour les événements sélectionnés.",
+    "brevoKey": "Clé API Brevo",
+    "brevoKeyPlaceholder": "xkeysib-...",
+    "brevoKeyHint": "Récupérez votre clé API dans les paramètres SMTP et API de Brevo.",
+    "recipientEmail": "E-mail du destinataire",
+    "recipientEmailHint": "Adresse à laquelle les notifications seront envoyées.",
+    "senderName": "Nom de l'expéditeur",
+    "senderEmail": "E-mail de l'expéditeur",
+    "notificationEvents": "Événements de notification",
+    "save": "Enregistrer la configuration e-mail",
+    "sendTest": "Envoyer un e-mail de test"
+  },
+  "events": {
+    "inboundCall": {
+      "label": "Appel entrant reçu",
+      "desc": "Envoyé au démarrage d'un appel entrant",
+      "short": "Appel entrant"
+    },
+    "outboundCall": {
+      "label": "Appel sortant démarré",
+      "desc": "Envoyé lorsqu'un nouvel appel sortant est lancé",
+      "short": "Appel sortant"
+    },
+    "callCompleted": {
+      "label": "Appel terminé",
+      "desc": "Envoyé à la fin de tout appel",
+      "short": "Appel terminé"
+    },
+    "leadCreated": {
+      "label": "Prospect créé",
+      "desc": "Envoyé lorsqu'un nouveau prospect est ajouté",
+      "short": "Prospect créé"
+    },
+    "leadQualified": {
+      "label": "Prospect qualifié",
+      "desc": "Envoyé lorsque l'IA qualifie un prospect",
+      "short": "Prospect qualifié"
+    },
+    "campaignCompleted": {
+      "label": "Campagne terminée",
+      "desc": "Envoyé à la fin d'une campagne",
+      "short": "Campagne terminée"
+    },
+    "appointmentBooked": {
+      "label": "Rendez-vous réservé",
+      "desc": "Envoyé lorsqu'un nouveau rendez-vous est planifié",
+      "short": "Rendez-vous réservé"
+    },
+    "appointmentCanceled": {
+      "label": "Rendez-vous annulé",
+      "desc": "Envoyé lorsqu'un rendez-vous est annulé",
+      "short": "Rendez-vous annulé"
+    },
+    "callTransferred": {
+      "label": "Appelant transféré",
+      "desc": "Envoyé quand l'appelant est mis en relation avec une personne",
+      "short": "Appelant transféré"
+    },
+    "transferFailed": {
+      "label": "Échec du transfert",
+      "desc": "Envoyé quand la personne n'a pas pu être jointe",
+      "short": "Échec du transfert"
+    }
+  },
+  "billing": {
+    "currentPlanTitle": "Votre formule actuelle",
+    "currentPlanDescription": "Gérez votre abonnement et consultez vos limites d'utilisation.",
+    "status": "Statut :",
+    "expiredOn": "Expiré le :",
+    "expires": "Expire le :",
+    "trialPlan": "Formule d'essai",
+    "agents": "Agents",
+    "campaigns": "Campagnes",
+    "leads": "Prospects",
+    "calls": "Appels",
+    "unlimited": "Illimité",
+    "availablePlans": "Formules disponibles",
+    "currentPlan": "Formule actuelle",
+    "upgradePlan": "Passer à une formule supérieure",
+    "planAgents": "{count} agents",
+    "planCampaigns": "{count} campagnes",
+    "planLeads": "{count} prospects",
+    "planCallsUnlimited": "Appels illimités (BYOK)",
+    "planCalls": "{count} appels/mois"
+  },
+  "transactions": {
+    "title": "Historique des transactions",
+    "description": "Consultez tous vos paiements d'abonnement et vos enregistrements de facturation passés.",
+    "date": "Date",
+    "plan": "Formule",
+    "amount": "Montant",
+    "method": "Moyen de paiement",
+    "status": "Statut",
+    "empty": "Aucune transaction trouvée.",
+    "premiumPlan": "Formule Premium"
+  },
+  "preferences": {
+    "title": "Préférences de fonctionnement",
+    "description": "Paramètres globaux de la plateforme et des campagnes d'appels.",
+    "language": "Langue de l'interface",
+    "languageHint": "Langue utilisée dans tout le tableau de bord. S'applique immédiatement.",
+    "timeFormat": "Format de l'heure",
+    "timeFormatHint": "Choisissez entre le format 12 heures (AM/PM) et 24 heures.",
+    "selectFormat": "Sélectionnez un format",
+    "hour12": "12 heures",
+    "hour24": "24 heures",
+    "timeZone": "Fuseau horaire",
+    "timeZoneHint": "Fuseau horaire des rendez-vous et des disponibilités (p. ex. America/New_York).",
+    "selectTimeZone": "Sélectionnez un fuseau horaire",
+    "callSettings": "Paramètres d'appel",
+    "callRecording": "Enregistrement des appels",
+    "callRecordingHint": "Enregistre automatiquement tous les appels via Twilio.",
+    "autoAnalysis": "Analyse automatique des appels",
+    "autoAnalysisHint": "Génère automatiquement un résumé IA et la qualification après chaque appel.",
+    "autoHangup": "Raccrochage automatique",
+    "immediateHangup": "Raccrochage immédiat",
+    "autoHangupHint": "Met automatiquement fin aux sessions d'appel après une durée définie.",
+    "incomingTimeout": "Délai entrant",
+    "outgoingTimeout": "Délai sortant",
+    "immediate": "Immédiat",
+    "minutesAbbrev": "min",
+    "hangupHint": "Les appels dépassant leur durée respective seront automatiquement interrompus.",
+    "apply": "Appliquer les préférences"
+  },
+  "asterisk": {
+    "title": "Moteur Asterisk / SIP",
+    "description": "Statut du serveur PBX Asterisk pour les appels via SIP.",
+    "connected": "Connecté",
+    "offline": "Hors ligne",
+    "activeCalls": "{count, plural, one {# appel SIP actif} other {# appels SIP actifs}}",
+    "manageTrunks": "Gérer les trunks SIP"
+  },
+  "payment": {
+    "selectGateway": "Sélectionnez une passerelle pour continuer",
+    "choosePrompt": "Choisissez votre moyen de paiement préféré pour passer à",
+    "testMode": "Mode test",
+    "stripeHint": "Payer par carte bancaire",
+    "dodoHint": "Moyens de paiement locaux",
+    "razorpayHint": "La passerelle la plus populaire en Inde",
+    "noMethods": "Aucun moyen de paiement n'est disponible actuellement. Veuillez contacter l'assistance.",
+    "legal": "En continuant, vous acceptez nos Conditions d'utilisation et notre Politique de confidentialité. Paiement sécurisé, chiffré en SSL."
+  },
+  "toast": {
+    "keyGenerateFailed": "Échec de la génération de la clé API",
+    "keyRevoked": "Clé API révoquée",
+    "keyRevokeFailed": "Échec de la révocation de la clé API",
+    "keyCopied": "Clé API copiée",
+    "curlCopied": "Commande curl copiée",
+    "n8nUrlRequired": "Collez d'abord l'URL de votre webhook n8n",
+    "n8nConnected": "n8n connecté",
+    "n8nConnectFailed": "Échec de la connexion à n8n",
+    "n8nDisconnected": "n8n déconnecté",
+    "disconnectFailed": "Échec de la déconnexion",
+    "testSent": "Événement de test envoyé — vérifiez vos exécutions n8n",
+    "testFailed": "Échec du test",
+    "preferenceFailed": "Échec de la mise à jour de la préférence",
+    "slackConnected": "Slack connecté",
+    "slackConnectFailed": "Échec de la connexion à Slack",
+    "userNotFound": "Utilisateur introuvable. Veuillez vous reconnecter.",
+    "slackDisconnected": "Slack déconnecté",
+    "slackTestSent": "Message de test envoyé dans #{channel}",
+    "slackTestFailed": "Échec de l'envoi du message de test",
+    "slackDefaultChannel": "canal",
+    "hubspotConnected": "HubSpot connecté",
+    "hubspotConnectFailed": "Échec de la connexion à HubSpot",
+    "hubspotDisconnected": "HubSpot déconnecté",
+    "calendarConnected": "Google Agenda connecté",
+    "calendarConnectFailed": "Échec de la connexion à Google Agenda",
+    "googleOAuthNotConfigured": "Google OAuth n'est pas configuré. Ajoutez l'ID client et le secret dans Admin → Intégrations → Google (ou GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET dans backend/.env)",
+    "googleOAuthInvalidClientId": "L'ID client Google configuré n'est pas valide : il doit se terminer par .apps.googleusercontent.com. Corrigez-le dans Admin → Intégrations → Google",
+    "calendarDisconnected": "Google Agenda déconnecté",
+    "sheetsConnected": "Google Sheets connecté",
+    "sheetsConnectFailed": "Échec de la connexion à Google Sheets",
+    "waCredentialsRequired": "Le token d'accès, l'ID du numéro de téléphone et votre numéro WhatsApp sont obligatoires",
+    "waConnected": "WhatsApp connecté",
+    "waConnectFailed": "Échec de la connexion à WhatsApp",
+    "waDisconnected": "WhatsApp déconnecté",
+    "waTestSent": "Message de test envoyé au +{number}",
+    "waTestFailed": "Échec de l'envoi du message de test",
+    "waRecipientUpdated": "Numéro du destinataire mis à jour",
+    "waRecipientFailed": "Échec de la mise à jour du destinataire",
+    "waTemplateFirst": "Enregistrez d'abord un nom de modèle — les rappels nécessitent un modèle approuvé par Meta",
+    "waRemindersFailed": "Échec de la mise à jour des rappels",
+    "waRemindersSaved": "Paramètres de rappel enregistrés",
+    "waRemindersSaveFailed": "Échec de l'enregistrement des paramètres de rappel",
+    "waTemplateNameRequired": "Saisissez d'abord un nom de modèle",
+    "waReminderTestSent": "Rappel de test envoyé au +{number}",
+    "waReminderTestFailed": "Échec de l'envoi du rappel de test",
+    "loadFailed": "Échec du chargement des données de paramètres",
+    "upgraded": "Félicitations ! Vous êtes passé à la formule {plan}.",
+    "verifyFailed": "Échec de la vérification du paiement. Veuillez contacter l'assistance.",
+    "saved": "Paramètres enregistrés avec succès !",
+    "saveFailed": "Échec de l'enregistrement des paramètres",
+    "testStarting": "Lancement du test de base...",
+    "testCallStarted": "Appel de test lancé !",
+    "preparingCheckout": "Préparation du paiement...",
+    "redirecting": "Redirection vers le paiement sécurisé...",
+    "paymentFailed": "Échec du lancement du paiement",
+    "preparingRazorpay": "Préparation du paiement Razorpay...",
+    "verifyingPayment": "Vérification du paiement...",
+    "planUpgraded": "Félicitations ! Formule mise à niveau vers {plan}.",
+    "verificationFailed": "Échec de la vérification",
+    "razorpayFailed": "Échec du lancement de Razorpay",
+    "gatewayDemo": "Démonstration de paiement {gateway} lancée pour {plan}",
+    "sendingTestEvent": "Envoi de l'événement de test {label}...",
+    "eventDelivered": "Événement {label} livré avec succès !",
+    "sendingTestEmail": "Envoi de l'e-mail de test {label}...",
+    "emailDispatched": "E-mail {label} envoyé avec succès !",
+    "regeneratingSecret": "Régénération du secret...",
+    "secretRegenerated": "Secret du webhook régénéré !",
+    "regenerateFailed": "Échec de la régénération du secret",
+    "paypalFailed": "Échec du lancement du paiement PayPal",
+    "capturingPayment": "Capture du paiement...",
+    "paypalCompleteFailed": "Échec de la finalisation du paiement PayPal",
+    "hubspotKeySaved": "HubSpot connecté",
+    "hubspotKeyFailed": "Impossible de vérifier cette clé de service"
+  },
+  "whatsapp": {
+    "description": "Recevez des notifications en temps réel sur votre WhatsApp : prospect créé, appel terminé, rendez-vous réservé, et plus encore. Propulsé par l'API WhatsApp Cloud de Meta.",
+    "howToTitle": "Comment obtenir les identifiants",
+    "step1": "1. Créez une application gratuite avec le produit <b>WhatsApp</b> sur",
+    "step2": "2. Ouvrez <b>WhatsApp > API Setup</b> et copiez le token d'accès et l'ID du numéro de téléphone.",
+    "step3": "3. Saisissez ci-dessous votre propre numéro WhatsApp pour recevoir les alertes (ajoutez-le comme destinataire dans API Setup si vous utilisez le numéro de test de Meta).",
+    "tokenLabel": "Token d'accès",
+    "tokenPlaceholder": "EAAG••••••••••••••••••••••••",
+    "tokenHint": "Utilisez un token permanent (utilisateur système) afin que les notifications ne s'interrompent pas au bout de 24 heures.",
+    "phoneIdLabel": "ID du numéro de téléphone",
+    "recipientLabel": "Votre numéro WhatsApp",
+    "connect": "Connecter WhatsApp",
+    "sendingTo": "Envoi vers",
+    "changeRecipient": "Modifier le numéro du destinataire",
+    "from": "depuis",
+    "sendTest": "Envoyer un test",
+    "sessionWarning": "WhatsApp ne délivre ces alertes que dans une fenêtre de session de 24 heures. Envoyez n'importe quel message depuis votre WhatsApp vers <b>{number}</b> pour ouvrir (et maintenir ouverte) la fenêtre de livraison.",
+    "yourBusinessNumber": "votre numéro professionnel",
+    "remindersTitle": "Rappels de rendez-vous pour les clients",
+    "remindersHint": "Envoyez un rappel WhatsApp au numéro du client avant le début de son rendez-vous.",
+    "templateSetupTitle": "Configuration initiale : créez le modèle de message",
+    "templateSetupIntro": "Les rappels sont à l'initiative de l'entreprise, Meta exige donc un modèle approuvé au préalable. Dans",
+    "metaBusinessManager": "Meta Business Manager",
+    "templateSetupOutro": "créez un modèle de type <b>Utility</b> (p. ex. <code>appointment_reminder</code>) avec ce corps :",
+    "templateBody": "Bonjour {v1}, ceci est un rappel amical concernant votre rendez-vous du {v2} à {v3}. Au plaisir d'échanger avec vous !",
+    "templateVars": "Nous renseignons <b>{v1}</b> = nom du client, <b>{v2}</b> = date, <b>{v3}</b> = heure. La formulation est libre, mais conservez exactement ces 3 variables. L'approbation prend généralement quelques minutes.",
+    "templateNameLabel": "Nom du modèle",
+    "templateLanguageLabel": "Langue du modèle",
+    "templateLanguageHint": "Code issu du modèle, p. ex. en, en_US, ar.",
+    "sendReminderLabel": "Envoyer le rappel",
+    "saveReminders": "Enregistrer les paramètres de rappel",
+    "sendReminderTest": "Envoyer un test à mon numéro",
+    "leadOptions": {
+      "15": "15 minutes avant",
+      "30": "30 minutes avant",
+      "60": "1 heure avant",
+      "120": "2 heures avant",
+      "180": "3 heures avant",
+      "720": "12 heures avant",
+      "1440": "24 heures avant"
+    }
+  }
+}

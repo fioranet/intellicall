@@ -1,0 +1,13 @@
+{
+  "generic": "Algo deu errado. Por favor, tente novamente.",
+  "loadFailed": "Falha ao carregar dados",
+  "saveFailed": "Falha ao salvar as alterações",
+  "deleteFailed": "Falha ao excluir",
+  "createFailed": "Falha ao criar",
+  "updateFailed": "Falha ao atualizar",
+  "networkError": "Erro de rede. Verifique sua conexão e tente novamente.",
+  "unauthorized": "Você não está autorizado a fazer isso",
+  "notFound": "Não encontrado",
+  "requiredField": "Este campo é obrigatório",
+  "invalidEmail": "Insira um endereço de e-mail válido"
+}

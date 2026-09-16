@@ -1,0 +1,24 @@
+{
+  "main": {
+    "dashboard": "لوحة التحكم",
+    "leads": "العملاء المحتملون",
+    "phoneNumbers": "أرقام الهاتف",
+    "sipTrunks": "وصلات SIP",
+    "agents": "وكلاء الذكاء الاصطناعي",
+    "knowledgeBase": "قاعدة المعرفة",
+    "campaigns": "الحملات",
+    "callLogs": "سجلات المكالمات",
+    "appointments": "المواعيد",
+    "support": "الدعم"
+  },
+  "secondary": { "admin": "الإدارة", "settings": "الإعدادات" },
+  "badge": {
+    "myOpenTickets": "{count, plural, zero {لا توجد تذاكر مفتوحة} one {تذكرة مفتوحة أو قيد التنفيذ} two {تذكرتان مفتوحتان أو قيد التنفيذ} few {# تذاكر مفتوحة أو قيد التنفيذ} many {# تذكرة مفتوحة أو قيد التنفيذ} other {# تذكرة مفتوحة أو قيد التنفيذ}}",
+    "pendingTickets": "{count, plural, zero {لا توجد تذاكر دعم معلّقة} one {تذكرة دعم معلّقة} two {تذكرتا دعم معلّقتان} few {# تذاكر دعم معلّقة} many {# تذكرة دعم معلّقة} other {# تذكرة دعم معلّقة}}"
+  },
+  "closeMenu": "إغلاق القائمة",
+  "openMenu": "فتح القائمة",
+  "user": { "account": "حسابي", "settings": "الإعدادات", "logout": "تسجيل الخروج" },
+  "toast": { "loggedOut": "تم تسجيل الخروج بنجاح" },
+  "pendingTickets": "تذاكر دعم معلّقة"
+}

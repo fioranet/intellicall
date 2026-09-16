@@ -1,0 +1,69 @@
+{
+  "name": "IntelliCall — Instant AI call on form submit",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## IntelliCall — Instant AI call\n\nA form / app POSTs `{ \"phone\": \"+1555...\", \"name\": \"Jane\" }` to the Webhook below, and your IntelliCall agent calls the prospect within seconds.\n\n**Setup (2 minutes):**\n1. In the *Call prospect via IntelliCall* node, replace:\n   - `YOUR_INTELLICALL_URL` → your IntelliCall backend URL (e.g. `https://api.yourdomain.com`)\n   - `YOUR_API_KEY` → generate one in IntelliCall under **Settings → Integrations → API Access**\n   - `YOUR_AGENT_ID` → copy from the agent's page URL in the dashboard\n2. Activate this workflow and point your form / app at the Webhook node's **Production URL**.\n\nIf your form sends different field names, adjust the two expressions in the body.",
+        "height": 420,
+        "width": 420
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000001",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-220, -100]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "new-lead",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0002-4000-8000-000000000002",
+      "name": "New lead webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [260, 0],
+      "webhookId": "a1b2c3d4-0002-4000-8000-000000000002"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR_INTELLICALL_URL/api/calls/dial",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "YOUR_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ to: $json.body.phone, name: $json.body.name || ('Lead ' + $json.body.phone), agentId: 'YOUR_AGENT_ID', tags: ['n8n'] }) }}",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0003-4000-8000-000000000003",
+      "name": "Call prospect via IntelliCall",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [500, 0]
+    }
+  ],
+  "connections": {
+    "New lead webhook": {
+      "main": [
+        [
+          {
+            "node": "Call prospect via IntelliCall",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "pinData": {}
+}

@@ -1,0 +1,24 @@
+{
+  "main": {
+    "dashboard": "Dashboard",
+    "leads": "Leads",
+    "phoneNumbers": "Telefonnummern",
+    "sipTrunks": "SIP-Trunks",
+    "agents": "KI-Agenten",
+    "knowledgeBase": "Wissensdatenbank",
+    "campaigns": "Kampagnen",
+    "callLogs": "Anrufprotokolle",
+    "appointments": "Termine",
+    "support": "Support"
+  },
+  "secondary": { "admin": "Administration", "settings": "Einstellungen" },
+  "badge": {
+    "myOpenTickets": "{count, plural, one {# offenes oder laufendes Ticket} other {# offene oder laufende Tickets}}",
+    "pendingTickets": "{count, plural, one {# ausstehendes Support-Ticket} other {# ausstehende Support-Tickets}}"
+  },
+  "closeMenu": "Menü schließen",
+  "openMenu": "Menü öffnen",
+  "user": { "account": "Mein Konto", "settings": "Einstellungen", "logout": "Abmelden" },
+  "toast": { "loggedOut": "Erfolgreich abgemeldet" },
+  "pendingTickets": "Ausstehende Support-Tickets"
+}

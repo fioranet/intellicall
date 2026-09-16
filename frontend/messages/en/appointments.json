@@ -1,0 +1,60 @@
+{
+  "title": "Appointments",
+  "subtitle": "Manage scheduled sessions and define your availability.",
+  "tabs": {
+    "appointments": "Appointments",
+    "availability": "Availability & Slots"
+  },
+  "card": {
+    "client": "Client",
+    "agent": "Agent: {name}",
+    "deletedAgent": "Deleted Agent",
+    "complete": "Complete",
+    "cancel": "Cancel",
+    "edit": "Edit"
+  },
+  "table": {
+    "dateTime": "Date & Time",
+    "lead": "Lead",
+    "phone": "Phone",
+    "agent": "Agent",
+    "status": "Status",
+    "actions": "Actions",
+    "editTitle": "Edit Appointment",
+    "completeTitle": "Mark Completed",
+    "cancelTitle": "Cancel Appointment",
+    "empty": "No appointments found."
+  },
+  "edit": {
+    "trigger": "Edit",
+    "title": "Edit Appointment",
+    "description": "Update appointment details. Changes sync to Google Calendar if connected.",
+    "dateTimeLabel": "Date & Time",
+    "durationLabel": "Duration (minutes)",
+    "clientNameLabel": "Client Name",
+    "clientNamePlaceholder": "Jane Doe",
+    "phoneLabel": "Phone",
+    "notesLabel": "Notes",
+    "notesPlaceholder": "Optional notes for this appointment",
+    "save": "Save Changes"
+  },
+  "availability": {
+    "title": "Work Schedule",
+    "description": "Define your available time slots for the week.",
+    "save": "Save Changes",
+    "noSlots": "No availability set",
+    "addSlot": "Add Slot"
+  },
+  "toast": {
+    "loadFailed": "Failed to load appointments",
+    "statusUpdated": "Appointment {status}",
+    "statusFailed": "Failed to update status",
+    "pickDateTime": "Please pick a date and time",
+    "invalidDateTime": "Invalid date / time",
+    "updated": "Appointment updated",
+    "updateFailed": "Failed to update appointment",
+    "slotsLoadFailed": "Failed to load availability slots",
+    "availabilityUpdated": "Availability updated successfully",
+    "availabilityFailed": "Failed to save availability"
+  }
+}

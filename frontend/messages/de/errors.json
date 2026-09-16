@@ -1,0 +1,13 @@
+{
+  "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+  "loadFailed": "Daten konnten nicht geladen werden",
+  "saveFailed": "Änderungen konnten nicht gespeichert werden",
+  "deleteFailed": "Löschen fehlgeschlagen",
+  "createFailed": "Erstellen fehlgeschlagen",
+  "updateFailed": "Aktualisieren fehlgeschlagen",
+  "networkError": "Netzwerkfehler. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+  "unauthorized": "Sie sind dazu nicht berechtigt",
+  "notFound": "Nicht gefunden",
+  "requiredField": "Dieses Feld ist erforderlich",
+  "invalidEmail": "Geben Sie eine gültige E-Mail-Adresse ein"
+}

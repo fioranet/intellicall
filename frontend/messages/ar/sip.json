@@ -1,0 +1,112 @@
+{
+  "title": "وصلات SIP",
+  "subtitle": "اتصل بمشغّلي الاتصالات المحليين (STC، Mobily، Zain) أو بأي مشغّل يدعم SIP.",
+  "actions": {
+    "debug": "تصحيح الأخطاء",
+    "reloadAsterisk": "إعادة تحميل Asterisk",
+    "addTrunk": "إضافة وصلة SIP"
+  },
+  "status": {
+    "connected": "Asterisk متصل",
+    "offline": "Asterisk غير متصل",
+    "activeCalls": "{count, plural, zero {لا توجد مكالمات SIP نشطة} one {مكالمة SIP نشطة واحدة} two {مكالمتا SIP نشطتان} few {# مكالمات SIP نشطة} many {# مكالمة SIP نشطة} other {# مكالمة SIP نشطة}}",
+    "trunksConfigured": "{count, plural, zero {لا توجد وصلات مُهيَّأة} one {وصلة واحدة مُهيَّأة} two {وصلتان مُهيَّأتان} few {# وصلات مُهيَّأة} many {# وصلة مُهيَّأة} other {# وصلة مُهيَّأة}}"
+  },
+  "list": {
+    "title": "الوصلات المُهيَّأة",
+    "description": "تمثّل كل وصلة اتصالًا بمزوّد SIP. أضف بيانات اعتماد مشغّلك لبدء إجراء المكالمات.",
+    "emptyTitle": "لا توجد وصلات SIP مُهيَّأة",
+    "emptyDescription": "أضف وصلة SIP للاتصال بمشغّل الاتصالات لديك والبدء بإجراء مكالمات موفّرة للتكلفة."
+  },
+  "table": {
+    "trunk": "الوصلة",
+    "host": "المضيف",
+    "provider": "المزوّد / المنطقة",
+    "status": "الحالة",
+    "lastTest": "آخر اختبار",
+    "test": "اختبار",
+    "actions": "الإجراءات",
+    "port": "{transport} · منفذ {port}",
+    "never": "مطلقًا",
+    "edit": "تعديل",
+    "delete": "حذف"
+  },
+  "info": {
+    "title": "كيف تعمل وصلات SIP",
+    "body": "تربط وصلة SIP بين {appName} ومشغّل الاتصالات لديك (مثل STC أو Mobily أو Zain في السعودية، أو مزوّدين عالميين مثل Telnyx وBandwidth). بعد التهيئة، اربطها برقم هاتف من صفحة <b>أرقام الهاتف</b>، وعندها سيُجري وكلاء الذكاء الاصطناعي المكالمات ويستقبلونها عبر الوصلة دون الحاجة إلى Twilio.",
+    "requirements": "<b>المتطلبات:</b> يجب أن يكون Asterisk مثبّتًا على خادمك. بعد إضافة الوصلات أو تعديلها، اضغط <b>«إعادة تحميل Asterisk»</b> لتطبيق الإعدادات."
+  },
+  "dialog": {
+    "quickSetup": "إعداد سريع",
+    "manual": "إدخال يدوي",
+    "manualHint": "هيّئ المضيف والمنفذ وبيانات الاعتماد دون استخدام إعداد جاهز.",
+    "nameLabel": "اسم الوصلة *",
+    "namePlaceholder": "خط أعمال STC",
+    "providerLabel": "اسم المزوّد",
+    "providerPlaceholder": "STC، Mobily، Telnyx...",
+    "hostLabel": "مضيف / مُسجّل SIP *",
+    "hostPlaceholder": "sip.stc.com.sa",
+    "portLabel": "المنفذ",
+    "transportLabel": "بروتوكول النقل",
+    "transportPlaceholder": "اختر بروتوكول النقل",
+    "udp": "UDP (الأكثر شيوعًا)",
+    "tcp": "TCP (موثوق)",
+    "tls": "TLS (مشفّر)",
+    "transportHint": "راجع وثائق مزوّدك. يستخدم معظمهم UDP.",
+    "usernameLabel": "اسم المستخدم",
+    "passwordLabel": "كلمة المرور",
+    "authRealmLabel": "نطاق المصادقة",
+    "authRealmPlaceholder": "sip.provider.com",
+    "ipAuth": "استخدام المصادقة بعنوان IP (مسح اسم المستخدم وكلمة المرور)",
+    "callerIdLabel": "معرّف المتصل الافتراضي",
+    "regionLabel": "المنطقة",
+    "regionPlaceholder": "السعودية، شرق الولايات المتحدة...",
+    "codecsLabel": "برامج الترميز",
+    "codecsPlaceholder": "PCMU,PCMA,G729",
+    "codecsHint": "برامج ترميز صوتية مفصولة بفواصل",
+    "dialPrefixLabel": "بادئة الاتصال",
+    "dialPrefixPlaceholder": "999",
+    "dialPrefixHint": "بادئة تقنية اختيارية تُضاف قبل الرقم عند الاتصال"
+  },
+  "debug": {
+    "registration": {
+      "registered": "مُسجَّلة",
+      "failed": "فشل التسجيل",
+      "missing": "لا يوجد تسجيل",
+      "pending": "جارٍ التسجيل…",
+      "ipAuth": "مصادقة IP",
+      "unknown": "غير معروف"
+    },
+    "title": "تصحيح أخطاء SIP",
+    "description": "شخّص مشكلات SIP دون الحاجة إلى وصول SSH — تُنفَّذ الفحوص على الخادم وتظهر أحداث المكالمات أدناه.",
+    "tabHealth": "فحوص السلامة",
+    "tabLogs": "السجلات المباشرة",
+    "rerun": "إعادة التشغيل",
+    "fix": "الحل:",
+    "trunkStatus": "حالة الوصلة في Asterisk",
+    "noTrunks": "لا توجد وصلات SIP مُهيَّأة بعد.",
+    "endpointLoaded": "تم تحميل نقطة النهاية في Asterisk",
+    "endpointNotLoaded": "لم يتم تحميل نقطة النهاية — ستفشل المكالمات بخطأ «Allocation failed». اضغط «إعادة تحميل Asterisk».",
+    "endpointUnknown": "حالة نقطة النهاية غير معروفة (واجهة الأوامر غير متاحة)",
+    "providerReachable": "يمكن الوصول إلى المزوّد (فحص qualify ناجح)",
+    "providerUnreachable": "تعذّر الوصول إلى المزوّد — ستفشل المكالمات بخطأ «Allocation failed». يعود السبب عادةً إلى بروتوكول نقل أو منفذ خاطئ لهذا المزوّد (مثلًا يتطلّب Twilio منفذ UDP 5060 أو TLS 5061 وليس TCP).",
+    "providerNotQualified": "لم يتم فحص المزوّد بعد (لا توجد نتيجة لفحص OPTIONS)",
+    "noContact": "لا توجد جهة اتصال مسجّلة لهذه الوصلة في Asterisk. اضغط «إعادة تحميل Asterisk».",
+    "providerUnknown": "إمكانية الوصول إلى المزوّد غير معروفة (واجهة الأوامر غير متاحة)",
+    "healthFailed": "تعذّر تحميل فحوص السلامة. هل الخادم الخلفي يعمل؟",
+    "autoRefresh": "يتم التحديث تلقائيًا كل {seconds} ثانية أثناء فتح هذه الصفحة",
+    "clearView": "مسح العرض",
+    "noEvents": "لا توجد أحداث SIP بعد. أجرِ مكالمة اختبارية أو أعد تحميل Asterisk — ستظهر الأحداث هنا."
+  },
+  "toast": {
+    "loadFailed": "تعذّر تحميل وصلات SIP",
+    "deleted": "تم حذف وصلة SIP",
+    "deleteFailed": "تعذّر الحذف",
+    "testFailed": "فشل الاختبار",
+    "configWarnings": "تمت كتابة الإعدادات مع تحذيرات",
+    "reloadFailed": "فشلت إعادة التحميل",
+    "updated": "تم تحديث وصلة SIP",
+    "created": "تم إنشاء وصلة SIP",
+    "saveFailed": "تعذّر حفظ وصلة SIP"
+  }
+}

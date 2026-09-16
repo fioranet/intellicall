@@ -1,0 +1,31 @@
+{
+  "title": "Support",
+  "subtitle": "Erstellen und verwalten Sie Ihre Support-Tickets.",
+  "filters": {
+    "status": "Status", "all": "Alle Tickets", "open": "Offen",
+    "inProgress": "In Bearbeitung", "resolved": "Gelöst", "closed": "Geschlossen"
+  },
+  "newTicket": "Neues Ticket",
+  "empty": {
+    "title": "Noch keine Support-Tickets",
+    "description": "Erstellen Sie ein Ticket, um Hilfe von unserem Team zu erhalten."
+  },
+  "create": {
+    "title": "Neues Support-Ticket",
+    "description": "Beschreiben Sie Ihr Anliegen. Unser Team meldet sich schnellstmöglich.",
+    "subjectLabel": "Betreff",
+    "subjectPlaceholder": "Kurze Zusammenfassung Ihres Anliegens",
+    "messageLabel": "Nachricht (optional)",
+    "messagePlaceholder": "Weitere Details hinzufügen...",
+    "submit": "Ticket erstellen"
+  },
+  "reply": { "placeholder": "Antwort eingeben...", "send": "Antwort senden" },
+  "toast": {
+    "loadFailed": "Tickets konnten nicht geladen werden",
+    "conversationFailed": "Konversation konnte nicht geladen werden",
+    "replyFailed": "Antwort konnte nicht gesendet werden",
+    "subjectRequired": "Bitte geben Sie einen Betreff ein",
+    "created": "Ticket erstellt",
+    "createFailed": "Ticket konnte nicht erstellt werden"
+  }
+}

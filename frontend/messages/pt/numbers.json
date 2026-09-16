@@ -1,0 +1,81 @@
+{
+  "title": "Números de telefone",
+  "subtitle": "Gerencie seus números de telefone Twilio e SIP para campanhas de saída e chamadas de entrada.",
+  "addNumber": "Adicionar número",
+  "alerts": {
+    "aiNotConfiguredTitle": "Infraestrutura de IA não configurada",
+    "aiNotConfiguredBody": "Deepgram, ElevenLabs e OpenRouter são necessários para que as chamadas de IA funcionem.",
+    "configureAiKeys": "Configurar chaves AI",
+    "twilioNotConfiguredTitle": "Twilio não configurado",
+    "twilioNotConfiguredBody": "Você precisa configurar seu SID e token do Twilio em Configurações antes de poder usar os números do Twilio.",
+    "configureNow": "Configurar agora"
+  },
+  "list": {
+    "title": "Números Conectados",
+    "description": "Seus números de telefone vinculados ao Twilio ou troncos SIP, prontos para campanhas de saída e chamadas de entrada.",
+    "emptyTitle": "Nenhum número conectado",
+    "emptyDescription": "Adicione seu primeiro número de telefone (Twilio ou SIP) para começar a fazer chamadas de voz com IA."
+  },
+  "table": {
+    "friendlyName": "Nome amigável",
+    "phoneNumber": "Número de telefone",
+    "provider": "Provedor",
+    "inboundAgent": "Agente de entrada",
+    "testCall": "Chamada de teste",
+    "actions": "Ações",
+    "sipTrunk": "Tronco SIP",
+    "twilio": "Twilio",
+    "linked": "Vinculado",
+    "assigned": "Atribuído",
+    "fallback": "Alternativo: {number}",
+    "noAgent": "Nenhum agente atribuído",
+    "forwardsTo": "→ Encaminha para {number}",
+    "edit": "Editar",
+    "delete": "Excluir"
+  },
+  "twilioInfo": {
+    "title": "Chamadas recebidas da Twilio",
+    "body": "Para receber chamadas via Twilio, aponte o webhook <b> \"A Call Comes In\" </b> do seu número de telefone Twilio para:",
+    "afterCode": "Uma vez apontada, qualquer chamada para o seu número será automaticamente atendida pelo agente de entrada designado."
+  },
+  "sipInfo": {
+    "title": "Chamada de tronco SIP",
+    "body": "Para números locais (por exemplo, Saudi +966), crie um <b>tronco SIP</b> primeiro com as credenciais da sua operadora, depois adicione um número de telefone aqui e selecione <b>\"tronco SIP\"</b> como provedor. As chamadas serão roteadas através do Asterisk, sem necessidade de Twilio.",
+    "originationBody": "Para receber chamadas de entrada <b></b> em números de tronco SIP, defina-o como <b>Origination URI</b> no painel do seu provedor:",
+    "manageTrunks": "Gerenciar troncos SIP"
+  },
+  "dialog": {
+    "editTitle": "Editar número de telefone",
+    "createTitle": "Adicionar novo número de telefone",
+    "description": "Configure seu número de telefone, escolha um provedor e atribua um agente de entrada.",
+    "providerLabel": "Provedor",
+    "sipTrunk": "Tronco SIP",
+    "phoneLabel": "Número de telefone (E.164)",
+    "friendlyNameLabel": "Nome amigável",
+    "friendlyNamePlaceholder": "Linha de vendas - Riad",
+    "sipTrunkLabel": "Tronco SIP",
+    "selectTrunk": "Selecione um tronco SIP",
+    "noTrunkSelected": "Nenhum tronco selecionado",
+    "noTrunks": "Nenhum tronco SIP encontrado. Vá para a página troncos SIP para criar um primeiro.",
+    "inboundAgentLabel": "Agente de tratamento de chamadas recebidas",
+    "selectAgent": "Selecione um agente para chamadas recebidas",
+    "noAgentHangUp": "Nenhum agente (desligar)",
+    "inboundAgentHint": "As chamadas recebidas para este número serão atendidas pelo agente selecionado.",
+    "fallbackLabel": "Número substituto",
+    "optional": "(opcional)",
+    "fallbackHint": "Se nenhum agente for atribuído, as chamadas recebidas serão encaminhadas para esse número em vez de serem desligadas."
+  },
+  "toast": {
+    "loadFailed": "Falha ao carregar números de telefone",
+    "removed": "Número de telefone removido",
+    "deleteFailed": "Falha ao excluir",
+    "sipCallFailed": "Falha na chamada SIP",
+    "sipCallInitiated": "Chamada SIP iniciada. Aguardando a conexão do provedor...",
+    "testCallInitiated": "Chamada de teste iniciada! Verifique seu telefone.",
+    "testCallFailed": "Falha ao iniciar chamada de teste",
+    "uriCopied": "URI de origem copiado!",
+    "updated": "Número de telefone atualizado com sucesso!",
+    "added": "Número de telefone adicionado com sucesso!",
+    "generic": "Algo deu errado"
+  }
+}

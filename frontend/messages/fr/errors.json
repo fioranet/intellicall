@@ -1,0 +1,13 @@
+{
+  "generic": "Une erreur s'est produite. Veuillez réessayer.",
+  "loadFailed": "Échec du chargement des données",
+  "saveFailed": "Échec de l'enregistrement des modifications",
+  "deleteFailed": "Échec de la suppression",
+  "createFailed": "Échec de la création",
+  "updateFailed": "Échec de la mise à jour",
+  "networkError": "Erreur réseau. Vérifiez votre connexion et réessayez.",
+  "unauthorized": "Vous n'êtes pas autorisé à effectuer cette action",
+  "notFound": "Introuvable",
+  "requiredField": "Ce champ est obligatoire",
+  "invalidEmail": "Saisissez une adresse e-mail valide"
+}

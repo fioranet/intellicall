@@ -1,0 +1,38 @@
+{
+  "actions": {
+    "save": "Guardar", "saving": "Guardando...", "saveChanges": "Guardar cambios",
+    "cancel": "Cancelar", "delete": "Eliminar", "deleting": "Eliminando...",
+    "edit": "Editar", "create": "Crear", "creating": "Creando...",
+    "add": "Añadir", "remove": "Quitar", "close": "Cerrar", "confirm": "Confirmar",
+    "back": "Atrás", "next": "Siguiente", "previous": "Anterior",
+    "search": "Buscar", "filter": "Filtrar", "refresh": "Actualizar",
+    "export": "Exportar", "import": "Importar", "copy": "Copiar", "copied": "Copiado",
+    "download": "Descargar", "upload": "Subir", "connect": "Conectar",
+    "disconnect": "Desconectar", "test": "Probar", "view": "Ver", "viewAll": "Ver todo",
+    "duplicate": "Duplicar", "retry": "Reintentar", "done": "Hecho",
+    "apply": "Aplicar", "reset": "Restablecer", "selectAll": "Seleccionar todo",
+    "clear": "Limpiar", "openMenu": "Abrir menú", "toggleTheme": "Cambiar tema"
+  },
+  "states": {
+    "loading": "Cargando...", "noResults": "No se encontraron resultados",
+    "noData": "No hay datos disponibles", "error": "Algo salió mal",
+    "empty": "Aún no hay nada aquí", "active": "Activo", "inactive": "Inactivo",
+    "enabled": "Activado", "disabled": "Desactivado", "connected": "Conectado",
+    "notConnected": "No conectado", "pending": "Pendiente", "completed": "Completado",
+    "failed": "Fallido", "inProgress": "En curso", "unknown": "Desconocido",
+    "none": "Ninguno", "all": "Todos", "yes": "Sí", "no": "No",
+    "optional": "Opcional", "required": "Obligatorio"
+  },
+  "labels": {
+    "name": "Nombre", "email": "Correo electrónico", "phone": "Teléfono",
+    "status": "Estado", "date": "Fecha", "time": "Hora", "type": "Tipo",
+    "description": "Descripción", "actions": "Acciones", "createdAt": "Creado",
+    "updatedAt": "Actualizado", "notes": "Notas", "tags": "Etiquetas", "total": "Total"
+  },
+  "language": { "label": "Idioma", "change": "Cambiar idioma" },
+  "confirm": {
+    "title": "¿Estás seguro?", "deleteTitle": "¿Eliminar este elemento?",
+    "deleteDescription": "Esta acción no se puede deshacer."
+  },
+  "selfHost": { "badge": "Autoalojado", "buyOn": "Comprar en {marketplace}" }
+}

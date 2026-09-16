@@ -1,0 +1,37 @@
+{
+  "title": "Benutzer",
+  "subtitle": "Systembenutzer verwalten (nur für Administratoren)",
+  "accessDenied": {
+    "title": "Zugriff verweigert",
+    "description": "Sie haben keine Berechtigung, diese Seite anzuzeigen. Dieser Bereich ist Administratoren vorbehalten."
+  },
+  "empty": {
+    "title": "Noch keine Benutzer",
+    "description": "Sie haben noch keine Benutzer angelegt. Erstellen Sie den ersten, um ihm Zugriff auf das System zu geben."
+  },
+  "table": {
+    "name": "Name", "email": "E-Mail", "role": "Rolle",
+    "sharedAccess": "Geteilter Zugriff", "joined": "Beigetreten",
+    "tags": "Tags:", "agents": "Agenten:", "campaigns": "Kampagnen:",
+    "unknown": "Unbekannt", "none": "Keine"
+  },
+  "roles": { "admin": "Administrator", "member": "Mitglied", "placeholder": "Rolle auswählen" },
+  "create": {
+    "trigger": "Benutzer erstellen", "title": "Neuen Benutzer erstellen",
+    "description": "Fügen Sie dem System einen neuen Benutzer hinzu.",
+    "nameLabel": "Name", "namePlaceholder": "Max Mustermann",
+    "emailLabel": "E-Mail", "passwordLabel": "Passwort", "roleLabel": "Rolle"
+  },
+  "edit": {
+    "title": "Benutzer bearbeiten: {name}",
+    "description": "Rolle aktualisieren und geteilte Ressourcen verwalten.",
+    "roleLabel": "Rolle",
+    "sharedTags": "Geteilte Tags (Lead-Zugriff)",
+    "noTags": "Keine Tags in den Leads gefunden",
+    "manualTag": "Oder Tag manuell hinzufügen:",
+    "add": "Hinzufügen",
+    "sharedAgents": "Geteilte Agenten", "noAgents": "Keine Agenten verfügbar",
+    "sharedCampaigns": "Geteilte Kampagnen", "noCampaigns": "Keine Kampagnen verfügbar"
+  },
+  "toast": { "created": "Benutzer erfolgreich erstellt!", "updated": "Benutzer erfolgreich aktualisiert!" }
+}

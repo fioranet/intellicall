@@ -1,0 +1,131 @@
+{
+  "title": "Leads",
+  "subtitle": "Centralized management for your {count} contacts and prospects.",
+  "searchPlaceholder": "Search by name or phone...",
+  "filter": {
+    "button": "Filter",
+    "withCount": "Tags ({count})",
+    "byTags": "Filter by Tags",
+    "noTags": "No tags created yet",
+    "columns": "Columns",
+    "visibleFields": "Visible Fields",
+    "clear": "Clear"
+  },
+  "empty": {
+    "noMatchTitle": "No leads found",
+    "noMatchDescription": "No leads match your current search or tag filters.",
+    "clearFilters": "Clear all filters",
+    "noLeadsTitle": "No Leads Yet",
+    "noLeadsDescription": "You haven't added any leads yet. Get started by adding your first lead or importing from CSV."
+  },
+  "table": {
+    "name": "Name",
+    "phone": "Phone",
+    "tags": "Tags",
+    "addedOn": "Added On",
+    "addTag": "Add Tag",
+    "actions": "Actions",
+    "editRecord": "Edit Record",
+    "removeLead": "Remove Lead"
+  },
+  "selection": {
+    "count": "{count, plural, one {# lead selected} other {# leads selected}}",
+    "deselectAll": "Deselect All",
+    "manageTags": "Manage Tags",
+    "editRecord": "Edit Record",
+    "deleteSelected": "Delete Selected"
+  },
+  "add": {
+    "trigger": "Add Lead",
+    "title": "Add New Lead",
+    "description": "Enter the lead details below. Click save when you're done.",
+    "nameLabel": "Name",
+    "namePlaceholder": "John Doe",
+    "phoneLabel": "Phone",
+    "tagsLabel": "Tags (Comma separated)",
+    "tagsPlaceholder": "customer, high-priority, vips"
+  },
+  "edit": {
+    "title": "Edit Lead",
+    "description": "Update lead details below. Click save when you're done.",
+    "nameLabel": "Name",
+    "namePlaceholder": "John Doe",
+    "phoneLabel": "Phone",
+    "tagsLabel": "Tags (Comma separated)",
+    "tagsPlaceholder": "customer, high-priority, vips"
+  },
+  "bulkTag": {
+    "title": "Bulk Add Tags",
+    "description": "{count, plural, one {Add tags to # selected lead.} other {Add tags to # selected leads.}}",
+    "tagsLabel": "Tags (comma separated)",
+    "tagsPlaceholder": "priority, follow-up, q1"
+  },
+  "customFields": {
+    "title": "Custom Fields (Optional)",
+    "addField": "Add field",
+    "namePlaceholder": "Field name (e.g. appointment_date)",
+    "valuePlaceholder": "Value (e.g. July 10th at 3 PM)"
+  },
+  "importCsv": {
+    "trigger": "Import CSV",
+    "title": "Import Leads from CSV",
+    "description": "Upload a CSV file with columns: name, phone, company (optional)",
+    "fileLabel": "CSV File",
+    "selected": "Selected:",
+    "tagsLabel": "Add Tags to all (comma separated)",
+    "tagsPlaceholder": "new-leads, campaign-1"
+  },
+  "toast": {
+    "fetchFailed": "Failed to fetch leads",
+    "deleted": "Leads deleted successfully",
+    "deleteFailed": "Failed to delete leads",
+    "added": "Lead added successfully!",
+    "addFailed": "Failed to add lead",
+    "updated": "Lead updated successfully!",
+    "updateFailed": "Failed to update lead",
+    "tagRequired": "Please enter at least one tag",
+    "tagsAdded": "{count, plural, one {Tags added to # lead} other {Tags added to # leads}}",
+    "tagsFailed": "Failed to add tags",
+    "selectCsv": "Please select a CSV file",
+    "noValidLeads": "No valid leads found in CSV",
+    "imported": "{count, plural, one {# lead imported successfully!} other {# leads imported successfully!}}",
+    "importFailed": "Failed to import leads",
+    "parseError": "Error parsing CSV: {message}",
+    "quickSyncFailed": "Quick sync failed",
+    "syncFailed": "Failed to sync leads",
+    "sheetsDisconnected": "Google Sheets disconnected",
+    "disconnectFailed": "Failed to disconnect",
+    "fetchSheetsFailed": "Failed to fetch sheets",
+    "userNotFound": "User not found. Please log in again."
+  },
+  "googleSheets": {
+    "syncing": "Syncing...",
+    "defaultLabel": "Google Sheets",
+    "title": "Google Sheets Sync",
+    "description": "Import and keep your leads synced with Google Sheets.",
+    "connectTitle": "Connect Google Sheets",
+    "connectDescription": "Connect your account to import leads directly from your spreadsheets and keep them in sync.",
+    "connectNow": "Connect Now",
+    "quickSyncReady": "Quick Sync Ready",
+    "lastSynced": "Last synced: {date}",
+    "previouslyConnected": "Previously connected to <b>{sheet}</b>. New leads will be added automatically, existing ones will be skipped.",
+    "syncNow": "Sync New Leads Now",
+    "orStartFresh": "Or Start Fresh",
+    "selectSpreadsheet": "Select Spreadsheet",
+    "selectSheet": "Select Sheet (Tab Name)",
+    "chooseSheet": "Choose a sheet",
+    "configureMapping": "Configure Column Mapping",
+    "back": "Back",
+    "mappingHint": "Type column names exactly as they appear in headers (Row 1).",
+    "nameColumn": "Name Column",
+    "namePlaceholder": "e.g. Full Name",
+    "phoneColumn": "Phone Column",
+    "phonePlaceholder": "e.g. Phone Number",
+    "companyColumn": "Company (Optional)",
+    "companyPlaceholder": "e.g. Company",
+    "saveForQuickSync": "Save these settings for One-Click Quick Sync",
+    "initialSync": "Perform Initial Sync",
+    "connectedToGoogle": "Connected to Google",
+    "disconnect": "Disconnect Account"
+  }
+}

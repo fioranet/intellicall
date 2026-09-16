@@ -1,0 +1,38 @@
+{
+  "actions": {
+    "save": "Enregistrer", "saving": "Enregistrement...", "saveChanges": "Enregistrer les modifications",
+    "cancel": "Annuler", "delete": "Supprimer", "deleting": "Suppression...",
+    "edit": "Modifier", "create": "Créer", "creating": "Création...",
+    "add": "Ajouter", "remove": "Retirer", "close": "Fermer", "confirm": "Confirmer",
+    "back": "Retour", "next": "Suivant", "previous": "Précédent",
+    "search": "Rechercher", "filter": "Filtrer", "refresh": "Actualiser",
+    "export": "Exporter", "import": "Importer", "copy": "Copier", "copied": "Copié",
+    "download": "Télécharger", "upload": "Téléverser", "connect": "Connecter",
+    "disconnect": "Déconnecter", "test": "Tester", "view": "Afficher", "viewAll": "Tout afficher",
+    "duplicate": "Dupliquer", "retry": "Réessayer", "done": "Terminé",
+    "apply": "Appliquer", "reset": "Réinitialiser", "selectAll": "Tout sélectionner",
+    "clear": "Effacer", "openMenu": "Ouvrir le menu", "toggleTheme": "Changer de thème"
+  },
+  "states": {
+    "loading": "Chargement...", "noResults": "Aucun résultat trouvé",
+    "noData": "Aucune donnée disponible", "error": "Une erreur s'est produite",
+    "empty": "Rien ici pour le moment", "active": "Actif", "inactive": "Inactif",
+    "enabled": "Activé", "disabled": "Désactivé", "connected": "Connecté",
+    "notConnected": "Non connecté", "pending": "En attente", "completed": "Terminé",
+    "failed": "Échoué", "inProgress": "En cours", "unknown": "Inconnu",
+    "none": "Aucun", "all": "Tous", "yes": "Oui", "no": "Non",
+    "optional": "Facultatif", "required": "Obligatoire"
+  },
+  "labels": {
+    "name": "Nom", "email": "E-mail", "phone": "Téléphone",
+    "status": "Statut", "date": "Date", "time": "Heure", "type": "Type",
+    "description": "Description", "actions": "Actions", "createdAt": "Créé le",
+    "updatedAt": "Mis à jour", "notes": "Notes", "tags": "Étiquettes", "total": "Total"
+  },
+  "language": { "label": "Langue", "change": "Changer de langue" },
+  "confirm": {
+    "title": "Êtes-vous sûr ?", "deleteTitle": "Supprimer cet élément ?",
+    "deleteDescription": "Cette action est irréversible."
+  },
+  "selfHost": { "badge": "Auto-hébergé", "buyOn": "Acheter sur {marketplace}" }
+}

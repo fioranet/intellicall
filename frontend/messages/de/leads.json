@@ -1,0 +1,100 @@
+{
+  "title": "Leads",
+  "subtitle": "Zentrale Verwaltung Ihrer {count} Kontakte und Interessenten.",
+  "searchPlaceholder": "Nach Name oder Telefon suchen...",
+  "filter": {
+    "button": "Filtern", "withCount": "Tags ({count})", "byTags": "Nach Tags filtern",
+    "noTags": "Noch keine Tags erstellt", "columns": "Spalten",
+    "visibleFields": "Sichtbare Felder", "clear": "Leeren"
+  },
+  "empty": {
+    "noMatchTitle": "Keine Leads gefunden",
+    "noMatchDescription": "Keine Leads entsprechen Ihrer aktuellen Suche oder den Tag-Filtern.",
+    "clearFilters": "Alle Filter löschen",
+    "noLeadsTitle": "Noch keine Leads",
+    "noLeadsDescription": "Sie haben noch keine Leads hinzugefügt. Legen Sie den ersten an oder importieren Sie aus einer CSV-Datei."
+  },
+  "table": {
+    "name": "Name", "phone": "Telefon", "tags": "Tags", "addedOn": "Hinzugefügt am",
+    "addTag": "Tag hinzufügen", "actions": "Aktionen",
+    "editRecord": "Datensatz bearbeiten", "removeLead": "Lead entfernen"
+  },
+  "selection": {
+    "count": "{count, plural, one {# Lead ausgewählt} other {# Leads ausgewählt}}",
+    "deselectAll": "Auswahl aufheben", "manageTags": "Tags verwalten",
+    "editRecord": "Datensatz bearbeiten", "deleteSelected": "Auswahl löschen"
+  },
+  "add": {
+    "trigger": "Lead hinzufügen", "title": "Neuen Lead hinzufügen",
+    "description": "Geben Sie unten die Lead-Daten ein. Klicken Sie anschließend auf Speichern.",
+    "nameLabel": "Name", "namePlaceholder": "Max Mustermann", "phoneLabel": "Telefon",
+    "tagsLabel": "Tags (durch Komma getrennt)", "tagsPlaceholder": "kunde, hohe-prioritaet, vip"
+  },
+  "edit": {
+    "title": "Lead bearbeiten",
+    "description": "Aktualisieren Sie unten die Lead-Daten. Klicken Sie anschließend auf Speichern.",
+    "nameLabel": "Name", "namePlaceholder": "Max Mustermann", "phoneLabel": "Telefon",
+    "tagsLabel": "Tags (durch Komma getrennt)", "tagsPlaceholder": "kunde, hohe-prioritaet, vip"
+  },
+  "bulkTag": {
+    "title": "Tags per Massenaktion hinzufügen",
+    "description": "{count, plural, one {Tags zu # ausgewähltem Lead hinzufügen.} other {Tags zu # ausgewählten Leads hinzufügen.}}",
+    "tagsLabel": "Tags (durch Komma getrennt)", "tagsPlaceholder": "prioritaet, nachfassen, q1"
+  },
+  "customFields": {
+    "title": "Benutzerdefinierte Felder (optional)", "addField": "Feld hinzufügen",
+    "namePlaceholder": "Feldname (z. B. termin_datum)",
+    "valuePlaceholder": "Wert (z. B. 10. Juli um 15:00 Uhr)"
+  },
+  "importCsv": {
+    "trigger": "CSV importieren", "title": "Leads aus CSV importieren",
+    "description": "Laden Sie eine CSV-Datei mit den Spalten hoch: name, phone, company (optional)",
+    "fileLabel": "CSV-Datei", "selected": "Ausgewählt:",
+    "tagsLabel": "Tags zu allen hinzufügen (durch Komma getrennt)",
+    "tagsPlaceholder": "neue-leads, kampagne-1"
+  },
+  "toast": {
+    "fetchFailed": "Leads konnten nicht abgerufen werden",
+    "deleted": "Leads erfolgreich gelöscht",
+    "deleteFailed": "Leads konnten nicht gelöscht werden",
+    "added": "Lead erfolgreich hinzugefügt!",
+    "addFailed": "Lead konnte nicht hinzugefügt werden",
+    "updated": "Lead erfolgreich aktualisiert!",
+    "updateFailed": "Lead konnte nicht aktualisiert werden",
+    "tagRequired": "Bitte geben Sie mindestens einen Tag ein",
+    "tagsAdded": "{count, plural, one {Tags zu # Lead hinzugefügt} other {Tags zu # Leads hinzugefügt}}",
+    "tagsFailed": "Tags konnten nicht hinzugefügt werden",
+    "selectCsv": "Bitte wählen Sie eine CSV-Datei aus",
+    "noValidLeads": "Keine gültigen Leads in der CSV-Datei gefunden",
+    "imported": "{count, plural, one {# Lead erfolgreich importiert!} other {# Leads erfolgreich importiert!}}",
+    "importFailed": "Leads konnten nicht importiert werden",
+    "parseError": "Fehler beim Auswerten der CSV-Datei: {message}",
+    "quickSyncFailed": "Schnellsynchronisierung fehlgeschlagen",
+    "syncFailed": "Leads konnten nicht synchronisiert werden",
+    "sheetsDisconnected": "Google Sheets getrennt",
+    "disconnectFailed": "Trennen fehlgeschlagen",
+    "fetchSheetsFailed": "Tabellenblätter konnten nicht abgerufen werden",
+    "userNotFound": "Benutzer nicht gefunden. Bitte melden Sie sich erneut an."
+  },
+  "googleSheets": {
+    "syncing": "Wird synchronisiert...", "defaultLabel": "Google Sheets",
+    "title": "Google-Sheets-Synchronisierung",
+    "description": "Importieren Sie Ihre Leads und halten Sie sie mit Google Sheets synchron.",
+    "connectTitle": "Google Sheets verbinden",
+    "connectDescription": "Verbinden Sie Ihr Konto, um Leads direkt aus Ihren Tabellen zu importieren und synchron zu halten.",
+    "connectNow": "Jetzt verbinden", "quickSyncReady": "Schnellsynchronisierung bereit",
+    "lastSynced": "Zuletzt synchronisiert: {date}",
+    "previouslyConnected": "Zuvor verbunden mit <b>{sheet}</b>. Neue Leads werden automatisch hinzugefügt, bestehende übersprungen.",
+    "syncNow": "Neue Leads jetzt synchronisieren",
+    "orStartFresh": "Oder neu beginnen", "selectSpreadsheet": "Tabelle auswählen",
+    "selectSheet": "Tabellenblatt auswählen (Registername)", "chooseSheet": "Tabellenblatt wählen",
+    "configureMapping": "Spaltenzuordnung konfigurieren", "back": "Zurück",
+    "mappingHint": "Geben Sie die Spaltennamen exakt so ein, wie sie in den Kopfzeilen stehen (Zeile 1).",
+    "nameColumn": "Namensspalte", "namePlaceholder": "z. B. Vollständiger Name",
+    "phoneColumn": "Telefonspalte", "phonePlaceholder": "z. B. Telefonnummer",
+    "companyColumn": "Unternehmen (optional)", "companyPlaceholder": "z. B. Unternehmen",
+    "saveForQuickSync": "Diese Einstellungen für die Ein-Klick-Schnellsynchronisierung speichern",
+    "initialSync": "Erstsynchronisierung durchführen",
+    "connectedToGoogle": "Mit Google verbunden", "disconnect": "Konto trennen"
+  }
+}

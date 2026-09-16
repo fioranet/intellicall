@@ -1,0 +1,81 @@
+{
+  "title": "Phone Numbers",
+  "subtitle": "Manage your Twilio and SIP phone numbers for outbound campaigns and inbound calls.",
+  "addNumber": "Add Number",
+  "alerts": {
+    "aiNotConfiguredTitle": "AI Infrastructure Not Configured",
+    "aiNotConfiguredBody": "Deepgram, ElevenLabs, and OpenRouter are required for AI calling to work.",
+    "configureAiKeys": "Configure AI Keys",
+    "twilioNotConfiguredTitle": "Twilio Not Configured",
+    "twilioNotConfiguredBody": "You need to configure your Twilio SID and Token in Settings before you can use Twilio numbers.",
+    "configureNow": "Configure Now"
+  },
+  "list": {
+    "title": "Connected Numbers",
+    "description": "Your phone numbers linked to Twilio or SIP trunks, ready for outbound campaigns and inbound calls.",
+    "emptyTitle": "No numbers connected",
+    "emptyDescription": "Add your first phone number (Twilio or SIP) to start making AI voice calls."
+  },
+  "table": {
+    "friendlyName": "Friendly Name",
+    "phoneNumber": "Phone Number",
+    "provider": "Provider",
+    "inboundAgent": "Inbound Agent",
+    "testCall": "Test Call",
+    "actions": "Actions",
+    "sipTrunk": "SIP Trunk",
+    "twilio": "Twilio",
+    "linked": "Linked",
+    "assigned": "Assigned",
+    "fallback": "Fallback: {number}",
+    "noAgent": "No Agent Assigned",
+    "forwardsTo": "→ Forwards to {number}",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "twilioInfo": {
+    "title": "Twilio Inbound Calling",
+    "body": "To receive inbound calls via Twilio, point your Twilio phone number's <b>\"A Call Comes In\"</b> webhook to:",
+    "afterCode": "Once pointed, any call to your number will automatically be handled by the assigned Inbound Agent."
+  },
+  "sipInfo": {
+    "title": "SIP Trunk Calling",
+    "body": "For local numbers (e.g. Saudi +966), create a <b>SIP Trunk</b> first with your carrier's credentials, then add a phone number here and select <b>\"SIP Trunk\"</b> as the provider. Calls will be routed through Asterisk, no Twilio needed.",
+    "originationBody": "To receive <b>inbound calls</b> on SIP trunk numbers, set this as the <b>Origination URI</b> in your provider's dashboard:",
+    "manageTrunks": "Manage SIP Trunks"
+  },
+  "dialog": {
+    "editTitle": "Edit Phone Number",
+    "createTitle": "Add New Phone Number",
+    "description": "Configure your phone number, choose a provider, and assign an inbound agent.",
+    "providerLabel": "Provider",
+    "sipTrunk": "SIP Trunk",
+    "phoneLabel": "Phone Number (E.164)",
+    "friendlyNameLabel": "Friendly Name",
+    "friendlyNamePlaceholder": "Sales Line - Riyadh",
+    "sipTrunkLabel": "SIP Trunk",
+    "selectTrunk": "Select a SIP trunk",
+    "noTrunkSelected": "No Trunk Selected",
+    "noTrunks": "No SIP trunks found. Go to SIP Trunks page to create one first.",
+    "inboundAgentLabel": "Inbound Call Handling Agent",
+    "selectAgent": "Select an agent for inbound calls",
+    "noAgentHangUp": "No Agent (Hang up)",
+    "inboundAgentHint": "Incoming calls to this number will be handled by the selected agent.",
+    "fallbackLabel": "Fallback Number",
+    "optional": "(optional)",
+    "fallbackHint": "If no agent is assigned, inbound calls will be forwarded to this number instead of hanging up."
+  },
+  "toast": {
+    "loadFailed": "Failed to load phone numbers",
+    "removed": "Phone number removed",
+    "deleteFailed": "Failed to delete",
+    "sipCallFailed": "SIP call failed",
+    "sipCallInitiated": "SIP call initiated. Waiting for the provider to connect...",
+    "testCallInitiated": "Test call initiated! Check your phone.",
+    "testCallFailed": "Failed to initiate test call",
+    "uriCopied": "Origination URI copied!",
+    "updated": "Phone number updated successfully!",
+    "added": "Phone number added successfully!",
+    "generic": "Something went wrong"
+  }
+}

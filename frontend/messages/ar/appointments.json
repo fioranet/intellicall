@@ -1,0 +1,40 @@
+{
+  "title": "المواعيد",
+  "subtitle": "أدر الجلسات المجدولة وحدّد أوقات توفّرك.",
+  "tabs": { "appointments": "المواعيد", "availability": "التوفّر والفترات" },
+  "card": {
+    "client": "العميل", "agent": "الوكيل: {name}", "deletedAgent": "وكيل محذوف",
+    "complete": "إكمال", "cancel": "إلغاء", "edit": "تعديل"
+  },
+  "table": {
+    "dateTime": "التاريخ والوقت", "lead": "العميل المحتمل", "phone": "الهاتف",
+    "agent": "الوكيل", "status": "الحالة", "actions": "الإجراءات",
+    "editTitle": "تعديل الموعد", "completeTitle": "وضع علامة مكتمل",
+    "cancelTitle": "إلغاء الموعد", "empty": "لم يتم العثور على مواعيد."
+  },
+  "edit": {
+    "trigger": "تعديل", "title": "تعديل الموعد",
+    "description": "حدّث تفاصيل الموعد. تتم مزامنة التغييرات مع تقويم Google إذا كان متصلًا.",
+    "dateTimeLabel": "التاريخ والوقت", "durationLabel": "المدة (بالدقائق)",
+    "clientNameLabel": "اسم العميل", "clientNamePlaceholder": "سارة علي",
+    "phoneLabel": "الهاتف", "notesLabel": "ملاحظات",
+    "notesPlaceholder": "ملاحظات اختيارية لهذا الموعد", "save": "حفظ التغييرات"
+  },
+  "availability": {
+    "title": "جدول العمل",
+    "description": "حدّد الفترات الزمنية المتاحة لديك خلال الأسبوع.",
+    "save": "حفظ التغييرات", "noSlots": "لم يتم تحديد أي توفّر", "addSlot": "إضافة فترة"
+  },
+  "toast": {
+    "loadFailed": "تعذّر تحميل المواعيد",
+    "statusUpdated": "الموعد {status}",
+    "statusFailed": "تعذّر تحديث الحالة",
+    "pickDateTime": "يُرجى اختيار تاريخ ووقت",
+    "invalidDateTime": "التاريخ أو الوقت غير صالح",
+    "updated": "تم تحديث الموعد",
+    "updateFailed": "تعذّر تحديث الموعد",
+    "slotsLoadFailed": "تعذّر تحميل فترات التوفّر",
+    "availabilityUpdated": "تم تحديث التوفّر بنجاح",
+    "availabilityFailed": "تعذّر حفظ التوفّر"
+  }
+}

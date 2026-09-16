@@ -1,0 +1,31 @@
+{
+  "title": "Soporte",
+  "subtitle": "Crea y gestiona tus tickets de soporte.",
+  "filters": {
+    "status": "Estado", "all": "Todos los tickets", "open": "Abierto",
+    "inProgress": "En curso", "resolved": "Resuelto", "closed": "Cerrado"
+  },
+  "newTicket": "Nuevo ticket",
+  "empty": {
+    "title": "Aún no hay tickets de soporte",
+    "description": "Crea un ticket para recibir ayuda de nuestro equipo."
+  },
+  "create": {
+    "title": "Nuevo ticket de soporte",
+    "description": "Describe tu problema. Nuestro equipo responderá lo antes posible.",
+    "subjectLabel": "Asunto",
+    "subjectPlaceholder": "Breve resumen de tu problema",
+    "messageLabel": "Mensaje (opcional)",
+    "messagePlaceholder": "Añade más detalles...",
+    "submit": "Crear ticket"
+  },
+  "reply": { "placeholder": "Escribe tu respuesta...", "send": "Enviar respuesta" },
+  "toast": {
+    "loadFailed": "No se pudieron cargar los tickets",
+    "conversationFailed": "No se pudo cargar la conversación",
+    "replyFailed": "No se pudo enviar la respuesta",
+    "subjectRequired": "Introduce un asunto",
+    "created": "Ticket creado",
+    "createFailed": "No se pudo crear el ticket"
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "title": "Numéros de téléphone",
+  "subtitle": "Gérez vos numéros Twilio et SIP pour les campagnes sortantes et les appels entrants.",
+  "addNumber": "Ajouter un numéro",
+  "alerts": {
+    "aiNotConfiguredTitle": "Infrastructure IA non configurée",
+    "aiNotConfiguredBody": "Deepgram, ElevenLabs et OpenRouter sont requis pour que les appels IA fonctionnent.",
+    "configureAiKeys": "Configurer les clés IA",
+    "twilioNotConfiguredTitle": "Twilio non configuré",
+    "twilioNotConfiguredBody": "Vous devez configurer votre SID et votre token Twilio dans les Paramètres avant de pouvoir utiliser des numéros Twilio.",
+    "configureNow": "Configurer maintenant"
+  },
+  "list": {
+    "title": "Numéros connectés",
+    "description": "Vos numéros de téléphone reliés à Twilio ou à des trunks SIP, prêts pour les campagnes sortantes et les appels entrants.",
+    "emptyTitle": "Aucun numéro connecté",
+    "emptyDescription": "Ajoutez votre premier numéro de téléphone (Twilio ou SIP) pour commencer à passer des appels vocaux IA."
+  },
+  "table": {
+    "friendlyName": "Nom convivial",
+    "phoneNumber": "Numéro de téléphone",
+    "provider": "Fournisseur",
+    "inboundAgent": "Agent entrant",
+    "testCall": "Appel de test",
+    "actions": "Actions",
+    "sipTrunk": "Trunk SIP",
+    "twilio": "Twilio",
+    "linked": "Relié",
+    "assigned": "Assigné",
+    "fallback": "Repli : {number}",
+    "noAgent": "Aucun agent assigné",
+    "forwardsTo": "→ Transféré vers {number}",
+    "edit": "Modifier",
+    "delete": "Supprimer"
+  },
+  "twilioInfo": {
+    "title": "Appels entrants via Twilio",
+    "body": "Pour recevoir des appels entrants via Twilio, pointez le webhook <b>« A Call Comes In »</b> de votre numéro Twilio vers :",
+    "afterCode": "Une fois configuré, tout appel vers votre numéro sera automatiquement traité par l'agent entrant assigné."
+  },
+  "sipInfo": {
+    "title": "Appels via trunk SIP",
+    "body": "Pour les numéros locaux (p. ex. Arabie saoudite +966), créez d'abord un <b>trunk SIP</b> avec les identifiants de votre opérateur, puis ajoutez ici un numéro de téléphone et sélectionnez <b>« Trunk SIP »</b> comme fournisseur. Les appels seront acheminés via Asterisk, sans Twilio.",
+    "originationBody": "Pour recevoir des <b>appels entrants</b> sur les numéros de trunk SIP, définissez ceci comme <b>URI d'origination</b> dans le tableau de bord de votre fournisseur :",
+    "manageTrunks": "Gérer les trunks SIP"
+  },
+  "dialog": {
+    "editTitle": "Modifier le numéro de téléphone",
+    "createTitle": "Ajouter un nouveau numéro de téléphone",
+    "description": "Configurez votre numéro de téléphone, choisissez un fournisseur et assignez un agent entrant.",
+    "providerLabel": "Fournisseur",
+    "sipTrunk": "Trunk SIP",
+    "phoneLabel": "Numéro de téléphone (E.164)",
+    "friendlyNameLabel": "Nom convivial",
+    "friendlyNamePlaceholder": "Ligne commerciale - Riyad",
+    "sipTrunkLabel": "Trunk SIP",
+    "selectTrunk": "Sélectionnez un trunk SIP",
+    "noTrunkSelected": "Aucun trunk sélectionné",
+    "noTrunks": "Aucun trunk SIP trouvé. Rendez-vous sur la page Trunks SIP pour en créer un.",
+    "inboundAgentLabel": "Agent de traitement des appels entrants",
+    "selectAgent": "Sélectionnez un agent pour les appels entrants",
+    "noAgentHangUp": "Aucun agent (raccrocher)",
+    "inboundAgentHint": "Les appels entrants vers ce numéro seront traités par l'agent sélectionné.",
+    "fallbackLabel": "Numéro de repli",
+    "optional": "(facultatif)",
+    "fallbackHint": "Si aucun agent n'est assigné, les appels entrants seront transférés vers ce numéro au lieu d'être raccrochés."
+  },
+  "toast": {
+    "loadFailed": "Échec du chargement des numéros de téléphone",
+    "removed": "Numéro de téléphone supprimé",
+    "deleteFailed": "Échec de la suppression",
+    "sipCallFailed": "Échec de l'appel SIP",
+    "sipCallInitiated": "Appel SIP lancé. En attente de connexion du fournisseur...",
+    "testCallInitiated": "Appel de test lancé ! Vérifiez votre téléphone.",
+    "testCallFailed": "Échec du lancement de l'appel de test",
+    "uriCopied": "URI d'origination copiée !",
+    "updated": "Numéro de téléphone mis à jour avec succès !",
+    "added": "Numéro de téléphone ajouté avec succès !",
+    "generic": "Une erreur s'est produite"
+  }
+}

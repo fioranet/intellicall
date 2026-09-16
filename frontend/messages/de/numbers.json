@@ -1,0 +1,81 @@
+{
+  "title": "Telefonnummern",
+  "subtitle": "Verwalten Sie Ihre Twilio- und SIP-Telefonnummern für ausgehende Kampagnen und eingehende Anrufe.",
+  "addNumber": "Nummer hinzufügen",
+  "alerts": {
+    "aiNotConfiguredTitle": "KI-Infrastruktur nicht konfiguriert",
+    "aiNotConfiguredBody": "Deepgram, ElevenLabs und OpenRouter sind erforderlich, damit KI-Anrufe funktionieren.",
+    "configureAiKeys": "KI-Schlüssel konfigurieren",
+    "twilioNotConfiguredTitle": "Twilio nicht konfiguriert",
+    "twilioNotConfiguredBody": "Sie müssen Ihre Twilio-SID und Ihr Token in den Einstellungen hinterlegen, bevor Sie Twilio-Nummern verwenden können.",
+    "configureNow": "Jetzt konfigurieren"
+  },
+  "list": {
+    "title": "Verbundene Nummern",
+    "description": "Ihre mit Twilio oder SIP-Trunks verknüpften Telefonnummern, bereit für ausgehende Kampagnen und eingehende Anrufe.",
+    "emptyTitle": "Keine Nummern verbunden",
+    "emptyDescription": "Fügen Sie Ihre erste Telefonnummer (Twilio oder SIP) hinzu, um KI-Sprachanrufe zu starten."
+  },
+  "table": {
+    "friendlyName": "Anzeigename",
+    "phoneNumber": "Telefonnummer",
+    "provider": "Anbieter",
+    "inboundAgent": "Eingehender Agent",
+    "testCall": "Testanruf",
+    "actions": "Aktionen",
+    "sipTrunk": "SIP-Trunk",
+    "twilio": "Twilio",
+    "linked": "Verknüpft",
+    "assigned": "Zugewiesen",
+    "fallback": "Ersatznummer: {number}",
+    "noAgent": "Kein Agent zugewiesen",
+    "forwardsTo": "→ Weiterleitung an {number}",
+    "edit": "Bearbeiten",
+    "delete": "Löschen"
+  },
+  "twilioInfo": {
+    "title": "Eingehende Anrufe über Twilio",
+    "body": "Um eingehende Anrufe über Twilio zu empfangen, richten Sie den Webhook <b>„A Call Comes In“</b> Ihrer Twilio-Nummer auf Folgendes aus:",
+    "afterCode": "Sobald dies eingerichtet ist, wird jeder Anruf an Ihre Nummer automatisch vom zugewiesenen eingehenden Agenten bearbeitet."
+  },
+  "sipInfo": {
+    "title": "Anrufe über SIP-Trunk",
+    "body": "Für lokale Nummern (z. B. Saudi-Arabien +966) erstellen Sie zuerst einen <b>SIP-Trunk</b> mit den Zugangsdaten Ihres Anbieters, fügen dann hier eine Telefonnummer hinzu und wählen <b>„SIP-Trunk“</b> als Anbieter. Anrufe werden über Asterisk geleitet, Twilio wird nicht benötigt.",
+    "originationBody": "Um <b>eingehende Anrufe</b> auf SIP-Trunk-Nummern zu empfangen, tragen Sie dies als <b>Origination-URI</b> im Dashboard Ihres Anbieters ein:",
+    "manageTrunks": "SIP-Trunks verwalten"
+  },
+  "dialog": {
+    "editTitle": "Telefonnummer bearbeiten",
+    "createTitle": "Neue Telefonnummer hinzufügen",
+    "description": "Konfigurieren Sie Ihre Telefonnummer, wählen Sie einen Anbieter und weisen Sie einen eingehenden Agenten zu.",
+    "providerLabel": "Anbieter",
+    "sipTrunk": "SIP-Trunk",
+    "phoneLabel": "Telefonnummer (E.164)",
+    "friendlyNameLabel": "Anzeigename",
+    "friendlyNamePlaceholder": "Vertriebsleitung - Riad",
+    "sipTrunkLabel": "SIP-Trunk",
+    "selectTrunk": "SIP-Trunk auswählen",
+    "noTrunkSelected": "Kein Trunk ausgewählt",
+    "noTrunks": "Keine SIP-Trunks gefunden. Erstellen Sie zuerst einen auf der Seite „SIP-Trunks“.",
+    "inboundAgentLabel": "Agent für eingehende Anrufe",
+    "selectAgent": "Agent für eingehende Anrufe auswählen",
+    "noAgentHangUp": "Kein Agent (auflegen)",
+    "inboundAgentHint": "Eingehende Anrufe an diese Nummer werden vom ausgewählten Agenten bearbeitet.",
+    "fallbackLabel": "Ersatznummer",
+    "optional": "(optional)",
+    "fallbackHint": "Wenn kein Agent zugewiesen ist, werden eingehende Anrufe an diese Nummer weitergeleitet, statt aufzulegen."
+  },
+  "toast": {
+    "loadFailed": "Telefonnummern konnten nicht geladen werden",
+    "removed": "Telefonnummer entfernt",
+    "deleteFailed": "Löschen fehlgeschlagen",
+    "sipCallFailed": "SIP-Anruf fehlgeschlagen",
+    "sipCallInitiated": "SIP-Anruf gestartet. Warten auf die Verbindung des Anbieters...",
+    "testCallInitiated": "Testanruf gestartet! Prüfen Sie Ihr Telefon.",
+    "testCallFailed": "Testanruf konnte nicht gestartet werden",
+    "uriCopied": "Origination-URI kopiert!",
+    "updated": "Telefonnummer erfolgreich aktualisiert!",
+    "added": "Telefonnummer erfolgreich hinzugefügt!",
+    "generic": "Etwas ist schiefgelaufen"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "title": "Suporte",
+  "subtitle": "Crie e gerencie seus chamados de suporte.",
+  "filters": {
+    "status": "Status",
+    "all": "Todos os chamados",
+    "open": "Abrir",
+    "inProgress": "Em andamento",
+    "resolved": "Resolvido",
+    "closed": "Fechado"
+  },
+  "newTicket": "Novo chamado",
+  "empty": {
+    "title": "Ainda não há chamados de suporte",
+    "description": "Abra um chamado para obter ajuda de nossa equipe."
+  },
+  "create": {
+    "title": "Novo chamado de suporte",
+    "description": "Descreva seu problema. Nossa equipe responderá o mais breve possível.",
+    "subjectLabel": "Assunto",
+    "subjectPlaceholder": "Breve resumo do seu problema",
+    "messageLabel": "Mensagem (opcional)",
+    "messagePlaceholder": "Adicione mais detalhes...",
+    "submit": "Abrir chamado"
+  },
+  "reply": {
+    "placeholder": "Digite sua resposta...",
+    "send": "Enviar resposta"
+  },
+  "toast": {
+    "loadFailed": "Falha ao carregar chamados",
+    "conversationFailed": "Falha ao carregar a conversa",
+    "replyFailed": "Falha ao enviar resposta",
+    "subjectRequired": "Por favor insira um assunto",
+    "created": "Chamado criado com sucesso",
+    "createFailed": "Falha ao criar chamado"
+  }
+}

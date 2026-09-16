@@ -1,0 +1,93 @@
+{
+  "title": "سجلات المكالمات",
+  "subtitle": "سجلّ شامل لجميع التفاعلات الهاتفية للذكاء الاصطناعي.",
+  "filters": {
+    "qualification": "التأهيل",
+    "allLeads": "كل العملاء المحتملين",
+    "qualified": "مؤهّل",
+    "unqualified": "غير مؤهّل",
+    "direction": "الاتجاه",
+    "allDirections": "كل الاتجاهات",
+    "inbound": "وارد",
+    "outbound": "صادر",
+    "campaign": "الحملة",
+    "allCampaigns": "كل الحملات",
+    "refresh": "تحديث",
+    "export": "تصدير"
+  },
+  "table": {
+    "lead": "العميل المحتمل",
+    "context": "السياق / الوكيل",
+    "dateTime": "التاريخ والوقت",
+    "duration": "المدة",
+    "status": "الحالة",
+    "score": "تقييم الذكاء الاصطناعي",
+    "recording": "تسجيل المكالمة",
+    "action": "الإجراء",
+    "noLogs": "لم يتم العثور على سجلات.",
+    "pending": "قيد الانتظار",
+    "notAvailable": "غير متاح",
+    "details": "التفاصيل"
+  },
+  "detail": {
+    "title": "تفاصيل سجل المكالمة",
+    "description": "تحليل معمّق وسجلّ كامل للمحادثة.",
+    "tabSummary": "الملخّص",
+    "tabTranscript": "النص المكتوب",
+    "date": "التاريخ",
+    "time": "الوقت",
+    "duration": "المدة",
+    "issuesDetected": "مشكلات مكتشفة في المكالمة",
+    "aiIntelligence": "تحليلات الذكاء الاصطناعي",
+    "conversationSummary": "ملخّص المحادثة",
+    "score": "تقييم الذكاء الاصطناعي",
+    "estimatedBudget": "الميزانية التقديرية",
+    "timeline": "الإطار الزمني",
+    "reasoning": "المنطق والتحليل",
+    "nextSteps": "الخطوات التالية الموصى بها",
+    "noAnalysis": "لا يتوفّر تحليل من الذكاء الاصطناعي",
+    "noAnalysisHint": "يستخدم إنشاء التحليل خدمة OpenRouter لتأهيل العميل المحتمل وتلخيص الحوار.",
+    "roleAgent": "وكيل الذكاء الاصطناعي",
+    "roleLead": "العميل المحتمل",
+    "roleSystem": "النظام",
+    "voiceQuality": {
+      "title": "جودة الصوت",
+      "turns": "الأدوار",
+      "interruptions": "المقاطعات",
+      "falseVad": "أحداث VAD خاطئة",
+      "rtpDrops": "إسقاطات قائمة RTP",
+      "ttsChunks": "مقاطع TTS",
+      "llmFirstToken": "أول رمز LLM",
+      "ttsFirstText": "أول نص TTS",
+      "firstAudio": "أول صوت (متوسط)",
+      "maxFirstAudio": "أول صوت (أقصى)"
+    },
+    "transfers": {
+      "title": "التحويلات إلى موظفين",
+      "destination": "الوجهة",
+      "outcome": "النتيجة",
+      "attempt": "المحاولة",
+      "ringTime": "الرنين",
+      "talkTime": "مع الموظف",
+      "sipCause": "سبب SIP",
+      "status": {
+        "ringing": "يرن",
+        "connected": "متصل",
+        "completed": "مكتملة",
+        "busy": "مشغول",
+        "no_answer": "لا يوجد رد",
+        "rejected": "مرفوضة",
+        "unavailable": "غير متاح",
+        "failed": "فشلت"
+      }
+    }
+  },
+  "toast": {
+    "analysisComplete": "اكتمل التحليل",
+    "analysisFailed": "تعذّر تحليل المكالمة",
+    "updated": "تم تحديث السجلات",
+    "fetchFailed": "تعذّر جلب سجلات المكالمات",
+    "noExportData": "لا توجد بيانات للتصدير",
+    "exported": "تم التصدير بنجاح"
+  }
+}

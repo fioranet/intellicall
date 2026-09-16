@@ -1,0 +1,144 @@
+{
+  "title": "Campanhas",
+  "subtitle": "Orquestre e monitore suas campanhas de chamadas",
+  "view": {
+    "cards": "Cartões",
+    "list": "Lista"
+  },
+  "status": {
+    "idle": "Parado",
+    "scheduled": "Agendado",
+    "running": "Correndo",
+    "completed": "Concluído",
+    "stopped": "Parou"
+  },
+  "card": {
+    "created": "Criado {date}",
+    "agent": "Agente de IA",
+    "deletedAgent": "Agente excluído",
+    "totalLeads": "Total de leads",
+    "duplicateTitle": "Campanha duplicada",
+    "deleteTitle": "Excluir campanha",
+    "active": "Ativo",
+    "done": "Feito",
+    "start": "Começar"
+  },
+  "table": {
+    "name": "Nome da campanha",
+    "agent": "Agente",
+    "leads": "Leads",
+    "status": "Status",
+    "createdAt": "Criado em",
+    "actions": "Ações",
+    "details": "Detalhes",
+    "duplicate": "Duplicado",
+    "delete": "Excluir"
+  },
+  "empty": {
+    "title": "Ainda não há campanhas",
+    "description": "Você ainda não criou nenhuma campanha. Crie sua primeira campanha para começar a alcançar leads."
+  },
+  "selection": {
+    "count": "{count, plural, one {# campanha selecionada} other {# campanhas selecionadas}}",
+    "deselectAll": "Desmarcar tudo",
+    "deleteSelected": "Excluir selecionado"
+  },
+  "create": {
+    "trigger": "Criar campanha",
+    "title": "Criar nova campanha",
+    "description": "Configure uma nova campanha de ligações com um agente e leads de IA.",
+    "nameLabel": "Nome da campanha",
+    "namePlaceholder": "Campanha de vendas do primeiro trimestre",
+    "agentLabel": "Selecione Agente",
+    "agentPlaceholder": "Escolha um agente",
+    "scheduleLater": "Agendar para mais tarde",
+    "dateTimeLabel": "Data e hora",
+    "selectLeads": "Selecione Leads ({count} selecionado)",
+    "addByTag": "Adicionar por tag",
+    "noTags": "Nenhuma tag disponível",
+    "selectAll": "Selecionar tudo",
+    "searchLeads": "Pesquisar leads...",
+    "noLeadsFound": "Nenhum lead encontrado",
+    "creating": "Criando..."
+  },
+  "toast": {
+    "loadFailed": "Falha ao carregar campanhas",
+    "noProvider": "Nenhum provedor de chamadas configurado. Configure o Twilio ou um tronco SIP em Configurações.",
+    "missingKeys": "As chaves Deepgram ou Model estão faltando. As chamadas podem falhar.",
+    "started": "Campanha iniciada com sucesso",
+    "startFailed": "Falha ao iniciar a campanha",
+    "duplicated": "Campanha duplicada",
+    "duplicateFailed": "Falha ao duplicar a campanha",
+    "deleted": "Campanha excluída com sucesso",
+    "deleteFailed": "Falha ao excluir campanha",
+    "bulkDeleted": "Campanhas excluídas com sucesso",
+    "bulkDeleteFailed": "Falha ao excluir campanhas",
+    "loadDataFailed": "Falha ao carregar os dados iniciais",
+    "selectAgent": "Selecione um agente",
+    "selectLead": "Selecione pelo menos um lead",
+    "statsFailed": "Falha ao carregar estatísticas da campanha",
+    "sequenceStarted": "Sequência da campanha iniciada",
+    "stopping": "Parando campanha...",
+    "stopped": "Campanha interrompida com sucesso",
+    "stopFailed": "Falha ao interromper a campanha"
+  },
+  "detail": {
+    "createdOn": "Criado em {date}",
+    "stop": "Parar campanha",
+    "scheduledFor": "Programado para {date}",
+    "start": "Iniciar campanha",
+    "totalLeads": "Total de leads",
+    "completed": "Concluído",
+    "avgDuration": "Média Duração",
+    "successRate": "Taxa de sucesso",
+    "tabs": {
+      "activity": "Atividade ao vivo",
+      "leads": "Líderes de campanha",
+      "agent": "Detalhes do agente"
+    },
+    "activity": {
+      "title": "Operações Ativas",
+      "description": "Status de execução em tempo real e acompanhamento de progresso",
+      "activeCall": "Chamada ativa",
+      "status": "Status",
+      "talking": "Conversando",
+      "ringing": "Toque",
+      "queued": "Na fila",
+      "queue": "Fila",
+      "live": "AO VIVO",
+      "emptyTitle": "Nenhuma operação ativa",
+      "emptyDescription": "Inicie a campanha para ver a atividade em tempo real",
+      "completion": "Conclusão completa da campanha",
+      "processed": "{count, plural, one {# contato processado} other {# contatos processados}}",
+      "remaining": "{count, plural, one {# restante} other {# restantes}}"
+    },
+    "summary": {
+      "title": "Resumo da sessão",
+      "description": "Principais métricas para a janela de execução atual",
+      "handledBy": "Manipulado por",
+      "voiceEngine": "Motor de voz",
+      "elevenLabs": "OnzeLabs IA",
+      "standard": "Padrão",
+      "personaVoice": "Voz Pessoal",
+      "totalCalls": "Total de chamadas",
+      "avgPulse": "Pulso médio"
+    },
+    "contacts": {
+      "title": "Lista de Contatos",
+      "description": "Lista abrangente de todos os leads participantes desta campanha",
+      "totalTargets": "TOTAL DE CONTATOS: {count}",
+      "leadProfile": "Perfil de lead",
+      "executionStatus": "Status de execução",
+      "callMetrics": "Métricas de chamada",
+      "waiting": "ESPERANDO..."
+    },
+    "agent": {
+      "title": "Configuração do agente",
+      "description": "Detalhes de configuração do agente de IA que gerencia esta campanha",
+      "selected": "Agente Selecionado",
+      "openingMessage": "Mensagem de abertura",
+      "instructions": "Instruções de IA",
+      "instructionsHint": "As instruções comportamentais e a base de conhecimento para o agente"
+    }
+  }
+}

@@ -1,0 +1,144 @@
+{
+  "title": "Campaigns",
+  "subtitle": "Orchestrate and monitor your calling campaigns",
+  "view": {
+    "cards": "Cards",
+    "list": "List"
+  },
+  "status": {
+    "idle": "Idle",
+    "scheduled": "Scheduled",
+    "running": "Running",
+    "completed": "Completed",
+    "stopped": "Stopped"
+  },
+  "card": {
+    "created": "Created {date}",
+    "agent": "AI Agent",
+    "deletedAgent": "Deleted Agent",
+    "totalLeads": "Total Leads",
+    "duplicateTitle": "Duplicate campaign",
+    "deleteTitle": "Delete campaign",
+    "active": "Active",
+    "done": "Done",
+    "start": "Start"
+  },
+  "table": {
+    "name": "Campaign Name",
+    "agent": "Agent",
+    "leads": "Leads",
+    "status": "Status",
+    "createdAt": "Created At",
+    "actions": "Actions",
+    "details": "Details",
+    "duplicate": "Duplicate",
+    "delete": "Delete"
+  },
+  "empty": {
+    "title": "No Campaigns Yet",
+    "description": "You haven't created any campaigns yet. Create your first campaign to start reaching out to leads."
+  },
+  "selection": {
+    "count": "{count, plural, one {# campaign selected} other {# campaigns selected}}",
+    "deselectAll": "Deselect All",
+    "deleteSelected": "Delete Selected"
+  },
+  "create": {
+    "trigger": "Create Campaign",
+    "title": "Create New Campaign",
+    "description": "Set up a new calling campaign with an AI agent and leads.",
+    "nameLabel": "Campaign Name",
+    "namePlaceholder": "Q1 Sales Campaign",
+    "agentLabel": "Select Agent",
+    "agentPlaceholder": "Choose an agent",
+    "scheduleLater": "Schedule for later",
+    "dateTimeLabel": "Date & time",
+    "selectLeads": "Select Leads ({count} selected)",
+    "addByTag": "Add by Tag",
+    "noTags": "No tags available",
+    "selectAll": "Select All",
+    "searchLeads": "Search leads...",
+    "noLeadsFound": "No leads found",
+    "creating": "Creating..."
+  },
+  "toast": {
+    "loadFailed": "Failed to load campaigns",
+    "noProvider": "No call provider configured. Set up Twilio or a SIP Trunk in Settings.",
+    "missingKeys": "Deepgram or Model keys are missing. Calls may fail.",
+    "started": "Campaign started successfully",
+    "startFailed": "Failed to start campaign",
+    "duplicated": "Campaign duplicated",
+    "duplicateFailed": "Failed to duplicate campaign",
+    "deleted": "Campaign deleted successfully",
+    "deleteFailed": "Failed to delete campaign",
+    "bulkDeleted": "Campaigns deleted successfully",
+    "bulkDeleteFailed": "Failed to delete campaigns",
+    "loadDataFailed": "Failed to load initial data",
+    "selectAgent": "Please select an agent",
+    "selectLead": "Please select at least one lead",
+    "statsFailed": "Failed to load campaign statistics",
+    "sequenceStarted": "Campaign sequence started",
+    "stopping": "Stopping campaign...",
+    "stopped": "Campaign stopped successfully",
+    "stopFailed": "Failed to stop campaign"
+  },
+  "detail": {
+    "createdOn": "Created on {date}",
+    "stop": "Stop Campaign",
+    "scheduledFor": "Scheduled for {date}",
+    "start": "Start Campaign",
+    "totalLeads": "Total Leads",
+    "completed": "Completed",
+    "avgDuration": "Avg. Duration",
+    "successRate": "Success Rate",
+    "tabs": {
+      "activity": "Live Activity",
+      "leads": "Campaign Leads",
+      "agent": "Agent Details"
+    },
+    "activity": {
+      "title": "Active Operations",
+      "description": "Real-time execution status and progress tracking",
+      "activeCall": "Active Call",
+      "status": "Status",
+      "talking": "Talking",
+      "ringing": "Ringing",
+      "queued": "Queued",
+      "queue": "Queue",
+      "live": "LIVE",
+      "emptyTitle": "No Active Operations",
+      "emptyDescription": "Start the campaign to see real-time activity",
+      "completion": "Full Campaign Completion",
+      "processed": "{count} Contacts Processed",
+      "remaining": "{count} Remaining"
+    },
+    "summary": {
+      "title": "Session Summary",
+      "description": "Key metrics for the current execution window",
+      "handledBy": "Handled by",
+      "voiceEngine": "Voice Engine",
+      "elevenLabs": "ElevenLabs AI",
+      "standard": "Standard",
+      "personaVoice": "Persona Voice",
+      "totalCalls": "Total Calls",
+      "avgPulse": "Avg Pulse"
+    },
+    "contacts": {
+      "title": "Contact List",
+      "description": "Comprehensive list of all leads participating in this campaign",
+      "totalTargets": "{count} TOTAL TARGETS",
+      "leadProfile": "Lead Profile",
+      "executionStatus": "Execution Status",
+      "callMetrics": "Call Metrics",
+      "waiting": "WAITING..."
+    },
+    "agent": {
+      "title": "Agent Configuration",
+      "description": "Setup details for the AI agent handling this campaign",
+      "selected": "Selected Agent",
+      "openingMessage": "Opening Message",
+      "instructions": "AI Instructions",
+      "instructionsHint": "The behavioral instructions and knowledge base for the agent"
+    }
+  }
+}

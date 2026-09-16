@@ -1,0 +1,24 @@
+{
+  "main": {
+    "dashboard": "Tableau de bord",
+    "leads": "Prospects",
+    "phoneNumbers": "Numéros de téléphone",
+    "sipTrunks": "Trunks SIP",
+    "agents": "Agents IA",
+    "knowledgeBase": "Base de connaissances",
+    "campaigns": "Campagnes",
+    "callLogs": "Journal d'appels",
+    "appointments": "Rendez-vous",
+    "support": "Assistance"
+  },
+  "secondary": { "admin": "Administration", "settings": "Paramètres" },
+  "badge": {
+    "myOpenTickets": "{count, plural, one {# ticket ouvert ou en cours} other {# tickets ouverts ou en cours}}",
+    "pendingTickets": "{count, plural, one {# ticket d'assistance en attente} other {# tickets d'assistance en attente}}"
+  },
+  "closeMenu": "Fermer le menu",
+  "openMenu": "Ouvrir le menu",
+  "user": { "account": "Mon compte", "settings": "Paramètres", "logout": "Se déconnecter" },
+  "toast": { "loggedOut": "Déconnexion réussie" },
+  "pendingTickets": "Tickets d'assistance en attente"
+}

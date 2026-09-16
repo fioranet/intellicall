@@ -1,0 +1,100 @@
+{
+  "title": "Prospects",
+  "subtitle": "Gestion centralisée de vos {count} contacts et prospects.",
+  "searchPlaceholder": "Rechercher par nom ou téléphone...",
+  "filter": {
+    "button": "Filtrer", "withCount": "Étiquettes ({count})", "byTags": "Filtrer par étiquettes",
+    "noTags": "Aucune étiquette créée pour le moment", "columns": "Colonnes",
+    "visibleFields": "Champs visibles", "clear": "Effacer"
+  },
+  "empty": {
+    "noMatchTitle": "Aucun prospect trouvé",
+    "noMatchDescription": "Aucun prospect ne correspond à votre recherche ou à vos filtres d'étiquettes.",
+    "clearFilters": "Effacer tous les filtres",
+    "noLeadsTitle": "Aucun prospect pour le moment",
+    "noLeadsDescription": "Vous n'avez pas encore ajouté de prospect. Commencez par en ajouter un ou importez depuis un CSV."
+  },
+  "table": {
+    "name": "Nom", "phone": "Téléphone", "tags": "Étiquettes", "addedOn": "Ajouté le",
+    "addTag": "Ajouter une étiquette", "actions": "Actions",
+    "editRecord": "Modifier la fiche", "removeLead": "Supprimer le prospect"
+  },
+  "selection": {
+    "count": "{count, plural, one {# prospect sélectionné} other {# prospects sélectionnés}}",
+    "deselectAll": "Tout désélectionner", "manageTags": "Gérer les étiquettes",
+    "editRecord": "Modifier la fiche", "deleteSelected": "Supprimer la sélection"
+  },
+  "add": {
+    "trigger": "Ajouter un prospect", "title": "Ajouter un nouveau prospect",
+    "description": "Saisissez les informations du prospect ci-dessous. Cliquez sur Enregistrer une fois terminé.",
+    "nameLabel": "Nom", "namePlaceholder": "Jean Dupont", "phoneLabel": "Téléphone",
+    "tagsLabel": "Étiquettes (séparées par des virgules)", "tagsPlaceholder": "client, haute-priorite, vip"
+  },
+  "edit": {
+    "title": "Modifier le prospect",
+    "description": "Mettez à jour les informations du prospect ci-dessous. Cliquez sur Enregistrer une fois terminé.",
+    "nameLabel": "Nom", "namePlaceholder": "Jean Dupont", "phoneLabel": "Téléphone",
+    "tagsLabel": "Étiquettes (séparées par des virgules)", "tagsPlaceholder": "client, haute-priorite, vip"
+  },
+  "bulkTag": {
+    "title": "Ajout d'étiquettes en masse",
+    "description": "{count, plural, one {Ajouter des étiquettes à # prospect sélectionné.} other {Ajouter des étiquettes à # prospects sélectionnés.}}",
+    "tagsLabel": "Étiquettes (séparées par des virgules)", "tagsPlaceholder": "priorite, relance, t1"
+  },
+  "customFields": {
+    "title": "Champs personnalisés (facultatif)", "addField": "Ajouter un champ",
+    "namePlaceholder": "Nom du champ (p. ex. date_rdv)",
+    "valuePlaceholder": "Valeur (p. ex. 10 juillet à 15h)"
+  },
+  "importCsv": {
+    "trigger": "Importer un CSV", "title": "Importer des prospects depuis un CSV",
+    "description": "Téléversez un fichier CSV avec les colonnes : name, phone, company (facultatif)",
+    "fileLabel": "Fichier CSV", "selected": "Sélectionné :",
+    "tagsLabel": "Ajouter des étiquettes à tous (séparées par des virgules)",
+    "tagsPlaceholder": "nouveaux-prospects, campagne-1"
+  },
+  "toast": {
+    "fetchFailed": "Échec de la récupération des prospects",
+    "deleted": "Prospects supprimés avec succès",
+    "deleteFailed": "Échec de la suppression des prospects",
+    "added": "Prospect ajouté avec succès !",
+    "addFailed": "Échec de l'ajout du prospect",
+    "updated": "Prospect mis à jour avec succès !",
+    "updateFailed": "Échec de la mise à jour du prospect",
+    "tagRequired": "Veuillez saisir au moins une étiquette",
+    "tagsAdded": "{count, plural, one {Étiquettes ajoutées à # prospect} other {Étiquettes ajoutées à # prospects}}",
+    "tagsFailed": "Échec de l'ajout des étiquettes",
+    "selectCsv": "Veuillez sélectionner un fichier CSV",
+    "noValidLeads": "Aucun prospect valide trouvé dans le CSV",
+    "imported": "{count, plural, one {# prospect importé avec succès !} other {# prospects importés avec succès !}}",
+    "importFailed": "Échec de l'import des prospects",
+    "parseError": "Erreur d'analyse du CSV : {message}",
+    "quickSyncFailed": "Échec de la synchronisation rapide",
+    "syncFailed": "Échec de la synchronisation des prospects",
+    "sheetsDisconnected": "Google Sheets déconnecté",
+    "disconnectFailed": "Échec de la déconnexion",
+    "fetchSheetsFailed": "Échec de la récupération des feuilles",
+    "userNotFound": "Utilisateur introuvable. Veuillez vous reconnecter."
+  },
+  "googleSheets": {
+    "syncing": "Synchronisation...", "defaultLabel": "Google Sheets",
+    "title": "Synchronisation Google Sheets",
+    "description": "Importez vos prospects et gardez-les synchronisés avec Google Sheets.",
+    "connectTitle": "Connecter Google Sheets",
+    "connectDescription": "Connectez votre compte pour importer des prospects directement depuis vos feuilles de calcul et les garder synchronisés.",
+    "connectNow": "Connecter maintenant", "quickSyncReady": "Synchronisation rapide prête",
+    "lastSynced": "Dernière synchronisation : {date}",
+    "previouslyConnected": "Précédemment connecté à <b>{sheet}</b>. Les nouveaux prospects seront ajoutés automatiquement, les existants seront ignorés.",
+    "syncNow": "Synchroniser les nouveaux prospects",
+    "orStartFresh": "Ou repartir de zéro", "selectSpreadsheet": "Sélectionnez une feuille de calcul",
+    "selectSheet": "Sélectionnez la feuille (nom de l'onglet)", "chooseSheet": "Choisissez une feuille",
+    "configureMapping": "Configurer le mappage des colonnes", "back": "Retour",
+    "mappingHint": "Saisissez les noms de colonnes exactement comme ils apparaissent dans les en-têtes (ligne 1).",
+    "nameColumn": "Colonne Nom", "namePlaceholder": "p. ex. Nom complet",
+    "phoneColumn": "Colonne Téléphone", "phonePlaceholder": "p. ex. Numéro de téléphone",
+    "companyColumn": "Entreprise (facultatif)", "companyPlaceholder": "p. ex. Entreprise",
+    "saveForQuickSync": "Enregistrer ces paramètres pour la synchronisation rapide en un clic",
+    "initialSync": "Lancer la synchronisation initiale",
+    "connectedToGoogle": "Connecté à Google", "disconnect": "Déconnecter le compte"
+  }
+}

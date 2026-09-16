@@ -1,0 +1,452 @@
+{
+  "loading": "Carregando…",
+  "loadingIntegrations": "Carregando integrações…",
+  "connected": "Conectado",
+  "disconnect": "Desconectar",
+  "apiAccess": {
+    "title": "Acesso à API",
+    "active": "Ativo",
+    "description": "Chave de API pessoal para chamar a API {appName} de n8n, Zapier ou seus próprios scripts - crie leads, inicie campanhas, faça chamadas.",
+    "regenerate": "Regenerado",
+    "revoke": "Revogar",
+    "generate": "Gerar chave de API",
+    "copyNow": "Copie sua chave de API agora – ela não será mostrada novamente.",
+    "copy": "Cópia",
+    "key": "Chave",
+    "created": "Criado",
+    "lastUsed": "Usado pela última vez",
+    "never": "Nunca",
+    "usage": "Uso",
+    "usageHint": "Envie a chave em um cabeçalho <code>X-API-Key</code> com qualquer solicitação. Lista completa de endpoints abaixo.",
+    "reference": "Referência de API",
+    "endpointCount": "{count, plural, one {# endpoint} other {# endpoints}}",
+    "referenceIntro": "URL base <code>{baseUrl}</code> — cada endpoint aceita <code>X-API-Key</code>. As respostas são <code>{shape}</code> JSON. Para eventos <em>receive</em> (lead criado, chamada concluída,…) use a guia Webhooks ou a integração n8n.",
+    "required": "obrigatório",
+    "copyCurl": "Copiar comando curl"
+  },
+  "n8n": {
+    "description": "Transmita todos os eventos da plataforma em fluxos de trabalho n8n e automatize com mais de 400 aplicativos — CRMs, planilhas, e-mail, Slack e muito mais.",
+    "howToTitle": "Como conectar",
+    "step1": "1. Em seu fluxo de trabalho n8n, adicione um nó <b>Webhook</b> com o método <code>POST</code> (ou importe um modelo abaixo - ele já possui um).",
+    "step2": "2. Copie o URL de produção <b></b> e <b> do nó e ative o fluxo de trabalho</b> — ou use o URL de teste durante a construção.",
+    "step3": "3. Cole o URL aqui e conecte-se. Os eventos chegam como JSON: <code>{shape}</code>.",
+    "connect": "Conecte n8n",
+    "deliveringTo": "Entregando para",
+    "sendTest": "Enviar teste",
+    "templatesTitle": "Modelos de fluxo de trabalho",
+    "templatesHint": "Baixe e importe para n8n (menu Fluxo de trabalho → Importar do arquivo) e siga a nota dentro de cada um.",
+    "download": "Download",
+    "newToN8n": "Novo no n8n? É uma ferramenta de automação gratuita e auto-hospedada —",
+    "events": {
+      "leadCreated": {
+        "label": "Lead criado",
+        "description": "Novo lead adicionado manualmente, por meio de importação em massa ou campanha."
+      },
+      "leadQualified": {
+        "label": "Lead qualificado",
+        "description": "A IA marca um lead como qualificado após análise."
+      },
+      "callCompleted": {
+        "label": "Chamada concluída",
+        "description": "Fim da chamada — inclui duração, status e gravação."
+      },
+      "inboundCall": {
+        "label": "Chamada recebida",
+        "description": "A chamada recebida chega à plataforma."
+      },
+      "outboundCall": {
+        "label": "Chamada de saída",
+        "description": "A chamada de saída é realizada."
+      },
+      "campaignCompleted": {
+        "label": "Campanha concluída",
+        "description": "Todas as chamadas em uma campanha terminam."
+      },
+      "appointmentBooked": {
+        "label": "consulte agendada",
+        "description": "O compromisso agendado manualmente ou com IA está agendado."
+      },
+      "appointmentCanceled": {
+        "label": "Agendamento cancelado",
+        "description": "O compromisso agendado foi cancelado."
+      },
+      "callTransferred": {
+        "label": "Chamador transferido",
+        "description": "Um chamador foi conectado a um humano. Apenas chamadas SIP."
+      },
+      "transferFailed": {
+        "label": "Falha na transferência",
+        "description": "Não foi possível encontrar um humano e o chamador permaneceu com o agente."
+      }
+    },
+    "templates": {
+      "instantCall": {
+        "name": "Chamada instantânea no envio do formulário",
+        "description": "Formulário / webhook é acionado → a IA liga para o cliente potencial em segundos. Precisa de uma chave de API (consulte o cartão de acesso à API)."
+      },
+      "callLogToSheets": {
+        "name": "Registro de chamadas para o Planilhas Google",
+        "description": "Cada chamada concluída acrescenta uma linha – carimbo de data/hora, números, duração, status."
+      },
+      "leadQualifiedCrm": {
+        "name": "Lead qualificado para CRM + notificação",
+        "description": "A IA qualifica um lead → envie-o para o seu CRM e notifique a equipe."
+      }
+    },
+    "urlPlaceholder": "https://your-n8n.app/webhook/intellicall-events"
+  },
+  "slack": {
+    "description": "Receba notificações em tempo real em um canal do Slack: lead criado, chamada concluída, compromisso agendado e muito mais.",
+    "addToSlack": "Adicionar ao Slack",
+    "notConfigured": "A integração do Slack não está configurada neste servidor. Peça ao administrador para definir",
+    "notConfiguredSuffix": "no ambiente de back-end.",
+    "postingTo": "Postando em",
+    "sendTest": "Enviar teste"
+  },
+  "hubspot": {
+    "title": "CRM HubSpot",
+    "description": "Envie cada novo lead para o HubSpot como um contato, combinado por número de telefone – sem duplicatas.",
+    "connect": "Conecte o HubSpot",
+    "notConfigured": "A integração do HubSpot não está configurada neste servidor. Peça ao administrador para definir",
+    "notConfiguredSuffix": "no ambiente de back-end.",
+    "connectedTo": "Conectado a",
+    "syncLeads": "Sincronize novos leads com o HubSpot",
+    "syncLeadsHint": "Cada lead criado no {appName} (manual, importação em massa ou campanha) é atualizado como um contato HubSpot, combinado por telefone.",
+    "serviceKeyLabel": "Chave de serviço HubSpot",
+    "serviceKeyHint": "Crie um no HubSpot em Configurações → Integrações → Chaves de serviço (ou Desenvolvimento → Chaves → Chaves de serviço) com os escopos crm.objects.contacts.read e crm.objects.contacts.write e cole-o aqui.",
+    "serviceKeyPlaceholder": "pat-na1-…",
+    "serviceKeySave": "Conectar",
+    "serviceKeyReplace": "Substituir chave",
+    "serviceKeyCancel": "Cancelar",
+    "serviceKeyDocs": "Como criar uma chave de serviço",
+    "connectedVia": "Conectado com uma chave de serviço que termina em {last4}",
+    "connectedViaOAuth": "Conectado ao aplicativo OAuth legado",
+    "legacyOAuthTitle": "Aplicativo OAuth legado",
+    "legacyOAuthHint": "A HubSpot parou de permitir novos aplicativos públicos em 23 de junho de 2026. Esta opção só funciona para instalações que registraram um aplicativo antes disso – todos os outros devem usar uma chave de serviço."
+  },
+  "googleCalendar": {
+    "title": "Google Agenda",
+    "description": "Espelhe todos os compromissos reservados no seu Google Agenda em tempo real. Atualizações e cancelamentos são sincronizados automaticamente.",
+    "connect": "Conecte o Google Agenda",
+    "connectedAccount": "Conta conectada",
+    "syncTarget": "Os eventos são sincronizados com seu calendário <b>primary</b>.",
+    "primaryAccount": "Conta principal do Google"
+  },
+  "googleSheets": {
+    "title": "Planilhas Google",
+    "description": "Importe leads de uma Planilha Google e mantenha-os sincronizados. O painel extrai automaticamente novas linhas na próxima vez que você abrir a página Leads.",
+    "activeSheet": "Planilha ativa",
+    "lastSynced": "Última sincronização",
+    "noSheet": "Conta conectada, mas nenhuma planilha selecionada ainda. Clique em <b>Manage Sync</b> para escolher uma planilha, planilha e mapeamento de coluna.",
+    "manageSync": "Gerenciar sincronização",
+    "connect": "Conectar Planilhas Google"
+  },
+  "toast": {
+    "keyGenerateFailed": "Falha ao gerar chave de API",
+    "keyRevoked": "Chave de API revogada",
+    "keyRevokeFailed": "Falha ao revogar a chave de API",
+    "keyCopied": "Chave de API copiada",
+    "curlCopied": "comando curl copiado",
+    "n8nUrlRequired": "Cole primeiro o URL do webhook n8n",
+    "n8nConnected": "n8n conectado",
+    "n8nConnectFailed": "Falha ao conectar n8n",
+    "n8nDisconnected": "n8n desconectado",
+    "disconnectFailed": "Falha ao desconectar",
+    "testSent": "Evento de teste enviado – verifique suas execuções n8n",
+    "testFailed": "Falha no teste",
+    "preferenceFailed": "Falha ao atualizar preferência",
+    "slackConnected": "Slack conectado",
+    "slackConnectFailed": "Falha ao conectar o Slack",
+    "userNotFound": "Usuário não encontrado. Faça login novamente.",
+    "slackDisconnected": "Slack desconectado",
+    "slackTestSent": "Mensagem de teste enviada para #{channel}",
+    "slackTestFailed": "Falha ao enviar mensagem de teste",
+    "slackDefaultChannel": "canal",
+    "hubspotConnected": "HubSpot conectado",
+    "hubspotConnectFailed": "Falha ao conectar o HubSpot",
+    "hubspotDisconnected": "HubSpot desconectado",
+    "calendarConnected": "Google Agenda conectado",
+    "calendarConnectFailed": "Falha ao conectar o Google Agenda",
+    "googleOAuthNotConfigured": "O Google OAuth não está configurado. Adicione o ID do cliente e o segredo em Admin → Integrações → Google (ou GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET em backend/.env)",
+    "googleOAuthInvalidClientId": "O ID de cliente Google configurado não é válido. Ele deve terminar em .apps.googleusercontent.com. Corrija em Admin → Integrações → Google",
+    "calendarDisconnected": "Google Agenda desconectado",
+    "sheetsConnected": "Planilhas Google conectadas",
+    "sheetsConnectFailed": "Falha ao conectar o Planilhas Google",
+    "waCredentialsRequired": "Token de acesso, ID do número de telefone e seu número do WhatsApp são obrigatórios",
+    "waConnected": "WhatsApp conectado",
+    "waConnectFailed": "Falha ao conectar o WhatsApp",
+    "waDisconnected": "WhatsApp desconectado",
+    "waTestSent": "Mensagem de teste enviada para +{number}",
+    "waTestFailed": "Falha ao enviar mensagem de teste",
+    "waRecipientUpdated": "Número do destinatário atualizado",
+    "waRecipientFailed": "Falha ao atualizar o destinatário",
+    "waTemplateFirst": "Salve o nome do modelo primeiro – os lembretes precisam de um modelo Meta aprovado",
+    "waRemindersFailed": "Falha ao atualizar lembretes",
+    "waRemindersSaved": "Configurações de lembrete salvas",
+    "waRemindersSaveFailed": "Falha ao salvar as configurações do lembrete",
+    "waTemplateNameRequired": "Insira um nome de modelo primeiro",
+    "waReminderTestSent": "Lembrete de teste enviado para +{number}",
+    "waReminderTestFailed": "Falha ao enviar lembrete de teste",
+    "loadFailed": "Falha ao carregar dados de configurações",
+    "upgraded": "Sucesso! Você foi atualizado para o {plan}.",
+    "verifyFailed": "Falha ao verificar o pagamento. Entre em contato com o suporte.",
+    "saved": "Configurações salvas com sucesso!",
+    "saveFailed": "Falha ao salvar as configurações",
+    "testStarting": "Iniciando teste básico...",
+    "testCallStarted": "Chamada de teste iniciada!",
+    "preparingCheckout": "Preparando a finalização da compra...",
+    "redirecting": "Redirecionando para checkout seguro...",
+    "paymentFailed": "Falha ao iniciar o pagamento",
+    "preparingRazorpay": "Preparando a finalização da compra do Razorpay...",
+    "verifyingPayment": "Verificando pagamento...",
+    "planUpgraded": "Sucesso! Plano atualizado para {plan}.",
+    "verificationFailed": "Falha na verificação",
+    "razorpayFailed": "Falha ao iniciar o Razorpay",
+    "gatewayDemo": "Demonstração de pagamento {gateway} iniciada para {plan}",
+    "sendingTestEvent": "Enviando evento de teste {label}...",
+    "eventDelivered": "Evento {label} entregue com sucesso!",
+    "sendingTestEmail": "Enviando e-mail de teste {label}...",
+    "emailDispatched": "E-mail {label} enviado com sucesso!",
+    "regeneratingSecret": "Regenerando segredo...",
+    "secretRegenerated": "Segredo do Webhook regenerado!",
+    "regenerateFailed": "Falha ao regenerar segredo",
+    "paypalFailed": "Falha ao iniciar o pagamento do PayPal",
+    "capturingPayment": "Capturando pagamento...",
+    "paypalCompleteFailed": "Falha ao concluir o pagamento do PayPal",
+    "hubspotKeySaved": "HubSpot conectado",
+    "hubspotKeyFailed": "Não foi possível verificar essa chave de serviço"
+  },
+  "whatsapp": {
+    "description": "Receba notificações em tempo real no seu WhatsApp: lead criado, chamada concluída, compromisso agendado e muito mais. Desenvolvido pela API Meta WhatsApp Cloud.",
+    "howToTitle": "Como obter credenciais",
+    "step1": "1. Crie um aplicativo gratuito com o produto <b>WhatsApp</b> em",
+    "step2": "2. Abra <b>WhatsApp > API Setup</b> e copie o token de acesso e o ID do número de telefone.",
+    "step3": "3. Digite seu próprio número de WhatsApp abaixo para receber os alertas (adicione-o como destinatário na configuração da API ao usar o número de teste do Meta).",
+    "tokenLabel": "Token de acesso",
+    "tokenPlaceholder": "EAAG••••••••••••••••••••••••",
+    "tokenHint": "Use um token permanente (usuário do sistema) para que as notificações não parem após 24 horas.",
+    "phoneIdLabel": "ID do número de telefone",
+    "recipientLabel": "Seu número do WhatsApp",
+    "connect": "Conectar WhatsApp",
+    "sendingTo": "Enviando para",
+    "changeRecipient": "Alterar número do destinatário",
+    "from": "de",
+    "sendTest": "Enviar teste",
+    "sessionWarning": "O WhatsApp só entrega esses alertas em uma sessão de 24 horas. Envie qualquer mensagem do seu WhatsApp para <b>{number}</b> para abrir (e manter aberta) a janela de entrega.",
+    "yourBusinessNumber": "seu número comercial",
+    "remindersTitle": "Lembretes de compromissos para clientes",
+    "remindersHint": "Envie um lembrete do WhatsApp para o número do cliente antes do início do agendamento.",
+    "templateSetupTitle": "Configuração única: crie o modelo de mensagem",
+    "templateSetupIntro": "Os lembretes são iniciados pelos negócios, portanto, o Meta requer um modelo pré-aprovado. Em",
+    "metaBusinessManager": "Gerente de metanegócios",
+    "templateSetupOutro": "crie um modelo <b>Utility</b> (por exemplo, <code>appointment_reminder</code>) com este corpo:",
+    "templateBody": "Olá {v1}, este é um lembrete amigável sobre seu compromisso no {v2} no {v3}. Estamos ansiosos para falar com você!",
+    "templateVars": "Preenchemos <b>{v1}</b> = nome do cliente, <b>{v2}</b> = data, <b>{v3}</b> = hora. A redação fica por sua conta, mas mantenha exatamente essas 3 variáveis. A aprovação geralmente leva alguns minutos.",
+    "templateNameLabel": "Nome do modelo",
+    "templateLanguageLabel": "Idioma do modelo",
+    "templateLanguageHint": "Código do modelo, por ex. en, en_US, ar.",
+    "sendReminderLabel": "Enviar lembrete",
+    "saveReminders": "Salvar configurações de lembrete",
+    "sendReminderTest": "Enviar teste para meu número",
+    "leadOptions": {
+      "15": "15 minutos antes",
+      "30": "30 minutos antes",
+      "60": "1 hora antes",
+      "120": "2 horas antes",
+      "180": "3 horas antes",
+      "720": "12 horas antes",
+      "1440": "24 horas antes"
+    }
+  },
+  "page": {
+    "title": "Configurações",
+    "subtitle": "Configure sua conta, credenciais de API e assinatura.",
+    "tabs": {
+      "preferences": "Preferências",
+      "apiKeys": "Chaves de API",
+      "webhooks": "Webhooks",
+      "email": "E-mail",
+      "integrations": "Integrações",
+      "billing": "Plano e faturamento",
+      "transactions": "Histórico de transações"
+    }
+  },
+  "credentials": {
+    "title": "Credenciais Twilio e IA",
+    "description": "Essas chaves são necessárias para iniciar chamadas telefônicas e alimentar o agente de IA.",
+    "twilioSid": "SID da conta Twilio",
+    "twilioSidPlaceholder": "ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "twilioToken": "Token de autenticação Twilio",
+    "openRouter": "Chave de API OpenRouter",
+    "elevenLabs": "Chave de API ElevenLabs",
+    "verifying": "Verificando...",
+    "keyErrorSuffix": "Por favor, verifique sua chave.",
+    "validKey": "Chave de API válida",
+    "deepgram": "Chave de API Deepgram",
+    "deepgramHint": "Potencializa o reconhecimento de fala - e o mecanismo \"Deepgram Voice Agent\" de baixa latência selecionável por agente (que também usa sua voz ElevenLabs, mas não precisa de chave OpenRouter).",
+    "sarvam": "Chave de API Sarvam AI",
+    "sarvamHint": "Alimenta o mecanismo independente \"Sarvam AI\" para idiomas indianos (fala, raciocínio e voz, tudo no Sarvam). Selecionável por agente — não precisa de outras chaves.",
+    "gemini": "Chave de API Gemini",
+    "geminiHint": "Aciona o mecanismo \"Gemini Live\" — um modelo do Google ouve, pensa e fala, em 97 idiomas. Selecionável por agente em números SIP — não precisa de outras chaves."
+  },
+  "webhooks": {
+    "title": "Configuração de webhook",
+    "description": "Receba notificações em tempo real sobre eventos em seu aplicativo por meio de solicitações HTTP POST.",
+    "enable": "Habilitar webhooks",
+    "enableHint": "Alterne para começar a enviar eventos para seu URL.",
+    "payloadUrl": "URL de carga útil",
+    "payloadUrlHint": "Os eventos serão enviados como solicitações JSON POST para este URL.",
+    "signingSecret": "Segredo de Assinatura",
+    "regenerate": "Regenerado",
+    "signingSecretHint": "Protege seu webhook assinando a carga com HMAC-SHA256.",
+    "triggerEvents": "Eventos de gatilho",
+    "save": "Salvar configuração do webhook",
+    "sendTest": "Enviar evento de teste"
+  },
+  "emailNotifications": {
+    "title": "Notificações por e-mail",
+    "description": "Receba alertas em tempo real para compromissos e eventos de chamadas por e-mail usando o Brevo.",
+    "enable": "Habilitar notificações por e-mail",
+    "enableHint": "Alterne para começar a receber e-mails de eventos selecionados.",
+    "brevoKey": "Chave de API Brevo",
+    "brevoKeyPlaceholder": "xkeysib-...",
+    "brevoKeyHint": "Obtenha sua chave de API nas configurações de SMTP e API do Brevo.",
+    "recipientEmail": "E-mail do destinatário",
+    "recipientEmailHint": "Endereço para onde as notificações serão enviadas.",
+    "senderName": "Nome do remetente",
+    "senderEmail": "E-mail do remetente",
+    "notificationEvents": "Eventos de notificação",
+    "save": "Salvar configuração de e-mail",
+    "sendTest": "Enviar e-mail de teste"
+  },
+  "events": {
+    "inboundCall": {
+      "label": "Chamada recebida recebida",
+      "desc": "Enviado quando uma chamada recebida é iniciada",
+      "short": "Chamada recebida"
+    },
+    "outboundCall": {
+      "label": "Chamada de saída iniciada",
+      "desc": "Enviado quando uma nova chamada é iniciada",
+      "short": "Chamada de saída"
+    },
+    "callCompleted": {
+      "label": "Chamada concluída",
+      "desc": "Enviado quando qualquer chamada termina",
+      "short": "Chamada concluída"
+    },
+    "leadCreated": {
+      "label": "Lead criado",
+      "desc": "Enviado quando um novo lead é adicionado",
+      "short": "Lead criado"
+    },
+    "leadQualified": {
+      "label": "Lead Qualificado",
+      "desc": "Enviado quando a IA qualifica um lead",
+      "short": "Lead Qualificado"
+    },
+    "campaignCompleted": {
+      "label": "Campanha concluída",
+      "desc": "Enviado quando uma campanha termina",
+      "short": "Campanha concluída"
+    },
+    "appointmentBooked": {
+      "label": "consulte agendada",
+      "desc": "Enviado quando um novo compromisso é agendado",
+      "short": "consulte agendada"
+    },
+    "appointmentCanceled": {
+      "label": "Agendamento cancelado",
+      "desc": "Enviado quando um compromisso é cancelado",
+      "short": "Agendamento cancelado"
+    },
+    "callTransferred": {
+      "label": "Chamador transferido",
+      "desc": "Enviado quando um chamador está conectado a uma pessoa",
+      "short": "Chamador transferido"
+    },
+    "transferFailed": {
+      "label": "Falha na transferência",
+      "desc": "Enviado quando não foi possível contatar um humano",
+      "short": "Falha na transferência"
+    }
+  },
+  "billing": {
+    "currentPlanTitle": "Seu plano atual",
+    "currentPlanDescription": "Gerencie sua assinatura e visualize os limites de uso.",
+    "status": "Status:",
+    "expiredOn": "Expirou em:",
+    "expires": "Expira:",
+    "trialPlan": "Plano Trial",
+    "agents": "Agentes",
+    "campaigns": "Campanhas",
+    "leads": "Leads",
+    "calls": "Chamadas",
+    "unlimited": "Ilimitado",
+    "availablePlans": "Planos disponíveis",
+    "currentPlan": "Plano Atual",
+    "upgradePlan": "Plano de atualização",
+    "planAgents": "{count, plural, one {# Agente} other {# Agentes}}",
+    "planCampaigns": "{count, plural, one {# Campanha} other {# Campanhas}}",
+    "planLeads": "{count, plural, one {# Lead} other {# Leads}}",
+    "planCallsUnlimited": "Chamadas ilimitadas (BYOK)",
+    "planCalls": "{count, plural, one {# Chamada/mês} other {# Chamadas/mês}}"
+  },
+  "transactions": {
+    "title": "Histórico de transações",
+    "description": "Veja todos os seus pagamentos de assinaturas anteriores e registros de cobrança.",
+    "date": "Data",
+    "plan": "Plano",
+    "amount": "Quantia",
+    "method": "Método",
+    "status": "Status",
+    "empty": "Nenhuma transação encontrada.",
+    "premiumPlan": "Plano Premium"
+  },
+  "preferences": {
+    "title": "Preferências de operação",
+    "description": "Configurações globais para plataformas e campanhas de chamadas.",
+    "language": "Idioma da interface",
+    "languageHint": "Idioma usado no painel. Aplica-se imediatamente.",
+    "timeFormat": "Formato de hora",
+    "timeFormatHint": "Escolha entre o formato de relógio de 12 horas (AM/PM) ou 24 horas.",
+    "selectFormat": "Selecione o formato",
+    "hour12": "12 horas",
+    "hour24": "24 horas",
+    "timeZone": "Fuso horário",
+    "timeZoneHint": "Fuso horário para compromissos e disponibilidade (por exemplo, América/Nova_Iorque).",
+    "selectTimeZone": "Selecione o fuso horário",
+    "callSettings": "Configurações de chamada",
+    "callRecording": "Gravação de chamadas",
+    "callRecordingHint": "Grave automaticamente todas as chamadas via Twilio.",
+    "autoAnalysis": "Análise Automática de Chamadas",
+    "autoAnalysisHint": "Gere automaticamente resumo e qualificação de IA após cada chamada.",
+    "autoHangup": "Desligamento automático",
+    "immediateHangup": "Desligamento imediato",
+    "autoHangupHint": "Encerre sessões de chamada automaticamente após um período definido.",
+    "incomingTimeout": "Tempo limite de entrada",
+    "outgoingTimeout": "Tempo limite de saída",
+    "immediate": "Imediato",
+    "minutesAbbrev": "min",
+    "hangupHint": "As chamadas que excederem a respectiva duração serão encerradas automaticamente.",
+    "apply": "Aplicar preferências"
+  },
+  "asterisk": {
+    "title": "Asterisk / Mecanismo SIP",
+    "description": "Status do servidor Asterisk PBX para chamadas baseadas em SIP.",
+    "connected": "Conectado",
+    "offline": "Off-line",
+    "activeCalls": "{count, plural, one {# chamada SIP ativa} other {# chamadas SIP ativas}}",
+    "manageTrunks": "Gerenciar troncos SIP"
+  },
+  "payment": {
+    "selectGateway": "Selecione um gateway para continuar",
+    "choosePrompt": "Escolha o método de pagamento de sua preferência para atualizar",
+    "testMode": "Modo de teste",
+    "stripeHint": "Pague com cartões de crédito/débito",
+    "dodoHint": "Métodos de pagamento locais",
+    "razorpayHint": "O portal mais popular da Índia",
+    "noMethods": "Nenhum método de pagamento está disponível no momento. Entre em contato com o suporte.",
+    "legal": "Ao continuar, você concorda com nossos Termos de Serviço e Política de Privacidade. Processado com segurança, criptografado por SSL."
+  }
+}

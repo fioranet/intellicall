@@ -1,0 +1,95 @@
+{
+  "title": "Campagnes",
+  "subtitle": "Orchestrez et suivez vos campagnes d'appels",
+  "view": { "cards": "Cartes", "list": "Liste" },
+  "status": { "idle": "Inactive", "scheduled": "Planifiée", "running": "En cours", "completed": "Terminée", "stopped": "Arrêtée" },
+  "card": {
+    "created": "Créée le {date}", "agent": "Agent IA", "deletedAgent": "Agent supprimé",
+    "totalLeads": "Prospects au total", "duplicateTitle": "Dupliquer la campagne", "deleteTitle": "Supprimer la campagne",
+    "active": "Active", "done": "Terminée", "start": "Démarrer"
+  },
+  "table": {
+    "name": "Nom de la campagne", "agent": "Agent", "leads": "Prospects",
+    "status": "Statut", "createdAt": "Date de création", "actions": "Actions",
+    "details": "Détails", "duplicate": "Dupliquer", "delete": "Supprimer"
+  },
+  "empty": {
+    "title": "Aucune campagne pour le moment",
+    "description": "Vous n'avez pas encore créé de campagne. Créez la première pour commencer à contacter vos prospects."
+  },
+  "selection": {
+    "count": "{count, plural, one {# campagne sélectionnée} other {# campagnes sélectionnées}}",
+    "deselectAll": "Tout désélectionner", "deleteSelected": "Supprimer la sélection"
+  },
+  "create": {
+    "trigger": "Créer une campagne", "title": "Créer une nouvelle campagne",
+    "description": "Configurez une nouvelle campagne d'appels avec un agent IA et des prospects.",
+    "nameLabel": "Nom de la campagne", "namePlaceholder": "Campagne commerciale T1",
+    "agentLabel": "Sélectionner un agent", "agentPlaceholder": "Choisissez un agent",
+    "scheduleLater": "Planifier pour plus tard", "dateTimeLabel": "Date et heure",
+    "selectLeads": "Sélectionner des prospects ({count} sélectionnés)",
+    "addByTag": "Ajouter par étiquette", "noTags": "Aucune étiquette disponible",
+    "selectAll": "Tout sélectionner", "searchLeads": "Rechercher des prospects...",
+    "noLeadsFound": "Aucun prospect trouvé", "creating": "Création..."
+  },
+  "toast": {
+    "loadFailed": "Échec du chargement des campagnes",
+    "noProvider": "Aucun fournisseur d'appels configuré. Configurez Twilio ou un trunk SIP dans les Paramètres.",
+    "missingKeys": "Les clés Deepgram ou du modèle sont manquantes. Les appels risquent d'échouer.",
+    "started": "Campagne démarrée avec succès",
+    "startFailed": "Échec du démarrage de la campagne",
+    "duplicated": "Campagne dupliquée",
+    "duplicateFailed": "Échec de la duplication de la campagne",
+    "deleted": "Campagne supprimée avec succès",
+    "deleteFailed": "Échec de la suppression de la campagne",
+    "bulkDeleted": "Campagnes supprimées avec succès",
+    "bulkDeleteFailed": "Échec de la suppression des campagnes",
+    "loadDataFailed": "Échec du chargement des données initiales",
+    "selectAgent": "Veuillez sélectionner un agent",
+    "selectLead": "Veuillez sélectionner au moins un prospect",
+    "statsFailed": "Échec du chargement des statistiques de la campagne",
+    "sequenceStarted": "Séquence de campagne démarrée",
+    "stopping": "Arrêt de la campagne...",
+    "stopped": "Campagne arrêtée avec succès",
+    "stopFailed": "Échec de l'arrêt de la campagne"
+  },
+  "detail": {
+    "createdOn": "Créée le {date}", "stop": "Arrêter la campagne",
+    "scheduledFor": "Planifiée pour le {date}", "start": "Démarrer la campagne",
+    "totalLeads": "Prospects au total", "completed": "Terminés",
+    "avgDuration": "Durée moyenne", "successRate": "Taux de réussite",
+    "tabs": { "activity": "Activité en direct", "leads": "Prospects de la campagne", "agent": "Détails de l'agent" },
+    "activity": {
+      "title": "Opérations actives",
+      "description": "Statut d'exécution en temps réel et suivi de progression",
+      "activeCall": "Appel en cours", "status": "Statut",
+      "talking": "En conversation", "ringing": "Sonnerie", "queued": "En file d'attente",
+      "queue": "File d'attente", "live": "EN DIRECT",
+      "emptyTitle": "Aucune opération active",
+      "emptyDescription": "Démarrez la campagne pour voir l'activité en temps réel",
+      "completion": "Achèvement global de la campagne",
+      "processed": "{count} contacts traités", "remaining": "{count} restants"
+    },
+    "summary": {
+      "title": "Résumé de la session",
+      "description": "Indicateurs clés de la fenêtre d'exécution actuelle",
+      "handledBy": "Géré par", "voiceEngine": "Moteur vocal",
+      "elevenLabs": "ElevenLabs AI", "standard": "Standard",
+      "personaVoice": "Voix du persona", "totalCalls": "Appels au total", "avgPulse": "Cadence moyenne"
+    },
+    "contacts": {
+      "title": "Liste de contacts",
+      "description": "Liste complète de tous les prospects participant à cette campagne",
+      "totalTargets": "{count} CIBLES AU TOTAL",
+      "leadProfile": "Profil du prospect", "executionStatus": "Statut d'exécution",
+      "callMetrics": "Indicateurs d'appel", "waiting": "EN ATTENTE..."
+    },
+    "agent": {
+      "title": "Configuration de l'agent",
+      "description": "Détails de configuration de l'agent IA en charge de cette campagne",
+      "selected": "Agent sélectionné", "openingMessage": "Message d'ouverture",
+      "instructions": "Instructions IA",
+      "instructionsHint": "Les instructions comportementales et la base de connaissances de l'agent"
+    }
+  }
+}

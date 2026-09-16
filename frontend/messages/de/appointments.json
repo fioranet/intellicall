@@ -1,0 +1,40 @@
+{
+  "title": "Termine",
+  "subtitle": "Verwalten Sie geplante Sitzungen und legen Sie Ihre Verfügbarkeit fest.",
+  "tabs": { "appointments": "Termine", "availability": "Verfügbarkeit & Zeitfenster" },
+  "card": {
+    "client": "Kunde", "agent": "Agent: {name}", "deletedAgent": "Gelöschter Agent",
+    "complete": "Abschließen", "cancel": "Absagen", "edit": "Bearbeiten"
+  },
+  "table": {
+    "dateTime": "Datum & Uhrzeit", "lead": "Lead", "phone": "Telefon",
+    "agent": "Agent", "status": "Status", "actions": "Aktionen",
+    "editTitle": "Termin bearbeiten", "completeTitle": "Als abgeschlossen markieren",
+    "cancelTitle": "Termin absagen", "empty": "Keine Termine gefunden."
+  },
+  "edit": {
+    "trigger": "Bearbeiten", "title": "Termin bearbeiten",
+    "description": "Aktualisieren Sie die Termindetails. Änderungen werden mit Google Kalender synchronisiert, sofern verbunden.",
+    "dateTimeLabel": "Datum & Uhrzeit", "durationLabel": "Dauer (Minuten)",
+    "clientNameLabel": "Kundenname", "clientNamePlaceholder": "Erika Mustermann",
+    "phoneLabel": "Telefon", "notesLabel": "Notizen",
+    "notesPlaceholder": "Optionale Notizen zu diesem Termin", "save": "Änderungen speichern"
+  },
+  "availability": {
+    "title": "Arbeitszeiten",
+    "description": "Legen Sie Ihre verfügbaren Zeitfenster für die Woche fest.",
+    "save": "Änderungen speichern", "noSlots": "Keine Verfügbarkeit festgelegt", "addSlot": "Zeitfenster hinzufügen"
+  },
+  "toast": {
+    "loadFailed": "Termine konnten nicht geladen werden",
+    "statusUpdated": "Termin {status}",
+    "statusFailed": "Status konnte nicht aktualisiert werden",
+    "pickDateTime": "Bitte wählen Sie Datum und Uhrzeit",
+    "invalidDateTime": "Ungültiges Datum / ungültige Uhrzeit",
+    "updated": "Termin aktualisiert",
+    "updateFailed": "Termin konnte nicht aktualisiert werden",
+    "slotsLoadFailed": "Verfügbarkeitszeitfenster konnten nicht geladen werden",
+    "availabilityUpdated": "Verfügbarkeit erfolgreich aktualisiert",
+    "availabilityFailed": "Verfügbarkeit konnte nicht gespeichert werden"
+  }
+}

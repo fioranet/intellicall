@@ -1,0 +1,95 @@
+{
+  "title": "Kampagnen",
+  "subtitle": "Steuern und überwachen Sie Ihre Anrufkampagnen",
+  "view": { "cards": "Karten", "list": "Liste" },
+  "status": { "idle": "Inaktiv", "scheduled": "Geplant", "running": "Läuft", "completed": "Abgeschlossen", "stopped": "Gestoppt" },
+  "card": {
+    "created": "Erstellt am {date}", "agent": "KI-Agent", "deletedAgent": "Gelöschter Agent",
+    "totalLeads": "Leads gesamt", "duplicateTitle": "Kampagne duplizieren", "deleteTitle": "Kampagne löschen",
+    "active": "Aktiv", "done": "Fertig", "start": "Starten"
+  },
+  "table": {
+    "name": "Kampagnenname", "agent": "Agent", "leads": "Leads",
+    "status": "Status", "createdAt": "Erstellt am", "actions": "Aktionen",
+    "details": "Details", "duplicate": "Duplizieren", "delete": "Löschen"
+  },
+  "empty": {
+    "title": "Noch keine Kampagnen",
+    "description": "Sie haben noch keine Kampagne erstellt. Legen Sie die erste an, um Ihre Leads zu kontaktieren."
+  },
+  "selection": {
+    "count": "{count, plural, one {# Kampagne ausgewählt} other {# Kampagnen ausgewählt}}",
+    "deselectAll": "Auswahl aufheben", "deleteSelected": "Auswahl löschen"
+  },
+  "create": {
+    "trigger": "Kampagne erstellen", "title": "Neue Kampagne erstellen",
+    "description": "Richten Sie eine neue Anrufkampagne mit einem KI-Agenten und Leads ein.",
+    "nameLabel": "Kampagnenname", "namePlaceholder": "Vertriebskampagne Q1",
+    "agentLabel": "Agent auswählen", "agentPlaceholder": "Agent wählen",
+    "scheduleLater": "Für später planen", "dateTimeLabel": "Datum & Uhrzeit",
+    "selectLeads": "Leads auswählen ({count} ausgewählt)",
+    "addByTag": "Nach Tag hinzufügen", "noTags": "Keine Tags verfügbar",
+    "selectAll": "Alle auswählen", "searchLeads": "Leads suchen...",
+    "noLeadsFound": "Keine Leads gefunden", "creating": "Wird erstellt..."
+  },
+  "toast": {
+    "loadFailed": "Kampagnen konnten nicht geladen werden",
+    "noProvider": "Kein Anrufanbieter konfiguriert. Richten Sie Twilio oder einen SIP-Trunk in den Einstellungen ein.",
+    "missingKeys": "Deepgram- oder Modell-Schlüssel fehlen. Anrufe könnten fehlschlagen.",
+    "started": "Kampagne erfolgreich gestartet",
+    "startFailed": "Kampagne konnte nicht gestartet werden",
+    "duplicated": "Kampagne dupliziert",
+    "duplicateFailed": "Kampagne konnte nicht dupliziert werden",
+    "deleted": "Kampagne erfolgreich gelöscht",
+    "deleteFailed": "Kampagne konnte nicht gelöscht werden",
+    "bulkDeleted": "Kampagnen erfolgreich gelöscht",
+    "bulkDeleteFailed": "Kampagnen konnten nicht gelöscht werden",
+    "loadDataFailed": "Ausgangsdaten konnten nicht geladen werden",
+    "selectAgent": "Bitte wählen Sie einen Agenten aus",
+    "selectLead": "Bitte wählen Sie mindestens einen Lead aus",
+    "statsFailed": "Kampagnenstatistiken konnten nicht geladen werden",
+    "sequenceStarted": "Kampagnensequenz gestartet",
+    "stopping": "Kampagne wird gestoppt...",
+    "stopped": "Kampagne erfolgreich gestoppt",
+    "stopFailed": "Kampagne konnte nicht gestoppt werden"
+  },
+  "detail": {
+    "createdOn": "Erstellt am {date}", "stop": "Kampagne stoppen",
+    "scheduledFor": "Geplant für {date}", "start": "Kampagne starten",
+    "totalLeads": "Leads gesamt", "completed": "Abgeschlossen",
+    "avgDuration": "Ø Dauer", "successRate": "Erfolgsquote",
+    "tabs": { "activity": "Live-Aktivität", "leads": "Kampagnen-Leads", "agent": "Agentendetails" },
+    "activity": {
+      "title": "Aktive Vorgänge",
+      "description": "Ausführungsstatus in Echtzeit und Fortschrittsverfolgung",
+      "activeCall": "Aktiver Anruf", "status": "Status",
+      "talking": "Im Gespräch", "ringing": "Klingelt", "queued": "In Warteschlange",
+      "queue": "Warteschlange", "live": "LIVE",
+      "emptyTitle": "Keine aktiven Vorgänge",
+      "emptyDescription": "Starten Sie die Kampagne, um Aktivität in Echtzeit zu sehen",
+      "completion": "Gesamtfortschritt der Kampagne",
+      "processed": "{count} Kontakte verarbeitet", "remaining": "{count} verbleibend"
+    },
+    "summary": {
+      "title": "Sitzungsübersicht",
+      "description": "Kennzahlen des aktuellen Ausführungsfensters",
+      "handledBy": "Bearbeitet von", "voiceEngine": "Sprach-Engine",
+      "elevenLabs": "ElevenLabs AI", "standard": "Standard",
+      "personaVoice": "Persona-Stimme", "totalCalls": "Anrufe gesamt", "avgPulse": "Ø Taktung"
+    },
+    "contacts": {
+      "title": "Kontaktliste",
+      "description": "Vollständige Liste aller Leads, die an dieser Kampagne teilnehmen",
+      "totalTargets": "{count} ZIELE GESAMT",
+      "leadProfile": "Lead-Profil", "executionStatus": "Ausführungsstatus",
+      "callMetrics": "Anrufkennzahlen", "waiting": "WARTET..."
+    },
+    "agent": {
+      "title": "Agentenkonfiguration",
+      "description": "Konfigurationsdetails des KI-Agenten für diese Kampagne",
+      "selected": "Ausgewählter Agent", "openingMessage": "Eröffnungsnachricht",
+      "instructions": "KI-Anweisungen",
+      "instructionsHint": "Die Verhaltensanweisungen und die Wissensdatenbank des Agenten"
+    }
+  }
+}

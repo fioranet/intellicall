@@ -1,0 +1,37 @@
+{
+  "title": "Utilisateurs",
+  "subtitle": "Gérez les utilisateurs du système (administrateurs uniquement)",
+  "accessDenied": {
+    "title": "Accès refusé",
+    "description": "Vous n'avez pas la permission de consulter cette page. Cette section est réservée aux administrateurs."
+  },
+  "empty": {
+    "title": "Aucun utilisateur pour le moment",
+    "description": "Vous n'avez pas encore ajouté d'utilisateur. Créez le premier pour lui donner accès au système."
+  },
+  "table": {
+    "name": "Nom", "email": "E-mail", "role": "Rôle",
+    "sharedAccess": "Accès partagé", "joined": "Inscription",
+    "tags": "Étiquettes :", "agents": "Agents :", "campaigns": "Campagnes :",
+    "unknown": "Inconnu", "none": "Aucun"
+  },
+  "roles": { "admin": "Administrateur", "member": "Membre", "placeholder": "Sélectionnez un rôle" },
+  "create": {
+    "trigger": "Créer un utilisateur", "title": "Créer un nouvel utilisateur",
+    "description": "Ajoutez un nouvel utilisateur au système.",
+    "nameLabel": "Nom", "namePlaceholder": "Jean Dupont",
+    "emailLabel": "E-mail", "passwordLabel": "Mot de passe", "roleLabel": "Rôle"
+  },
+  "edit": {
+    "title": "Modifier l'utilisateur : {name}",
+    "description": "Mettez à jour le rôle et gérez les ressources partagées.",
+    "roleLabel": "Rôle",
+    "sharedTags": "Étiquettes partagées (accès aux prospects)",
+    "noTags": "Aucune étiquette trouvée dans les prospects",
+    "manualTag": "Ou ajoutez une étiquette manuellement :",
+    "add": "Ajouter",
+    "sharedAgents": "Agents partagés", "noAgents": "Aucun agent disponible",
+    "sharedCampaigns": "Campagnes partagées", "noCampaigns": "Aucune campagne disponible"
+  },
+  "toast": { "created": "Utilisateur créé avec succès !", "updated": "Utilisateur mis à jour avec succès !" }
+}

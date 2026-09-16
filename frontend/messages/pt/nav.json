@@ -1,0 +1,33 @@
+{
+  "main": {
+    "dashboard": "Dashboard",
+    "leads": "Leads",
+    "phoneNumbers": "Números de telefone",
+    "sipTrunks": "Troncos SIP",
+    "agents": "Agentes de IA",
+    "knowledgeBase": "Base de conhecimento",
+    "campaigns": "Campanhas",
+    "callLogs": "Registros de chamadas",
+    "appointments": "Agenda",
+    "support": "Suporte"
+  },
+  "secondary": {
+    "admin": "Administrador",
+    "settings": "Configurações"
+  },
+  "badge": {
+    "myOpenTickets": "{count, plural, one {# chamado aberto ou em andamento} other {# chamados abertos ou em andamento}}",
+    "pendingTickets": "{count, plural, one {# chamado de suporte pendente} other {# chamados de suporte pendentes}}"
+  },
+  "closeMenu": "Fechar menu",
+  "openMenu": "Abrir menu",
+  "user": {
+    "account": "Minha conta",
+    "settings": "Configurações",
+    "logout": "Sair"
+  },
+  "toast": {
+    "loggedOut": "Desconectado com sucesso"
+  },
+  "pendingTickets": "Tickets de suporte pendentes"
+}

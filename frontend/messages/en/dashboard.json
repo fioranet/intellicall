@@ -1,0 +1,30 @@
+{
+  "title": "Dashboard",
+  "newCampaign": "New Campaign",
+  "overview": {
+    "title": "Overview",
+    "description": "Call volume distribution over the last 7 days.",
+    "callsTooltip": "{count} Calls"
+  },
+  "recentActivity": {
+    "title": "Recent Activity",
+    "description": "Recent system interactions and network responses.",
+    "systemEvent": "System Event",
+    "withAgent": "with {agent}",
+    "inbound": "Inbound",
+    "viewAllLogs": "View all logs"
+  },
+  "counts": {
+    "leads": "Leads",
+    "contacted": "{count} contacted",
+    "uncontacted": "{count} uncontacted",
+    "manageLeads": "Manage Workforce",
+    "agents": "AI Agents",
+    "configureAgents": "Configure Intelligence",
+    "campaigns": "Campaigns",
+    "reviewCampaigns": "Review Operations"
+  },
+  "toast": {
+    "loadFailed": "Failed to load dashboard metrics"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "title": "Support",
+  "subtitle": "Create and manage your support tickets.",
+  "filters": {
+    "status": "Status",
+    "all": "All tickets",
+    "open": "Open",
+    "inProgress": "In progress",
+    "resolved": "Resolved",
+    "closed": "Closed"
+  },
+  "newTicket": "New ticket",
+  "empty": {
+    "title": "No support tickets yet",
+    "description": "Create a ticket to get help from our team."
+  },
+  "create": {
+    "title": "New support ticket",
+    "description": "Describe your issue. Our team will respond as soon as possible.",
+    "subjectLabel": "Subject",
+    "subjectPlaceholder": "Brief summary of your issue",
+    "messageLabel": "Message (optional)",
+    "messagePlaceholder": "Add more details...",
+    "submit": "Create ticket"
+  },
+  "reply": {
+    "placeholder": "Type your reply...",
+    "send": "Send reply"
+  },
+  "toast": {
+    "loadFailed": "Failed to load tickets",
+    "conversationFailed": "Failed to load conversation",
+    "replyFailed": "Failed to send reply",
+    "subjectRequired": "Please enter a subject",
+    "created": "Ticket created",
+    "createFailed": "Failed to create ticket"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "title": "Users",
+  "subtitle": "Manage system users (Admin only)",
+  "accessDenied": {
+    "title": "Access Denied",
+    "description": "You do not have permission to view this page. This section is restricted to administrators only."
+  },
+  "empty": {
+    "title": "No Users Yet",
+    "description": "You haven't added any users yet. Create your first user to give them access to the system."
+  },
+  "table": {
+    "name": "Name",
+    "email": "Email",
+    "role": "Role",
+    "sharedAccess": "Shared Access",
+    "joined": "Joined",
+    "tags": "Tags:",
+    "agents": "Agents:",
+    "campaigns": "Campaigns:",
+    "unknown": "Unknown",
+    "none": "None"
+  },
+  "roles": {
+    "admin": "Admin",
+    "member": "Member",
+    "placeholder": "Select a role"
+  },
+  "create": {
+    "trigger": "Create User",
+    "title": "Create New User",
+    "description": "Add a new user to the system.",
+    "nameLabel": "Name",
+    "namePlaceholder": "John Doe",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "roleLabel": "Role"
+  },
+  "edit": {
+    "title": "Edit User: {name}",
+    "description": "Update role and manage shared resources.",
+    "roleLabel": "Role",
+    "sharedTags": "Shared Tags (Leads Access)",
+    "noTags": "No tags found in leads",
+    "manualTag": "Or manually add tag:",
+    "add": "Add",
+    "sharedAgents": "Shared Agents",
+    "noAgents": "No agents available",
+    "sharedCampaigns": "Shared Campaigns",
+    "noCampaigns": "No campaigns available"
+  },
+  "toast": {
+    "created": "User created successfully!",
+    "updated": "User updated successfully!"
+  }
+}

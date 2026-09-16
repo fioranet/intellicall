@@ -1,0 +1,82 @@
+{
+  "title": "Knowledge Base",
+  "subtitle": "Store and manage business information for your AI agents",
+  "create": {
+    "trigger": "Create Knowledge Base",
+    "manual": "Enter manually",
+    "fromWebsite": "From website"
+  },
+  "view": {
+    "cards": "Cards",
+    "list": "List"
+  },
+  "badges": {
+    "basicInfo": "Basic Info",
+    "faqs": "{count, plural, one {# FAQ} other {# FAQs}}",
+    "faqsLabel": "FAQs",
+    "otherInfo": "Other Info"
+  },
+  "card": {
+    "fallbackDescription": "Contains business specific data for AI agents.",
+    "created": "Created {date}",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "table": {
+    "name": "KB Name",
+    "sections": "Sections",
+    "faqs": "FAQs",
+    "createdAt": "Created At",
+    "actions": "Actions",
+    "items": "{count, plural, one {# item} other {# items}}"
+  },
+  "empty": {
+    "title": "No Knowledge Bases Yet",
+    "description": "Store business information, FAQs, and more to give your AI agents extra context."
+  },
+  "dialog": {
+    "editTitle": "Edit Knowledge Base",
+    "createTitle": "Create Knowledge Base",
+    "description": "Store reusable information that your AI agents can use during calls.",
+    "importNotes": "Import notes",
+    "nameLabel": "Knowledge Base Name",
+    "namePlaceholder": "e.g. Company General Info",
+    "descriptionLabel": "Description (Internal)",
+    "descriptionPlaceholder": "Brief description of what this info covers",
+    "basicInfoLabel": "Basic Information",
+    "basicInfoPlaceholder": "Describe your business, services, office hours, etc.",
+    "faqsLabel": "Frequently Asked Questions (FAQs)",
+    "addFaq": "Add FAQ",
+    "questionLabel": "Question {number}",
+    "questionPlaceholder": "e.g. What is your refund policy?",
+    "answerLabel": "Answer",
+    "answerPlaceholder": "e.g. We offer a 30-day money back guarantee...",
+    "noFaqs": "No FAQs added yet. Click \"Add FAQ\" to begin.",
+    "otherInfoLabel": "Other Information",
+    "otherInfoPlaceholder": "Any additional context, pricing tables, or specialized knowledge...",
+    "updating": "Updating...",
+    "creating": "Creating...",
+    "save": "Save Knowledge Base",
+    "create": "Create Knowledge Base"
+  },
+  "fromWebsite": {
+    "title": "Import from website",
+    "description": "We will fetch the page and use AI to suggest basic info, FAQs, and other fields. Results depend on the site; always review before saving. Requires an OpenRouter API key in Settings.",
+    "urlLabel": "Website URL",
+    "generating": "Generating…",
+    "generate": "Generate draft"
+  },
+  "toast": {
+    "loadFailed": "Failed to load knowledge bases",
+    "deleted": "Knowledge Base deleted successfully",
+    "deleteFailed": "Failed to delete knowledge base",
+    "updated": "Knowledge Base updated successfully!",
+    "created": "Knowledge Base created successfully!",
+    "generic": "Something went wrong",
+    "urlRequired": "Please enter a website URL",
+    "urlInvalid": "Please enter a valid URL (e.g. https://example.com)",
+    "urlScheme": "Only http and https URLs are allowed",
+    "draftFailed": "Could not generate draft",
+    "draftReady": "Draft ready — review and save your knowledge base"
+  }
+}

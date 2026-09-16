@@ -1,0 +1,100 @@
+{
+  "title": "Contactos",
+  "subtitle": "Gestión centralizada de tus {count} contactos y clientes potenciales.",
+  "searchPlaceholder": "Buscar por nombre o teléfono...",
+  "filter": {
+    "button": "Filtrar", "withCount": "Etiquetas ({count})", "byTags": "Filtrar por etiquetas",
+    "noTags": "Aún no se han creado etiquetas", "columns": "Columnas",
+    "visibleFields": "Campos visibles", "clear": "Limpiar"
+  },
+  "empty": {
+    "noMatchTitle": "No se encontraron contactos",
+    "noMatchDescription": "Ningún contacto coincide con tu búsqueda o filtros de etiquetas actuales.",
+    "clearFilters": "Borrar todos los filtros",
+    "noLeadsTitle": "Aún no hay contactos",
+    "noLeadsDescription": "Todavía no has añadido contactos. Empieza añadiendo el primero o importando desde CSV."
+  },
+  "table": {
+    "name": "Nombre", "phone": "Teléfono", "tags": "Etiquetas", "addedOn": "Fecha de alta",
+    "addTag": "Añadir etiqueta", "actions": "Acciones",
+    "editRecord": "Editar registro", "removeLead": "Eliminar contacto"
+  },
+  "selection": {
+    "count": "{count, plural, one {# contacto seleccionado} other {# contactos seleccionados}}",
+    "deselectAll": "Deseleccionar todo", "manageTags": "Gestionar etiquetas",
+    "editRecord": "Editar registro", "deleteSelected": "Eliminar seleccionados"
+  },
+  "add": {
+    "trigger": "Añadir contacto", "title": "Añadir nuevo contacto",
+    "description": "Introduce los datos del contacto. Pulsa guardar cuando termines.",
+    "nameLabel": "Nombre", "namePlaceholder": "Juan Pérez", "phoneLabel": "Teléfono",
+    "tagsLabel": "Etiquetas (separadas por comas)", "tagsPlaceholder": "cliente, alta-prioridad, vip"
+  },
+  "edit": {
+    "title": "Editar contacto",
+    "description": "Actualiza los datos del contacto. Pulsa guardar cuando termines.",
+    "nameLabel": "Nombre", "namePlaceholder": "Juan Pérez", "phoneLabel": "Teléfono",
+    "tagsLabel": "Etiquetas (separadas por comas)", "tagsPlaceholder": "cliente, alta-prioridad, vip"
+  },
+  "bulkTag": {
+    "title": "Añadir etiquetas en bloque",
+    "description": "{count, plural, one {Añadir etiquetas a # contacto seleccionado.} other {Añadir etiquetas a # contactos seleccionados.}}",
+    "tagsLabel": "Etiquetas (separadas por comas)", "tagsPlaceholder": "prioridad, seguimiento, q1"
+  },
+  "customFields": {
+    "title": "Campos personalizados (opcional)", "addField": "Añadir campo",
+    "namePlaceholder": "Nombre del campo (p. ej. fecha_cita)",
+    "valuePlaceholder": "Valor (p. ej. 10 de julio a las 15:00)"
+  },
+  "importCsv": {
+    "trigger": "Importar CSV", "title": "Importar contactos desde CSV",
+    "description": "Sube un archivo CSV con las columnas: name, phone, company (opcional)",
+    "fileLabel": "Archivo CSV", "selected": "Seleccionado:",
+    "tagsLabel": "Añadir etiquetas a todos (separadas por comas)",
+    "tagsPlaceholder": "contactos-nuevos, campana-1"
+  },
+  "toast": {
+    "fetchFailed": "No se pudieron obtener los contactos",
+    "deleted": "Contactos eliminados correctamente",
+    "deleteFailed": "No se pudieron eliminar los contactos",
+    "added": "¡Contacto añadido correctamente!",
+    "addFailed": "No se pudo añadir el contacto",
+    "updated": "¡Contacto actualizado correctamente!",
+    "updateFailed": "No se pudo actualizar el contacto",
+    "tagRequired": "Introduce al menos una etiqueta",
+    "tagsAdded": "{count, plural, one {Etiquetas añadidas a # contacto} other {Etiquetas añadidas a # contactos}}",
+    "tagsFailed": "No se pudieron añadir las etiquetas",
+    "selectCsv": "Selecciona un archivo CSV",
+    "noValidLeads": "No se encontraron contactos válidos en el CSV",
+    "imported": "{count, plural, one {¡# contacto importado correctamente!} other {¡# contactos importados correctamente!}}",
+    "importFailed": "No se pudieron importar los contactos",
+    "parseError": "Error al analizar el CSV: {message}",
+    "quickSyncFailed": "La sincronización rápida falló",
+    "syncFailed": "No se pudieron sincronizar los contactos",
+    "sheetsDisconnected": "Google Sheets desconectado",
+    "disconnectFailed": "No se pudo desconectar",
+    "fetchSheetsFailed": "No se pudieron obtener las hojas",
+    "userNotFound": "Usuario no encontrado. Inicia sesión de nuevo."
+  },
+  "googleSheets": {
+    "syncing": "Sincronizando...", "defaultLabel": "Google Sheets",
+    "title": "Sincronización con Google Sheets",
+    "description": "Importa y mantén tus contactos sincronizados con Google Sheets.",
+    "connectTitle": "Conectar Google Sheets",
+    "connectDescription": "Conecta tu cuenta para importar contactos directamente desde tus hojas de cálculo y mantenerlos sincronizados.",
+    "connectNow": "Conectar ahora", "quickSyncReady": "Sincronización rápida lista",
+    "lastSynced": "Última sincronización: {date}",
+    "previouslyConnected": "Conectado anteriormente a <b>{sheet}</b>. Los contactos nuevos se añadirán automáticamente y los existentes se omitirán.",
+    "syncNow": "Sincronizar contactos nuevos ahora",
+    "orStartFresh": "O empezar de cero", "selectSpreadsheet": "Selecciona una hoja de cálculo",
+    "selectSheet": "Selecciona la hoja (nombre de pestaña)", "chooseSheet": "Elige una hoja",
+    "configureMapping": "Configurar asignación de columnas", "back": "Atrás",
+    "mappingHint": "Escribe los nombres de columna exactamente como aparecen en los encabezados (fila 1).",
+    "nameColumn": "Columna de nombre", "namePlaceholder": "p. ej. Nombre completo",
+    "phoneColumn": "Columna de teléfono", "phonePlaceholder": "p. ej. Número de teléfono",
+    "companyColumn": "Empresa (opcional)", "companyPlaceholder": "p. ej. Empresa",
+    "saveForQuickSync": "Guardar estos ajustes para la sincronización rápida de un clic",
+    "initialSync": "Realizar sincronización inicial",
+    "connectedToGoogle": "Conectado a Google", "disconnect": "Desconectar cuenta"
+  }
+}

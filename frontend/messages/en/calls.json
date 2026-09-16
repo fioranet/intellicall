@@ -1,0 +1,93 @@
+{
+  "title": "Call Logs",
+  "subtitle": "Comprehensive history of all AI telephonic interactions.",
+  "filters": {
+    "qualification": "Qualification",
+    "allLeads": "All Leads",
+    "qualified": "Qualified",
+    "unqualified": "Unqualified",
+    "direction": "Direction",
+    "allDirections": "All Directions",
+    "inbound": "Inbound",
+    "outbound": "Outbound",
+    "campaign": "Campaign",
+    "allCampaigns": "All Campaigns",
+    "refresh": "Refresh",
+    "export": "Export"
+  },
+  "table": {
+    "lead": "Lead",
+    "context": "Context / Agent",
+    "dateTime": "Date & Time",
+    "duration": "Duration",
+    "status": "Status",
+    "score": "AI Score",
+    "recording": "Call Recording",
+    "action": "Action",
+    "noLogs": "No logs found.",
+    "pending": "Pending",
+    "notAvailable": "Not available",
+    "details": "Details"
+  },
+  "detail": {
+    "title": "Call Log Details",
+    "description": "In-depth analysis and complete conversation history.",
+    "tabSummary": "Summary",
+    "tabTranscript": "Transcript",
+    "date": "Date",
+    "time": "Time",
+    "duration": "Duration",
+    "issuesDetected": "Call Issues Detected",
+    "aiIntelligence": "AI Intelligence",
+    "conversationSummary": "Conversation Summary",
+    "score": "AI Score",
+    "estimatedBudget": "Estimated Budget",
+    "timeline": "Timeline",
+    "reasoning": "Logic & Reasoning",
+    "nextSteps": "Recommended Next Steps",
+    "noAnalysis": "No AI analysis available",
+    "noAnalysisHint": "Generating analysis uses OpenRouter to qualify the lead and summarize the dialogue.",
+    "roleAgent": "AI AGENT",
+    "roleLead": "LEAD",
+    "roleSystem": "SYSTEM",
+    "voiceQuality": {
+      "title": "Voice Quality",
+      "turns": "Turns",
+      "interruptions": "Interruptions",
+      "falseVad": "False VAD events",
+      "rtpDrops": "RTP queue drops",
+      "ttsChunks": "TTS chunks",
+      "llmFirstToken": "LLM first token",
+      "ttsFirstText": "TTS first text",
+      "firstAudio": "First audio (avg)",
+      "maxFirstAudio": "First audio (max)"
+    },
+    "transfers": {
+      "title": "Human Transfers",
+      "destination": "Destination",
+      "outcome": "Outcome",
+      "attempt": "Attempt",
+      "ringTime": "Ringing",
+      "talkTime": "With the human",
+      "sipCause": "SIP cause",
+      "status": {
+        "ringing": "Ringing",
+        "connected": "Connected",
+        "completed": "Completed",
+        "busy": "Busy",
+        "no_answer": "No answer",
+        "rejected": "Declined",
+        "unavailable": "Unavailable",
+        "failed": "Failed"
+      }
+    }
+  },
+  "toast": {
+    "analysisComplete": "Analysis complete",
+    "analysisFailed": "Failed to analyze call",
+    "updated": "Logs updated",
+    "fetchFailed": "Failed to fetch call logs",
+    "noExportData": "No data to export",
+    "exported": "Exported successfully"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "title": "الدعم",
+  "subtitle": "أنشئ تذاكر الدعم الخاصة بك وأدرها.",
+  "filters": {
+    "status": "الحالة", "all": "كل التذاكر", "open": "مفتوحة",
+    "inProgress": "قيد التنفيذ", "resolved": "تم حلها", "closed": "مغلقة"
+  },
+  "newTicket": "تذكرة جديدة",
+  "empty": {
+    "title": "لا توجد تذاكر دعم بعد",
+    "description": "أنشئ تذكرة للحصول على مساعدة من فريقنا."
+  },
+  "create": {
+    "title": "تذكرة دعم جديدة",
+    "description": "صِف مشكلتك. سيرد فريقنا في أقرب وقت ممكن.",
+    "subjectLabel": "الموضوع",
+    "subjectPlaceholder": "ملخّص موجز لمشكلتك",
+    "messageLabel": "الرسالة (اختياري)",
+    "messagePlaceholder": "أضف مزيدًا من التفاصيل...",
+    "submit": "إنشاء التذكرة"
+  },
+  "reply": { "placeholder": "اكتب ردّك...", "send": "إرسال الرد" },
+  "toast": {
+    "loadFailed": "تعذّر تحميل التذاكر",
+    "conversationFailed": "تعذّر تحميل المحادثة",
+    "replyFailed": "تعذّر إرسال الرد",
+    "subjectRequired": "يُرجى إدخال موضوع",
+    "created": "تم إنشاء التذكرة",
+    "createFailed": "تعذّر إنشاء التذكرة"
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "title": "Números de teléfono",
+  "subtitle": "Gestiona tus números de Twilio y SIP para campañas salientes y llamadas entrantes.",
+  "addNumber": "Añadir número",
+  "alerts": {
+    "aiNotConfiguredTitle": "Infraestructura de IA no configurada",
+    "aiNotConfiguredBody": "Deepgram, ElevenLabs y OpenRouter son necesarios para que funcionen las llamadas con IA.",
+    "configureAiKeys": "Configurar claves de IA",
+    "twilioNotConfiguredTitle": "Twilio no configurado",
+    "twilioNotConfiguredBody": "Debes configurar tu SID y token de Twilio en Ajustes antes de poder usar números de Twilio.",
+    "configureNow": "Configurar ahora"
+  },
+  "list": {
+    "title": "Números conectados",
+    "description": "Tus números de teléfono vinculados a Twilio o a troncales SIP, listos para campañas salientes y llamadas entrantes.",
+    "emptyTitle": "No hay números conectados",
+    "emptyDescription": "Añade tu primer número de teléfono (Twilio o SIP) para empezar a realizar llamadas de voz con IA."
+  },
+  "table": {
+    "friendlyName": "Nombre descriptivo",
+    "phoneNumber": "Número de teléfono",
+    "provider": "Proveedor",
+    "inboundAgent": "Agente entrante",
+    "testCall": "Llamada de prueba",
+    "actions": "Acciones",
+    "sipTrunk": "Troncal SIP",
+    "twilio": "Twilio",
+    "linked": "Vinculado",
+    "assigned": "Asignado",
+    "fallback": "Alternativo: {number}",
+    "noAgent": "Sin agente asignado",
+    "forwardsTo": "→ Se desvía a {number}",
+    "edit": "Editar",
+    "delete": "Eliminar"
+  },
+  "twilioInfo": {
+    "title": "Llamadas entrantes con Twilio",
+    "body": "Para recibir llamadas entrantes a través de Twilio, apunta el webhook <b>«A Call Comes In»</b> de tu número de Twilio a:",
+    "afterCode": "Una vez configurado, cualquier llamada a tu número será atendida automáticamente por el agente entrante asignado."
+  },
+  "sipInfo": {
+    "title": "Llamadas por troncal SIP",
+    "body": "Para números locales (p. ej. Arabia Saudí +966), crea primero una <b>troncal SIP</b> con las credenciales de tu operador, después añade aquí un número de teléfono y selecciona <b>«Troncal SIP»</b> como proveedor. Las llamadas se enrutarán a través de Asterisk, sin necesidad de Twilio.",
+    "originationBody": "Para recibir <b>llamadas entrantes</b> en números de troncal SIP, configura esto como <b>URI de originación</b> en el panel de tu proveedor:",
+    "manageTrunks": "Gestionar troncales SIP"
+  },
+  "dialog": {
+    "editTitle": "Editar número de teléfono",
+    "createTitle": "Añadir nuevo número de teléfono",
+    "description": "Configura tu número de teléfono, elige un proveedor y asigna un agente entrante.",
+    "providerLabel": "Proveedor",
+    "sipTrunk": "Troncal SIP",
+    "phoneLabel": "Número de teléfono (E.164)",
+    "friendlyNameLabel": "Nombre descriptivo",
+    "friendlyNamePlaceholder": "Línea de ventas - Riad",
+    "sipTrunkLabel": "Troncal SIP",
+    "selectTrunk": "Selecciona una troncal SIP",
+    "noTrunkSelected": "Ninguna troncal seleccionada",
+    "noTrunks": "No se encontraron troncales SIP. Ve a la página de Troncales SIP para crear una primero.",
+    "inboundAgentLabel": "Agente para llamadas entrantes",
+    "selectAgent": "Selecciona un agente para las llamadas entrantes",
+    "noAgentHangUp": "Sin agente (colgar)",
+    "inboundAgentHint": "Las llamadas entrantes a este número serán atendidas por el agente seleccionado.",
+    "fallbackLabel": "Número alternativo",
+    "optional": "(opcional)",
+    "fallbackHint": "Si no se asigna ningún agente, las llamadas entrantes se desviarán a este número en lugar de colgarse."
+  },
+  "toast": {
+    "loadFailed": "No se pudieron cargar los números de teléfono",
+    "removed": "Número de teléfono eliminado",
+    "deleteFailed": "No se pudo eliminar",
+    "sipCallFailed": "La llamada SIP falló",
+    "sipCallInitiated": "Llamada SIP iniciada. Esperando a que el proveedor conecte...",
+    "testCallInitiated": "¡Llamada de prueba iniciada! Comprueba tu teléfono.",
+    "testCallFailed": "No se pudo iniciar la llamada de prueba",
+    "uriCopied": "¡URI de originación copiada!",
+    "updated": "¡Número de teléfono actualizado correctamente!",
+    "added": "¡Número de teléfono añadido correctamente!",
+    "generic": "Algo salió mal"
+  }
+}

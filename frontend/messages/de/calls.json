@@ -1,0 +1,93 @@
+{
+  "title": "Anrufprotokolle",
+  "subtitle": "Vollständiger Verlauf aller telefonischen KI-Interaktionen.",
+  "filters": {
+    "qualification": "Qualifizierung",
+    "allLeads": "Alle Leads",
+    "qualified": "Qualifiziert",
+    "unqualified": "Nicht qualifiziert",
+    "direction": "Richtung",
+    "allDirections": "Alle Richtungen",
+    "inbound": "Eingehend",
+    "outbound": "Ausgehend",
+    "campaign": "Kampagne",
+    "allCampaigns": "Alle Kampagnen",
+    "refresh": "Aktualisieren",
+    "export": "Exportieren"
+  },
+  "table": {
+    "lead": "Lead",
+    "context": "Kontext / Agent",
+    "dateTime": "Datum & Uhrzeit",
+    "duration": "Dauer",
+    "status": "Status",
+    "score": "KI-Score",
+    "recording": "Aufzeichnung",
+    "action": "Aktion",
+    "noLogs": "Keine Protokolle gefunden.",
+    "pending": "Ausstehend",
+    "notAvailable": "Nicht verfügbar",
+    "details": "Details"
+  },
+  "detail": {
+    "title": "Anrufprotokoll-Details",
+    "description": "Detaillierte Analyse und vollständiger Gesprächsverlauf.",
+    "tabSummary": "Zusammenfassung",
+    "tabTranscript": "Transkript",
+    "date": "Datum",
+    "time": "Uhrzeit",
+    "duration": "Dauer",
+    "issuesDetected": "Erkannte Probleme im Anruf",
+    "aiIntelligence": "KI-Auswertung",
+    "conversationSummary": "Gesprächszusammenfassung",
+    "score": "KI-Score",
+    "estimatedBudget": "Geschätztes Budget",
+    "timeline": "Zeitrahmen",
+    "reasoning": "Logik & Begründung",
+    "nextSteps": "Empfohlene nächste Schritte",
+    "noAnalysis": "Keine KI-Analyse verfügbar",
+    "noAnalysisHint": "Die Analyse nutzt OpenRouter, um den Lead zu qualifizieren und das Gespräch zusammenzufassen.",
+    "roleAgent": "KI-AGENT",
+    "roleLead": "LEAD",
+    "roleSystem": "SYSTEM",
+    "voiceQuality": {
+      "title": "Sprachqualität",
+      "turns": "Gesprächszüge",
+      "interruptions": "Unterbrechungen",
+      "falseVad": "Falsche VAD-Ereignisse",
+      "rtpDrops": "RTP-Queue-Verluste",
+      "ttsChunks": "TTS-Abschnitte",
+      "llmFirstToken": "Erstes LLM-Token",
+      "ttsFirstText": "Erster TTS-Text",
+      "firstAudio": "Erstes Audio (Ø)",
+      "maxFirstAudio": "Erstes Audio (max.)"
+    },
+    "transfers": {
+      "title": "Weiterleitungen an Menschen",
+      "destination": "Ziel",
+      "outcome": "Ergebnis",
+      "attempt": "Versuch",
+      "ringTime": "Klingeln",
+      "talkTime": "Mit der Person",
+      "sipCause": "SIP-Ursache",
+      "status": {
+        "ringing": "Klingelt",
+        "connected": "Verbunden",
+        "completed": "Abgeschlossen",
+        "busy": "Besetzt",
+        "no_answer": "Keine Antwort",
+        "rejected": "Abgelehnt",
+        "unavailable": "Nicht erreichbar",
+        "failed": "Fehlgeschlagen"
+      }
+    }
+  },
+  "toast": {
+    "analysisComplete": "Analyse abgeschlossen",
+    "analysisFailed": "Anruf konnte nicht analysiert werden",
+    "updated": "Protokolle aktualisiert",
+    "fetchFailed": "Anrufprotokolle konnten nicht abgerufen werden",
+    "noExportData": "Keine Daten zum Exportieren",
+    "exported": "Erfolgreich exportiert"
+  }
+}

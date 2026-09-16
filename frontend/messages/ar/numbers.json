@@ -1,0 +1,81 @@
+{
+  "title": "أرقام الهاتف",
+  "subtitle": "أدر أرقام Twilio وSIP للحملات الصادرة والمكالمات الواردة.",
+  "addNumber": "إضافة رقم",
+  "alerts": {
+    "aiNotConfiguredTitle": "لم تُهيَّأ بنية الذكاء الاصطناعي",
+    "aiNotConfiguredBody": "يلزم توفّر Deepgram وElevenLabs وOpenRouter لكي تعمل المكالمات بالذكاء الاصطناعي.",
+    "configureAiKeys": "إعداد مفاتيح الذكاء الاصطناعي",
+    "twilioNotConfiguredTitle": "لم تتم تهيئة Twilio",
+    "twilioNotConfiguredBody": "يجب إعداد معرّف Twilio ورمزه في الإعدادات قبل أن تتمكّن من استخدام أرقام Twilio.",
+    "configureNow": "الإعداد الآن"
+  },
+  "list": {
+    "title": "الأرقام المتصلة",
+    "description": "أرقام هاتفك المرتبطة بـ Twilio أو بوصلات SIP، جاهزة للحملات الصادرة والمكالمات الواردة.",
+    "emptyTitle": "لا توجد أرقام متصلة",
+    "emptyDescription": "أضف أول رقم هاتف (Twilio أو SIP) لبدء إجراء مكالمات صوتية بالذكاء الاصطناعي."
+  },
+  "table": {
+    "friendlyName": "الاسم المألوف",
+    "phoneNumber": "رقم الهاتف",
+    "provider": "المزوّد",
+    "inboundAgent": "وكيل المكالمات الواردة",
+    "testCall": "مكالمة اختبارية",
+    "actions": "الإجراءات",
+    "sipTrunk": "وصلة SIP",
+    "twilio": "Twilio",
+    "linked": "مرتبط",
+    "assigned": "معيَّن",
+    "fallback": "الرقم البديل: {number}",
+    "noAgent": "لم يُعيَّن أي وكيل",
+    "forwardsTo": "← يُحوَّل إلى {number}",
+    "edit": "تعديل",
+    "delete": "حذف"
+  },
+  "twilioInfo": {
+    "title": "المكالمات الواردة عبر Twilio",
+    "body": "لاستقبال المكالمات الواردة عبر Twilio، وجّه خطّاف الويب <b>«A Call Comes In»</b> الخاص برقم Twilio إلى:",
+    "afterCode": "بعد التوجيه، ستتم معالجة أي مكالمة إلى رقمك تلقائيًا بواسطة وكيل المكالمات الواردة المعيَّن."
+  },
+  "sipInfo": {
+    "title": "المكالمات عبر وصلة SIP",
+    "body": "بالنسبة للأرقام المحلية (مثل السعودية +966)، أنشئ أولًا <b>وصلة SIP</b> ببيانات اعتماد مشغّلك، ثم أضف رقم هاتف هنا واختر <b>«وصلة SIP»</b> كمزوّد. ستُوجَّه المكالمات عبر Asterisk دون الحاجة إلى Twilio.",
+    "originationBody": "لاستقبال <b>المكالمات الواردة</b> على أرقام وصلات SIP، اضبط هذا بوصفه <b>عنوان الإصدار (Origination URI)</b> في لوحة تحكم مزوّدك:",
+    "manageTrunks": "إدارة وصلات SIP"
+  },
+  "dialog": {
+    "editTitle": "تعديل رقم الهاتف",
+    "createTitle": "إضافة رقم هاتف جديد",
+    "description": "هيّئ رقم هاتفك، واختر مزوّدًا، وعيّن وكيلًا للمكالمات الواردة.",
+    "providerLabel": "المزوّد",
+    "sipTrunk": "وصلة SIP",
+    "phoneLabel": "رقم الهاتف (E.164)",
+    "friendlyNameLabel": "الاسم المألوف",
+    "friendlyNamePlaceholder": "خط المبيعات - الرياض",
+    "sipTrunkLabel": "وصلة SIP",
+    "selectTrunk": "اختر وصلة SIP",
+    "noTrunkSelected": "لم يتم اختيار وصلة",
+    "noTrunks": "لم يتم العثور على وصلات SIP. انتقل إلى صفحة وصلات SIP لإنشاء واحدة أولًا.",
+    "inboundAgentLabel": "وكيل معالجة المكالمات الواردة",
+    "selectAgent": "اختر وكيلًا للمكالمات الواردة",
+    "noAgentHangUp": "بدون وكيل (إنهاء المكالمة)",
+    "inboundAgentHint": "ستتم معالجة المكالمات الواردة إلى هذا الرقم بواسطة الوكيل المحدَّد.",
+    "fallbackLabel": "الرقم البديل",
+    "optional": "(اختياري)",
+    "fallbackHint": "في حال عدم تعيين وكيل، ستُحوَّل المكالمات الواردة إلى هذا الرقم بدلًا من إنهائها."
+  },
+  "toast": {
+    "loadFailed": "تعذّر تحميل أرقام الهاتف",
+    "removed": "تمت إزالة رقم الهاتف",
+    "deleteFailed": "تعذّر الحذف",
+    "sipCallFailed": "فشلت مكالمة SIP",
+    "sipCallInitiated": "تم بدء مكالمة SIP. في انتظار اتصال المزوّد...",
+    "testCallInitiated": "تم بدء المكالمة الاختبارية! تحقّق من هاتفك.",
+    "testCallFailed": "تعذّر بدء المكالمة الاختبارية",
+    "uriCopied": "تم نسخ عنوان الإصدار!",
+    "updated": "تم تحديث رقم الهاتف بنجاح!",
+    "added": "تمت إضافة رقم الهاتف بنجاح!",
+    "generic": "حدث خطأ ما"
+  }
+}

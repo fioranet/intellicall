@@ -1,0 +1,95 @@
+{
+  "title": "الحملات",
+  "subtitle": "نسّق حملات الاتصال لديك وراقبها",
+  "view": { "cards": "بطاقات", "list": "قائمة" },
+  "status": { "idle": "خاملة", "scheduled": "مجدولة", "running": "قيد التشغيل", "completed": "مكتملة", "stopped": "متوقفة" },
+  "card": {
+    "created": "أُنشئت في {date}", "agent": "وكيل الذكاء الاصطناعي", "deletedAgent": "وكيل محذوف",
+    "totalLeads": "إجمالي العملاء المحتملين", "duplicateTitle": "تكرار الحملة", "deleteTitle": "حذف الحملة",
+    "active": "نشطة", "done": "منتهية", "start": "بدء"
+  },
+  "table": {
+    "name": "اسم الحملة", "agent": "الوكيل", "leads": "العملاء المحتملون",
+    "status": "الحالة", "createdAt": "تاريخ الإنشاء", "actions": "الإجراءات",
+    "details": "التفاصيل", "duplicate": "تكرار", "delete": "حذف"
+  },
+  "empty": {
+    "title": "لا توجد حملات بعد",
+    "description": "لم تُنشئ أي حملات بعد. أنشئ حملتك الأولى لبدء التواصل مع العملاء المحتملين."
+  },
+  "selection": {
+    "count": "{count, plural, zero {لم يتم تحديد أي حملة} one {تم تحديد حملة واحدة} two {تم تحديد حملتين} few {تم تحديد # حملات} many {تم تحديد # حملة} other {تم تحديد # حملة}}",
+    "deselectAll": "إلغاء تحديد الكل", "deleteSelected": "حذف المحدَّد"
+  },
+  "create": {
+    "trigger": "إنشاء حملة", "title": "إنشاء حملة جديدة",
+    "description": "أعدّ حملة اتصال جديدة بوكيل ذكاء اصطناعي وعملاء محتملين.",
+    "nameLabel": "اسم الحملة", "namePlaceholder": "حملة مبيعات الربع الأول",
+    "agentLabel": "اختر وكيلًا", "agentPlaceholder": "اختر وكيلًا",
+    "scheduleLater": "الجدولة لوقت لاحق", "dateTimeLabel": "التاريخ والوقت",
+    "selectLeads": "اختر العملاء المحتملين (تم تحديد {count})",
+    "addByTag": "الإضافة حسب الوسم", "noTags": "لا توجد وسوم متاحة",
+    "selectAll": "تحديد الكل", "searchLeads": "ابحث في العملاء المحتملين...",
+    "noLeadsFound": "لم يتم العثور على عملاء محتملين", "creating": "جارٍ الإنشاء..."
+  },
+  "toast": {
+    "loadFailed": "تعذّر تحميل الحملات",
+    "noProvider": "لم يتم إعداد أي مزوّد مكالمات. أعدّ Twilio أو وصلة SIP من الإعدادات.",
+    "missingKeys": "مفاتيح Deepgram أو النموذج مفقودة. قد تفشل المكالمات.",
+    "started": "تم بدء الحملة بنجاح",
+    "startFailed": "تعذّر بدء الحملة",
+    "duplicated": "تم تكرار الحملة",
+    "duplicateFailed": "تعذّر تكرار الحملة",
+    "deleted": "تم حذف الحملة بنجاح",
+    "deleteFailed": "تعذّر حذف الحملة",
+    "bulkDeleted": "تم حذف الحملات بنجاح",
+    "bulkDeleteFailed": "تعذّر حذف الحملات",
+    "loadDataFailed": "تعذّر تحميل البيانات الأولية",
+    "selectAgent": "يُرجى اختيار وكيل",
+    "selectLead": "يُرجى اختيار عميل محتمل واحد على الأقل",
+    "statsFailed": "تعذّر تحميل إحصاءات الحملة",
+    "sequenceStarted": "تم بدء تسلسل الحملة",
+    "stopping": "جارٍ إيقاف الحملة...",
+    "stopped": "تم إيقاف الحملة بنجاح",
+    "stopFailed": "تعذّر إيقاف الحملة"
+  },
+  "detail": {
+    "createdOn": "أُنشئت في {date}", "stop": "إيقاف الحملة",
+    "scheduledFor": "مجدولة في {date}", "start": "بدء الحملة",
+    "totalLeads": "إجمالي العملاء المحتملين", "completed": "المكتملة",
+    "avgDuration": "متوسط المدة", "successRate": "معدّل النجاح",
+    "tabs": { "activity": "النشاط المباشر", "leads": "عملاء الحملة", "agent": "تفاصيل الوكيل" },
+    "activity": {
+      "title": "العمليات النشطة",
+      "description": "حالة التنفيذ الفورية وتتبّع التقدّم",
+      "activeCall": "مكالمة نشطة", "status": "الحالة",
+      "talking": "جارٍ التحدّث", "ringing": "جارٍ الرنين", "queued": "في قائمة الانتظار",
+      "queue": "قائمة الانتظار", "live": "مباشر",
+      "emptyTitle": "لا توجد عمليات نشطة",
+      "emptyDescription": "ابدأ الحملة لعرض النشاط الفوري",
+      "completion": "اكتمال الحملة الكامل",
+      "processed": "تمت معالجة {count} جهة اتصال", "remaining": "{count} متبقية"
+    },
+    "summary": {
+      "title": "ملخّص الجلسة",
+      "description": "المؤشرات الرئيسية لنافذة التنفيذ الحالية",
+      "handledBy": "يديرها", "voiceEngine": "محرّك الصوت",
+      "elevenLabs": "ElevenLabs AI", "standard": "قياسي",
+      "personaVoice": "صوت الشخصية", "totalCalls": "إجمالي المكالمات", "avgPulse": "متوسط الإيقاع"
+    },
+    "contacts": {
+      "title": "قائمة جهات الاتصال",
+      "description": "قائمة شاملة بجميع العملاء المحتملين المشاركين في هذه الحملة",
+      "totalTargets": "{count} هدفًا إجماليًا",
+      "leadProfile": "ملف العميل المحتمل", "executionStatus": "حالة التنفيذ",
+      "callMetrics": "مؤشرات المكالمة", "waiting": "في الانتظار..."
+    },
+    "agent": {
+      "title": "إعدادات الوكيل",
+      "description": "تفاصيل إعداد وكيل الذكاء الاصطناعي المسؤول عن هذه الحملة",
+      "selected": "الوكيل المحدَّد", "openingMessage": "رسالة الافتتاح",
+      "instructions": "تعليمات الذكاء الاصطناعي",
+      "instructionsHint": "تعليمات السلوك وقاعدة المعرفة الخاصة بالوكيل"
+    }
+  }
+}

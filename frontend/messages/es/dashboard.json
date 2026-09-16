@@ -1,0 +1,28 @@
+{
+  "title": "Panel",
+  "newCampaign": "Nueva campaña",
+  "overview": {
+    "title": "Resumen",
+    "description": "Distribución del volumen de llamadas de los últimos 7 días.",
+    "callsTooltip": "{count} llamadas"
+  },
+  "recentActivity": {
+    "title": "Actividad reciente",
+    "description": "Interacciones recientes del sistema y respuestas de red.",
+    "systemEvent": "Evento del sistema",
+    "withAgent": "con {agent}",
+    "inbound": "Entrante",
+    "viewAllLogs": "Ver todos los registros"
+  },
+  "counts": {
+    "leads": "Contactos",
+    "contacted": "{count} contactados",
+    "uncontacted": "{count} sin contactar",
+    "manageLeads": "Gestionar contactos",
+    "agents": "Agentes de IA",
+    "configureAgents": "Configurar inteligencia",
+    "campaigns": "Campañas",
+    "reviewCampaigns": "Revisar operaciones"
+  },
+  "toast": { "loadFailed": "No se pudieron cargar las métricas del panel" }
+}

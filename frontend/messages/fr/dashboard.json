@@ -1,0 +1,28 @@
+{
+  "title": "Tableau de bord",
+  "newCampaign": "Nouvelle campagne",
+  "overview": {
+    "title": "Vue d'ensemble",
+    "description": "Répartition du volume d'appels sur les 7 derniers jours.",
+    "callsTooltip": "{count} appels"
+  },
+  "recentActivity": {
+    "title": "Activité récente",
+    "description": "Interactions système récentes et réponses réseau.",
+    "systemEvent": "Événement système",
+    "withAgent": "avec {agent}",
+    "inbound": "Entrant",
+    "viewAllLogs": "Voir tous les journaux"
+  },
+  "counts": {
+    "leads": "Prospects",
+    "contacted": "{count} contactés",
+    "uncontacted": "{count} non contactés",
+    "manageLeads": "Gérer les prospects",
+    "agents": "Agents IA",
+    "configureAgents": "Configurer l'intelligence",
+    "campaigns": "Campagnes",
+    "reviewCampaigns": "Consulter les opérations"
+  },
+  "toast": { "loadFailed": "Échec du chargement des indicateurs du tableau de bord" }
+}

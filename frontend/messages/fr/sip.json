@@ -1,0 +1,112 @@
+{
+  "title": "Trunks SIP",
+  "subtitle": "Connectez-vous à des opérateurs locaux (STC, Mobily, Zain) ou à tout opérateur compatible SIP.",
+  "actions": {
+    "debug": "Déboguer",
+    "reloadAsterisk": "Recharger Asterisk",
+    "addTrunk": "Ajouter un trunk SIP"
+  },
+  "status": {
+    "connected": "Asterisk connecté",
+    "offline": "Asterisk hors ligne",
+    "activeCalls": "{count, plural, one {# appel SIP actif} other {# appels SIP actifs}}",
+    "trunksConfigured": "{count, plural, one {# trunk configuré} other {# trunks configurés}}"
+  },
+  "list": {
+    "title": "Trunks configurés",
+    "description": "Chaque trunk représente une connexion à un fournisseur SIP. Ajoutez les identifiants de votre opérateur pour commencer à passer des appels.",
+    "emptyTitle": "Aucun trunk SIP configuré",
+    "emptyDescription": "Ajoutez un trunk SIP pour vous connecter à votre opérateur et passer des appels à moindre coût."
+  },
+  "table": {
+    "trunk": "Trunk",
+    "host": "Hôte",
+    "provider": "Fournisseur / Région",
+    "status": "Statut",
+    "lastTest": "Dernier test",
+    "test": "Tester",
+    "actions": "Actions",
+    "port": "{transport} · Port {port}",
+    "never": "Jamais",
+    "edit": "Modifier",
+    "delete": "Supprimer"
+  },
+  "info": {
+    "title": "Fonctionnement des trunks SIP",
+    "body": "Un trunk SIP relie {appName} à votre opérateur télécom (p. ex. STC, Mobily ou Zain en Arabie saoudite, ou des fournisseurs mondiaux comme Telnyx et Bandwidth). Une fois configuré, associez-le à un numéro de téléphone sur la page <b>Numéros de téléphone</b> ; vos agents IA passeront et recevront alors des appels via le trunk, sans Twilio.",
+    "requirements": "<b>Prérequis :</b> Asterisk doit être installé sur votre serveur. Après avoir ajouté ou modifié des trunks, cliquez sur <b>« Recharger Asterisk »</b> pour appliquer la configuration."
+  },
+  "dialog": {
+    "quickSetup": "Configuration rapide",
+    "manual": "Saisir manuellement",
+    "manualHint": "Configurez l'hôte, le port et les identifiants sans utiliser de préréglage.",
+    "nameLabel": "Nom du trunk *",
+    "namePlaceholder": "Ligne professionnelle STC",
+    "providerLabel": "Nom du fournisseur",
+    "providerPlaceholder": "STC, Mobily, Telnyx...",
+    "hostLabel": "Hôte / registrar SIP *",
+    "hostPlaceholder": "sip.stc.com.sa",
+    "portLabel": "Port",
+    "transportLabel": "Transport",
+    "transportPlaceholder": "Sélectionnez le transport",
+    "udp": "UDP (le plus courant)",
+    "tcp": "TCP (fiable)",
+    "tls": "TLS (chiffré)",
+    "transportHint": "Consultez la documentation de votre fournisseur. La plupart utilisent UDP.",
+    "usernameLabel": "Nom d'utilisateur",
+    "passwordLabel": "Mot de passe",
+    "authRealmLabel": "Domaine d'authentification",
+    "authRealmPlaceholder": "sip.fournisseur.com",
+    "ipAuth": "Utiliser l'authentification par IP (effacer identifiant et mot de passe)",
+    "callerIdLabel": "Identifiant d'appelant par défaut",
+    "regionLabel": "Région",
+    "regionPlaceholder": "Arabie saoudite, États-Unis Est...",
+    "codecsLabel": "Codecs",
+    "codecsPlaceholder": "PCMU,PCMA,G729",
+    "codecsHint": "Codecs audio séparés par des virgules",
+    "dialPrefixLabel": "Préfixe de numérotation",
+    "dialPrefixPlaceholder": "999",
+    "dialPrefixHint": "Préfixe technique facultatif ajouté avant le numéro lors de l'appel"
+  },
+  "debug": {
+    "registration": {
+      "registered": "Enregistré",
+      "failed": "Échec d'enregistrement",
+      "missing": "Aucun enregistrement",
+      "pending": "Enregistrement…",
+      "ipAuth": "Auth. par IP",
+      "unknown": "Inconnu"
+    },
+    "title": "Débogage SIP",
+    "description": "Diagnostiquez les problèmes SIP sans accès SSH — les vérifications s'exécutent sur le serveur et les événements d'appel apparaissent ci-dessous.",
+    "tabHealth": "Vérifications",
+    "tabLogs": "Journaux en direct",
+    "rerun": "Relancer",
+    "fix": "Solution :",
+    "trunkStatus": "Statut du trunk dans Asterisk",
+    "noTrunks": "Aucun trunk SIP configuré pour le moment.",
+    "endpointLoaded": "Endpoint chargé dans Asterisk",
+    "endpointNotLoaded": "Endpoint non chargé — les appels échoueront avec « Allocation failed ». Cliquez sur « Recharger Asterisk ».",
+    "endpointUnknown": "Statut de l'endpoint inconnu (CLI indisponible)",
+    "providerReachable": "Fournisseur joignable (qualify OK)",
+    "providerUnreachable": "Fournisseur injoignable — les appels échoueront avec « Allocation failed ». Généralement dû à un transport ou un port incorrect pour ce fournisseur (p. ex. Twilio requiert UDP 5060 ou TLS 5061, pas TCP).",
+    "providerNotQualified": "Fournisseur pas encore qualifié (aucun résultat de ping OPTIONS)",
+    "noContact": "Aucun contact enregistré pour ce trunk dans Asterisk. Cliquez sur « Recharger Asterisk ».",
+    "providerUnknown": "Joignabilité du fournisseur inconnue (CLI indisponible)",
+    "healthFailed": "Impossible de charger les vérifications. Le backend est-il démarré ?",
+    "autoRefresh": "Actualisation automatique toutes les {seconds} s tant que cette vue est ouverte",
+    "clearView": "Effacer la vue",
+    "noEvents": "Aucun événement SIP pour le moment. Passez un appel de test ou rechargez Asterisk — les événements apparaîtront ici."
+  },
+  "toast": {
+    "loadFailed": "Échec du chargement des trunks SIP",
+    "deleted": "Trunk SIP supprimé",
+    "deleteFailed": "Échec de la suppression",
+    "testFailed": "Échec du test",
+    "configWarnings": "Configuration écrite avec des avertissements",
+    "reloadFailed": "Échec du rechargement",
+    "updated": "Trunk SIP mis à jour",
+    "created": "Trunk SIP créé",
+    "saveFailed": "Échec de l'enregistrement du trunk SIP"
+  }
+}

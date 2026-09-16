@@ -1,0 +1,28 @@
+{
+  "title": "لوحة التحكم",
+  "newCampaign": "حملة جديدة",
+  "overview": {
+    "title": "نظرة عامة",
+    "description": "توزيع حجم المكالمات خلال الأيام السبعة الماضية.",
+    "callsTooltip": "{count} مكالمة"
+  },
+  "recentActivity": {
+    "title": "النشاط الأخير",
+    "description": "أحدث تفاعلات النظام واستجابات الشبكة.",
+    "systemEvent": "حدث نظام",
+    "withAgent": "مع {agent}",
+    "inbound": "وارد",
+    "viewAllLogs": "عرض جميع السجلات"
+  },
+  "counts": {
+    "leads": "العملاء المحتملون",
+    "contacted": "{count} تم التواصل معهم",
+    "uncontacted": "{count} لم يتم التواصل معهم",
+    "manageLeads": "إدارة العملاء المحتملين",
+    "agents": "وكلاء الذكاء الاصطناعي",
+    "configureAgents": "إعداد الذكاء",
+    "campaigns": "الحملات",
+    "reviewCampaigns": "مراجعة العمليات"
+  },
+  "toast": { "loadFailed": "تعذّر تحميل مؤشرات لوحة التحكم" }
+}

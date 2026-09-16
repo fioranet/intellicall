@@ -1,0 +1,452 @@
+{
+  "loading": "Loading…",
+  "loadingIntegrations": "Loading integrations…",
+  "connected": "Connected",
+  "disconnect": "Disconnect",
+  "apiAccess": {
+    "title": "API Access",
+    "active": "Active",
+    "description": "Personal API key for calling the {appName} API from n8n, Zapier, or your own scripts — create leads, start campaigns, dial calls.",
+    "regenerate": "Regenerate",
+    "revoke": "Revoke",
+    "generate": "Generate API key",
+    "copyNow": "Copy your API key now — it won't be shown again.",
+    "copy": "Copy",
+    "key": "Key",
+    "created": "Created",
+    "lastUsed": "Last used",
+    "never": "Never",
+    "usage": "Usage",
+    "usageHint": "Send the key in an <code>X-API-Key</code> header with any request. Full endpoint list below.",
+    "reference": "API Reference",
+    "endpointCount": "{count, plural, one {# endpoint} other {# endpoints}}",
+    "referenceIntro": "Base URL <code>{baseUrl}</code> — every endpoint accepts <code>X-API-Key</code>. Responses are <code>{shape}</code> JSON. For <em>receiving</em> events (lead created, call completed, …) use the Webhooks tab or the n8n integration instead.",
+    "required": "required",
+    "copyCurl": "Copy curl command"
+  },
+  "n8n": {
+    "description": "Stream every platform event into n8n workflows and automate with 400+ apps — CRMs, sheets, email, Slack, and more.",
+    "howToTitle": "How to connect",
+    "step1": "1. In your n8n workflow, add a <b>Webhook</b> node with method <code>POST</code> (or import a template below — it already has one).",
+    "step2": "2. Copy the node's <b>Production URL</b> and <b>activate the workflow</b> — or use the Test URL while building.",
+    "step3": "3. Paste the URL here and connect. Events arrive as JSON: <code>{shape}</code>.",
+    "connect": "Connect n8n",
+    "deliveringTo": "Delivering to",
+    "sendTest": "Send test",
+    "templatesTitle": "Workflow templates",
+    "templatesHint": "Download and import into n8n (Workflow menu → Import from File), then follow the sticky note inside each one.",
+    "download": "Download",
+    "newToN8n": "New to n8n? It's a free, self-hostable automation tool —",
+    "events": {
+      "leadCreated": {
+        "label": "Lead created",
+        "description": "New lead added manually, via bulk import, or campaign."
+      },
+      "leadQualified": {
+        "label": "Lead qualified",
+        "description": "AI marks a lead as qualified after analysis."
+      },
+      "callCompleted": {
+        "label": "Call completed",
+        "description": "Call finishes — includes duration, status, recording."
+      },
+      "inboundCall": {
+        "label": "Inbound call",
+        "description": "Incoming call hits the platform."
+      },
+      "outboundCall": {
+        "label": "Outbound call",
+        "description": "Outbound call is placed."
+      },
+      "campaignCompleted": {
+        "label": "Campaign completed",
+        "description": "All calls in a campaign finish."
+      },
+      "appointmentBooked": {
+        "label": "Appointment booked",
+        "description": "Manual or AI-booked appointment is scheduled."
+      },
+      "appointmentCanceled": {
+        "label": "Appointment canceled",
+        "description": "Scheduled appointment is canceled."
+      },
+      "callTransferred": {
+        "label": "Caller transferred",
+        "description": "A caller was connected to a human. SIP calls only."
+      },
+      "transferFailed": {
+        "label": "Transfer failed",
+        "description": "A human could not be reached and the caller stayed with the agent."
+      }
+    },
+    "templates": {
+      "instantCall": {
+        "name": "Instant call on form submit",
+        "description": "Form / webhook fires → the AI calls the prospect within seconds. Needs an API key (see API Access card)."
+      },
+      "callLogToSheets": {
+        "name": "Call log to Google Sheets",
+        "description": "Every completed call appends a row — timestamp, numbers, duration, status."
+      },
+      "leadQualifiedCrm": {
+        "name": "Qualified lead to CRM + notify",
+        "description": "AI qualifies a lead → push it to your CRM and notify the team."
+      }
+    },
+    "urlPlaceholder": "https://your-n8n.app/webhook/intellicall-events"
+  },
+  "slack": {
+    "description": "Get real-time notifications in a Slack channel — lead created, call completed, appointment booked, and more.",
+    "addToSlack": "Add to Slack",
+    "notConfigured": "Slack integration is not configured on this server. Ask the administrator to set",
+    "notConfiguredSuffix": "in the backend environment.",
+    "postingTo": "Posting to",
+    "sendTest": "Send test"
+  },
+  "hubspot": {
+    "title": "HubSpot CRM",
+    "description": "Push every new lead into HubSpot as a contact, matched by phone number — no duplicates.",
+    "connect": "Connect HubSpot",
+    "notConfigured": "HubSpot integration is not configured on this server. Ask the administrator to set",
+    "notConfiguredSuffix": "in the backend environment.",
+    "connectedTo": "Connected to",
+    "syncLeads": "Sync new leads to HubSpot",
+    "syncLeadsHint": "Every lead created in {appName} (manual, bulk import, or campaign) is upserted as a HubSpot contact, matched by phone.",
+    "serviceKeyLabel": "HubSpot service key",
+    "serviceKeyHint": "Create one in HubSpot under Settings → Integrations → Service keys (or Development → Keys → Service keys) with the crm.objects.contacts.read and crm.objects.contacts.write scopes, then paste it here.",
+    "serviceKeyPlaceholder": "pat-na1-…",
+    "serviceKeySave": "Connect",
+    "serviceKeyReplace": "Replace key",
+    "serviceKeyCancel": "Cancel",
+    "serviceKeyDocs": "How to create a service key",
+    "connectedVia": "Connected with a service key ending in {last4}",
+    "connectedViaOAuth": "Connected with the legacy OAuth app",
+    "legacyOAuthTitle": "Legacy OAuth app",
+    "legacyOAuthHint": "HubSpot stopped allowing new public apps on 23 June 2026. This option only works for installs that registered an app before then — everyone else should use a service key."
+  },
+  "googleCalendar": {
+    "title": "Google Calendar",
+    "description": "Mirror every booked appointment to your Google Calendar in real time. Updates and cancellations sync automatically.",
+    "connect": "Connect Google Calendar",
+    "connectedAccount": "Connected account",
+    "syncTarget": "Events sync to your <b>primary</b> calendar.",
+    "primaryAccount": "Primary Google account"
+  },
+  "googleSheets": {
+    "title": "Google Sheets",
+    "description": "Import leads from a Google Sheet and keep them in sync. The dashboard auto-pulls new rows the next time you open the Leads page.",
+    "activeSheet": "Active sheet",
+    "lastSynced": "Last synced",
+    "noSheet": "Account connected, but no sheet selected yet. Click <b>Manage Sync</b> to pick a spreadsheet, sheet, and column mapping.",
+    "manageSync": "Manage Sync",
+    "connect": "Connect Google Sheets"
+  },
+  "toast": {
+    "keyGenerateFailed": "Failed to generate API key",
+    "keyRevoked": "API key revoked",
+    "keyRevokeFailed": "Failed to revoke API key",
+    "keyCopied": "API key copied",
+    "curlCopied": "curl command copied",
+    "n8nUrlRequired": "Paste your n8n webhook URL first",
+    "n8nConnected": "n8n connected",
+    "n8nConnectFailed": "Failed to connect n8n",
+    "n8nDisconnected": "n8n disconnected",
+    "disconnectFailed": "Failed to disconnect",
+    "testSent": "Test event sent — check your n8n executions",
+    "testFailed": "Test failed",
+    "preferenceFailed": "Failed to update preference",
+    "slackConnected": "Slack connected",
+    "slackConnectFailed": "Failed to connect Slack",
+    "userNotFound": "User not found. Please log in again.",
+    "slackDisconnected": "Slack disconnected",
+    "slackTestSent": "Test message sent to #{channel}",
+    "slackTestFailed": "Failed to send test message",
+    "slackDefaultChannel": "channel",
+    "hubspotConnected": "HubSpot connected",
+    "hubspotConnectFailed": "Failed to connect HubSpot",
+    "hubspotDisconnected": "HubSpot disconnected",
+    "calendarConnected": "Google Calendar connected",
+    "calendarConnectFailed": "Failed to connect Google Calendar",
+    "googleOAuthNotConfigured": "Google OAuth is not configured. Add the client ID and secret in Admin → Integrations → Google (or GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET in backend/.env)",
+    "googleOAuthInvalidClientId": "The configured Google client ID is not valid — it must end in .apps.googleusercontent.com. Fix it in Admin → Integrations → Google",
+    "calendarDisconnected": "Google Calendar disconnected",
+    "sheetsConnected": "Google Sheets connected",
+    "sheetsConnectFailed": "Failed to connect Google Sheets",
+    "waCredentialsRequired": "Access token, Phone Number ID, and your WhatsApp number are required",
+    "waConnected": "WhatsApp connected",
+    "waConnectFailed": "Failed to connect WhatsApp",
+    "waDisconnected": "WhatsApp disconnected",
+    "waTestSent": "Test message sent to +{number}",
+    "waTestFailed": "Failed to send test message",
+    "waRecipientUpdated": "Recipient number updated",
+    "waRecipientFailed": "Failed to update recipient",
+    "waTemplateFirst": "Save a template name first — reminders need an approved Meta template",
+    "waRemindersFailed": "Failed to update reminders",
+    "waRemindersSaved": "Reminder settings saved",
+    "waRemindersSaveFailed": "Failed to save reminder settings",
+    "waTemplateNameRequired": "Enter a template name first",
+    "waReminderTestSent": "Test reminder sent to +{number}",
+    "waReminderTestFailed": "Failed to send test reminder",
+    "loadFailed": "Failed to load settings data",
+    "upgraded": "Success! You have been upgraded to the {plan}.",
+    "verifyFailed": "Failed to verify payment. Please contact support.",
+    "saved": "Settings saved successfully!",
+    "saveFailed": "Failed to save settings",
+    "testStarting": "Initiating basic test...",
+    "testCallStarted": "Test call initiated!",
+    "preparingCheckout": "Preparing checkout...",
+    "redirecting": "Redirecting to secure checkout...",
+    "paymentFailed": "Failed to initiate payment",
+    "preparingRazorpay": "Preparing Razorpay checkout...",
+    "verifyingPayment": "Verifying payment...",
+    "planUpgraded": "Success! Plan upgraded to {plan}.",
+    "verificationFailed": "Verification failed",
+    "razorpayFailed": "Failed to initiate Razorpay",
+    "gatewayDemo": "{gateway} payment demo initiated for {plan}",
+    "sendingTestEvent": "Sending {label} test event...",
+    "eventDelivered": "{label} event delivered successfully!",
+    "sendingTestEmail": "Sending {label} test email...",
+    "emailDispatched": "{label} email dispatched successfully!",
+    "regeneratingSecret": "Regenerating secret...",
+    "secretRegenerated": "Webhook secret regenerated!",
+    "regenerateFailed": "Failed to regenerate secret",
+    "paypalFailed": "Failed to initiate PayPal payment",
+    "capturingPayment": "Capturing payment...",
+    "paypalCompleteFailed": "Failed to complete PayPal payment",
+    "hubspotKeySaved": "HubSpot connected",
+    "hubspotKeyFailed": "Could not verify that service key"
+  },
+  "whatsapp": {
+    "description": "Get real-time notifications on your WhatsApp — lead created, call completed, appointment booked, and more. Powered by the Meta WhatsApp Cloud API.",
+    "howToTitle": "How to get credentials",
+    "step1": "1. Create a free app with the <b>WhatsApp</b> product at",
+    "step2": "2. Open <b>WhatsApp > API Setup</b> and copy the access token and Phone Number ID.",
+    "step3": "3. Enter your own WhatsApp number below to receive the alerts (add it as a recipient in API Setup when using Meta's test number).",
+    "tokenLabel": "Access Token",
+    "tokenPlaceholder": "EAAG••••••••••••••••••••••••",
+    "tokenHint": "Use a permanent token (System User) so notifications don't stop after 24 hours.",
+    "phoneIdLabel": "Phone Number ID",
+    "recipientLabel": "Your WhatsApp Number",
+    "connect": "Connect WhatsApp",
+    "sendingTo": "Sending to",
+    "changeRecipient": "Change recipient number",
+    "from": "from",
+    "sendTest": "Send test",
+    "sessionWarning": "WhatsApp only delivers these alerts inside a 24-hour session. Send any message from your WhatsApp to <b>{number}</b> to open (and keep open) the delivery window.",
+    "yourBusinessNumber": "your business number",
+    "remindersTitle": "Appointment reminders for clients",
+    "remindersHint": "Send a WhatsApp reminder to the client's number before their appointment starts.",
+    "templateSetupTitle": "One-time setup: create the message template",
+    "templateSetupIntro": "Reminders are business-initiated, so Meta requires a pre-approved template. In",
+    "metaBusinessManager": "Meta Business Manager",
+    "templateSetupOutro": "create a <b>Utility</b> template (e.g. <code>appointment_reminder</code>) with this body:",
+    "templateBody": "Hi {v1}, this is a friendly reminder about your appointment on {v2} at {v3}. We look forward to speaking with you!",
+    "templateVars": "We fill <b>{v1}</b> = client name, <b>{v2}</b> = date, <b>{v3}</b> = time. Wording is up to you, but keep exactly these 3 variables. Approval usually takes a few minutes.",
+    "templateNameLabel": "Template Name",
+    "templateLanguageLabel": "Template Language",
+    "templateLanguageHint": "Code from the template, e.g. en, en_US, ar.",
+    "sendReminderLabel": "Send Reminder",
+    "saveReminders": "Save reminder settings",
+    "sendReminderTest": "Send test to my number",
+    "leadOptions": {
+      "15": "15 minutes before",
+      "30": "30 minutes before",
+      "60": "1 hour before",
+      "120": "2 hours before",
+      "180": "3 hours before",
+      "720": "12 hours before",
+      "1440": "24 hours before"
+    }
+  },
+  "page": {
+    "title": "Settings",
+    "subtitle": "Configure your account, API credentials, and subscription.",
+    "tabs": {
+      "preferences": "Preferences",
+      "apiKeys": "API Keys",
+      "webhooks": "Webhooks",
+      "email": "Email",
+      "integrations": "Integrations",
+      "billing": "Plan & Billing",
+      "transactions": "Transaction History"
+    }
+  },
+  "credentials": {
+    "title": "Twilio & AI Credentials",
+    "description": "These keys are required to initiate phone calls and power the AI agent.",
+    "twilioSid": "Twilio Account SID",
+    "twilioSidPlaceholder": "ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "twilioToken": "Twilio Auth Token",
+    "openRouter": "OpenRouter API Key",
+    "elevenLabs": "ElevenLabs API Key",
+    "verifying": "Verifying...",
+    "keyErrorSuffix": "Please check your key.",
+    "validKey": "Valid API Key",
+    "deepgram": "Deepgram API Key",
+    "deepgramHint": "Powers speech recognition — and the low-latency \"Deepgram Voice Agent\" engine selectable per agent (which also uses your ElevenLabs voice but needs no OpenRouter key).",
+    "sarvam": "Sarvam AI API Key",
+    "sarvamHint": "Powers the self-contained \"Sarvam AI\" engine for Indian languages (speech, reasoning and voice all on Sarvam). Selectable per agent — needs no other keys.",
+    "gemini": "Gemini API Key",
+    "geminiHint": "Powers the \"Gemini Live\" engine — one Google model hears, thinks and speaks, in 97 languages. Selectable per agent on SIP numbers — needs no other keys."
+  },
+  "webhooks": {
+    "title": "Webhook Configuration",
+    "description": "Receive real-time notifications for events in your application via HTTP POST requests.",
+    "enable": "Enable Webhooks",
+    "enableHint": "Toggle to start sending events to your URL.",
+    "payloadUrl": "Payload URL",
+    "payloadUrlHint": "Events will be sent as JSON POST requests to this URL.",
+    "signingSecret": "Signing Secret",
+    "regenerate": "Regenerate",
+    "signingSecretHint": "Secures your webhook by signing the payload with HMAC-SHA256.",
+    "triggerEvents": "Trigger Events",
+    "save": "Save Webhook Configuration",
+    "sendTest": "Send Test Event"
+  },
+  "emailNotifications": {
+    "title": "Email Notifications",
+    "description": "Receive real-time alerts for appointments and call events via email using Brevo.",
+    "enable": "Enable Email Notifications",
+    "enableHint": "Toggle to start receiving emails for selected events.",
+    "brevoKey": "Brevo API Key",
+    "brevoKeyPlaceholder": "xkeysib-...",
+    "brevoKeyHint": "Get your API key from Brevo SMTP & API settings.",
+    "recipientEmail": "Recipient Email",
+    "recipientEmailHint": "Address where notifications will be sent.",
+    "senderName": "Sender Name",
+    "senderEmail": "Sender Email",
+    "notificationEvents": "Notification Events",
+    "save": "Save Email Configuration",
+    "sendTest": "Send Test Email"
+  },
+  "events": {
+    "inboundCall": {
+      "label": "Inbound Call Received",
+      "desc": "Sent when an inbound call starts",
+      "short": "Inbound Call"
+    },
+    "outboundCall": {
+      "label": "Outbound Call Started",
+      "desc": "Sent when a new outbound call is initiated",
+      "short": "Outbound Call"
+    },
+    "callCompleted": {
+      "label": "Call Completed",
+      "desc": "Sent when any call finishes",
+      "short": "Call Completed"
+    },
+    "leadCreated": {
+      "label": "Lead Created",
+      "desc": "Sent when a new lead is added",
+      "short": "Lead Created"
+    },
+    "leadQualified": {
+      "label": "Lead Qualified",
+      "desc": "Sent when AI qualifies a lead",
+      "short": "Lead Qualified"
+    },
+    "campaignCompleted": {
+      "label": "Campaign Finished",
+      "desc": "Sent when a campaign ends",
+      "short": "Campaign Finished"
+    },
+    "appointmentBooked": {
+      "label": "Appointment Booked",
+      "desc": "Sent when a new appointment is scheduled",
+      "short": "Appointment Booked"
+    },
+    "appointmentCanceled": {
+      "label": "Appointment Canceled",
+      "desc": "Sent when an appointment is canceled",
+      "short": "Appointment Canceled"
+    },
+    "callTransferred": {
+      "label": "Caller Transferred",
+      "desc": "Sent when a caller is connected to a human",
+      "short": "Caller Transferred"
+    },
+    "transferFailed": {
+      "label": "Transfer Failed",
+      "desc": "Sent when a human could not be reached",
+      "short": "Transfer Failed"
+    }
+  },
+  "billing": {
+    "currentPlanTitle": "Your Current Plan",
+    "currentPlanDescription": "Manage your subscription and view usage limits.",
+    "status": "Status:",
+    "expiredOn": "Expired on:",
+    "expires": "Expires:",
+    "trialPlan": "Trial Plan",
+    "agents": "Agents",
+    "campaigns": "Campaigns",
+    "leads": "Leads",
+    "calls": "Calls",
+    "unlimited": "Unlimited",
+    "availablePlans": "Available Plans",
+    "currentPlan": "Current Plan",
+    "upgradePlan": "Upgrade Plan",
+    "planAgents": "{count} Agents",
+    "planCampaigns": "{count} Campaigns",
+    "planLeads": "{count} Leads",
+    "planCallsUnlimited": "Unlimited Calls (BYOK)",
+    "planCalls": "{count} Calls/mo"
+  },
+  "transactions": {
+    "title": "Transaction History",
+    "description": "View all your past subscription payments and billing records.",
+    "date": "Date",
+    "plan": "Plan",
+    "amount": "Amount",
+    "method": "Method",
+    "status": "Status",
+    "empty": "No transactions found.",
+    "premiumPlan": "Premium Plan"
+  },
+  "preferences": {
+    "title": "Operation Preferences",
+    "description": "Global settings for platform and calling campaigns.",
+    "language": "Interface Language",
+    "languageHint": "Language used across the dashboard. Applies immediately.",
+    "timeFormat": "Time Format",
+    "timeFormatHint": "Choose between 12-hour (AM/PM) or 24-hour clock format.",
+    "selectFormat": "Select format",
+    "hour12": "12 Hour",
+    "hour24": "24 Hour",
+    "timeZone": "Time Zone",
+    "timeZoneHint": "Time zone for appointments and availability (e.g. America/New_York).",
+    "selectTimeZone": "Select time zone",
+    "callSettings": "Call Settings",
+    "callRecording": "Call Recording",
+    "callRecordingHint": "Automatically record all phone calls via Twilio.",
+    "autoAnalysis": "Automatic Call Analysis",
+    "autoAnalysisHint": "Automatically generate AI summary and qualification after each call.",
+    "autoHangup": "Auto Hangup",
+    "immediateHangup": "Immediate Hangup",
+    "autoHangupHint": "Automatically terminate call sessions after a set duration.",
+    "incomingTimeout": "Incoming Timeout",
+    "outgoingTimeout": "Outgoing Timeout",
+    "immediate": "Immediate",
+    "minutesAbbrev": "min",
+    "hangupHint": "Calls exceeding their respective duration will be terminated automatically.",
+    "apply": "Apply Preferences"
+  },
+  "asterisk": {
+    "title": "Asterisk / SIP Engine",
+    "description": "Status of the Asterisk PBX server for SIP-based calling.",
+    "connected": "Connected",
+    "offline": "Offline",
+    "activeCalls": "{count, plural, one {# active SIP call} other {# active SIP calls}}",
+    "manageTrunks": "Manage SIP Trunks"
+  },
+  "payment": {
+    "selectGateway": "Select a gateway to continue",
+    "choosePrompt": "Choose your preferred payment method to upgrade to",
+    "testMode": "Test Mode",
+    "stripeHint": "Pay via Credit/Debit Cards",
+    "dodoHint": "Local payment methods",
+    "razorpayHint": "India's most popular gateway",
+    "noMethods": "No payment methods are currently available. Please contact support.",
+    "legal": "By continuing, you agree to our Terms of Service and Privacy Policy. Securely processed, SSL encrypted."
+  }
+}

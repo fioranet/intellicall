@@ -1,0 +1,452 @@
+{
+  "loading": "جارٍ التحميل…",
+  "loadingIntegrations": "جارٍ تحميل التكاملات…",
+  "connected": "متصل",
+  "disconnect": "قطع الاتصال",
+  "apiAccess": {
+    "title": "الوصول إلى الواجهة البرمجية",
+    "active": "نشط",
+    "description": "مفتاح واجهة برمجية شخصي لاستدعاء واجهة {appName} من n8n أو Zapier أو نصوصك البرمجية — لإنشاء العملاء المحتملين وبدء الحملات وإجراء المكالمات.",
+    "regenerate": "إعادة التوليد",
+    "revoke": "إبطال",
+    "generate": "توليد مفتاح واجهة برمجية",
+    "copyNow": "انسخ مفتاحك الآن — لن يُعرض مرة أخرى.",
+    "copy": "نسخ",
+    "key": "المفتاح",
+    "created": "تاريخ الإنشاء",
+    "lastUsed": "آخر استخدام",
+    "never": "مطلقًا",
+    "usage": "طريقة الاستخدام",
+    "usageHint": "أرسل المفتاح في ترويسة <code>X-API-Key</code> مع كل طلب. تجد القائمة الكاملة لنقاط النهاية أدناه.",
+    "reference": "مرجع الواجهة البرمجية",
+    "endpointCount": "{count, plural, zero {لا توجد نقاط نهاية} one {نقطة نهاية واحدة} two {نقطتا نهاية} few {# نقاط نهاية} many {# نقطة نهاية} other {# نقطة نهاية}}",
+    "referenceIntro": "عنوان الأساس <code>{baseUrl}</code> — تقبل جميع نقاط النهاية ترويسة <code>X-API-Key</code>. تأتي الاستجابات بصيغة JSON على النحو <code>{shape}</code>. ولـ<em>استقبال</em> الأحداث (إنشاء عميل محتمل، انتهاء مكالمة، …) استخدم تبويب خطافات الويب أو تكامل n8n.",
+    "required": "مطلوب",
+    "copyCurl": "نسخ أمر curl"
+  },
+  "n8n": {
+    "description": "مرِّر كل أحداث المنصة إلى مسارات عمل n8n وأتمِت مهامك مع أكثر من 400 تطبيق — أنظمة إدارة العملاء وجداول البيانات والبريد والمحادثات وغيرها.",
+    "howToTitle": "طريقة الربط",
+    "step1": "1. في مسار عمل n8n، أضف عقدة <b>Webhook</b> بطريقة <code>POST</code> (أو استورد أحد القوالب أدناه — فهو يتضمّنها بالفعل).",
+    "step2": "2. انسخ <b>عنوان الإنتاج</b> الخاص بالعقدة ثم <b>فعّل مسار العمل</b> — أو استخدم عنوان الاختبار أثناء الإعداد.",
+    "step3": "3. الصق العنوان هنا واربطه. تصل الأحداث بصيغة JSON: <code>{shape}</code>.",
+    "connect": "ربط n8n",
+    "deliveringTo": "الإرسال إلى",
+    "sendTest": "إرسال اختبار",
+    "templatesTitle": "قوالب مسارات العمل",
+    "templatesHint": "نزّلها واستوردها في n8n (قائمة Workflow ← Import from File)، ثم اتبع الملاحظة الموجودة داخل كل قالب.",
+    "download": "تنزيل",
+    "newToN8n": "أول مرة تستخدم n8n؟ إنها أداة أتمتة مجانية وقابلة للاستضافة الذاتية —",
+    "urlPlaceholder": "https://your-n8n.app/webhook/intellicall-events",
+    "events": {
+      "leadCreated": {
+        "label": "إنشاء عميل محتمل",
+        "description": "تمت إضافة عميل محتمل جديد يدويًا أو عبر استيراد جماعي أو من خلال حملة."
+      },
+      "leadQualified": {
+        "label": "تأهيل عميل محتمل",
+        "description": "يصنّف الذكاء الاصطناعي العميل المحتمل كمؤهّل بعد التحليل."
+      },
+      "callCompleted": {
+        "label": "انتهاء المكالمة",
+        "description": "تنتهي المكالمة — ويشمل ذلك المدة والحالة والتسجيل."
+      },
+      "inboundCall": {
+        "label": "مكالمة واردة",
+        "description": "تصل مكالمة واردة إلى المنصة."
+      },
+      "outboundCall": {
+        "label": "مكالمة صادرة",
+        "description": "يتم إجراء مكالمة صادرة."
+      },
+      "campaignCompleted": {
+        "label": "اكتمال الحملة",
+        "description": "انتهت جميع مكالمات الحملة."
+      },
+      "appointmentBooked": {
+        "label": "حجز موعد",
+        "description": "تتم جدولة موعد يدويًا أو بواسطة الذكاء الاصطناعي."
+      },
+      "appointmentCanceled": {
+        "label": "إلغاء موعد",
+        "description": "يتم إلغاء موعد مجدول."
+      },
+      "callTransferred": {
+        "label": "تم تحويل المتصل",
+        "description": "تم توصيل المتصل بموظف. مكالمات SIP فقط."
+      },
+      "transferFailed": {
+        "label": "فشل التحويل",
+        "description": "تعذّر الوصول إلى موظف وبقي المتصل مع الوكيل."
+      }
+    },
+    "templates": {
+      "instantCall": {
+        "name": "مكالمة فورية عند إرسال نموذج",
+        "description": "يُفعَّل نموذج أو خطّاف ويب، فيتصل الذكاء الاصطناعي بالعميل المحتمل خلال ثوانٍ. يتطلّب مفتاح واجهة برمجية (راجع بطاقة الوصول إلى الواجهة البرمجية)."
+      },
+      "callLogToSheets": {
+        "name": "سجل المكالمات إلى Google Sheets",
+        "description": "تُضيف كل مكالمة منتهية صفًا جديدًا — الطابع الزمني والأرقام والمدة والحالة."
+      },
+      "leadQualifiedCrm": {
+        "name": "العميل المؤهّل إلى نظام إدارة العملاء مع إشعار",
+        "description": "يؤهّل الذكاء الاصطناعي العميل المحتمل، فيُرسَل إلى نظام إدارة العملاء لديك مع تنبيه الفريق."
+      }
+    }
+  },
+  "slack": {
+    "description": "احصل على إشعارات فورية في قناة Slack — إنشاء عميل محتمل، انتهاء مكالمة، حجز موعد، وغير ذلك.",
+    "addToSlack": "إضافة إلى Slack",
+    "notConfigured": "لم تتم تهيئة تكامل Slack على هذا الخادم. اطلب من المسؤول ضبط",
+    "notConfiguredSuffix": "في بيئة الخادم الخلفي.",
+    "postingTo": "النشر في",
+    "sendTest": "إرسال اختبار"
+  },
+  "hubspot": {
+    "title": "HubSpot CRM",
+    "description": "أرسل كل عميل محتمل جديد إلى HubSpot كجهة اتصال، مع المطابقة برقم الهاتف — دون تكرار.",
+    "connect": "ربط HubSpot",
+    "notConfigured": "لم تتم تهيئة تكامل HubSpot على هذا الخادم. اطلب من المسؤول ضبط",
+    "notConfiguredSuffix": "في بيئة الخادم الخلفي.",
+    "connectedTo": "متصل بـ",
+    "syncLeads": "مزامنة العملاء المحتملين الجدد مع HubSpot",
+    "syncLeadsHint": "يُضاف كل عميل محتمل يُنشَأ في {appName} (يدويًا أو باستيراد جماعي أو عبر حملة) أو يُحدَّث كجهة اتصال في HubSpot، مع المطابقة برقم الهاتف.",
+    "serviceKeyLabel": "مفتاح خدمة HubSpot",
+    "serviceKeyHint": "أنشئ مفتاحًا في HubSpot من الإعدادات → عمليات التكامل → مفاتيح الخدمة (أو التطوير → المفاتيح → مفاتيح الخدمة) مع النطاقين crm.objects.contacts.read و crm.objects.contacts.write، ثم الصقه هنا.",
+    "serviceKeyPlaceholder": "pat-na1-…",
+    "serviceKeySave": "اتصال",
+    "serviceKeyReplace": "استبدال المفتاح",
+    "serviceKeyCancel": "إلغاء",
+    "serviceKeyDocs": "كيفية إنشاء مفتاح خدمة",
+    "connectedVia": "متصل بمفتاح خدمة ينتهي بـ {last4}",
+    "connectedViaOAuth": "متصل عبر تطبيق OAuth القديم",
+    "legacyOAuthTitle": "تطبيق OAuth القديم",
+    "legacyOAuthHint": "أوقفت HubSpot إنشاء التطبيقات العامة الجديدة في 23 يونيو 2026. يعمل هذا الخيار فقط مع التثبيتات التي سجّلت تطبيقًا قبل ذلك التاريخ — وعلى الآخرين استخدام مفتاح خدمة."
+  },
+  "googleCalendar": {
+    "title": "تقويم Google",
+    "description": "انسخ كل موعد محجوز إلى تقويم Google لديك فورًا. تتم مزامنة التعديلات والإلغاءات أيضًا.",
+    "connect": "ربط تقويم Google",
+    "connectedAccount": "الحساب المتصل",
+    "syncTarget": "تتم مزامنة الأحداث مع تقويمك <b>الأساسي</b>.",
+    "primaryAccount": "حساب Google الأساسي"
+  },
+  "googleSheets": {
+    "title": "Google Sheets",
+    "description": "استورد العملاء المحتملين من ورقة Google وأبقِهم متزامنين. تجلب لوحة التحكم الصفوف الجديدة تلقائيًا في المرة التالية التي تفتح فيها صفحة العملاء المحتملين.",
+    "activeSheet": "الورقة النشطة",
+    "lastSynced": "آخر مزامنة",
+    "noSheet": "الحساب متصل، لكن لم يتم اختيار أي ورقة بعد. اضغط <b>إدارة المزامنة</b> لاختيار جدول بيانات وورقة وربط الأعمدة.",
+    "manageSync": "إدارة المزامنة",
+    "connect": "ربط Google Sheets"
+  },
+  "page": {
+    "title": "الإعدادات",
+    "subtitle": "هيّئ حسابك وبيانات اعتماد الواجهة البرمجية واشتراكك.",
+    "tabs": {
+      "preferences": "التفضيلات",
+      "apiKeys": "مفاتيح الواجهة البرمجية",
+      "webhooks": "خطافات الويب",
+      "email": "البريد الإلكتروني",
+      "integrations": "التكاملات",
+      "billing": "الباقة والفوترة",
+      "transactions": "سجلّ المعاملات"
+    }
+  },
+  "credentials": {
+    "title": "بيانات اعتماد Twilio والذكاء الاصطناعي",
+    "description": "هذه المفاتيح مطلوبة لبدء المكالمات الهاتفية وتشغيل وكيل الذكاء الاصطناعي.",
+    "twilioSid": "معرّف حساب Twilio",
+    "twilioSidPlaceholder": "ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "twilioToken": "رمز مصادقة Twilio",
+    "openRouter": "مفتاح OpenRouter",
+    "elevenLabs": "مفتاح ElevenLabs",
+    "verifying": "جارٍ التحقّق...",
+    "keyErrorSuffix": "يُرجى التحقّق من مفتاحك.",
+    "validKey": "مفتاح صالح",
+    "deepgram": "مفتاح Deepgram",
+    "deepgramHint": "يشغّل التعرّف على الكلام — وكذلك محرّك «Deepgram Voice Agent» منخفض زمن الاستجابة القابل للاختيار لكل وكيل (وهو يستخدم صوت ElevenLabs لديك أيضًا لكنه لا يحتاج إلى مفتاح OpenRouter).",
+    "sarvam": "مفتاح Sarvam AI",
+    "sarvamHint": "يشغّل محرّك «Sarvam AI» المكتفي ذاتيًا للّغات الهندية (الكلام والاستدلال والصوت كلها على Sarvam). قابل للاختيار لكل وكيل — ولا يحتاج إلى أي مفاتيح أخرى.",
+    "gemini": "مفتاح Gemini API",
+    "geminiHint": "يشغّل محرّك «Gemini Live» — نموذج واحد من Google يسمع ويفكر ويتحدث بـ 97 لغة. يمكن اختياره لكل وكيل على أرقام SIP — ولا يحتاج إلى مفاتيح أخرى."
+  },
+  "webhooks": {
+    "title": "إعدادات خطافات الويب",
+    "description": "احصل على إشعارات فورية بأحداث تطبيقك عبر طلبات HTTP POST.",
+    "enable": "تفعيل خطافات الويب",
+    "enableHint": "فعّل الخيار لبدء إرسال الأحداث إلى عنوانك.",
+    "payloadUrl": "عنوان الاستقبال",
+    "payloadUrlHint": "ستُرسَل الأحداث إلى هذا العنوان كطلبات POST بصيغة JSON.",
+    "signingSecret": "سرّ التوقيع",
+    "regenerate": "إعادة التوليد",
+    "signingSecretHint": "يؤمّن خطّاف الويب لديك بتوقيع المحتوى باستخدام HMAC-SHA256.",
+    "triggerEvents": "الأحداث المُشغِّلة",
+    "save": "حفظ إعدادات خطافات الويب",
+    "sendTest": "إرسال حدث اختباري"
+  },
+  "emailNotifications": {
+    "title": "إشعارات البريد الإلكتروني",
+    "description": "احصل على تنبيهات فورية بالمواعيد وأحداث المكالمات عبر البريد الإلكتروني باستخدام Brevo.",
+    "enable": "تفعيل إشعارات البريد الإلكتروني",
+    "enableHint": "فعّل الخيار لبدء تلقّي رسائل البريد للأحداث المحدَّدة.",
+    "brevoKey": "مفتاح Brevo",
+    "brevoKeyPlaceholder": "xkeysib-...",
+    "brevoKeyHint": "احصل على مفتاحك من إعدادات SMTP والواجهة البرمجية في Brevo.",
+    "recipientEmail": "بريد المستلِم",
+    "recipientEmailHint": "العنوان الذي ستُرسَل إليه الإشعارات.",
+    "senderName": "اسم المُرسِل",
+    "senderEmail": "بريد المُرسِل",
+    "notificationEvents": "أحداث الإشعارات",
+    "save": "حفظ إعدادات البريد",
+    "sendTest": "إرسال بريد اختباري"
+  },
+  "events": {
+    "inboundCall": {
+      "label": "استلام مكالمة واردة",
+      "desc": "تُرسَل عند بدء مكالمة واردة",
+      "short": "مكالمة واردة"
+    },
+    "outboundCall": {
+      "label": "بدء مكالمة صادرة",
+      "desc": "تُرسَل عند بدء مكالمة صادرة جديدة",
+      "short": "مكالمة صادرة"
+    },
+    "callCompleted": {
+      "label": "انتهاء المكالمة",
+      "desc": "تُرسَل عند انتهاء أي مكالمة",
+      "short": "انتهاء المكالمة"
+    },
+    "leadCreated": {
+      "label": "إنشاء عميل محتمل",
+      "desc": "تُرسَل عند إضافة عميل محتمل جديد",
+      "short": "إنشاء عميل محتمل"
+    },
+    "leadQualified": {
+      "label": "تأهيل عميل محتمل",
+      "desc": "تُرسَل عندما يؤهّل الذكاء الاصطناعي عميلًا محتملًا",
+      "short": "تأهيل عميل محتمل"
+    },
+    "campaignCompleted": {
+      "label": "اكتمال الحملة",
+      "desc": "تُرسَل عند انتهاء الحملة",
+      "short": "اكتمال الحملة"
+    },
+    "appointmentBooked": {
+      "label": "حجز موعد",
+      "desc": "تُرسَل عند جدولة موعد جديد",
+      "short": "حجز موعد"
+    },
+    "appointmentCanceled": {
+      "label": "إلغاء موعد",
+      "desc": "تُرسَل عند إلغاء موعد",
+      "short": "إلغاء موعد"
+    },
+    "callTransferred": {
+      "label": "تم تحويل المتصل",
+      "desc": "يُرسل عند توصيل المتصل بموظف",
+      "short": "تم تحويل المتصل"
+    },
+    "transferFailed": {
+      "label": "فشل التحويل",
+      "desc": "يُرسل عند تعذّر الوصول إلى الموظف",
+      "short": "فشل التحويل"
+    }
+  },
+  "billing": {
+    "currentPlanTitle": "باقتك الحالية",
+    "currentPlanDescription": "أدر اشتراكك واطّلع على حدود الاستخدام.",
+    "status": "الحالة:",
+    "expiredOn": "انتهت في:",
+    "expires": "تنتهي في:",
+    "trialPlan": "باقة التجربة",
+    "agents": "الوكلاء",
+    "campaigns": "الحملات",
+    "leads": "العملاء المحتملون",
+    "calls": "المكالمات",
+    "unlimited": "غير محدود",
+    "availablePlans": "الباقات المتاحة",
+    "currentPlan": "الباقة الحالية",
+    "upgradePlan": "ترقية الباقة",
+    "planAgents": "{count} وكيل",
+    "planCampaigns": "{count} حملة",
+    "planLeads": "{count} عميل محتمل",
+    "planCallsUnlimited": "مكالمات غير محدودة (بمفاتيحك)",
+    "planCalls": "{count} مكالمة/شهر"
+  },
+  "transactions": {
+    "title": "سجلّ المعاملات",
+    "description": "اطّلع على جميع مدفوعات اشتراكاتك وسجلات الفوترة السابقة.",
+    "date": "التاريخ",
+    "plan": "الباقة",
+    "amount": "المبلغ",
+    "method": "طريقة الدفع",
+    "status": "الحالة",
+    "empty": "لم يتم العثور على معاملات.",
+    "premiumPlan": "الباقة المميزة"
+  },
+  "preferences": {
+    "title": "تفضيلات التشغيل",
+    "description": "الإعدادات العامة للمنصة ولحملات الاتصال.",
+    "language": "لغة الواجهة",
+    "languageHint": "اللغة المستخدمة في لوحة التحكم بالكامل. تُطبَّق فورًا.",
+    "timeFormat": "تنسيق الوقت",
+    "timeFormatHint": "اختر بين نظام 12 ساعة (ص/م) أو نظام 24 ساعة.",
+    "selectFormat": "اختر تنسيقًا",
+    "hour12": "12 ساعة",
+    "hour24": "24 ساعة",
+    "timeZone": "المنطقة الزمنية",
+    "timeZoneHint": "المنطقة الزمنية للمواعيد والتوفّر (مثال: America/New_York).",
+    "selectTimeZone": "اختر منطقة زمنية",
+    "callSettings": "إعدادات المكالمات",
+    "callRecording": "تسجيل المكالمات",
+    "callRecordingHint": "يسجّل جميع المكالمات الهاتفية تلقائيًا عبر Twilio.",
+    "autoAnalysis": "التحليل التلقائي للمكالمات",
+    "autoAnalysisHint": "يُنشئ تلقائيًا ملخّصًا بالذكاء الاصطناعي وتقييم التأهيل بعد كل مكالمة.",
+    "autoHangup": "الإنهاء التلقائي",
+    "immediateHangup": "إنهاء فوري",
+    "autoHangupHint": "ينهي جلسات المكالمات تلقائيًا بعد مدة محدَّدة.",
+    "incomingTimeout": "مهلة المكالمات الواردة",
+    "outgoingTimeout": "مهلة المكالمات الصادرة",
+    "immediate": "فوري",
+    "minutesAbbrev": "دقيقة",
+    "hangupHint": "ستُنهى المكالمات التي تتجاوز المدة المحدَّدة لها تلقائيًا.",
+    "apply": "تطبيق التفضيلات"
+  },
+  "asterisk": {
+    "title": "محرّك Asterisk / SIP",
+    "description": "حالة خادم Asterisk PBX للمكالمات المعتمِدة على SIP.",
+    "connected": "متصل",
+    "offline": "غير متصل",
+    "activeCalls": "{count, plural, zero {لا توجد مكالمات SIP نشطة} one {مكالمة SIP نشطة واحدة} two {مكالمتا SIP نشطتان} few {# مكالمات SIP نشطة} many {# مكالمة SIP نشطة} other {# مكالمة SIP نشطة}}",
+    "manageTrunks": "إدارة وصلات SIP"
+  },
+  "payment": {
+    "selectGateway": "اختر بوابة دفع للمتابعة",
+    "choosePrompt": "اختر وسيلة الدفع المفضّلة لديك للترقية إلى",
+    "testMode": "وضع الاختبار",
+    "stripeHint": "الدفع ببطاقات الائتمان أو الخصم",
+    "dodoHint": "وسائل دفع محلية",
+    "razorpayHint": "البوابة الأكثر شيوعًا في الهند",
+    "noMethods": "لا تتوفّر أي وسائل دفع حاليًا. يُرجى التواصل مع الدعم.",
+    "legal": "بالمتابعة، فإنك توافق على شروط الخدمة وسياسة الخصوصية لدينا. تتم المعالجة بأمان وبتشفير SSL."
+  },
+  "toast": {
+    "keyGenerateFailed": "تعذّر توليد مفتاح الواجهة البرمجية",
+    "keyRevoked": "تم إبطال مفتاح الواجهة البرمجية",
+    "keyRevokeFailed": "تعذّر إبطال مفتاح الواجهة البرمجية",
+    "keyCopied": "تم نسخ مفتاح الواجهة البرمجية",
+    "curlCopied": "تم نسخ أمر curl",
+    "n8nUrlRequired": "الصق أولًا عنوان خطّاف الويب الخاص بـ n8n",
+    "n8nConnected": "تم ربط n8n",
+    "n8nConnectFailed": "تعذّر ربط n8n",
+    "n8nDisconnected": "تم فصل n8n",
+    "disconnectFailed": "تعذّر قطع الاتصال",
+    "testSent": "تم إرسال حدث اختباري — تحقّق من عمليات التنفيذ في n8n",
+    "testFailed": "فشل الاختبار",
+    "preferenceFailed": "تعذّر تحديث التفضيل",
+    "slackConnected": "تم ربط Slack",
+    "slackConnectFailed": "تعذّر ربط Slack",
+    "userNotFound": "المستخدم غير موجود. يُرجى تسجيل الدخول مرة أخرى.",
+    "slackDisconnected": "تم فصل Slack",
+    "slackTestSent": "تم إرسال رسالة اختبارية إلى ‎#{channel}",
+    "slackTestFailed": "تعذّر إرسال الرسالة الاختبارية",
+    "slackDefaultChannel": "القناة",
+    "hubspotConnected": "تم ربط HubSpot",
+    "hubspotConnectFailed": "تعذّر ربط HubSpot",
+    "hubspotDisconnected": "تم فصل HubSpot",
+    "calendarConnected": "تم ربط تقويم Google",
+    "calendarConnectFailed": "تعذّر ربط تقويم Google",
+    "googleOAuthNotConfigured": "لم تتم تهيئة Google OAuth. أضف معرّف العميل والسر في المشرف ← عمليات التكامل ← Google (أو GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET في backend/.env)",
+    "googleOAuthInvalidClientId": "معرّف عميل Google المُهيأ غير صالح — يجب أن ينتهي بـ ‎.apps.googleusercontent.com. صحّحه في المشرف ← عمليات التكامل ← Google",
+    "calendarDisconnected": "تم فصل تقويم Google",
+    "sheetsConnected": "تم ربط Google Sheets",
+    "sheetsConnectFailed": "تعذّر ربط Google Sheets",
+    "waCredentialsRequired": "رمز الوصول ومعرّف رقم الهاتف ورقم WhatsApp الخاص بك حقول مطلوبة",
+    "waConnected": "تم ربط WhatsApp",
+    "waConnectFailed": "تعذّر ربط WhatsApp",
+    "waDisconnected": "تم فصل WhatsApp",
+    "waTestSent": "تم إرسال رسالة اختبارية إلى ‎+{number}",
+    "waTestFailed": "تعذّر إرسال الرسالة الاختبارية",
+    "waRecipientUpdated": "تم تحديث رقم المستلِم",
+    "waRecipientFailed": "تعذّر تحديث المستلِم",
+    "waTemplateFirst": "احفظ اسم قالب أولًا — تتطلّب التذكيرات قالبًا معتمدًا من Meta",
+    "waRemindersFailed": "تعذّر تحديث التذكيرات",
+    "waRemindersSaved": "تم حفظ إعدادات التذكير",
+    "waRemindersSaveFailed": "تعذّر حفظ إعدادات التذكير",
+    "waTemplateNameRequired": "أدخل اسم قالب أولًا",
+    "waReminderTestSent": "تم إرسال تذكير اختباري إلى ‎+{number}",
+    "waReminderTestFailed": "تعذّر إرسال التذكير الاختباري",
+    "loadFailed": "تعذّر تحميل بيانات الإعدادات",
+    "upgraded": "تهانينا! تمت ترقيتك إلى باقة {plan}.",
+    "verifyFailed": "تعذّر التحقّق من الدفع. يُرجى التواصل مع الدعم.",
+    "saved": "تم حفظ الإعدادات بنجاح!",
+    "saveFailed": "تعذّر حفظ الإعدادات",
+    "testStarting": "جارٍ بدء اختبار أساسي...",
+    "testCallStarted": "تم بدء المكالمة الاختبارية!",
+    "preparingCheckout": "جارٍ تجهيز عملية الدفع...",
+    "redirecting": "جارٍ التحويل إلى صفحة الدفع الآمنة...",
+    "paymentFailed": "تعذّر بدء عملية الدفع",
+    "preparingRazorpay": "جارٍ تجهيز الدفع عبر Razorpay...",
+    "verifyingPayment": "جارٍ التحقّق من الدفع...",
+    "planUpgraded": "تهانينا! تمت ترقية الباقة إلى {plan}.",
+    "verificationFailed": "فشل التحقّق",
+    "razorpayFailed": "تعذّر بدء Razorpay",
+    "gatewayDemo": "تم بدء عرض دفع تجريبي عبر {gateway} لباقة {plan}",
+    "sendingTestEvent": "جارٍ إرسال حدث اختباري لـ {label}...",
+    "eventDelivered": "تم تسليم حدث {label} بنجاح!",
+    "sendingTestEmail": "جارٍ إرسال بريد اختباري لـ {label}...",
+    "emailDispatched": "تم إرسال بريد {label} بنجاح!",
+    "regeneratingSecret": "جارٍ إعادة توليد السرّ...",
+    "secretRegenerated": "تمت إعادة توليد سرّ خطّاف الويب!",
+    "regenerateFailed": "تعذّرت إعادة توليد السرّ",
+    "paypalFailed": "تعذّر بدء الدفع عبر PayPal",
+    "capturingPayment": "جارٍ تحصيل الدفعة...",
+    "paypalCompleteFailed": "تعذّر إتمام الدفع عبر PayPal",
+    "hubspotKeySaved": "تم الاتصال بـ HubSpot",
+    "hubspotKeyFailed": "تعذّر التحقق من مفتاح الخدمة"
+  },
+  "whatsapp": {
+    "description": "احصل على إشعارات فورية على WhatsApp — إنشاء عميل محتمل، انتهاء مكالمة، حجز موعد، وغير ذلك. مدعوم بواجهة WhatsApp Cloud من Meta.",
+    "howToTitle": "كيفية الحصول على بيانات الاعتماد",
+    "step1": "1. أنشئ تطبيقًا مجانيًا يتضمّن منتج <b>WhatsApp</b> على",
+    "step2": "2. افتح <b>WhatsApp ‏> API Setup</b> وانسخ رمز الوصول ومعرّف رقم الهاتف.",
+    "step3": "3. أدخل رقم WhatsApp الخاص بك أدناه لتلقّي التنبيهات (أضِفه كمستلِم في API Setup إذا كنت تستخدم رقم الاختبار من Meta).",
+    "tokenLabel": "رمز الوصول",
+    "tokenPlaceholder": "EAAG••••••••••••••••••••••••",
+    "tokenHint": "استخدم رمزًا دائمًا (مستخدم نظام) حتى لا تتوقّف الإشعارات بعد 24 ساعة.",
+    "phoneIdLabel": "معرّف رقم الهاتف",
+    "recipientLabel": "رقم WhatsApp الخاص بك",
+    "connect": "ربط WhatsApp",
+    "sendingTo": "الإرسال إلى",
+    "changeRecipient": "تغيير رقم المستلِم",
+    "from": "من",
+    "sendTest": "إرسال اختبار",
+    "sessionWarning": "لا يوصّل WhatsApp هذه التنبيهات إلا ضمن جلسة مدتها 24 ساعة. أرسل أي رسالة من WhatsApp لديك إلى <b>{number}</b> لفتح نافذة التسليم وإبقائها مفتوحة.",
+    "yourBusinessNumber": "رقم نشاطك التجاري",
+    "remindersTitle": "تذكيرات المواعيد للعملاء",
+    "remindersHint": "أرسل تذكيرًا عبر WhatsApp إلى رقم العميل قبل بدء موعده.",
+    "templateSetupTitle": "إعداد لمرة واحدة: أنشئ قالب الرسالة",
+    "templateSetupIntro": "التذكيرات تبدأ من جهة النشاط التجاري، لذا تشترط Meta وجود قالب معتمد مسبقًا. من داخل",
+    "metaBusinessManager": "Meta Business Manager",
+    "templateSetupOutro": "أنشئ قالبًا من نوع <b>Utility</b> (مثل <code>appointment_reminder</code>) بهذا النص:",
+    "templateBody": "مرحبًا {v1}، هذا تذكير ودّي بموعدك في {v2} الساعة {v3}. نتطلّع للتحدّث معك!",
+    "templateVars": "نقوم بتعبئة <b>{v1}</b> = اسم العميل، و<b>{v2}</b> = التاريخ، و<b>{v3}</b> = الوقت. الصياغة متروكة لك، لكن حافظ على هذه المتغيّرات الثلاثة تمامًا. تستغرق الموافقة عادةً بضع دقائق.",
+    "templateNameLabel": "اسم القالب",
+    "templateLanguageLabel": "لغة القالب",
+    "templateLanguageHint": "الرمز المأخوذ من القالب، مثل en أو en_US أو ar.",
+    "sendReminderLabel": "إرسال التذكير",
+    "saveReminders": "حفظ إعدادات التذكير",
+    "sendReminderTest": "إرسال اختبار إلى رقمي",
+    "leadOptions": {
+      "15": "قبل 15 دقيقة",
+      "30": "قبل 30 دقيقة",
+      "60": "قبل ساعة",
+      "120": "قبل ساعتين",
+      "180": "قبل 3 ساعات",
+      "720": "قبل 12 ساعة",
+      "1440": "قبل 24 ساعة"
+    }
+  }
+}

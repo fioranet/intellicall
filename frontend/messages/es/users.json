@@ -1,0 +1,37 @@
+{
+  "title": "Usuarios",
+  "subtitle": "Gestiona los usuarios del sistema (solo administradores)",
+  "accessDenied": {
+    "title": "Acceso denegado",
+    "description": "No tienes permiso para ver esta página. Esta sección está restringida a los administradores."
+  },
+  "empty": {
+    "title": "Aún no hay usuarios",
+    "description": "Todavía no has añadido usuarios. Crea el primero para darle acceso al sistema."
+  },
+  "table": {
+    "name": "Nombre", "email": "Correo electrónico", "role": "Rol",
+    "sharedAccess": "Acceso compartido", "joined": "Alta",
+    "tags": "Etiquetas:", "agents": "Agentes:", "campaigns": "Campañas:",
+    "unknown": "Desconocido", "none": "Ninguno"
+  },
+  "roles": { "admin": "Administrador", "member": "Miembro", "placeholder": "Selecciona un rol" },
+  "create": {
+    "trigger": "Crear usuario", "title": "Crear nuevo usuario",
+    "description": "Añade un nuevo usuario al sistema.",
+    "nameLabel": "Nombre", "namePlaceholder": "Juan Pérez",
+    "emailLabel": "Correo electrónico", "passwordLabel": "Contraseña", "roleLabel": "Rol"
+  },
+  "edit": {
+    "title": "Editar usuario: {name}",
+    "description": "Actualiza el rol y gestiona los recursos compartidos.",
+    "roleLabel": "Rol",
+    "sharedTags": "Etiquetas compartidas (acceso a contactos)",
+    "noTags": "No se encontraron etiquetas en los contactos",
+    "manualTag": "O añade una etiqueta manualmente:",
+    "add": "Añadir",
+    "sharedAgents": "Agentes compartidos", "noAgents": "No hay agentes disponibles",
+    "sharedCampaigns": "Campañas compartidas", "noCampaigns": "No hay campañas disponibles"
+  },
+  "toast": { "created": "¡Usuario creado correctamente!", "updated": "¡Usuario actualizado correctamente!" }
+}

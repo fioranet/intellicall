@@ -1,0 +1,38 @@
+{
+  "actions": {
+    "save": "حفظ", "saving": "جارٍ الحفظ...", "saveChanges": "حفظ التغييرات",
+    "cancel": "إلغاء", "delete": "حذف", "deleting": "جارٍ الحذف...",
+    "edit": "تعديل", "create": "إنشاء", "creating": "جارٍ الإنشاء...",
+    "add": "إضافة", "remove": "إزالة", "close": "إغلاق", "confirm": "تأكيد",
+    "back": "رجوع", "next": "التالي", "previous": "السابق",
+    "search": "بحث", "filter": "تصفية", "refresh": "تحديث",
+    "export": "تصدير", "import": "استيراد", "copy": "نسخ", "copied": "تم النسخ",
+    "download": "تنزيل", "upload": "رفع", "connect": "ربط",
+    "disconnect": "قطع الاتصال", "test": "اختبار", "view": "عرض", "viewAll": "عرض الكل",
+    "duplicate": "تكرار", "retry": "إعادة المحاولة", "done": "تم",
+    "apply": "تطبيق", "reset": "إعادة تعيين", "selectAll": "تحديد الكل",
+    "clear": "مسح", "openMenu": "فتح القائمة", "toggleTheme": "تبديل المظهر"
+  },
+  "states": {
+    "loading": "جارٍ التحميل...", "noResults": "لم يتم العثور على نتائج",
+    "noData": "لا توجد بيانات متاحة", "error": "حدث خطأ ما",
+    "empty": "لا يوجد شيء هنا بعد", "active": "نشط", "inactive": "غير نشط",
+    "enabled": "مُفعّل", "disabled": "مُعطّل", "connected": "متصل",
+    "notConnected": "غير متصل", "pending": "قيد الانتظار", "completed": "مكتمل",
+    "failed": "فشل", "inProgress": "قيد التنفيذ", "unknown": "غير معروف",
+    "none": "لا شيء", "all": "الكل", "yes": "نعم", "no": "لا",
+    "optional": "اختياري", "required": "مطلوب"
+  },
+  "labels": {
+    "name": "الاسم", "email": "البريد الإلكتروني", "phone": "الهاتف",
+    "status": "الحالة", "date": "التاريخ", "time": "الوقت", "type": "النوع",
+    "description": "الوصف", "actions": "الإجراءات", "createdAt": "تاريخ الإنشاء",
+    "updatedAt": "آخر تحديث", "notes": "ملاحظات", "tags": "الوسوم", "total": "الإجمالي"
+  },
+  "language": { "label": "اللغة", "change": "تغيير اللغة" },
+  "confirm": {
+    "title": "هل أنت متأكد؟", "deleteTitle": "حذف هذا العنصر؟",
+    "deleteDescription": "لا يمكن التراجع عن هذا الإجراء."
+  },
+  "selfHost": { "badge": "استضافة ذاتية", "buyOn": "الشراء من {marketplace}" }
+}

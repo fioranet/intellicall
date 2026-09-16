@@ -1,0 +1,131 @@
+{
+  "title": "Leads",
+  "subtitle": "Gerenciamento centralizado para seus contatos e prospects {count}.",
+  "searchPlaceholder": "Pesquise por nome ou telefone...",
+  "filter": {
+    "button": "Filtro",
+    "withCount": "Etiquetas ({count})",
+    "byTags": "Filtrar por tags",
+    "noTags": "Nenhuma tag criada ainda",
+    "columns": "Colunas",
+    "visibleFields": "Campos Visíveis",
+    "clear": "Claro"
+  },
+  "empty": {
+    "noMatchTitle": "Nenhum lead encontrado",
+    "noMatchDescription": "Nenhum lead corresponde à sua pesquisa atual ou filtros de tags.",
+    "clearFilters": "Limpar todos os filtros",
+    "noLeadsTitle": "Ainda não há leads",
+    "noLeadsDescription": "Você ainda não adicionou nenhum lead. Comece adicionando seu primeiro lead ou importando de CSV."
+  },
+  "table": {
+    "name": "Nome",
+    "phone": "Telefone",
+    "tags": "Etiquetas",
+    "addedOn": "Adicionado",
+    "addTag": "Adicionar etiqueta",
+    "actions": "Ações",
+    "editRecord": "Editar registro",
+    "removeLead": "Remover lead"
+  },
+  "selection": {
+    "count": "{count, plural, one {# lead selecionado} other {# leads selecionados}}",
+    "deselectAll": "Desmarcar tudo",
+    "manageTags": "Gerenciar tags",
+    "editRecord": "Editar registro",
+    "deleteSelected": "Excluir selecionado"
+  },
+  "add": {
+    "trigger": "Adicionar lead",
+    "title": "Adicionar novo lead",
+    "description": "Insira os detalhes do lead abaixo. Clique em salvar quando terminar.",
+    "nameLabel": "Nome",
+    "namePlaceholder": "John Doe",
+    "phoneLabel": "Telefone",
+    "tagsLabel": "Tags (separadas por vírgula)",
+    "tagsPlaceholder": "cliente, alta prioridade, vips"
+  },
+  "edit": {
+    "title": "Editar lead",
+    "description": "Atualize os detalhes do lead abaixo. Clique em salvar quando terminar.",
+    "nameLabel": "Nome",
+    "namePlaceholder": "John Doe",
+    "phoneLabel": "Telefone",
+    "tagsLabel": "Tags (separadas por vírgula)",
+    "tagsPlaceholder": "cliente, alta prioridade, vips"
+  },
+  "bulkTag": {
+    "title": "Adicionar tags em massa",
+    "description": "{count, plural, one {Adicionar tags a # lead selecionado.} other {Adicionar tags a # leads selecionados.}}",
+    "tagsLabel": "Tags (separadas por vírgula)",
+    "tagsPlaceholder": "prioridade, acompanhamento, q1"
+  },
+  "customFields": {
+    "title": "Campos personalizados (opcional)",
+    "addField": "Adicionar campo",
+    "namePlaceholder": "Nome do campo (por exemplo, compromisso_data)",
+    "valuePlaceholder": "Valor (por exemplo, 10 de julho às 15h)"
+  },
+  "importCsv": {
+    "trigger": "Importar CSV",
+    "title": "Importar leads de CSV",
+    "description": "Faça upload de um arquivo CSV com colunas: nome, telefone, empresa (opcional)",
+    "fileLabel": "Arquivo CSV",
+    "selected": "Selecionado:",
+    "tagsLabel": "Adicionar tags a todos (separados por vírgula)",
+    "tagsPlaceholder": "novos leads, campanha-1"
+  },
+  "toast": {
+    "fetchFailed": "Falha ao buscar leads",
+    "deleted": "Leads excluídos com sucesso",
+    "deleteFailed": "Falha ao excluir leads",
+    "added": "Lead adicionado com sucesso!",
+    "addFailed": "Falha ao adicionar lead",
+    "updated": "Lead atualizado com sucesso!",
+    "updateFailed": "Falha ao atualizar lead",
+    "tagRequired": "Insira pelo menos uma tag",
+    "tagsAdded": "{count, plural, one {Tags adicionadas a # lead} other {Tags adicionadas a # leads}}",
+    "tagsFailed": "Falha ao adicionar tags",
+    "selectCsv": "Selecione um arquivo CSV",
+    "noValidLeads": "Nenhum lead válido encontrado no CSV",
+    "imported": "{count, plural, one {# lead importado com sucesso!} other {# leads importados com sucesso!}}",
+    "importFailed": "Falha ao importar leads",
+    "parseError": "Erro ao analisar CSV: {message}",
+    "quickSyncFailed": "Falha na sincronização rápida",
+    "syncFailed": "Falha ao sincronizar leads",
+    "sheetsDisconnected": "Planilhas Google desconectado",
+    "disconnectFailed": "Falha ao desconectar",
+    "fetchSheetsFailed": "Falha ao buscar planilhas",
+    "userNotFound": "Usuário não encontrado. Faça login novamente."
+  },
+  "googleSheets": {
+    "syncing": "Sincronizando...",
+    "defaultLabel": "Planilhas Google",
+    "title": "Sincronização do Planilhas Google",
+    "description": "Importe e mantenha seus leads sincronizados com o Planilhas Google.",
+    "connectTitle": "Conectar Planilhas Google",
+    "connectDescription": "Conecte sua conta para importar leads diretamente de suas planilhas e mantê-los sincronizados.",
+    "connectNow": "Conecte-se agora",
+    "quickSyncReady": "Pronto para sincronização rápida",
+    "lastSynced": "Última sincronização: {date}",
+    "previouslyConnected": "Anteriormente conectado a <b>{sheet}</b>. Novos leads serão adicionados automaticamente, os existentes serão ignorados.",
+    "syncNow": "Sincronize novos leads agora",
+    "orStartFresh": "Ou comece do zero",
+    "selectSpreadsheet": "Selecione planilha",
+    "selectSheet": "Selecionar planilha (nome da guia)",
+    "chooseSheet": "Escolha uma planilha",
+    "configureMapping": "Configurar mapeamento de coluna",
+    "back": "Voltar",
+    "mappingHint": "Digite os nomes das colunas exatamente como aparecem nos cabeçalhos (Linha 1).",
+    "nameColumn": "Coluna Nome",
+    "namePlaceholder": "por exemplo Nome completo",
+    "phoneColumn": "Coluna Telefone",
+    "phonePlaceholder": "por exemplo Número de telefone",
+    "companyColumn": "Empresa (opcional)",
+    "companyPlaceholder": "por exemplo Empresa",
+    "saveForQuickSync": "Salve essas configurações para sincronização rápida com um clique",
+    "initialSync": "Execute a sincronização inicial",
+    "connectedToGoogle": "Conectado ao Google",
+    "disconnect": "Desconectar conta"
+  }
+}
