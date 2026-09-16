@@ -9,6 +9,7 @@
     "campaigns": "Kampagnen",
     "callLogs": "Anrufprotokolle",
     "appointments": "Termine",
+    "credits": "Guthaben & Wallet",
     "support": "Support"
   },
   "secondary": { "admin": "Administration", "settings": "Einstellungen" },

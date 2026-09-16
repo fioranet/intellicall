@@ -3,11 +3,13 @@ const Settings = require('../../models/Settings');
 const Agent = require('../../models/Agent');
 const Lead = require('../../models/Lead');
 const CallLog = require('../../models/CallLog');
+const User = require('../../models/User');
 const { analyzeCallLog } = require('../../utils/analyzer');
 const WebhookService = require('../webhook-service');
 const EmailService = require('../email-service');
 const { GeminiLiveBridge } = require('../gemini-live/gemini-bridge');
 const { computeDuration } = require('../../utils/call-duration');
+const { resolveCallAiConfig, calculateCreditUsage } = require('../../utils/ai-key-resolver');
 
 const RTP_HEADER_SIZE = 12;
 /**
@@ -110,22 +112,33 @@ class SipGeminiLiveStream {
 
     async start() {
         try {
-            [this.settings, this.agent, this.lead] = await Promise.all([
-                Settings.findOne({ userId: this.userId }),
+            [this.agent, this.lead] = await Promise.all([
                 Agent.findOne({ _id: this.agentId, createdBy: this.userId }),
                 Lead.findOne({ _id: this.leadId, createdBy: this.userId })
             ]);
 
-            if (!this.settings || !this.agent) {
-                const msg = 'Missing settings or agent configuration.';
+            if (!this.agent) {
+                const msg = 'Missing agent configuration.';
                 console.error(`❌ [SIP Gemini] ${msg}`);
                 this._pushError('system', 'missing_config', msg);
                 return false;
             }
+
+            const aiConfig = await resolveCallAiConfig(this.userId, this.agent, 'sip');
+            if (!aiConfig.allowed) {
+                console.error(`❌ [SIP Gemini] Blocked: ${aiConfig.message}`);
+                this._pushError('system', aiConfig.reason || 'blocked', aiConfig.message);
+                return false;
+            }
+
+            this.settings = aiConfig.settings;
+            this.operatingMode = aiConfig.operatingMode;
+            this.billingCadence = aiConfig.billingCadence || 'full_minute';
+
             // Self-contained engine: speech recognition, reasoning and speech generation
             // all happen inside one model, so only the Gemini key is required.
             if (!this.settings.geminiKey) {
-                const msg = 'Missing API keys: Gemini. Please configure it in Settings.';
+                const msg = 'Missing API keys: Gemini. Please configure it in SuperAdmin or Settings.';
                 console.error(`❌ [SIP Gemini] ${msg}`);
                 this._pushError('system', 'missing_keys', msg);
                 return false;
@@ -312,9 +325,23 @@ class SipGeminiLiveStream {
                 // rather than leaving it stuck 'in-progress'.
                 const hadConversation = transcript.length > 0;
 
+                // Calculate credit usage if call was on Managed AI
+                let creditsConsumed = 0;
+                if (this.operatingMode === 'managed' && duration > 0) {
+                    creditsConsumed = calculateCreditUsage(duration, this.billingCadence);
+                    try {
+                        await User.findByIdAndUpdate(this.userId, { $inc: { credits: -creditsConsumed } });
+                        console.log(`💳 [SIP Gemini] [${this.callId}] Debited ${creditsConsumed} credits for ${duration}s call (cadence: ${this.billingCadence})`);
+                    } catch (creditErr) {
+                        console.error(`❌ [SIP Gemini] Credit debit error:`, creditErr);
+                    }
+                }
+
                 const updateData = {
                     status: hadConversation ? 'completed' : 'failed', transcript,
-                    endTime, duration, provider: 'sip', voiceEngine: 'gemini_live'
+                    endTime, duration, provider: 'sip', voiceEngine: 'gemini_live',
+                    isManagedAi: this.operatingMode === 'managed',
+                    creditsConsumed
                 };
 
                 const log = await CallLog.findOneAndUpdate(

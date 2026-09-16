@@ -18,6 +18,7 @@ import {
     HeadphonesIcon,
     Database,
     Calendar,
+    Coins,
 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { dirFor } from "@/i18n/config";
@@ -36,6 +37,7 @@ const mainMenuItems = [
     { key: "campaigns", href: "/campaigns", icon: Megaphone },
     { key: "callLogs", href: "/call-logs", icon: Phone },
     { key: "appointments", href: "/appointments", icon: Calendar },
+    { key: "credits", href: "/credits", icon: Coins },
     { key: "support", href: "/support", icon: HeadphonesIcon },
 ];
 

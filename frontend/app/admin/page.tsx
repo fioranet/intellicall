@@ -11,7 +11,9 @@ import {
     Calendar,
     CreditCard,
     Shield,
-    Loader2
+    Loader2,
+    Coins,
+    Sparkles
 } from "lucide-react";
 import {
     Card,
@@ -80,6 +82,14 @@ export default function AdminUsersPage() {
         password: "",
         role: "user",
         planId: "none"
+    });
+    const [isBillingModalOpen, setIsBillingModalOpen] = useState(false);
+    const [billingFormData, setBillingFormData] = useState({
+        operatingMode: "managed",
+        billingType: "prepaid",
+        billingCadence: "full_minute",
+        postpaidCreditLimit: 0,
+        creditAdjustment: 0
     });
 
     const fetchUsers = async () => {
@@ -180,6 +190,49 @@ export default function AdminUsersPage() {
         }
     };
 
+    const handleOpenBillingModal = (user: any) => {
+        setSelectedUser(user);
+        setBillingFormData({
+            operatingMode: user.operatingMode || "managed",
+            billingType: user.billingSettings?.type || "prepaid",
+            billingCadence: user.billingSettings?.billingCadence || "full_minute",
+            postpaidCreditLimit: user.billingSettings?.postpaidCreditLimit || 0,
+            creditAdjustment: 0
+        });
+        setIsBillingModalOpen(true);
+    };
+
+    const handleUpdateBilling = async () => {
+        if (!selectedUser) return;
+        try {
+            setIsUpdating(true);
+            const token = localStorage.getItem("token");
+            const response = await axios.patch(
+                `${API_BASE_URL}/admin/users/${selectedUser._id}/billing`,
+                {
+                    operatingMode: billingFormData.operatingMode,
+                    billingType: billingFormData.billingType,
+                    billingCadence: billingFormData.billingCadence,
+                    postpaidCreditLimit: Number(billingFormData.postpaidCreditLimit) || 0,
+                    creditAdjustment: Number(billingFormData.creditAdjustment) || 0
+                },
+                {
+                    headers: { Authorization: `Bearer ${token}` }
+                }
+            );
+
+            if (response.data?.status === "success") {
+                toast.success("Configuração de faturamento e IA atualizada com sucesso");
+                setIsBillingModalOpen(false);
+                fetchUsers();
+            }
+        } catch (err: any) {
+            toast.error(err.response?.data?.message || "Erro ao atualizar faturamento");
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
     const filteredUsers = users.filter(user =>
         user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.email.toLowerCase().includes(searchTerm.toLowerCase())
@@ -231,6 +284,7 @@ export default function AdminUsersPage() {
                                     <TableHead className="font-semibold px-6">{t("users.table.user")}</TableHead>
                                     <TableHead className="font-semibold">{t("users.table.role")}</TableHead>
                                     <TableHead className="font-semibold">{t("users.table.plan")}</TableHead>
+                                    <TableHead className="font-semibold">Créditos & Modelo</TableHead>
                                     <TableHead className="font-semibold">{t("users.table.status")}</TableHead>
                                     <TableHead className="font-semibold">{t("users.table.joined")}</TableHead>
                                     <TableHead className="text-end px-6 font-semibold">{t("users.table.actions")}</TableHead>
@@ -269,6 +323,29 @@ export default function AdminUsersPage() {
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
+                                            <div className="flex flex-col gap-1">
+                                                <div className="flex items-center gap-1.5 font-semibold text-xs">
+                                                    <Coins className="h-3.5 w-3.5 text-amber-500" />
+                                                    <span>{user.credits ?? 0} cr</span>
+                                                    <span className="text-[10px] text-muted-foreground">({user.billingSettings?.type === 'postpaid' ? 'Pós-pago' : 'Pré-pago'})</span>
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    {user.operatingMode === 'byok' ? (
+                                                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-purple-300 text-purple-600 bg-purple-50 dark:bg-purple-950/40">
+                                                            BYOK
+                                                        </Badge>
+                                                    ) : (
+                                                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-emerald-300 text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 flex items-center gap-0.5">
+                                                            <Sparkles className="h-2.5 w-2.5" /> Fixo Gerenciado
+                                                        </Badge>
+                                                    )}
+                                                    <span className="text-[10px] text-muted-foreground">
+                                                        {user.billingSettings?.billingCadence === 'thirty_seconds' ? '30s' : '1 min'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
                                             <div className="flex items-center gap-1.5">
                                                 <div className={`h-2 w-2 rounded-full ${user.isActive !== false ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
                                                 <span className={`text-sm font-medium capitalize ${user.isActive === false ? 'text-red-500' : ''}`}>
@@ -302,6 +379,13 @@ export default function AdminUsersPage() {
                                                         }}
                                                     >
                                                         {t("users.actions.changePlan")}
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem
+                                                        className="cursor-pointer"
+                                                        onClick={() => handleOpenBillingModal(user)}
+                                                    >
+                                                        <Coins className="me-2 h-4 w-4 text-amber-500" />
+                                                        Modelo IA & Faturamento
                                                     </DropdownMenuItem>
                                                     <DropdownMenuSeparator />
                                                     <DropdownMenuItem
@@ -440,6 +524,137 @@ export default function AdminUsersPage() {
                         <Button onClick={handleAddUser} disabled={isUpdating}>
                             {isUpdating && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
                             {t("users.createDialog.submit")}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={isBillingModalOpen} onOpenChange={setIsBillingModalOpen}>
+                <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Coins className="h-5 w-5 text-amber-500" />
+                            Modelo de IA & Faturamento
+                        </DialogTitle>
+                        <DialogDescription>
+                            Configure o modelo operacional e as regras de cobrança de créditos para <strong>{selectedUser?.name}</strong> ({selectedUser?.email}).
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="grid gap-4 py-3">
+                        <div className="rounded-xl border bg-muted/40 p-3 flex items-center justify-between">
+                            <div>
+                                <span className="text-xs text-muted-foreground">Saldo Atual</span>
+                                <div className="text-xl font-bold text-foreground flex items-center gap-1.5">
+                                    <Coins className="h-4 w-4 text-amber-500" />
+                                    {selectedUser?.credits ?? 0} créditos
+                                </div>
+                            </div>
+                            <div className="text-end">
+                                <span className="text-xs text-muted-foreground">Regime Atual</span>
+                                <div className="text-sm font-semibold capitalize text-primary">
+                                    {selectedUser?.billingSettings?.type === 'postpaid' ? 'Pós-pago' : 'Pré-pago'}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label className="font-semibold text-xs">Modelo Operacional de IA</Label>
+                            <Select
+                                value={billingFormData.operatingMode}
+                                onValueChange={(val) => setBillingFormData({ ...billingFormData, operatingMode: val })}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="managed">
+                                        <div className="flex flex-col text-start">
+                                            <span className="font-medium text-emerald-600 dark:text-emerald-400">Modelo 1: Fixo Gerenciado (Recomendado)</span>
+                                            <span className="text-[11px] text-muted-foreground">Chaves Nuvv Master • Gemini Multimodal S2S • Zero Config</span>
+                                        </div>
+                                    </SelectItem>
+                                    <SelectItem value="byok">
+                                        <div className="flex flex-col text-start">
+                                            <span className="font-medium text-purple-600 dark:text-purple-400">Modelo 3: BYOK (Chaves Próprias)</span>
+                                            <span className="text-[11px] text-muted-foreground">Chaves do cliente • Gemini Multimodal BLOQUEADO</span>
+                                        </div>
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-2">
+                                <Label className="font-semibold text-xs">Tipo de Cobrança</Label>
+                                <Select
+                                    value={billingFormData.billingType}
+                                    onValueChange={(val) => setBillingFormData({ ...billingFormData, billingType: val })}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="prepaid">Pré-pago (Carteira)</SelectItem>
+                                        <SelectItem value="postpaid">Pós-pago (Fatura)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="font-semibold text-xs">Cadência de Tarifação</Label>
+                                <Select
+                                    value={billingFormData.billingCadence}
+                                    onValueChange={(val) => setBillingFormData({ ...billingFormData, billingCadence: val })}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="full_minute">Minuto Cheio (1 cr/min)</SelectItem>
+                                        <SelectItem value="thirty_seconds">30s / 0.5 cr (Fracionado)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
+                        {billingFormData.billingType === "postpaid" && (
+                            <div className="space-y-2">
+                                <Label className="font-semibold text-xs">Limite de Crédito Pós-pago (Franquia)</Label>
+                                <Input
+                                    type="number"
+                                    min="0"
+                                    value={billingFormData.postpaidCreditLimit}
+                                    onChange={(e) => setBillingFormData({ ...billingFormData, postpaidCreditLimit: Number(e.target.value) })}
+                                    placeholder="Ex: 500"
+                                />
+                                <span className="text-[11px] text-muted-foreground">O cliente poderá operar com saldo negativo até este limite.</span>
+                            </div>
+                        )}
+
+                        <div className="space-y-2 pt-2 border-t">
+                            <Label className="font-semibold text-xs">Ajuste Manual de Saldo (Créditos)</Label>
+                            <div className="flex items-center gap-2">
+                                <Input
+                                    type="number"
+                                    value={billingFormData.creditAdjustment}
+                                    onChange={(e) => setBillingFormData({ ...billingFormData, creditAdjustment: Number(e.target.value) })}
+                                    placeholder="0 (ex: 50 para adicionar, -20 para deduzir)"
+                                />
+                            </div>
+                            <span className="text-[11px] text-muted-foreground">
+                                Insira um valor positivo para creditar ou negativo para estornar/deduzir do saldo do cliente.
+                            </span>
+                        </div>
+                    </div>
+
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsBillingModalOpen(false)}>
+                            {c("actions.cancel")}
+                        </Button>
+                        <Button onClick={handleUpdateBilling} disabled={isUpdating} className="bg-primary text-primary-foreground">
+                            {isUpdating && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
+                            Salvar Alterações
                         </Button>
                     </DialogFooter>
                 </DialogContent>

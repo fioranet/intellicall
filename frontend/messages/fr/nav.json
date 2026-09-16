@@ -9,7 +9,8 @@
     "campaigns": "Campagnes",
     "callLogs": "Journal d'appels",
     "appointments": "Rendez-vous",
-    "support": "Assistance"
+    "credits": "Crédits & Portefeuille",
+    "support": "Support"
   },
   "secondary": { "admin": "Administration", "settings": "Paramètres" },
   "badge": {

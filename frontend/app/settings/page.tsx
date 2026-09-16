@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import axios from "axios";
-import { Loader2, Clock, Globe, Phone, Lock, Server, Activity, Settings, ShoppingBag, Key, Webhook, ChevronDown, Mail, Plug, Languages } from "lucide-react";
+import { Loader2, Clock, Globe, Phone, Lock, Server, Activity, Settings, ShoppingBag, Key, Webhook, ChevronDown, Mail, Plug, Languages, Coins, Sparkles } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -739,6 +739,50 @@ function SettingsPageContent() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
+                            {/* Operating Mode Banner */}
+                            {user?.operatingMode === "byok" ? (
+                                <div className="mb-6 p-4 rounded-xl border border-purple-200 dark:border-purple-900/50 bg-purple-50/50 dark:bg-purple-950/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                    <div className="flex items-start gap-3">
+                                        <div className="p-2 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400">
+                                            <Key className="h-5 w-5" />
+                                        </div>
+                                        <div>
+                                            <h4 className="text-sm font-bold text-foreground">Modelo 3: BYOK Habilitado</h4>
+                                            <p className="text-xs text-muted-foreground mt-0.5">
+                                                Sua conta está autorizada a utilizar chaves próprias de API (OpenRouter, ElevenLabs, Deepgram, Sarvam).
+                                                O motor multimodal Gemini Live permanece exclusivo do Modelo Gerenciado.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <Badge variant="outline" className="text-purple-600 border-purple-300 shrink-0">
+                                        Chaves Próprias
+                                    </Badge>
+                                </div>
+                            ) : (
+                                <div className="mb-6 p-4 rounded-xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/50 dark:bg-emerald-950/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                    <div className="flex items-start gap-3">
+                                        <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                                            <Sparkles className="h-5 w-5" />
+                                        </div>
+                                        <div>
+                                            <div className="flex items-center gap-2">
+                                                <h4 className="text-sm font-bold text-foreground">Modelo 1: IA Fixa Gerenciada (Ativo)</h4>
+                                                <Badge className="bg-emerald-600 text-white text-[10px] h-4">Oficial Nuvv</Badge>
+                                            </div>
+                                            <p className="text-xs text-muted-foreground mt-1 max-w-2xl">
+                                                Você não precisa fornecer chaves de IA (Gemini, OpenRouter ou ElevenLabs). A plataforma injeta chaves master de alta performance com síntese de voz multimodal em tempo real. O uso é cobrado automaticamente em créditos na sua carteira.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <Link href="/credits">
+                                        <Button variant="outline" size="sm" className="border-emerald-300 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 shrink-0">
+                                            <Coins className="h-3.5 w-3.5 me-1.5 text-amber-500" />
+                                            Ver Carteira de Créditos
+                                        </Button>
+                                    </Link>
+                                </div>
+                            )}
+
                             <form onSubmit={handleSaveSettings} className="space-y-6">
                                 <div className="grid gap-6 md:grid-cols-2">
                                     <div className="space-y-2">

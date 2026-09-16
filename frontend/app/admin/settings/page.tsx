@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useCallback, useEffect, useState, useRef } from "react";
 import {
     Loader2,
@@ -17,6 +17,8 @@ import {
     Mail,
     Share2,
     Star,
+    Sparkles,
+    Key,
 } from "lucide-react";
 import {
     Card,
@@ -201,6 +203,7 @@ function BrandingUpload({
 export default function AdminSettingsPage() {
     const t = useTranslations("admin");
     const c = useTranslations("common");
+    const locale = useLocale();
     const [settings, setSettings] = useState<any>({
         currency: "USD",
         showCodeCanyonButton: false,
@@ -211,6 +214,10 @@ export default function AdminSettingsPage() {
         contactEmail: "",
         hqAddress: "",
         socialLinks: { instagram: "", linkedin: "", youtube: "" },
+        masterAi: {
+            geminiKey: "",
+            defaultEngine: "gemini_live",
+        },
         branding: {
             appName: "IntelliCallAI",
             primaryColor: "#8078F0",
@@ -263,6 +270,10 @@ export default function AdminSettingsPage() {
                         instagram: s.socialLinks?.instagram || "",
                         linkedin: s.socialLinks?.linkedin || "",
                         youtube: s.socialLinks?.youtube || "",
+                    },
+                    masterAi: {
+                        geminiKey: s.masterAi?.geminiKey || "",
+                        defaultEngine: s.masterAi?.defaultEngine || "gemini_live",
                     },
                     branding: {
                         appName: s.branding?.appName || "IntelliCallAI",
@@ -353,6 +364,60 @@ export default function AdminSettingsPage() {
             <AdminNav currentPath="/admin/settings" />
 
             <div className="grid gap-6 max-w-4xl">
+                {/* Master AI Card */}
+                <Card className="rounded-2xl border-border shadow-sm">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Sparkles className="h-5 w-5 text-primary" />
+                            {locale === "pt" ? "Inteligência Artificial Mestra (Modelo 1 - Gerenciado)" : "Master AI Configuration (Managed Tier)"}
+                        </CardTitle>
+                        <CardDescription>
+                            {locale === "pt" 
+                                ? "Configure a chave de API mestra do Google Gemini Live. Esta chave alimenta todos os agentes no modelo gerenciado da Nuvv Digital com processamento de voz Speech-to-Speech nativo."
+                                : "Configure the platform master Google Gemini Live API key for the managed voice AI tier."}
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="geminiKey" className="flex items-center gap-2 font-medium">
+                                    <Key className="h-4 w-4 text-muted-foreground" />
+                                    {locale === "pt" ? "Chave de API Gemini Live (Google AI)" : "Gemini Live API Key (Google AI)"}
+                                </Label>
+                                {settings.masterAi?.geminiKey ? (
+                                    <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-0.5 rounded-full">
+                                        <CheckCircle2 className="h-3 w-3" />
+                                        {locale === "pt" ? "Chave Ativa" : "Active Key"}
+                                    </span>
+                                ) : (
+                                    <span className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-2.5 py-0.5 rounded-full font-medium">
+                                        {locale === "pt" ? "Não configurada" : "Not configured"}
+                                    </span>
+                                )}
+                            </div>
+                            <Input
+                                id="geminiKey"
+                                type="password"
+                                placeholder="AIzaSy..."
+                                value={settings.masterAi?.geminiKey || ""}
+                                onChange={(e) => setSettings({
+                                    ...settings,
+                                    masterAi: {
+                                        ...(settings.masterAi || {}),
+                                        geminiKey: e.target.value
+                                    }
+                                })}
+                                className="font-mono"
+                            />
+                            <p className="text-xs text-muted-foreground">
+                                {locale === "pt" 
+                                    ? "Os clientes no Modelo Gerenciado realizarão chamadas utilizando esta chave, debitando créditos de suas carteiras (1 minuto = 1 crédito)."
+                                    : "Customers on the managed model will route calls through this key, consuming platform credits (1 min = 1 credit)."}
+                            </p>
+                        </div>
+                    </CardContent>
+                </Card>
+
                 {/* Branding Card */}
                 <Card className="rounded-2xl border-border shadow-sm">
                     <CardHeader>

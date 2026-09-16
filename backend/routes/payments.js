@@ -129,6 +129,94 @@ router.post('/stripe/create-checkout', auth, async (req, res) => {
     }
 });
 
+// @route   POST /api/payments/stripe/credits-checkout
+// @desc    Create a Stripe checkout session for purchasing credits
+router.post('/stripe/credits-checkout', auth, async (req, res) => {
+    try {
+        const { creditsAmount } = req.body;
+        const requestedCredits = parseInt(creditsAmount, 10);
+        if (!requestedCredits || requestedCredits <= 0) {
+            return res.status(400).json({ status: 'error', message: 'Quantidade de créditos inválida' });
+        }
+
+        const user = await User.findById(req.user._id).populate('plan');
+        const plan = user?.plan;
+
+        const creditPriceBrl = plan?.creditsConfig?.creditPriceBrl || 0.50;
+        const minRechargeCredits = plan?.creditsConfig?.minRechargeCredits || 50;
+
+        if (requestedCredits < minRechargeCredits) {
+            return res.status(400).json({
+                status: 'error',
+                message: `Quantidade mínima para recarga é de ${minRechargeCredits} créditos.`
+            });
+        }
+
+        const totalAmountBrl = requestedCredits * creditPriceBrl;
+        const stripeInstance = await getStripe();
+
+        const clientUrl = process.env.CLIENT_URL || 'https://flow.nuvv.com.br';
+        const session = await stripeInstance.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: [{
+                price_data: {
+                    currency: 'brl',
+                    product_data: {
+                        name: `Recarga de ${requestedCredits} Créditos IntelliCall`,
+                        description: `${requestedCredits} minutos de chamadas com Inteligência Artificial`,
+                    },
+                    unit_amount: Math.round(totalAmountBrl * 100),
+                },
+                quantity: 1,
+            }],
+            mode: 'payment',
+            success_url: `${clientUrl}/credits?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${clientUrl}/credits`,
+            customer_email: req.user.email,
+            metadata: {
+                type: 'credits_purchase',
+                userId: req.user._id.toString(),
+                creditsAmount: String(requestedCredits),
+            },
+        });
+
+        res.status(200).json({ status: 'success', data: { url: session.url } });
+    } catch (err) {
+        console.error('Stripe Credits Checkout Error:', err);
+        res.status(500).json({ status: 'error', message: err.message });
+    }
+});
+
+// @route   GET /api/payments/credits-summary
+// @desc    Get current user credits, rate, and purchase history
+router.get('/credits-summary', auth, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).populate('plan');
+        const plan = user?.plan;
+        const purchases = await Purchase.find({ user: req.user._id, purchaseType: 'credits' })
+            .sort({ createdAt: -1 })
+            .limit(20);
+
+        const creditPriceBrl = plan?.creditsConfig?.creditPriceBrl || 0.50;
+        const minRechargeCredits = plan?.creditsConfig?.minRechargeCredits || 50;
+
+        res.status(200).json({
+            status: 'success',
+            data: {
+                credits: user.credits || 0,
+                operatingMode: user.operatingMode || 'managed',
+                billingSettings: user.billingSettings || { type: 'prepaid', billingCadence: 'full_minute' },
+                creditPriceBrl,
+                minRechargeCredits,
+                planName: plan?.name || 'Padrão',
+                purchases
+            }
+        });
+    } catch (err) {
+        res.status(500).json({ status: 'error', message: err.message });
+    }
+});
+
 // @route   GET /api/payments/stripe/verify-session
 // @desc    Verify a checkout session status (frontend redirect fallback)
 router.get('/stripe/verify-session', auth, async (req, res) => {
@@ -142,7 +230,34 @@ router.get('/stripe/verify-session', auth, async (req, res) => {
         const session = await stripeInstance.checkout.sessions.retrieve(sessionId);
 
         if (session.payment_status === 'paid') {
-            const { userId, planId } = session.metadata;
+            const { userId, planId, type, creditsAmount } = session.metadata || {};
+
+            // Handle Credits Purchase
+            if (type === 'credits_purchase') {
+                const addedCredits = Number(creditsAmount) || 0;
+                let purchase = await Purchase.findOne({ paymentId: sessionId });
+                if (!purchase) {
+                    await User.findByIdAndUpdate(userId, {
+                        $inc: { credits: addedCredits }
+                    });
+                    purchase = await Purchase.create({
+                        user: userId,
+                        purchaseType: 'credits',
+                        creditsAmount: addedCredits,
+                        amount: session.amount_total / 100,
+                        currency: session.currency.toUpperCase(),
+                        paymentGateway: 'stripe',
+                        paymentId: sessionId,
+                        status: 'completed'
+                    });
+                }
+                const updatedUser = await User.findById(userId);
+                return res.status(200).json({
+                    status: 'success',
+                    message: `${addedCredits} créditos adicionados com sucesso!`,
+                    data: { creditsAmount: addedCredits, totalCredits: updatedUser.credits }
+                });
+            }
 
             // Find the plan to get its data
             const plan = await Plan.findById(planId);
@@ -159,10 +274,14 @@ router.get('/stripe/verify-session', auth, async (req, res) => {
                 expiryDate.setMonth(expiryDate.getMonth() + 1); // default 1 month
             }
 
+            // Also grant included credits if defined in plan
+            const includedCredits = plan.creditsConfig?.monthlyIncludedCredits || 0;
+
             await User.findByIdAndUpdate(userId, {
                 plan: planId,
                 planStatus: 'active',
-                planExpiry: expiryDate
+                planExpiry: expiryDate,
+                $inc: { credits: includedCredits }
             });
 
             // Record purchase if not already recorded

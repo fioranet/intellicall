@@ -254,7 +254,17 @@ router.post('/:id/test-session', auth, async (req, res) => {
             });
         }
 
-        const settings = await Settings.findOne({ userId: req.user._id });
+        const { resolveCallAiConfig } = require('../utils/ai-key-resolver');
+        const aiConfig = await resolveCallAiConfig(req.user._id, agent, 'browser');
+        if (!aiConfig.allowed) {
+            return res.status(400).json({
+                status: 'error',
+                code: aiConfig.reason || 'blocked',
+                message: aiConfig.message
+            });
+        }
+
+        const settings = aiConfig.settings;
         const missing = missingEngineKeys(settings, agent, 'browser');
         if (missing.length > 0) {
             return res.status(400).json({
@@ -337,6 +347,13 @@ router.post('/', auth, requireActivePlan, checkLimit('agents'), async (req, res)
             return res.status(400).json({ status: 'error', message: transferError });
         }
 
+        if (req.user.operatingMode === 'byok' && value.voiceEngine === 'gemini_live') {
+            return res.status(403).json({
+                status: 'error',
+                message: 'O motor Gemini Multimodal (Speech-to-Speech) é exclusivo da plataforma gerenciada e não é permitido no modo BYOK.'
+            });
+        }
+
         // Normalize outboundPhoneNumber
         if (value.outboundPhoneNumber === '' || value.outboundPhoneNumber === 'none') {
             value.outboundPhoneNumber = null;
@@ -414,6 +431,13 @@ router.patch('/:id', auth, async (req, res) => {
         const transferError = validateHumanTransfer(value.humanTransfer);
         if (transferError) {
             return res.status(400).json({ status: 'error', message: transferError });
+        }
+
+        if (req.user.operatingMode === 'byok' && value.voiceEngine === 'gemini_live') {
+            return res.status(403).json({
+                status: 'error',
+                message: 'O motor Gemini Multimodal (Speech-to-Speech) é exclusivo da plataforma gerenciada e não é permitido no modo BYOK.'
+            });
         }
 
         // Normalize outboundPhoneNumber & knowledgeBaseId

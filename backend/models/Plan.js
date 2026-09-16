@@ -33,6 +33,11 @@ const planSchema = new mongoose.Schema({
     dodoProductId: {
         type: String,
         trim: true
+    },
+    creditsConfig: {
+        creditPriceBrl: { type: Number, default: 0.50 },
+        minRechargeCredits: { type: Number, default: 50 },
+        monthlyIncludedCredits: { type: Number, default: 0 }
     }
 }, {
     timestamps: true

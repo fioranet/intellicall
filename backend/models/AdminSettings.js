@@ -100,6 +100,10 @@ const adminSettingsSchema = new mongoose.Schema({
             clientSecret: { type: String, default: '' },
             callbackUrl: { type: String, default: '' }
         }
+    },
+    masterAi: {
+        geminiKey: { type: String, default: '' },
+        defaultEngine: { type: String, default: 'gemini_live' }
     }
 }, {
     timestamps: true

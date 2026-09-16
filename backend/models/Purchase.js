@@ -6,10 +6,19 @@ const purchaseSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+    purchaseType: {
+        type: String,
+        enum: ['plan', 'credits'],
+        default: 'plan'
+    },
+    creditsAmount: {
+        type: Number,
+        default: 0
+    },
     plan: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Plan',
-        required: true
+        required: false
     },
     amount: {
         type: Number,

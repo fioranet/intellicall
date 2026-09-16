@@ -49,6 +49,14 @@ const callLogSchema = new mongoose.Schema({
         type: Number, // in seconds
         default: 0
     },
+    isManagedAi: {
+        type: Boolean,
+        default: false
+    },
+    creditsConsumed: {
+        type: Number,
+        default: 0
+    },
     recordingUrl: {
         type: String
     },

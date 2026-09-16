@@ -334,13 +334,18 @@ const handleVoiceStream = async (ws, req, opts = {}) => {
                     if (callSid && !isBrowserTest) activeTwilioCallSids.add(callSid);
 
                     try {
-                        settings = await Settings.findOne({ userId });
                         agent = await Agent.findOne({ _id: agentId, createdBy: userId });
-                        // Browser tests reuse a single per-user test lead minted by the
-                        // session route, so merge fields and appointment booking behave
-                        // exactly as they do on a real call.
                         lead = await Lead.findOne({ _id: leadId, createdBy: userId });
                         if (agent) voiceQuality = resolveVoiceQuality(agent);
+
+                        const { resolveCallAiConfig } = require('../utils/ai-key-resolver');
+                        const aiConfig = await resolveCallAiConfig(userId, agent, isBrowserTest ? 'browser' : 'stream');
+                        if (!aiConfig.allowed) {
+                            console.error(`❌ [Voice Stream] Blocked: ${aiConfig.message}`);
+                            sendErrorAndClose('system', aiConfig.reason || 'blocked', aiConfig.message);
+                            return;
+                        }
+                        settings = aiConfig.settings;
 
                         // Per-engine key requirements (deepgram_agent skips OpenRouter; sarvam
                         // is self-contained and needs only a Sarvam key).

@@ -58,6 +58,31 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    credits: {
+        type: Number,
+        default: 0
+    },
+    operatingMode: {
+        type: String,
+        enum: ['managed', 'byok'],
+        default: 'managed'
+    },
+    billingSettings: {
+        type: {
+            type: String,
+            enum: ['prepaid', 'postpaid'],
+            default: 'prepaid'
+        },
+        billingCadence: {
+            type: String,
+            enum: ['full_minute', 'thirty_seconds'],
+            default: 'full_minute'
+        },
+        postpaidCreditLimit: {
+            type: Number,
+            default: 0
+        }
+    },
     // Personal API key (for n8n / external automation). Only the sha256 hash
     // is stored; the plaintext key is shown once at generation time.
     apiKeyHash: {

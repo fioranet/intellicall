@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useEffect, useState } from "react";
 import {
     Layers,
@@ -17,7 +17,8 @@ import {
     CreditCard,
     Target,
     Users,
-    PhoneCall
+    PhoneCall,
+    Sparkles
 } from "lucide-react";
 import {
     Card,
@@ -60,6 +61,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/a
 export default function AdminPlansPage() {
     const t = useTranslations("admin");
     const c = useTranslations("common");
+    const locale = useLocale();
     const [plans, setPlans] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -77,6 +79,11 @@ export default function AdminPlansPage() {
             campaigns: 1,
             leads: 100,
             callsPerMonth: 100
+        },
+        creditsConfig: {
+            creditPriceBrl: 0.50,
+            minRechargeCredits: 50,
+            monthlyIncludedCredits: 0
         }
     });
     const [currency, setCurrency] = useState("$");
@@ -137,6 +144,11 @@ export default function AdminPlansPage() {
                 campaigns: 1,
                 leads: 100,
                 callsPerMonth: 100
+            },
+            creditsConfig: {
+                creditPriceBrl: 0.50,
+                minRechargeCredits: 50,
+                monthlyIncludedCredits: 0
             }
         });
         setEditingPlan(null);
@@ -159,6 +171,11 @@ export default function AdminPlansPage() {
                     callsPerMonth: typeof plan.limits?.callsPerMonth === "number"
                         ? plan.limits.callsPerMonth
                         : 100
+                },
+                creditsConfig: {
+                    creditPriceBrl: plan.creditsConfig?.creditPriceBrl ?? 0.50,
+                    minRechargeCredits: plan.creditsConfig?.minRechargeCredits ?? 50,
+                    monthlyIncludedCredits: plan.creditsConfig?.monthlyIncludedCredits ?? 0
                 }
             });
         } else {
@@ -546,6 +563,58 @@ export default function AdminPlansPage() {
                                         />
                                     </div>
                                 )}
+                            </div>
+                        </div>
+
+                        {/* AI Credits Configuration */}
+                        <div className="pt-3 border-t space-y-3">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
+                                    <Sparkles className="h-3.5 w-3.5" />
+                                    {locale === "pt" ? "Créditos de IA & Chamadas (1 Crédito = 1 Minuto)" : "AI Calling Credits (1 Credit = 1 Minute)"}
+                                </h3>
+                            </div>
+                            <div className="grid grid-cols-3 gap-3">
+                                <div className="space-y-1.5">
+                                    <Label className="text-xs">{locale === "pt" ? "Tarifa p/ Crédito (R$)" : "Price per Credit (R$)"}</Label>
+                                    <Input
+                                        type="number"
+                                        step="0.05"
+                                        value={formData.creditsConfig.creditPriceBrl}
+                                        onChange={(e) => setFormData({
+                                            ...formData,
+                                            creditsConfig: { ...formData.creditsConfig, creditPriceBrl: parseFloat(e.target.value) || 0.50 }
+                                        })}
+                                        className="rounded-xl h-10 font-mono"
+                                    />
+                                    <p className="text-[10px] text-muted-foreground">{locale === "pt" ? "Ex: 0.50 = R$ 0,50/min" : "Cost per minute"}</p>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-xs">{locale === "pt" ? "Recarga Mínima" : "Min. Recharge"}</Label>
+                                    <Input
+                                        type="number"
+                                        value={formData.creditsConfig.minRechargeCredits}
+                                        onChange={(e) => setFormData({
+                                            ...formData,
+                                            creditsConfig: { ...formData.creditsConfig, minRechargeCredits: parseInt(e.target.value, 10) || 50 }
+                                        })}
+                                        className="rounded-xl h-10 font-mono"
+                                    />
+                                    <p className="text-[10px] text-muted-foreground">{locale === "pt" ? "Mínimo de créditos" : "Min credits qty"}</p>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-xs">{locale === "pt" ? "Créditos Inclusos" : "Included Credits"}</Label>
+                                    <Input
+                                        type="number"
+                                        value={formData.creditsConfig.monthlyIncludedCredits}
+                                        onChange={(e) => setFormData({
+                                            ...formData,
+                                            creditsConfig: { ...formData.creditsConfig, monthlyIncludedCredits: parseInt(e.target.value, 10) || 0 }
+                                        })}
+                                        className="rounded-xl h-10 font-mono"
+                                    />
+                                    <p className="text-[10px] text-muted-foreground">{locale === "pt" ? "Grátis por ciclo" : "Per cycle"}</p>
+                                </div>
                             </div>
                         </div>
 

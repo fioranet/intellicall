@@ -101,6 +101,45 @@ router.patch('/users/:id/status', auth, isAdmin, async (req, res) => {
     }
 });
 
+// PATCH /api/admin/users/:id/billing - Update user AI operating mode, billing settings, and credits
+router.patch('/users/:id/billing', auth, isAdmin, async (req, res) => {
+    try {
+        const { operatingMode, billingType, billingCadence, postpaidCreditLimit, creditAdjustment } = req.body;
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ status: 'error', message: 'User not found' });
+
+        if (operatingMode && ['managed', 'byok'].includes(operatingMode)) {
+            user.operatingMode = operatingMode;
+        }
+
+        if (!user.billingSettings) {
+            user.billingSettings = { type: 'prepaid', billingCadence: 'full_minute', postpaidCreditLimit: 0 };
+        }
+
+        if (billingType && ['prepaid', 'postpaid'].includes(billingType)) {
+            user.billingSettings.type = billingType;
+        }
+
+        if (billingCadence && ['full_minute', 'thirty_seconds'].includes(billingCadence)) {
+            user.billingSettings.billingCadence = billingCadence;
+        }
+
+        if (typeof postpaidCreditLimit === 'number') {
+            user.billingSettings.postpaidCreditLimit = Math.max(0, postpaidCreditLimit);
+        }
+
+        if (typeof creditAdjustment === 'number' && !isNaN(creditAdjustment)) {
+            user.credits = (typeof user.credits === 'number' ? user.credits : 0) + creditAdjustment;
+        }
+
+        await user.save();
+        await user.populate('plan');
+        res.status(200).json({ status: 'success', data: { user } });
+    } catch (err) {
+        res.status(400).json({ status: 'error', message: err.message });
+    }
+});
+
 // GET /api/admin/plans - List all plans
 router.get('/plans', auth, isAdmin, async (req, res) => {
     try {

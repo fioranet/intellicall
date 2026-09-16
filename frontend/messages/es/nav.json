@@ -9,6 +9,7 @@
     "campaigns": "Campañas",
     "callLogs": "Registro de llamadas",
     "appointments": "Citas",
+    "credits": "Créditos y Cartera",
     "support": "Soporte"
   },
   "secondary": { "admin": "Administración", "settings": "Ajustes" },
