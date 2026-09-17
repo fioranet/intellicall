@@ -100,7 +100,6 @@ router.post('/stripe/create-checkout', auth, async (req, res) => {
         const stripeInstance = await getStripe();
 
         const session = await stripeInstance.checkout.sessions.create({
-            payment_method_types: ['card'],
             line_items: [{
                 price_data: {
                     currency: (adminSettings.currency || 'USD').toLowerCase(),
@@ -157,12 +156,11 @@ router.post('/stripe/credits-checkout', auth, async (req, res) => {
 
         const clientUrl = process.env.CLIENT_URL || 'https://flow.nuvv.com.br';
         const session = await stripeInstance.checkout.sessions.create({
-            payment_method_types: ['card'],
             line_items: [{
                 price_data: {
                     currency: 'brl',
                     product_data: {
-                        name: `Recarga de ${requestedCredits} Créditos IntelliCall`,
+                        name: `Recarga de ${requestedCredits} Créditos`,
                         description: `${requestedCredits} minutos de chamadas com Inteligência Artificial`,
                     },
                     unit_amount: Math.round(totalAmountBrl * 100),
