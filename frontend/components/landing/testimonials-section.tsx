@@ -9,9 +9,9 @@ export function TestimonialsSection({ testimonials }: { testimonials: any[] }) {
             <div className="space-y-10">
                 <SectionHeading
                     number="10"
-                    eyebrow="Testimonials"
-                    title="Why teams love us"
-                    subtitle="Join the companies that have transformed their calling operations."
+                    eyebrow="Depoimentos"
+                    title="O que dizem sobre nossa solução"
+                    subtitle="Empresas que transformaram seu atendimento e televendas com nossos agentes de voz inteligentes."
                 />
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {testimonials.map((t, i) => (

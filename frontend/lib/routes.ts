@@ -5,6 +5,7 @@
  */
 export const PUBLIC_ROUTES = [
     "/",
+    "/landing",
     "/login",
     "/signup",
     "/auth/callback",

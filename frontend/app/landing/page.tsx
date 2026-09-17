@@ -92,11 +92,11 @@ export default function LandingPage() {
     ];
 
     const navLinks = [
-        { href: "#voice-engines", label: "Voice AI", icon: Mic },
-        { href: "#features", label: "Features", icon: Layers },
-        { href: "#integrations", label: "Integrations", icon: Plug },
-        { href: "#pricing", label: "Pricing", icon: CreditCard },
-        ...(showSelfHosting ? [{ href: "#self-host", label: "Self Host", icon: Server }] : []),
+        { href: "#voice-engines", label: "Vozes & IA", icon: Mic },
+        { href: "#features", label: "Recursos", icon: Layers },
+        { href: "#integrations", label: "Integrações", icon: Plug },
+        { href: "#pricing", label: "Planos", icon: CreditCard },
+        ...(showSelfHosting ? [{ href: "#self-host", label: "Hospedagem Própria", icon: Server }] : []),
     ];
 
     return (
@@ -122,19 +122,19 @@ export default function LandingPage() {
                     <div className="flex items-center gap-3">
                         {isLoggedIn ? (
                             <Button asChild variant="default" className="h-8 rounded-full bg-brand px-4 text-xs text-white hover:bg-brand/90 sm:h-9 sm:px-6 sm:text-sm">
-                                <Link href="/dashboard">Dashboard</Link>
+                                <Link href="/dashboard">Acessar Painel</Link>
                             </Button>
                         ) : (
                             <>
                                 <div className="flex items-center gap-2 md:hidden">
                                     <Button asChild variant="default" className="h-8 rounded-full bg-brand px-3 text-xs text-white hover:bg-brand/90">
-                                        <Link href="/signup" className="flex items-center">Get Started<ChevronRight className="ml-1 h-3 w-3" /></Link>
+                                        <Link href="/signup" className="flex items-center">Começar<ChevronRight className="ml-1 h-3 w-3" /></Link>
                                     </Button>
                                 </div>
                                 <div className="hidden items-center gap-4 md:flex">
-                                    <Link href="/login" className="px-4 py-2 text-sm font-medium transition-colors hover:text-brand">Login</Link>
+                                    <Link href="/login" className="px-4 py-2 text-sm font-medium transition-colors hover:text-brand">Entrar</Link>
                                     <Button asChild variant="default" className="rounded-full bg-brand px-6 text-white hover:bg-brand/90">
-                                        <Link href="/signup" className="text-white">Get Started <ChevronRight className="ml-2 h-4 w-4" /></Link>
+                                        <Link href="/signup" className="text-white">Criar Conta <ChevronRight className="ml-2 h-4 w-4" /></Link>
                                     </Button>
                                 </div>
                             </>
@@ -143,7 +143,7 @@ export default function LandingPage() {
                             type="button"
                             className="inline-flex items-center justify-center rounded-full border border-border p-2 text-muted-foreground transition-colors hover:border-foreground hover:text-foreground md:hidden"
                             onClick={() => setMobileMenuOpen((p) => !p)}
-                            aria-label="Toggle navigation menu"
+                            aria-label="Alternar menu de navegação"
                         >
                             {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
                         </button>
@@ -160,7 +160,7 @@ export default function LandingPage() {
                                 </Link>
                             ))}
                             <div className="my-1 h-px bg-border" />
-                            <Link href="/login" className="py-2 text-sm font-medium text-muted-foreground hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>Login</Link>
+                            <Link href="/login" className="py-2 text-sm font-medium text-muted-foreground hover:text-foreground" onClick={() => setMobileMenuOpen(false)}>Entrar</Link>
                         </nav>
                     </div>
                 )}
@@ -191,18 +191,18 @@ export default function LandingPage() {
                         name: appName,
                         applicationCategory: "BusinessApplication",
                         operatingSystem: "Web",
-                        description: `${appName} is an AI voice calling platform: human-like AI agents answer and place calls 24/7, qualify leads in real time, book appointments, and send WhatsApp reminders.`,
+                        description: `${appName} é uma plataforma de atendimento por voz com inteligência artificial: agentes humanizados atendem e realizam chamadas 24/7, qualificam leads em tempo real, agendam reuniões e enviam lembretes via WhatsApp.`,
                         offers: plans.length > 0 ? plans.map((p) => ({ "@type": "Offer", name: p.name, price: p.price, priceCurrency: currencyCode })) : undefined,
                         featureList: [
-                            "AI voice agents for inbound and outbound calls",
-                            "Multiple voice engines including Deepgram Voice Agent, Gemini Live, and Sarvam AI for Indian languages",
-                            "Automated outbound call campaigns",
-                            "Real-time lead qualification and scoring",
-                            "AI appointment booking with Google Calendar sync",
-                            "WhatsApp client appointment reminders",
-                            "Call recordings, transcripts, and AI summaries",
-                            "n8n, HubSpot, Slack, and Google Sheets integrations",
-                            "REST API with personal API keys",
+                            "Agentes de voz com IA para chamadas receptivas e ativas",
+                            "Vozes neurais ultra-realistas com respostas em tempo real",
+                            "Campanhas ativas de chamadas automatizadas",
+                            "Qualificação e pontuação de oportunidades em tempo real",
+                            "Agendamento de reuniões com sincronização no Google Calendar",
+                            "Lembretes automáticos para clientes via WhatsApp",
+                            "Gravações de chamadas, transcrições e resumos por IA",
+                            "Integrações nativas com n8n, HubSpot, Slack e Google Sheets",
+                            "API REST e Webhooks para integrações personalizadas",
                         ],
                     }),
                 }}

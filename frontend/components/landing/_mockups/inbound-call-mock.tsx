@@ -6,11 +6,11 @@ const BARS = [0.4, 0.7, 1, 0.6, 0.85, 0.5, 0.95, 0.65, 0.35, 0.8, 0.55, 1, 0.45,
 export function InboundCallMock() {
     return (
         <MockFrame
-            title="Incoming Call"
+            title="Chamada Receptiva"
             toolbar={
                 <div className="flex items-center gap-1.5">
-                    <span className="rounded-md border border-border px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">SIP Trunk</span>
-                    <span className="rounded-md border border-border px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">Twilio</span>
+                    <span className="rounded-md border border-border px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">Tronco SIP</span>
+                    <span className="rounded-md border border-border px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">Telefonia Nuvem</span>
                 </div>
             }
         >
@@ -20,8 +20,8 @@ export function InboundCallMock() {
                         <PhoneIncoming className="h-5 w-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                        <div className="text-sm font-semibold text-foreground">+1 (415) 555‑0142</div>
-                        <div className="text-xs text-muted-foreground">Answered by AI receptionist</div>
+                        <div className="text-sm font-semibold text-foreground">(11) 3090-6888</div>
+                        <div className="text-xs text-muted-foreground">Atendida pela assistente virtual IA</div>
                     </div>
                     <span className="rounded-full bg-brand/15 px-2.5 py-1 text-xs font-semibold tabular-nums text-brand">00:47</span>
                 </div>
@@ -37,8 +37,8 @@ export function InboundCallMock() {
                 </div>
 
                 <div className="space-y-1.5 text-xs leading-relaxed">
-                    <p className="text-muted-foreground"><span className="font-semibold text-foreground">Caller:</span> Hi, are you open this Saturday?</p>
-                    <p className="text-muted-foreground"><span className="font-semibold text-brand">Agent:</span> Yes! We&apos;re open 9 to 5. Want me to book you a slot?</p>
+                    <p className="text-muted-foreground"><span className="font-semibold text-foreground">Cliente:</span> Olá, vocês têm atendimento neste sábado?</p>
+                    <p className="text-muted-foreground"><span className="font-semibold text-brand">Agente:</span> Olá! Sim, atendemos das 9h às 17h. Deseja que eu reserve um horário para você?</p>
                 </div>
             </div>
         </MockFrame>

@@ -9,15 +9,15 @@ export function SpotlightAppointments() {
             strokes="a"
             reverse
             number="05"
-            eyebrow="Appointments & Knowledge"
+            eyebrow="Agendamentos & Conhecimento"
             watermark="book"
-            title={<>Books the meeting <span className="text-brand italic">mid-conversation</span></>}
-            description="Agents answer from your business knowledge base and lock in appointments during the call — checking availability, booking the slot, and confirming, all without a human."
+            title={<>Agendamento de reuniões <span className="text-brand italic">durante a conversa</span></>}
+            description="Os agentes respondem com base na documentação da sua empresa e confirmam compromissos diretamente na chamada — consultando horários livres, reservando a vaga e enviando confirmações."
             bullets={[
-                "Grounded answers from your uploaded FAQs, docs, and scripts.",
-                "Live availability check and booking, right on the call.",
-                "Two-way Google Calendar sync — reschedules and cancellations too.",
-                "Automatic WhatsApp reminders before every appointment.",
+                "Respostas precisas e seguras a partir dos manuais, regras e materiais da sua empresa.",
+                "Consulta de disponibilidade e agendamento em tempo real durante o telefonema.",
+                "Sincronização bidirecional com Google Calendar para reagendamentos e cancelamentos.",
+                "Lembretes automáticos via WhatsApp antes de cada reunião para reduzir ausências.",
             ]}
             mock={<BookingMock />}
         />

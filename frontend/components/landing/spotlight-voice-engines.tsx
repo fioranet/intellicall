@@ -8,15 +8,15 @@ export function SpotlightVoiceEngines() {
             variant="brand"
             strokes="a"
             number="02"
-            eyebrow="Voice Engines"
+            eyebrow="Vozes Humanizadas"
             watermark="voice"
-            title={<>Choose the voice engine <span className="italic underline decoration-white/50 decoration-4 underline-offset-[6px]">per agent</span></>}
-            description="Every agent picks its own engine — from a fully self-contained pipeline to the lowest-latency managed stack — so you tune quality, cost, and language for each use case."
+            title={<>Vozes ultra-realistas com respostas <span className="italic underline decoration-white/50 decoration-4 underline-offset-[6px]">instantâneas</span></>}
+            description="Nossos agentes conversam com empatia, clareza e ritmo natural, compreendendo as nuances da fala humana e respondendo sem atrasos perceptíveis."
             bullets={[
-                "Classic pipeline: Deepgram STT + OpenRouter LLM + ElevenLabs voices.",
-                "Deepgram Voice Agent: one socket, sub-second responses, managed LLM.",
-                "Sarvam AI: native Indian languages — Hindi, Tamil, Telugu, Bengali, Kannada, Marathi and more, on a single Sarvam key.",
-                "Preview any voice before you launch, and switch engines without rebuilding your agent.",
+                "Interrupção natural: o cliente pode falar e interromper a qualquer momento, como em uma ligação real.",
+                "Português do Brasil como idioma nativo padrão, com fluência e dicção brasileira.",
+                "Personalidade e tom sob medida: configure o perfil ideal para suporte, televendas ou cobrança.",
+                "Serviço 100% gerenciado e integrado: sem necessidade de contratar APIs adicionais ou configurações complexas.",
             ]}
             mock={<AgentEditorMock />}
         />

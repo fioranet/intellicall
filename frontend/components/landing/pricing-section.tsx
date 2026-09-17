@@ -19,9 +19,9 @@ export function PricingSection({ plans, loading, currencySymbol, isLoggedIn }: P
             <div className="space-y-10">
                 <SectionHeading
                     number="08"
-                    eyebrow="Pricing"
-                    title="Simple, transparent pricing"
-                    subtitle="Choose the plan that fits your growth. No hidden fees, ever."
+                    eyebrow="Planos &amp; Preços"
+                    title="Planos simples e transparentes"
+                    subtitle="Escolha o plano ideal para a sua operação crescer. Sem taxas ocultas."
                     onBrand
                 />
 
@@ -46,7 +46,7 @@ export function PricingSection({ plans, loading, currencySymbol, isLoggedIn }: P
                                     <div className={cn("relative h-full rounded-2xl bg-card p-8", popular ? "border-2 border-white" : "border border-border")}>
                                         {popular && (
                                             <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-white px-4 py-1 text-xs font-bold uppercase text-brand">
-                                                Most Popular
+                                                Mais Popular
                                             </div>
                                         )}
                                         <div className="space-y-6">
@@ -54,15 +54,15 @@ export function PricingSection({ plans, loading, currencySymbol, isLoggedIn }: P
                                                 <h3 className="text-xl font-bold text-foreground">{plan.name}</h3>
                                                 <div className="mt-4 flex items-baseline gap-1">
                                                     <span className="text-4xl font-bold text-foreground">{currencySymbol}{plan.price}</span>
-                                                    <span className="text-sm text-muted-foreground">/{plan.interval}</span>
+                                                    <span className="text-sm text-muted-foreground">/{plan.interval === 'month' ? 'mês' : plan.interval === 'year' ? 'ano' : plan.interval}</span>
                                                 </div>
                                             </div>
                                             <div className="space-y-3">
                                                 {[
-                                                    `${plan.limits?.agents || 0} AI Agents`,
-                                                    `${plan.limits?.campaigns || 0} Active Campaigns`,
-                                                    `${plan.limits?.leads || 0} Lead Capacity`,
-                                                    plan.limits?.callsPerMonth === -1 ? "Unlimited Calls (BYOK)" : `${plan.limits?.callsPerMonth ?? 0} Calls/mo`,
+                                                    `${plan.limits?.agents || 0} Agentes de IA`,
+                                                    plan.limits?.campaigns === -1 ? "Campanhas Ilimitadas" : `${plan.limits?.campaigns || 0} Campanhas Ativas`,
+                                                    plan.limits?.leads === -1 ? "Capacidade Ilimitada de Leads" : `${plan.limits?.leads || 0} Contatos / Leads`,
+                                                    plan.limits?.callsPerMonth === -1 ? "Chamadas Ilimitadas" : `${plan.limits?.callsPerMonth ?? 0} Chamadas / mês`,
                                                 ].map((line) => (
                                                     <div key={line} className="flex items-center gap-3">
                                                         <CheckCircle2 className="h-5 w-5 shrink-0 text-brand" />
@@ -75,7 +75,7 @@ export function PricingSection({ plans, loading, currencySymbol, isLoggedIn }: P
                                                 asChild
                                                 className={cn("h-12 w-full rounded-full font-bold", popular ? "bg-brand text-white hover:bg-brand/90" : "bg-primary text-primary-foreground hover:bg-primary/90")}
                                             >
-                                                <Link href={isLoggedIn ? "/settings?tab=billing" : "/signup"}>Get Started</Link>
+                                                <Link href={isLoggedIn ? "/settings?tab=billing" : "/signup"}>{isLoggedIn ? "Gerenciar Assinatura" : "Começar Agora"}</Link>
                                             </Button>
                                         </div>
                                     </div>
@@ -83,7 +83,7 @@ export function PricingSection({ plans, loading, currencySymbol, isLoggedIn }: P
                             );
                         })
                     ) : (
-                        <div className="col-span-full py-12 text-center text-muted-foreground">No plans available at the moment.</div>
+                        <div className="col-span-full py-12 text-center text-muted-foreground">Nenhum plano disponível no momento.</div>
                     )}
                 </div>
             </div>

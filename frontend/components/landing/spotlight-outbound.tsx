@@ -9,15 +9,15 @@ export function SpotlightOutbound() {
             strokes="b"
             reverse
             number="03"
-            eyebrow="Outbound Campaigns"
+            eyebrow="Campanhas Ativas"
             watermark="dial"
-            title={<>Dial <span className="text-brand italic">thousands of leads</span> on autopilot</>}
-            description="Import your list, set the schedule, and let AI agents run the whole campaign — no human dialers. Watch progress live and let AI score every lead the moment the call ends."
+            title={<>Disque para <span className="text-brand italic">centenas de contatos</span> no piloto automático</>}
+            description="Importe sua base de contatos, defina os horários de disparo e deixe os agentes de IA realizarem as ligações. Acompanhe o progresso em tempo real e receba os leads qualificados prontos para sua equipe fechar negócios."
             bullets={[
-                "Import leads from CSV or sync straight from Google Sheets.",
-                "Automatic scheduling and pacing across your whole list.",
-                "Real-time call progress and per-lead status at a glance.",
-                "AI qualifies and scores each lead so reps chase only the hottest.",
+                "Importação rápida de listas via arquivo CSV ou integração com planilhas.",
+                "Cadência e distribuição automática de chamadas sem sobrecarregar sua linha.",
+                "Acompanhamento ao vivo com status de atendimento, caixas postais e tempo de chamada.",
+                "Qualificação inteligente de leads: seus consultores focam apenas nas melhores oportunidades.",
             ]}
             mock={<CampaignMock />}
         />

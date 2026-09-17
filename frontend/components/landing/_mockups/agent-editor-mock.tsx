@@ -48,23 +48,23 @@ function EngineRow({
 
 export function AgentEditorMock() {
     return (
-        <MockFrame title="Agent · Voice">
+        <MockFrame title="Agente · Configuração de Atendimento">
             <div className="space-y-4">
                 <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    <Zap className="h-3.5 w-3.5" /> Voice Engine
+                    <Zap className="h-3.5 w-3.5" /> Perfil &amp; Especialidade do Agente
                 </div>
                 <div className="space-y-1 rounded-xl border border-border bg-background p-1.5">
-                    <EngineRow letter="C" name="Classic pipeline" meta="Deepgram + OpenRouter + ElevenLabs" selected />
-                    <EngineRow letter="D" name="Deepgram Voice Agent" meta="Lowest latency · managed LLM" />
-                    <EngineRow letter="G" name="Gemini Live" meta="One Google model · 97 languages" badge="New" />
-                    <EngineRow letter="S" name="Sarvam AI" meta="Indian languages · self-contained" />
+                    <EngineRow letter="R" name="Atendimento Receptivo & SAC" meta="Resolução de dúvidas e triagem 24/7" badge="Ativo" selected />
+                    <EngineRow letter="V" name="Prospecção & Vendas Ativas" meta="Qualificação ágil e conversão de oportunidades" />
+                    <EngineRow letter="A" name="Agendamento & Confirmação" meta="Sincronização direta com Google Calendar" />
+                    <EngineRow letter="C" name="Pós-Venda & Cobrança Amigável" meta="Negociação empática e fidelização de clientes" />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 pt-1">
                     <div className="space-y-1.5">
-                        <div className="text-xs font-medium text-muted-foreground">Language</div>
+                        <div className="text-xs font-medium text-muted-foreground">Idioma Nativo</div>
                         <div className="flex flex-wrap gap-1.5">
-                            {["English", "Spanish", "French"].map((l) => (
+                            {["Português (BR)", "Inglês", "Espanhol"].map((l) => (
                                 <span key={l} className="rounded-md border border-border bg-muted px-2 py-1 text-xs font-medium text-foreground">
                                     {l}
                                 </span>
@@ -72,10 +72,10 @@ export function AgentEditorMock() {
                         </div>
                     </div>
                     <div className="space-y-1.5">
-                        <div className="text-xs font-medium text-muted-foreground">Voice</div>
+                        <div className="text-xs font-medium text-muted-foreground">Voz Humanizada</div>
                         <div className="flex items-center justify-between rounded-md border border-border bg-muted px-2.5 py-1.5">
-                            <span className="text-xs font-semibold text-foreground">Rachel</span>
-                            <span className="rounded-full border border-brand/40 px-2 py-0.5 text-[10px] font-semibold text-brand">▶ Test</span>
+                            <span className="text-xs font-semibold text-foreground">Voz Natural (Camila)</span>
+                            <span className="rounded-full border border-brand/40 px-2 py-0.5 text-[10px] font-semibold text-brand">▶ Ouvir</span>
                         </div>
                     </div>
                 </div>

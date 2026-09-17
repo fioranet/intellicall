@@ -11,7 +11,7 @@ export default function RootPage() {
         if (token) {
             router.replace("/dashboard");
         } else {
-            router.replace("/login");
+            router.replace("/landing");
         }
     }, [router]);
 

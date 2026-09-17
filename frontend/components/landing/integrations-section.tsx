@@ -3,12 +3,12 @@ import { SectionHeading } from "./_shared/section-heading";
 import { Reveal } from "./_shared/reveal";
 
 const INTEGRATIONS = [
-    { src: "/images/integrations/hubspot.png", name: "HubSpot CRM", desc: "New leads sync as contacts automatically, matched by phone." },
-    { src: "/images/integrations/calendar.png", name: "Google Calendar", desc: "Booked appointments mirror to your calendar in real time." },
-    { src: "/images/integrations/sheets.png", name: "Google Sheets", desc: "Import leads from a spreadsheet and keep them in sync." },
-    { src: "/images/integrations/slack.png", name: "Slack", desc: "Real-time channel alerts for leads, calls, and bookings." },
-    { src: "/images/integrations/whatsapp.png", name: "WhatsApp", desc: "Event alerts and reminders via the Meta Cloud API." },
-    { src: "/images/integrations/n8n.png", name: "n8n", desc: "Stream events into 400+ apps, plus REST API callbacks." },
+    { src: "/images/integrations/hubspot.png", name: "HubSpot CRM", desc: "Novos contatos e oportunidades sincronizados automaticamente após a chamada." },
+    { src: "/images/integrations/calendar.png", name: "Google Calendar", desc: "Compromissos agendados durante a chamada refletidos na sua agenda em tempo real." },
+    { src: "/images/integrations/sheets.png", name: "Google Sheets", desc: "Importe listas de contatos de planilhas e mantenha os dados sempre atualizados." },
+    { src: "/images/integrations/slack.png", name: "Slack", desc: "Notificações em tempo real no canal da sua equipe para cada lead qualificado." },
+    { src: "/images/integrations/whatsapp.png", name: "WhatsApp", desc: "Envio de alertas de compromissos e confirmações automáticas para o cliente." },
+    { src: "/images/integrations/n8n.png", name: "n8n", desc: "Dispare fluxos com mais de 400 aplicativos e crie automações avançadas." },
 ];
 
 export function IntegrationsSection() {
@@ -17,9 +17,9 @@ export function IntegrationsSection() {
             <div className="space-y-10">
                 <SectionHeading
                     number="07"
-                    eyebrow="Integrations"
-                    title="Plug into the tools you already use"
-                    subtitle="One-click OAuth into your CRM, calendar, spreadsheet, and team chat. Leads, calls, and appointments flow into your stack automatically — no copy-paste, no Zapier required."
+                    eyebrow="Integrações"
+                    title="Conecte-se facilmente às ferramentas que você já utiliza"
+                    subtitle="Sincronização com seu CRM, calendário, planilhas e canais de comunicação. Contatos, chamadas e reuniões fluem automaticamente para a sua operação sem retrabalho."
                 />
                 <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                     {INTEGRATIONS.map((it, i) => (
@@ -37,7 +37,7 @@ export function IntegrationsSection() {
                     ))}
                 </div>
                 <Reveal className="text-center">
-                    <p className="text-sm text-muted-foreground">Signed webhooks and a documented REST API cover everything else.</p>
+                    <p className="text-sm text-muted-foreground">Webhooks em tempo real e API REST documentada para integração com qualquer sistema interno.</p>
                 </Reveal>
             </div>
         </SectionShell>

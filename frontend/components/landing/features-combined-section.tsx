@@ -4,12 +4,12 @@ import { SectionHeading } from "./_shared/section-heading";
 import { Reveal } from "./_shared/reveal";
 
 const FEATURES = [
-    { icon: BarChart3, title: "Lead scoring & qualification", desc: "Every call ends with an AI score and qualification so reps focus on the hottest prospects." },
-    { icon: Mic, title: "Recordings & transcripts", desc: "Every conversation recorded and transcribed word-for-word, with AI summaries." },
-    { icon: Sparkles, title: "AI call analysis", desc: "Automatic outcomes, sentiment, and next steps extracted from each call." },
-    { icon: FileSpreadsheet, title: "Leads & custom fields", desc: "Import, tag, and personalize calls with your own merge fields per lead." },
-    { icon: MessageSquare, title: "WhatsApp reminders", desc: "Appointment reminders delivered automatically over the WhatsApp Cloud API." },
-    { icon: Plug, title: "REST API & webhooks", desc: "Personal API keys and signed webhooks to wire calling into anything." },
+    { icon: BarChart3, title: "Qualificação & Score de Leads", desc: "Cada chamada é analisada e recebe uma nota automática para que sua equipe foque nos clientes com real intenção de compra." },
+    { icon: Mic, title: "Gravações & Transcrições", desc: "Ouça cada conversa e leia a transcrição palavra por palavra, acompanhada de um resumo executivo gerado por IA." },
+    { icon: Sparkles, title: "Análise de Sentimento & Objeções", desc: "Identificação automática do nível de interesse do cliente, principais dúvidas e próximos passos combinados." },
+    { icon: FileSpreadsheet, title: "Gestão de Leads & Campos Personalizados", desc: "Importe contatos com variáveis customizadas para que o agente personalize a abordagem pelo nome e contexto." },
+    { icon: MessageSquare, title: "Lembretes Automáticos no WhatsApp", desc: "Envio de confirmações e avisos de compromissos diretamente no WhatsApp do cliente para zerar faltas." },
+    { icon: Plug, title: "API REST & Webhooks", desc: "Chaves de API seguras e webhooks em tempo real para conectar seu fluxo de chamadas com qualquer CRM ou ERP." },
 ];
 
 export function FeaturesCombinedSection() {
@@ -18,9 +18,9 @@ export function FeaturesCombinedSection() {
             <div className="space-y-10">
                 <SectionHeading
                     number="06"
-                    eyebrow="Everything else"
-                    title="A complete calling operation"
-                    subtitle="Beyond the headline features, everything you need to run and measure AI calling at scale."
+                    eyebrow="Recursos Completos"
+                    title="Tudo o que sua operação precisa para escalar"
+                    subtitle="Além dos recursos principais, uma plataforma completa para gerenciar, medir e otimizar suas ligações com alta performance."
                     onBrand
                 />
                 <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

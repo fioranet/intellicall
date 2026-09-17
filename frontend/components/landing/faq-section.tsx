@@ -16,9 +16,9 @@ export function FaqSection({ faqs, appName }: { faqs: Faq[]; appName: string }) 
             <div className="mx-auto max-w-3xl space-y-12">
                 <SectionHeading
                     number="11"
-                    eyebrow="FAQ"
-                    title="Frequently asked questions"
-                    subtitle={`Everything you need to know about AI voice agents and how ${appName} works.`}
+                    eyebrow="Perguntas Frequentes"
+                    title="Perguntas frequentes"
+                    subtitle={`Tudo o que você precisa saber sobre agentes de voz inteligentes e como o ${appName} funciona.`}
                 />
                 <div className="space-y-3">
                     {faqs.map((faq, i) => {

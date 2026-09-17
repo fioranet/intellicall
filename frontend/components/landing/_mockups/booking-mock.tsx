@@ -5,17 +5,17 @@ import { MockFrame } from "./mock-frame";
 const SLOTS = [
     { time: "10:00", taken: false },
     { time: "11:30", taken: true },
-    { time: "1:00", taken: false, selected: true },
-    { time: "2:30", taken: false },
-    { time: "4:00", taken: true },
-    { time: "5:00", taken: false },
+    { time: "13:00", taken: false, selected: true },
+    { time: "14:30", taken: false },
+    { time: "16:00", taken: true },
+    { time: "17:00", taken: false },
 ];
 
 export function BookingMock() {
     return (
-        <MockFrame title="Appointments · Knowledge Base">
+        <MockFrame title="Agendamentos &amp; Base de Conhecimento">
             <div className="space-y-4">
-                <div className="text-xs font-medium text-muted-foreground">Available · Thursday, Jul 10</div>
+                <div className="text-xs font-medium text-muted-foreground">Horários Disponíveis · Quinta-feira</div>
                 <div className="grid grid-cols-3 gap-2">
                     {SLOTS.map((s) => (
                         <div
@@ -37,15 +37,15 @@ export function BookingMock() {
                         <Check className="h-4 w-4" />
                     </div>
                     <div className="text-sm">
-                        <div className="font-semibold text-foreground">Booked · 1:00 PM</div>
-                        <div className="text-xs text-muted-foreground">Synced to Google Calendar · WhatsApp reminder queued</div>
+                        <div className="font-semibold text-foreground">Agendado · 13:00</div>
+                        <div className="text-xs text-muted-foreground">Sincronizado com Google Calendar · Lembrete por WhatsApp agendado</div>
                     </div>
                 </div>
 
                 <div className="flex items-start gap-2 rounded-xl border border-border bg-muted/40 p-3 text-xs leading-relaxed text-muted-foreground">
                     <BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
                     <span>
-                        <span className="font-semibold text-foreground">From your knowledge base:</span> &ldquo;First consultations are free and last about 30 minutes.&rdquo;
+                        <span className="font-semibold text-foreground">Da sua base de conhecimento:</span> &ldquo;A primeira consulta de avaliação é gratuita e tem duração de 30 minutos.&rdquo;
                     </span>
                 </div>
             </div>
