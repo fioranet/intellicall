@@ -59,7 +59,7 @@ const agentSchema = new mongoose.Schema({
     /** Gemini Live prebuilt voice name, used when voiceEngine === 'gemini_live'. */
     geminiVoice: {
         type: String,
-        default: 'Charon'
+        default: 'Kore'
     },
     /**
      * Language the Gemini agent speaks, used when voiceEngine === 'gemini_live'.

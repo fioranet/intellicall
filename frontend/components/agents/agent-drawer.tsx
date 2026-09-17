@@ -30,7 +30,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { AgentTemplate } from "@/lib/agent-templates";
 import { SARVAM_SPEAKERS, SARVAM_LANGUAGES, SARVAM_DEFAULT_SPEAKER, resolveSarvamSpeaker } from "./sarvam-options";
-import { GEMINI_VOICES, GEMINI_LANGUAGES, GEMINI_DEFAULT_VOICE, GEMINI_AUTO_LANGUAGE, GEMINI_DEFAULT_LANGUAGE } from "./gemini-options";
+import { GEMINI_VOICES, GEMINI_LANGUAGES, GEMINI_DEFAULT_VOICE, GEMINI_AUTO_LANGUAGE, GEMINI_DEFAULT_LANGUAGE, getGeminiVoiceLabel } from "./gemini-options";
 import { missingKeysForEngine as engineMissingKeys, usableEngines, type EngineId, type EngineConfigStatus } from "./voice-engines";
 import { useTranslations } from "next-intl";
 
@@ -1088,9 +1088,9 @@ export function AgentDrawer({ agent, trigger, onSuccess, templateData, open: con
                                                         </SelectTrigger>
                                                         <SelectContent className="max-h-[280px]">
                                                             {GEMINI_VOICES.map((v) => (
-                                                                <SelectItem key={v.name} value={v.name}>
+                                                                <SelectItem key={v.name} value={v.name} textValue={`${v.label} (${v.description})`}>
                                                                     <div className="flex flex-col items-start text-start">
-                                                                        <span className="font-medium">{v.name}</span>
+                                                                        <span className="font-medium">{v.label}</span>
                                                                         <span className="text-xs text-muted-foreground">{v.description}</span>
                                                                     </div>
                                                                 </SelectItem>

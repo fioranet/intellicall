@@ -6,7 +6,7 @@ import { AgentDrawer } from "@/components/agents/agent-drawer";
 import { AgentTestDrawer } from "@/components/agents/agent-test-drawer";
 import { TemplatePickerDrawer } from "@/components/agents/template-picker-drawer";
 import { SARVAM_LANGUAGES } from "@/components/agents/sarvam-options";
-import { GEMINI_LANGUAGES } from "@/components/agents/gemini-options";
+import { GEMINI_LANGUAGES, getGeminiVoiceLabel } from "@/components/agents/gemini-options";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -137,7 +137,7 @@ function agentVoiceLabel(a: Agent): string {
     if (a.voiceEngine === "sarvam") {
         return a.sarvamSpeaker ? a.sarvamSpeaker.charAt(0).toUpperCase() + a.sarvamSpeaker.slice(1) : "Sarvam Voice";
     }
-    if (a.voiceEngine === "gemini_live") return a.geminiVoice || "Gemini Voice";
+    if (a.voiceEngine === "gemini_live") return getGeminiVoiceLabel(a.geminiVoice);
     return a.useCustomVoice ? (a.voiceName || "Premium Voice") : (a.voice || "Standard Voice");
 }
 function agentVoiceProvider(a: Agent): string {

@@ -5,41 +5,63 @@
 // the backend turns the stored code into a language NAME for the system instruction, and a
 // code it does not recognise silently drops the pinning.
 
-export const GEMINI_VOICES: { name: string; description: string }[] = [
-    { name: "Zephyr", description: "Brilhante e Clara" },
-    { name: "Puck", description: "Alegre e Descontraída" },
-    { name: "Charon", description: "Informativa e Confiante" },
-    { name: "Kore", description: "Firme e Profissional" },
-    { name: "Fenrir", description: "Empolgada e Enérgica" },
-    { name: "Leda", description: "Jovem e Espontânea" },
-    { name: "Orus", description: "Firme e Madura" },
-    { name: "Aoede", description: "Leve e Serena" },
-    { name: "Callirrhoe", description: "Calma e Descontraída" },
-    { name: "Autonoe", description: "Brilhante e Convidativa" },
-    { name: "Enceladus", description: "Suave e Acolhedora" },
-    { name: "Iapetus", description: "Clara e Direta" },
-    { name: "Umbriel", description: "Tranquila e Amigável" },
-    { name: "Algieba", description: "Fluida e Aveludada" },
-    { name: "Despina", description: "Fluida e Natural" },
-    { name: "Erinome", description: "Clara e Expressiva" },
-    { name: "Algenib", description: "Encorpada e Marcante" },
-    { name: "Rasalgethi", description: "Informativa e Didática" },
-    { name: "Laomedeia", description: "Animada e Gentil" },
-    { name: "Achernar", description: "Suave e Confortável" },
-    { name: "Alnilam", description: "Firme e Segura" },
-    { name: "Schedar", description: "Equilibrada e Estável" },
-    { name: "Gacrux", description: "Madura e Sóbria" },
-    { name: "Pulcherrima", description: "Assertiva e Clara" },
-    { name: "Achird", description: "Amigável e Calorosa" },
-    { name: "Zubenelgenubi", description: "Casual e Natural" },
-    { name: "Vindemiatrix", description: "Gentil e Cordial" },
-    { name: "Sadachbia", description: "Vibrante e Positiva" },
-    { name: "Sadaltager", description: "Especialista e Confiável" },
-    { name: "Sulafat", description: "Calorosa e Atenciosa" },
+export interface GeminiVoiceOption {
+    name: string;
+    label: string;
+    description: string;
+}
+
+export const GEMINI_VOICES: GeminiVoiceOption[] = [
+    { name: "Kore", label: "Camila", description: "Firme e Profissional" },
+    { name: "Charon", label: "Lucas", description: "Informativo e Confiante" },
+    { name: "Aoede", label: "Mariana", description: "Leve e Serena" },
+    { name: "Puck", label: "Gabriel", description: "Alegre e Descontraído" },
+    { name: "Zephyr", label: "Ana", description: "Brilhante e Clara" },
+    { name: "Fenrir", label: "Rodrigo", description: "Empolgado e Enérgico" },
+    { name: "Leda", label: "Beatriz", description: "Jovem e Espontânea" },
+    { name: "Orus", label: "Eduardo", description: "Firme e Maduro" },
+    { name: "Callirrhoe", label: "Larissa", description: "Calma e Descontraída" },
+    { name: "Autonoe", label: "Juliana", description: "Brilhante e Convidativa" },
+    { name: "Enceladus", label: "Rafael", description: "Suave e Acolhedor" },
+    { name: "Iapetus", label: "Felipe", description: "Claro e Direto" },
+    { name: "Umbriel", label: "Gustavo", description: "Tranquilo e Amigável" },
+    { name: "Algieba", label: "Fernanda", description: "Fluida e Aveludada" },
+    { name: "Despina", label: "Isabela", description: "Fluida e Natural" },
+    { name: "Erinome", label: "Letícia", description: "Clara e Expressiva" },
+    { name: "Algenib", label: "Bruno", description: "Encorpado e Marcante" },
+    { name: "Rasalgethi", label: "André", description: "Informativo e Didático" },
+    { name: "Laomedeia", label: "Amanda", description: "Animada e Gentil" },
+    { name: "Achernar", label: "Leonardo", description: "Suave e Confortável" },
+    { name: "Alnilam", label: "Patrícia", description: "Firme e Segura" },
+    { name: "Schedar", label: "Diego", description: "Equilibrado e Estável" },
+    { name: "Gacrux", label: "Carlos", description: "Maduro e Sóbrio" },
+    { name: "Pulcherrima", label: "Priscila", description: "Assertiva e Clara" },
+    { name: "Achird", label: "Renata", description: "Amigável e Calorosa" },
+    { name: "Zubenelgenubi", label: "Marcelo", description: "Casual e Natural" },
+    { name: "Vindemiatrix", label: "Tatiane", description: "Gentil e Cordial" },
+    { name: "Sadachbia", label: "Luciana", description: "Vibrante e Positiva" },
+    { name: "Sadaltager", label: "Daniel", description: "Especialista e Confiável" },
+    { name: "Sulafat", label: "Sabrina", description: "Calorosa e Atenciosa" },
 ];
 
-export const GEMINI_DEFAULT_VOICE = "Charon";
+export const GEMINI_DEFAULT_VOICE = "Kore";
 export const GEMINI_DEFAULT_LANGUAGE = "pt";
+
+export function getGeminiVoiceLabel(name?: string): string {
+    if (!name) return "Camila";
+    const found = GEMINI_VOICES.find(
+        (v) => v.name.toLowerCase() === name.toLowerCase() || v.label.toLowerCase() === name.toLowerCase()
+    );
+    return found ? found.label : name;
+}
+
+export function resolveGeminiVoiceName(nameOrLabel?: string): string {
+    if (!nameOrLabel) return GEMINI_DEFAULT_VOICE;
+    const found = GEMINI_VOICES.find(
+        (v) => v.name.toLowerCase() === nameOrLabel.toLowerCase() || v.label.toLowerCase() === nameOrLabel.toLowerCase()
+    );
+    return found ? found.name : nameOrLabel;
+}
 
 /**
  * "auto" is not a language — it is the absence of a pin. Native-audio models have no

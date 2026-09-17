@@ -43,6 +43,39 @@ const IDLE_TIMEOUT_MS = parseInt(process.env.CALL_IDLE_TIMEOUT_MS) || 5 * 60 * 1
 const IDLE_CHECK_INTERVAL_MS = 30000;
 const IDLE_HANGUP_MESSAGE = "I haven't heard back from you, so I'll go ahead and end the call now. Goodbye.";
 
+const BRAZILIAN_VOICE_MAP = {
+    camila: 'Kore',
+    lucas: 'Charon',
+    mariana: 'Aoede',
+    gabriel: 'Puck',
+    ana: 'Zephyr',
+    rodrigo: 'Fenrir',
+    beatriz: 'Leda',
+    eduardo: 'Orus',
+    larissa: 'Callirrhoe',
+    juliana: 'Autonoe',
+    rafael: 'Enceladus',
+    felipe: 'Iapetus',
+    gustavo: 'Umbriel',
+    fernanda: 'Algieba',
+    isabela: 'Despina',
+    leticia: 'Erinome',
+    bruno: 'Algenib',
+    andre: 'Rasalgethi',
+    amanda: 'Laomedeia',
+    leonardo: 'Achernar',
+    patricia: 'Alnilam',
+    diego: 'Schedar',
+    carlos: 'Gacrux',
+    priscila: 'Pulcherrima',
+    renata: 'Achird',
+    marcelo: 'Zubenelgenubi',
+    tatiane: 'Vindemiatrix',
+    luciana: 'Sadachbia',
+    daniel: 'Sadaltager',
+    sabrina: 'Sulafat',
+};
+
 /**
  * Transport-agnostic bridge to the Google Gemini Live API.
  *
@@ -246,7 +279,9 @@ class GeminiLiveBridge {
             temperature: 0.7,
             speechConfig: {
                 voiceConfig: {
-                    prebuiltVoiceConfig: { voiceName: this.agent?.geminiVoice || 'Charon' },
+                    prebuiltVoiceConfig: {
+                        voiceName: BRAZILIAN_VOICE_MAP[(this.agent?.geminiVoice || '').toLowerCase()] || this.agent?.geminiVoice || 'Kore'
+                    },
                 },
             },
         };
