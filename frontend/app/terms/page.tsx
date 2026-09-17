@@ -175,7 +175,10 @@ export default function TermsPage() {
                         <section className="space-y-3">
                             <h2 className="text-xl sm:text-2xl font-bold text-foreground">8. Serviços e Conexões com Terceiros</h2>
                             <p>
-                                A PLATAFORMA opera de forma integrada com redes públicas de telecomunicações, operadoras de telefonia credenciadas (STFC/SIP Trunking), provedores de infraestrutura em nuvem e modelos de inteligência artificial. O CLIENTE reconhece que o tráfego telefônico e a latência de rede podem ser pontualmente impactados por fatores externos e pelas políticas das operadoras de telecomunicação receptoras.
+                                A PLATAFORMA opera de forma integrada com redes públicas de telecomunicações, operadoras de telefonia credenciadas (STFC/SIP Trunking), provedores de infraestrutura em nuvem, modelos de inteligência artificial e serviços de terceiros mediante autorização expressa do CLIENTE.
+                            </p>
+                            <p>
+                                <strong>8.1. Integração com Serviços e APIs do Google:</strong> Ao vincular sua Conta Google (como o Google Calendar) ao {branding.appName}, o CLIENTE autoriza a PLATAFORMA a consultar disponibilidade de horários e registrar agendamentos solicitados nas chamadas telefônicas. O tratamento desses dados observa rigorosamente a Política de Dados do Usuário dos Serviços de API do Google, os requisitos de Uso Limitado (<em>Limited Use Requirements</em>) e a vedação ao uso de dados do Google para treinamento de modelos de IA/ML, conforme detalhado em nossa <strong>Política de Privacidade</strong>.
                             </p>
                         </section>
 

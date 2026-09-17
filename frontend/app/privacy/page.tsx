@@ -209,11 +209,75 @@ export default function PrivacyPage() {
                             </ul>
                         </section>
 
-                        {/* 8. Canal do Encarregado (DPO) e Foro */}
+                        {/* 8. Integração com APIs do Google e Política de Uso Limitado */}
+                        <section className="space-y-4 p-6 rounded-2xl border border-border bg-muted/20 not-prose">
+                            <div className="flex items-center gap-3 text-foreground">
+                                <ShieldCheck className="h-6 w-6" style={{ color: branding.primaryColor }} />
+                                <h2 className="text-xl sm:text-2xl font-bold m-0">
+                                    8. Uso de Dados das APIs do Google e Política de Uso Limitado
+                                </h2>
+                            </div>
+                            <p className="text-sm leading-relaxed text-muted-foreground">
+                                A plataforma <strong>{branding.appName}</strong> oferece integração opcional com serviços do Google (incluindo <strong>Google Calendar</strong>) para viabilizar agendamentos de reuniões e consultas geridas pelos agentes de voz inteligentes.
+                            </p>
+
+                            <div className="space-y-3 text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                                <h4 className="font-semibold text-foreground text-sm">8.1. Dados Acessados e Finalidade Específica</h4>
+                                <p>
+                                    Ao conectar sua Conta Google via OAuth 2.0, nossa aplicação solicita acesso estritamente aos escopos consentidos para o Google Calendar. O acesso aos dados (como títulos de eventos, datas, horários de início e término e disponibilidade da agenda) é utilizado <strong>única e exclusivamente</strong> para:
+                                </p>
+                                <ul className="list-disc pl-6 space-y-1">
+                                    <li>Consultar horários livres e ocupados na agenda em tempo real durante o atendimento telefônico;</li>
+                                    <li>Criar, atualizar ou cancelar eventos e compromissos solicitados de forma expressa pelo cliente ou usuário na chamada.</li>
+                                </ul>
+
+                                <h4 className="font-semibold text-foreground text-sm pt-2">8.2. Não Utilização para Treinamento de Inteligência Artificial (AI/ML)</h4>
+                                <div className="p-4 rounded-xl border border-primary/20 bg-background text-foreground font-medium text-xs sm:text-sm">
+                                    Os dados de usuários obtidos por meio das APIs do Google (incluindo eventos, horários e metadados de calendário) <strong>NÃO</strong> são utilizados para desenvolver, treinar, calibrar ou aprimorar modelos generalistas ou não-personalizados de Inteligência Artificial (IA) ou Aprendizado de Máquina (Machine Learning).
+                                </div>
+
+                                <h4 className="font-semibold text-foreground text-sm pt-2">8.3. Armazenamento, Segurança e Não Compartilhamento</h4>
+                                <p>
+                                    Tokens de autenticação do Google são armazenados com criptografia de ponta e isolamento seguro em nossos servidores. O <strong>{branding.appName}</strong> não comercializa, não aluga e não transfere dados de usuários do Google para terceiros, anunciantes, corretores de dados (data brokers) ou redes de publicidade direcionada.
+                                </p>
+
+                                <h4 className="font-semibold text-foreground text-sm pt-2">8.4. Conformidade com a Política de Uso Limitado do Google</h4>
+                                <p>
+                                    O uso e a transferência de informações recebidas das APIs do Google para qualquer outro aplicativo pelo <strong>{branding.appName}</strong> cumprirão integralmente a{" "}
+                                    <a
+                                        href="https://developers.google.com/terms/api-services-user-data-policy"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="font-medium underline hover:text-foreground"
+                                        style={{ color: branding.primaryColor }}
+                                    >
+                                        Política de Dados do Usuário dos Serviços de API do Google
+                                    </a>
+                                    , incluindo os requisitos de Uso Limitado (<em>Limited Use Requirements</em>).
+                                </p>
+
+                                <h4 className="font-semibold text-foreground text-sm pt-2">8.5. Revogação de Acesso e Exclusão de Dados</h4>
+                                <p>
+                                    O usuário pode desconectar a integração a qualquer momento pelo painel do <strong>{branding.appName}</strong> ou revogar as permissões de acesso diretamente nas configurações de segurança de sua Conta Google acessando:{" "}
+                                    <a
+                                        href="https://myaccount.google.com/permissions"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="font-medium underline hover:text-foreground"
+                                        style={{ color: branding.primaryColor }}
+                                    >
+                                        https://myaccount.google.com/permissions
+                                    </a>
+                                    . Mediante a revogação ou solicitação de encerramento, os tokens de acesso são imediatamente excluídos de nossos bancos de dados.
+                                </p>
+                            </div>
+                        </section>
+
+                        {/* 9. Canal do Encarregado (DPO) */}
                         <section className="space-y-3">
                             <div className="flex items-center gap-3 text-foreground">
                                 <Mail className="h-5 w-5" style={{ color: branding.primaryColor }} />
-                                <h2 className="text-xl sm:text-2xl font-bold m-0">8. Canal de Contato com o Encarregado de Dados (DPO)</h2>
+                                <h2 className="text-xl sm:text-2xl font-bold m-0">9. Canal de Contato com o Encarregado de Dados (DPO)</h2>
                             </div>
                             <p>
                                 Para exercer qualquer um dos seus direitos, tirar dúvidas a respeito do tratamento de dados ou registrar solicitações, você pode contatar nosso <strong>Encarregado de Proteção de Dados (DPO)</strong>:
@@ -231,9 +295,9 @@ export default function PrivacyPage() {
                             </div>
                         </section>
 
-                        {/* 9. Legislação e Foro */}
+                        {/* 10. Legislação e Foro */}
                         <section className="space-y-3">
-                            <h2 className="text-xl sm:text-2xl font-bold text-foreground">9. Legislação Aplicável e Foro</h2>
+                            <h2 className="text-xl sm:text-2xl font-bold text-foreground">10. Legislação Aplicável e Foro</h2>
                             <p>
                                 Esta Política de Privacidade será interpretada segundo a legislação da República Federativa do Brasil, especialmente a Lei nº 13.709/2018 (LGPD), sendo competente o foro da sede da empresa para dirimir quaisquer litígios oriundos deste instrumento.
                             </p>
