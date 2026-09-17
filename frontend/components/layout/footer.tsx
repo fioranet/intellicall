@@ -20,21 +20,21 @@ export function Footer() {
                 <div className={cn("space-y-6", hasSocial ? "col-span-2" : "md:col-span-2")}>
                     <Logo width={180} height={45} variant="auto" />
                     <p className="text-muted-foreground max-w-sm">
-                        Revolutionizing business communications with intelligent, automated calling solutions that scale with your growth.
+                        Revolucionando a comunicação empresarial com agentes inteligentes de voz e soluções de chamadas que escalam com o seu crescimento.
                     </p>
                 </div>
                 <div className="space-y-4">
-                    <h4 className="font-bold text-foreground uppercase text-xs tracking-widest">Company</h4>
+                    <h4 className="font-bold text-foreground uppercase text-xs tracking-widest">Empresa</h4>
                     <nav className="flex flex-col gap-2">
-                        <Link href="/about" className="text-muted-foreground text-sm transition-colors" style={{ ["--hover-color" as any]: "var(--brand-primary)" }} onMouseEnter={e => (e.currentTarget.style.color = "var(--brand-primary)")} onMouseLeave={e => (e.currentTarget.style.color = "")}>About Us</Link>
-                        <Link href="/contact" className="text-muted-foreground text-sm transition-colors" onMouseEnter={e => (e.currentTarget.style.color = "var(--brand-primary)")} onMouseLeave={e => (e.currentTarget.style.color = "")}>Contact</Link>
-                        <Link href="/privacy" className="text-muted-foreground text-sm transition-colors" onMouseEnter={e => (e.currentTarget.style.color = "var(--brand-primary)")} onMouseLeave={e => (e.currentTarget.style.color = "")}>Privacy Policy</Link>
-                        <Link href="/terms" className="text-muted-foreground text-sm transition-colors" onMouseEnter={e => (e.currentTarget.style.color = "var(--brand-primary)")} onMouseLeave={e => (e.currentTarget.style.color = "")}>Terms of Service</Link>
+                        <Link href="/about" className="text-muted-foreground text-sm transition-colors" style={{ ["--hover-color" as any]: "var(--brand-primary)" }} onMouseEnter={e => (e.currentTarget.style.color = "var(--brand-primary)")} onMouseLeave={e => (e.currentTarget.style.color = "")}>Sobre Nós</Link>
+                        <Link href="/contact" className="text-muted-foreground text-sm transition-colors" onMouseEnter={e => (e.currentTarget.style.color = "var(--brand-primary)")} onMouseLeave={e => (e.currentTarget.style.color = "")}>Contato</Link>
+                        <Link href="/privacy" className="text-muted-foreground text-sm transition-colors" onMouseEnter={e => (e.currentTarget.style.color = "var(--brand-primary)")} onMouseLeave={e => (e.currentTarget.style.color = "")}>Política de Privacidade</Link>
+                        <Link href="/terms" className="text-muted-foreground text-sm transition-colors" onMouseEnter={e => (e.currentTarget.style.color = "var(--brand-primary)")} onMouseLeave={e => (e.currentTarget.style.color = "")}>Termos de Uso</Link>
                     </nav>
                 </div>
                 {hasSocial && (
                     <div className="space-y-4">
-                        <h4 className="font-bold text-foreground uppercase text-xs tracking-widest">Connect</h4>
+                        <h4 className="font-bold text-foreground uppercase text-xs tracking-widest">Conecte-se</h4>
                         <div className="flex gap-4">
                             {ig && (
                                 <Button size="icon" variant="ghost" className="rounded-full bg-muted transition-all" asChild>
