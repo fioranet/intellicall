@@ -48,6 +48,17 @@ export default function PhoneNumbersPage() {
     const t = useTranslations("numbers");
     const [numbers, setNumbers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [user, setUser] = useState<any>(() => {
+        if (typeof window !== "undefined") {
+            try {
+                const stored = localStorage.getItem("user");
+                return stored ? JSON.parse(stored) : null;
+            } catch {
+                return null;
+            }
+        }
+        return null;
+    });
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedNumber, setSelectedNumber] = useState<any>(null);
     const [isTwilioConfigured, setIsTwilioConfigured] = useState(true);
@@ -152,7 +163,7 @@ export default function PhoneNumbersPage() {
     }, []);
 
     const handleTestCall = async (number: any) => {
-        const phoneToCall = prompt("Enter the phone number to call (with country code, e.g. +1234567890):");
+        const phoneToCall = prompt("Informe o número de destino com DDI e DDD (ex: +5511999999999):");
         if (!phoneToCall) return;
 
         try {
@@ -198,7 +209,7 @@ export default function PhoneNumbersPage() {
                     </Button>
                 </div>
 
-                {(!configStatus.isElevenLabsConfigured || !configStatus.isDeepgramConfigured || !configStatus.isModelConfigured) && (
+                {user?.operatingMode === "byok" && (!configStatus.isElevenLabsConfigured || !configStatus.isDeepgramConfigured || !configStatus.isModelConfigured) && (
                     <Alert variant="warning" className="border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-500/20">
                         <Zap className="h-4 w-4 text-amber-600" />
                         <AlertTitle className="text-amber-800 dark:text-amber-400">{t("alerts.aiNotConfiguredTitle")}</AlertTitle>

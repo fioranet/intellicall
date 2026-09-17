@@ -26,6 +26,9 @@ const checkLimit = (type) => async (req, res, next) => {
         const userId = user._id;
 
         if (type === 'agents') {
+            if (limits.agents === null || limits.agents === undefined || limits.agents <= 0 || limits.agents === -1) {
+                return next();
+            }
             const currentAgents = await Agent.countDocuments({ createdBy: userId });
             if (currentAgents >= limits.agents) {
                 return res.status(403).json({
@@ -36,6 +39,9 @@ const checkLimit = (type) => async (req, res, next) => {
         }
 
         if (type === 'campaigns') {
+            if (limits.campaigns === null || limits.campaigns === undefined || limits.campaigns <= 0 || limits.campaigns === -1) {
+                return next();
+            }
             const currentCampaigns = await Campaign.countDocuments({ createdBy: userId });
             if (currentCampaigns >= limits.campaigns) {
                 return res.status(403).json({
@@ -46,8 +52,9 @@ const checkLimit = (type) => async (req, res, next) => {
         }
 
         if (type === 'leads') {
-            // This checks if the user can add AT LEAST ONE more lead.
-            // For bulk uploads, we might need a different check in the route itself.
+            if (limits.leads === null || limits.leads === undefined || limits.leads <= 0 || limits.leads === -1) {
+                return next();
+            }
             const currentLeads = await Lead.countDocuments({ createdBy: userId });
             if (currentLeads >= limits.leads) {
                 return res.status(403).json({

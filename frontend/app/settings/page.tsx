@@ -142,7 +142,17 @@ function SettingsPageContent() {
     const { refreshSettings, branding } = useSettings();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [user, setUser] = useState<any>(null);
+    const [user, setUser] = useState<any>(() => {
+        if (typeof window !== "undefined") {
+            try {
+                const stored = localStorage.getItem("user");
+                return stored ? JSON.parse(stored) : null;
+            } catch {
+                return null;
+            }
+        }
+        return null;
+    });
     const [plans, setPlans] = useState<any[]>([]);
     const [currency, setCurrency] = useState("$");
     const [currencyCode, setCurrencyCode] = useState("USD");
@@ -686,13 +696,15 @@ function SettingsPageContent() {
                         <Settings className="h-4 w-4" />
                         <span className="text-sm">{t("page.tabs.preferences")}</span>
                     </TabsTrigger>
-                    <TabsTrigger
-                        value="api-keys"
-                        className="flex-none flex items-center gap-2 px-6 py-2 rounded-none transition-all duration-200 shrink-0 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:bg-primary/5 border-b-2 border-transparent data-[state=active]:border-primary text-muted-foreground hover:text-foreground hover:bg-muted shadow-none bg-transparent !border-x-0 !border-t-0 !shadow-none after:hidden"
-                    >
-                        <Key className="h-4 w-4" />
-                        <span className="text-sm">{t("page.tabs.apiKeys")}</span>
-                    </TabsTrigger>
+                    {user?.operatingMode === "byok" && (
+                        <TabsTrigger
+                            value="api-keys"
+                            className="flex-none flex items-center gap-2 px-6 py-2 rounded-none transition-all duration-200 shrink-0 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:bg-primary/5 border-b-2 border-transparent data-[state=active]:border-primary text-muted-foreground hover:text-foreground hover:bg-muted shadow-none bg-transparent !border-x-0 !border-t-0 !shadow-none after:hidden"
+                        >
+                            <Key className="h-4 w-4" />
+                            <span className="text-sm">{t("page.tabs.apiKeys")}</span>
+                        </TabsTrigger>
+                    )}
                     <TabsTrigger
                         value="webhooks"
                         className="flex-none flex items-center gap-2 px-6 py-2 rounded-none transition-all duration-200 shrink-0 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:bg-primary/5 border-b-2 border-transparent data-[state=active]:border-primary text-muted-foreground hover:text-foreground hover:bg-muted shadow-none bg-transparent !border-x-0 !border-t-0 !shadow-none after:hidden"
@@ -730,6 +742,7 @@ function SettingsPageContent() {
                     </TabsTrigger>
                 </TabsList>
 
+                {user?.operatingMode === "byok" && (
                 <TabsContent value="api-keys">
                     <Card>
                         <CardHeader>
@@ -918,6 +931,7 @@ function SettingsPageContent() {
                         </CardContent>
                     </Card>
                 </TabsContent>
+                )}
                 <TabsContent value="webhooks">
                     <Card className="max-w-3xl">
                         <CardHeader>

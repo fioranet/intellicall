@@ -209,25 +209,25 @@ function CreditsContent() {
                 <Card className="rounded-2xl border-border">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                            <Sparkles className="h-4 w-4 text-primary" /> Modelo de IA Ativo
+                            <Sparkles className="h-4 w-4 text-primary" /> Serviço de Voz & Telefonia
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-center gap-2">
                             {data?.operatingMode === "byok" ? (
                                 <Badge className="bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-300">
-                                    Modelo 3: BYOK (Chaves Próprias)
+                                    Modelo BYOK Ativo
                                 </Badge>
                             ) : (
                                 <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-300 flex items-center gap-1">
-                                    <Sparkles className="h-3 w-3" /> Modelo 1: Fixo Gerenciado
+                                    <Sparkles className="h-3 w-3" /> Serviço de Voz Ativo
                                 </Badge>
                             )}
                         </div>
                         <p className="text-xs text-muted-foreground mt-2">
                             {data?.operatingMode === "byok"
-                                ? "Você utiliza suas próprias chaves de API. O Gemini Multimodal S2S é restrito ao Modelo Gerenciado."
-                                : "Gemini 2.0 Multimodal Speech-to-Speech nativo, otimizado e mantido pela Nuvv Digital com latência ultra baixa."}
+                                ? "Sua conta está configurada para utilizar chaves próprias de provedores autorizados."
+                                : "Inteligência artificial nativa de voz com processamento em tempo real de ultra baixa latência operando na infraestrutura da plataforma."}
                         </p>
                     </CardContent>
                 </Card>

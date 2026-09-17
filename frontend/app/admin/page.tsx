@@ -91,6 +91,12 @@ export default function AdminUsersPage() {
         postpaidCreditLimit: 0,
         creditAdjustment: 0
     });
+    const [isManualPaymentModalOpen, setIsManualPaymentModalOpen] = useState(false);
+    const [manualPaymentFormData, setManualPaymentFormData] = useState({
+        creditsAmount: 100,
+        amountBrl: 50,
+        notes: "Pagamento via PIX"
+    });
 
     const fetchUsers = async () => {
         try {
@@ -228,6 +234,46 @@ export default function AdminUsersPage() {
             }
         } catch (err: any) {
             toast.error(err.response?.data?.message || "Erro ao atualizar faturamento");
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
+    const handleOpenManualPaymentModal = (user: any) => {
+        setSelectedUser(user);
+        const creditPrice = user.plan?.billingSettings?.pricePerCredit || 0.50;
+        setManualPaymentFormData({
+            creditsAmount: 100,
+            amountBrl: Math.round(100 * creditPrice * 100) / 100,
+            notes: "Pagamento via PIX"
+        });
+        setIsManualPaymentModalOpen(true);
+    };
+
+    const handleManualPaymentSubmit = async () => {
+        if (!selectedUser) return;
+        try {
+            setIsUpdating(true);
+            const token = localStorage.getItem("token");
+            const response = await axios.post(
+                `${API_BASE_URL}/admin/users/${selectedUser._id}/manual-payment`,
+                {
+                    creditsAmount: Number(manualPaymentFormData.creditsAmount),
+                    amountBrl: Number(manualPaymentFormData.amountBrl),
+                    notes: manualPaymentFormData.notes
+                },
+                {
+                    headers: { Authorization: `Bearer ${token}` }
+                }
+            );
+
+            if (response.data?.status === "success") {
+                toast.success(`Pagamento registrado! ${manualPaymentFormData.creditsAmount} créditos adicionados a ${selectedUser.name}.`);
+                setIsManualPaymentModalOpen(false);
+                fetchUsers();
+            }
+        } catch (err: any) {
+            toast.error(err.response?.data?.message || "Erro ao registrar pagamento manual");
         } finally {
             setIsUpdating(false);
         }
@@ -386,6 +432,13 @@ export default function AdminUsersPage() {
                                                     >
                                                         <Coins className="me-2 h-4 w-4 text-amber-500" />
                                                         Modelo IA & Faturamento
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem
+                                                        className="cursor-pointer"
+                                                        onClick={() => handleOpenManualPaymentModal(user)}
+                                                    >
+                                                        <CreditCard className="me-2 h-4 w-4 text-emerald-600" />
+                                                        Lançar Pagamento (PIX / TED)
                                                     </DropdownMenuItem>
                                                     <DropdownMenuSeparator />
                                                     <DropdownMenuItem
@@ -655,6 +708,72 @@ export default function AdminUsersPage() {
                         <Button onClick={handleUpdateBilling} disabled={isUpdating} className="bg-primary text-primary-foreground">
                             {isUpdating && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
                             Salvar Alterações
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Manual Payment Dialog */}
+            <Dialog open={isManualPaymentModalOpen} onOpenChange={setIsManualPaymentModalOpen}>
+                <DialogContent className="sm:max-w-[480px]">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <CreditCard className="h-5 w-5 text-emerald-600" />
+                            Lançar Pagamento Manual (PIX / TED)
+                        </DialogTitle>
+                        <DialogDescription>
+                            Adicione créditos à carteira de <strong>{selectedUser?.name}</strong> com emissão de recibo de compra concluído no sistema.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="space-y-2">
+                            <Label className="font-semibold text-xs">Quantidade de Créditos (Minutos)</Label>
+                            <Input
+                                type="number"
+                                min="1"
+                                value={manualPaymentFormData.creditsAmount}
+                                onChange={(e) => {
+                                    const credits = Number(e.target.value);
+                                    const price = selectedUser?.plan?.billingSettings?.pricePerCredit || 0.50;
+                                    setManualPaymentFormData({
+                                        ...manualPaymentFormData,
+                                        creditsAmount: credits,
+                                        amountBrl: Math.round(credits * price * 100) / 100
+                                    });
+                                }}
+                                placeholder="100"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label className="font-semibold text-xs">Valor Pago em Dinheiro (R$)</Label>
+                            <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                value={manualPaymentFormData.amountBrl}
+                                onChange={(e) => setManualPaymentFormData({ ...manualPaymentFormData, amountBrl: Number(e.target.value) })}
+                                placeholder="50.00"
+                            />
+                            <span className="text-[11px] text-muted-foreground">Valor total recebido via PIX, transferência bancária ou boleto avulso.</span>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label className="font-semibold text-xs">Identificação / Comprovante / Observações</Label>
+                            <Input
+                                value={manualPaymentFormData.notes}
+                                onChange={(e) => setManualPaymentFormData({ ...manualPaymentFormData, notes: e.target.value })}
+                                placeholder="Ex: PIX recebido Banco Inter - E2E 9821..."
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsManualPaymentModalOpen(false)}>
+                            {c("actions.cancel")}
+                        </Button>
+                        <Button onClick={handleManualPaymentSubmit} disabled={isUpdating} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                            {isUpdating && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
+                            Confirmar & Creditar Carteira
                         </Button>
                     </DialogFooter>
                 </DialogContent>

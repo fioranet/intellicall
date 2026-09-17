@@ -140,6 +140,47 @@ router.patch('/users/:id/billing', auth, isAdmin, async (req, res) => {
     }
 });
 
+// POST /api/admin/users/:id/manual-payment - Record manual offline payment (PIX/Transfer) and add credits
+router.post('/users/:id/manual-payment', auth, isAdmin, async (req, res) => {
+    try {
+        const { creditsAmount, amountBrl, notes } = req.body;
+        const credits = Number(creditsAmount);
+        if (!credits || isNaN(credits) || credits <= 0) {
+            return res.status(400).json({ status: 'error', message: 'A quantidade de créditos deve ser maior que zero.' });
+        }
+
+        const user = await User.findById(req.params.id).populate('plan');
+        if (!user) return res.status(404).json({ status: 'error', message: 'Usuário não encontrado' });
+
+        const pricePerCredit = user.plan?.creditsConfig?.creditPriceBrl || 0.50;
+        const totalAmount = typeof amountBrl === 'number' && !isNaN(amountBrl) && amountBrl >= 0
+            ? amountBrl
+            : credits * pricePerCredit;
+
+        user.credits = (typeof user.credits === 'number' ? user.credits : 0) + credits;
+        await user.save();
+
+        const purchase = await Purchase.create({
+            userId: user._id,
+            purchaseType: 'credits',
+            creditsAmount: credits,
+            amount: totalAmount,
+            currency: 'BRL',
+            gateway: 'manual',
+            status: 'completed',
+            notes: notes || 'Pagamento manual / baixa efetuada pelo administrador (PIX / TED)'
+        });
+
+        res.status(200).json({
+            status: 'success',
+            message: `${credits} créditos adicionados com sucesso.`,
+            data: { user, purchase }
+        });
+    } catch (err) {
+        res.status(500).json({ status: 'error', message: err.message });
+    }
+});
+
 // GET /api/admin/plans - List all plans
 router.get('/plans', auth, isAdmin, async (req, res) => {
     try {

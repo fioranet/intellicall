@@ -40,7 +40,7 @@
   },
   "sipInfo": {
     "title": "Chamada de tronco SIP",
-    "body": "Para números locais (por exemplo, Saudi +966), crie um <b>tronco SIP</b> primeiro com as credenciais da sua operadora, depois adicione um número de telefone aqui e selecione <b>\"tronco SIP\"</b> como provedor. As chamadas serão roteadas através do Asterisk, sem necessidade de Twilio.",
+    "body": "Para números locais (por exemplo, Brasil +55 11), crie um <b>tronco SIP</b> primeiro com as credenciais da sua operadora (VoIP/DID), depois adicione um número de telefone aqui e selecione <b>\"tronco SIP\"</b> como provedor. As chamadas serão roteadas diretamente, sem necessidade de Twilio.",
     "originationBody": "Para receber chamadas de entrada <b></b> em números de tronco SIP, defina-o como <b>Origination URI</b> no painel do seu provedor:",
     "manageTrunks": "Gerenciar troncos SIP"
   },
@@ -52,7 +52,7 @@
     "sipTrunk": "Tronco SIP",
     "phoneLabel": "Número de telefone (E.164)",
     "friendlyNameLabel": "Nome amigável",
-    "friendlyNamePlaceholder": "Linha de vendas - Riad",
+    "friendlyNamePlaceholder": "Linha de Vendas - São Paulo (11)",
     "sipTrunkLabel": "Tronco SIP",
     "selectTrunk": "Selecione um tronco SIP",
     "noTrunkSelected": "Nenhum tronco selecionado",

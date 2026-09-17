@@ -199,7 +199,7 @@ export function PhoneNumberDialog({ phoneNumber, open, onOpenChange, onSuccess }
                                 onChange={(e) =>
                                     setFormData({ ...formData, phoneNumber: e.target.value })
                                 }
-                                placeholder="+966501234567"
+                                placeholder="+5511999999999"
                                 required
                                 disabled={loading || isEditing}
                                 className="font-mono"

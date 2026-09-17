@@ -145,7 +145,7 @@ export default async function RootLayout({
           <DirectionProvider dir={dir}>
             <ThemeProvider
               attribute="class"
-              defaultTheme="light"
+              defaultTheme="dark"
               enableSystem={false}
               disableTransitionOnChange
             >

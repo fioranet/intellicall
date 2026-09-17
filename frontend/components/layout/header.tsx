@@ -11,13 +11,14 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Settings, LogOut, Menu } from "lucide-react";
+import { Settings, LogOut, Menu, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ModeToggle } from "@/components/mode-toggle";
 import { LocaleToggle } from "@/components/locale-toggle";
 import { useTranslations } from "next-intl";
 import { clearLocaleCookie } from "@/lib/locale-client";
+import Link from "next/link";
 
 import axios from "axios";
 
@@ -26,6 +27,9 @@ interface User {
     name: string;
     email: string;
     role?: string;
+    credits?: number;
+    billingType?: "prepaid" | "postpaid";
+    operatingMode?: "managed" | "byok";
 }
 
 interface HeaderProps {
@@ -130,7 +134,17 @@ export function Header({ onMenuClick }: HeaderProps) {
                     </Button>
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 sm:gap-3">
+                    {user && (
+                        <Link
+                            href="/credits"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 transition-all duration-150 text-xs font-semibold shadow-xs"
+                            title="Saldo de Créditos - Clique para recarregar"
+                        >
+                            <Coins className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                            <span>{(user.credits ?? 0).toLocaleString()} <span className="hidden sm:inline">créditos</span></span>
+                        </Link>
+                    )}
                     <LocaleToggle />
                     <ModeToggle />
                     <DropdownMenu>

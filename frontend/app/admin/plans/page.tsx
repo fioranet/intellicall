@@ -357,17 +357,21 @@ export default function AdminPlansPage() {
                                         </div>
                                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                             <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                            {t("plans.campaigns", { count: plan.limits.campaigns })}
+                                            {plan.limits.campaigns === -1
+                                                ? "Campanhas Ilimitadas"
+                                                : t("plans.campaigns", { count: plan.limits.campaigns })}
                                         </div>
                                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                             <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                            {t("plans.leads", { count: plan.limits.leads })}
+                                            {plan.limits.leads === -1
+                                                ? "Leads Ilimitados"
+                                                : t("plans.leads", { count: plan.limits.leads })}
                                         </div>
                                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                             <div className="h-1.5 w-1.5 rounded-full bg-primary" />
                                             {plan.limits.callsPerMonth === -1
-                                                ? "Unlimited Calls"
-                                                : `${plan.limits.callsPerMonth} Calls/mo`}
+                                                ? "Chamadas Ilimitadas"
+                                                : `${plan.limits.callsPerMonth} chamadas/mês`}
                                         </div>
                                     </div>
                                 </div>
@@ -485,27 +489,64 @@ export default function AdminPlansPage() {
                         <div className="pt-3 border-t space-y-3">
                             <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("plans.resourceLimits")}</h3>
 
-                            <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50/70 dark:bg-muted/40 border">
-                                <div className="space-y-0.5">
-                                    <Label className="text-xs font-semibold">{t("plans.unlimitedCallsLabel")}</Label>
-                                    <p className="text-[10px] text-muted-foreground">
-                                        {t("plans.unlimitedCallsHint")}
-                                    </p>
+                            {/* Unlimited Toggles */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50/70 dark:bg-muted/40 border">
+                                    <div className="space-y-0.5">
+                                        <Label className="text-xs font-semibold">Chamadas Ilimitadas</Label>
+                                        <p className="text-[10px] text-muted-foreground">Sem limite mensal</p>
+                                    </div>
+                                    <Switch
+                                        checked={formData.limits.callsPerMonth === -1}
+                                        onCheckedChange={(checked) => {
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                limits: {
+                                                    ...prev.limits,
+                                                    callsPerMonth: checked ? -1 : (prev.limits.callsPerMonth === -1 ? 100 : prev.limits.callsPerMonth || 100)
+                                                }
+                                            }));
+                                        }}
+                                    />
                                 </div>
-                                <Switch
-                                    checked={formData.limits.callsPerMonth === -1}
-                                    onCheckedChange={(checked) => {
-                                        setFormData((prev) => ({
-                                            ...prev,
-                                            limits: {
-                                                ...prev.limits,
-                                                callsPerMonth: checked
-                                                    ? -1
-                                                    : (prev.limits.callsPerMonth === -1 ? 100 : prev.limits.callsPerMonth || 100)
-                                            }
-                                        }));
-                                    }}
-                                />
+
+                                <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50/70 dark:bg-muted/40 border">
+                                    <div className="space-y-0.5">
+                                        <Label className="text-xs font-semibold">Campanhas Ilimitadas</Label>
+                                        <p className="text-[10px] text-muted-foreground">Sem limite de campanhas</p>
+                                    </div>
+                                    <Switch
+                                        checked={formData.limits.campaigns === -1}
+                                        onCheckedChange={(checked) => {
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                limits: {
+                                                    ...prev.limits,
+                                                    campaigns: checked ? -1 : (prev.limits.campaigns === -1 ? 5 : prev.limits.campaigns || 5)
+                                                }
+                                            }));
+                                        }}
+                                    />
+                                </div>
+
+                                <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50/70 dark:bg-muted/40 border">
+                                    <div className="space-y-0.5">
+                                        <Label className="text-xs font-semibold">Leads Ilimitados</Label>
+                                        <p className="text-[10px] text-muted-foreground">Sem limite de contatos</p>
+                                    </div>
+                                    <Switch
+                                        checked={formData.limits.leads === -1}
+                                        onCheckedChange={(checked) => {
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                limits: {
+                                                    ...prev.limits,
+                                                    leads: checked ? -1 : (prev.limits.leads === -1 ? 500 : prev.limits.leads || 500)
+                                                }
+                                            }));
+                                        }}
+                                    />
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-3">
@@ -521,37 +562,41 @@ export default function AdminPlansPage() {
                                         className="rounded-xl h-10"
                                     />
                                 </div>
-                                <div className="space-y-1.5">
-                                    <Label className="text-xs">{t("plans.campaignsLabel")}</Label>
-                                    <Input
-                                        type="number"
-                                        value={formData.limits.campaigns}
-                                        onChange={(e) => setFormData({
-                                            ...formData,
-                                            limits: { ...formData.limits, campaigns: parseInt(e.target.value) }
-                                        })}
-                                        className="rounded-xl h-10"
-                                    />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label className="text-xs">{t("plans.leadsLabel")}</Label>
-                                    <Input
-                                        type="number"
-                                        value={formData.limits.leads}
-                                        onChange={(e) => setFormData({
-                                            ...formData,
-                                            limits: { ...formData.limits, leads: parseInt(e.target.value) }
-                                        })}
-                                        className="rounded-xl h-10"
-                                    />
-                                </div>
+                                {formData.limits.campaigns !== -1 && (
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs">{t("plans.campaignsLabel")}</Label>
+                                        <Input
+                                            type="number"
+                                            value={formData.limits.campaigns}
+                                            onChange={(e) => setFormData({
+                                                ...formData,
+                                                limits: { ...formData.limits, campaigns: parseInt(e.target.value) }
+                                            })}
+                                            className="rounded-xl h-10"
+                                        />
+                                    </div>
+                                )}
+                                {formData.limits.leads !== -1 && (
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs">{t("plans.leadsLabel")}</Label>
+                                        <Input
+                                            type="number"
+                                            value={formData.limits.leads}
+                                            onChange={(e) => setFormData({
+                                                ...formData,
+                                                limits: { ...formData.limits, leads: parseInt(e.target.value) }
+                                            })}
+                                            className="rounded-xl h-10"
+                                        />
+                                    </div>
+                                )}
                                 {formData.limits.callsPerMonth !== -1 && (
                                     <div className="space-y-1.5">
                                         <Label className="text-xs">{t("plans.callsLabel")}</Label>
                                         <Input
                                             type="number"
                                             value={formData.limits.callsPerMonth}
-                                            placeholder="e.g. 500"
+                                            placeholder="ex: 500"
                                             onChange={(e) => setFormData({
                                                 ...formData,
                                                 limits: {

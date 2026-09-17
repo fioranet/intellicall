@@ -213,6 +213,19 @@ export function AgentDrawer({ agent, trigger, onSuccess, templateData, open: con
             setInternalOpen(value);
         }
     };
+    const [user, setUser] = useState<any>(() => {
+        if (typeof window !== "undefined") {
+            try {
+                const stored = localStorage.getItem("user");
+                return stored ? JSON.parse(stored) : null;
+            } catch {
+                return null;
+            }
+        }
+        return null;
+    });
+    const isByok = user?.operatingMode === "byok";
+
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         name: agent?.name || "",
@@ -221,8 +234,8 @@ export function AgentDrawer({ agent, trigger, onSuccess, templateData, open: con
         voice: agent?.voice || "Polly.Amy",
         voiceId: agent?.voiceId || "",
         voiceName: agent?.voiceName || "Rachel",
-        useCustomVoice: agent?.useCustomVoice || false,
-        voiceEngine: agent?.voiceEngine || "classic",
+        useCustomVoice: agent?.useCustomVoice ?? (!isByok ? true : false),
+        voiceEngine: agent?.voiceEngine || (!isByok ? "gemini_live" : "classic"),
         sarvamSpeaker: resolveSarvamSpeaker(agent?.sarvamSpeaker),
         sarvamLanguage: agent?.sarvamLanguage || "hi-IN",
         geminiVoice: agent?.geminiVoice || GEMINI_DEFAULT_VOICE,
@@ -261,8 +274,10 @@ export function AgentDrawer({ agent, trigger, onSuccess, templateData, open: con
      * backend/utils/engine-keys.js); this wrapper just binds the fetched status.
      * Returns [] while configStatus is still loading, so nothing is blocked prematurely.
      */
-    const missingKeysForEngine = (engine: string): string[] =>
-        engineMissingKeys(engine as EngineId, (configStatus ?? null) as EngineConfigStatus | null);
+    const missingKeysForEngine = (engine: string): string[] => {
+        if (!isByok && engine === "gemini_live") return [];
+        return engineMissingKeys(engine as EngineId, (configStatus ?? null) as EngineConfigStatus | null);
+    };
 
     useEffect(() => {
         if (open) {
@@ -306,8 +321,8 @@ export function AgentDrawer({ agent, trigger, onSuccess, templateData, open: con
                         voice: "Polly.Amy",
                         voiceId: templateData.voiceId || "",
                         voiceName: templateData.voiceName || "Rachel",
-                        useCustomVoice: templateData.useCustomVoice ?? false,
-                        voiceEngine: "classic",
+                        useCustomVoice: templateData.useCustomVoice ?? (!isByok ? true : false),
+                        voiceEngine: !isByok ? "gemini_live" : "classic",
                         sarvamSpeaker: SARVAM_DEFAULT_SPEAKER,
                         sarvamLanguage: "hi-IN",
                         geminiVoice: GEMINI_DEFAULT_VOICE,
@@ -329,8 +344,8 @@ export function AgentDrawer({ agent, trigger, onSuccess, templateData, open: con
                         voice: "Polly.Amy",
                         voiceId: "",
                         voiceName: "Rachel",
-                        useCustomVoice: false,
-                        voiceEngine: "classic",
+                        useCustomVoice: !isByok ? true : false,
+                        voiceEngine: !isByok ? "gemini_live" : "classic",
                         sarvamSpeaker: SARVAM_DEFAULT_SPEAKER,
                         sarvamLanguage: "hi-IN",
                         geminiVoice: GEMINI_DEFAULT_VOICE,
@@ -368,13 +383,15 @@ export function AgentDrawer({ agent, trigger, onSuccess, templateData, open: con
                 setFormData(prev => {
                     const next = { ...prev };
                     if (!status.isTwilioConfigured) next.useCustomVoice = true;
-                    // For a NEW agent, fall to the first engine the user can actually run, so
-                    // configuring only Sarvam (or Gemini) lands there instead of a disabled
-                    // "classic". Never re-point an existing agent — that would silently change
-                    // its engine. Computed off the freshly fetched status, not component state.
-                    if (!agent && engineMissingKeys((next.voiceEngine || "classic") as EngineId, status).length) {
-                        const usable = usableEngines(status, false)[0];
-                        if (usable) next.voiceEngine = usable;
+                    // For a NEW agent, default to gemini_live in managed mode, or the first usable engine in BYOK.
+                    if (!agent) {
+                        if (!isByok) {
+                            next.voiceEngine = "gemini_live";
+                            next.useCustomVoice = true;
+                        } else if (engineMissingKeys((next.voiceEngine || "classic") as EngineId, status).length) {
+                            const usable = usableEngines(status, false).filter(e => e !== "gemini_live")[0];
+                            if (usable) next.voiceEngine = usable;
+                        }
                     }
                     return next;
                 });
@@ -597,9 +614,11 @@ export function AgentDrawer({ agent, trigger, onSuccess, templateData, open: con
             // to useCustomVoice=false + a valid engine ('classic'), never sent as-is.
             const selectedNumber = phoneNumbers.find((n) => n._id === formData.outboundPhoneNumber);
             const showTwilioVoices = configStatus?.isTwilioConfigured && selectedNumber?.provider !== "sip";
-            const effectiveEngine = (!formData.useCustomVoice && showTwilioVoices)
-                ? "twilio_standard"
-                : (formData.voiceEngine || "classic");
+            const effectiveEngine = !isByok
+                ? "gemini_live"
+                : ((!formData.useCustomVoice && showTwilioVoices)
+                    ? "twilio_standard"
+                    : (formData.voiceEngine || "classic"));
             const isStandard = effectiveEngine === "twilio_standard";
             const resolvedVoiceEngine = isStandard ? "classic" : effectiveEngine;
             const resolvedUseCustomVoice = !isStandard;
@@ -650,8 +669,8 @@ export function AgentDrawer({ agent, trigger, onSuccess, templateData, open: con
                     voice: "Polly.Amy",
                     voiceId: "",
                     voiceName: "Rachel",
-                    useCustomVoice: false,
-                    voiceEngine: "classic",
+                    useCustomVoice: !isByok ? true : false,
+                    voiceEngine: !isByok ? "gemini_live" : "classic",
                     sarvamSpeaker: SARVAM_DEFAULT_SPEAKER,
                     sarvamLanguage: "hi-IN",
                     geminiVoice: GEMINI_DEFAULT_VOICE,
@@ -933,66 +952,65 @@ export function AgentDrawer({ agent, trigger, onSuccess, templateData, open: con
 
                                     return (
                                         <div className="space-y-4">
-                                            {/* 1. Voice Engine — always shown first; language & voice below adapt to it */}
+                                            {/* 1. Voice Engine — in Managed Mode: official Gemini Live card. In BYOK Mode: selectable dropdown without Gemini Live */}
                                             <div className="space-y-1.5">
                                                 <div className="flex items-center gap-2">
                                                     <Zap className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                                                     <Label htmlFor="voice-engine" className="text-sm font-medium">{t("drawer.voiceEngineLabel")}</Label>
-                                                    {engineValue === "deepgram_agent" && <Badge variant="outline" className="text-[10px] font-medium border-primary/20 text-primary bg-primary/5">{t("drawer.badgeLowLatency")}</Badge>}
-                                                    {engineValue === "gemini_live" && <Badge variant="outline" className="text-[10px] font-medium border-primary/20 text-primary bg-primary/5">{t("drawer.badgeLowLatency")}</Badge>}
-                                                    {engineValue === "sarvam" && <Badge variant="outline" className="text-[10px] font-medium border-primary/20 text-primary bg-primary/5">{t("drawer.badgeIndianLanguages")}</Badge>}
+                                                    <Badge variant="outline" className="text-[10px] font-medium border-primary/20 text-primary bg-primary/5">{t("drawer.badgeLowLatency")}</Badge>
                                                 </div>
-                                                <Select value={engineValue} onValueChange={handleEngineChange} disabled={loading}>
-                                                    <SelectTrigger id="voice-engine" className="h-9 w-full rounded-md [&_[data-slot=select-value]]:items-start [&_[data-slot=select-value]]:text-start">
-                                                        <SelectValue placeholder={t("drawer.selectEngine")} />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {showTwilioVoices && (
-                                                            <SelectItem value="twilio_standard">
+                                                {!isByok ? (
+                                                    <div className="p-3 rounded-lg border bg-muted/30 border-primary/20 space-y-1">
+                                                        <div className="flex items-center justify-between">
+                                                            <div className="flex items-center gap-2">
+                                                                <Sparkles className="h-4 w-4 text-primary" />
+                                                                <span className="font-semibold text-sm">Voz em Tempo Real (Gemini Live)</span>
+                                                            </div>
+                                                            <Badge variant="outline" className="text-[10px] font-medium border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10">
+                                                                Oficial • Alta Fidelidade
+                                                            </Badge>
+                                                        </div>
+                                                        <p className="text-xs text-muted-foreground leading-relaxed">
+                                                            Motor de IA gerenciado pela plataforma com processamento nativo de fala ponta a ponta. Não requer chaves externas.
+                                                        </p>
+                                                    </div>
+                                                ) : (
+                                                    <Select value={engineValue} onValueChange={handleEngineChange} disabled={loading}>
+                                                        <SelectTrigger id="voice-engine" className="h-9 w-full rounded-md [&_[data-slot=select-value]]:items-start [&_[data-slot=select-value]]:text-start">
+                                                            <SelectValue placeholder={t("drawer.selectEngine")} />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {showTwilioVoices && (
+                                                                <SelectItem value="twilio_standard">
+                                                                    <div className="flex flex-col items-start text-start">
+                                                                        <span className="font-medium">{t("engines.twilioStandard")}</span>
+                                                                        <span className="text-xs text-muted-foreground">{t("engines.twilioStandardHint")}</span>
+                                                                    </div>
+                                                                </SelectItem>
+                                                            )}
+                                                            <SelectItem value="classic" disabled={classicMissing.length > 0}>
                                                                 <div className="flex flex-col items-start text-start">
-                                                                    <span className="font-medium">{t("engines.twilioStandard")}</span>
-                                                                    <span className="text-xs text-muted-foreground">{t("engines.twilioStandardHint")}</span>
+                                                                    <span className="font-medium">{t("engines.classic")}</span>
+                                                                    <span className="text-xs text-muted-foreground">{classicMissing.length ? missingLabel(classicMissing) : t("engines.classicHint")}</span>
                                                                 </div>
                                                             </SelectItem>
-                                                        )}
-                                                        <SelectItem value="classic" disabled={classicMissing.length > 0}>
-                                                            <div className="flex flex-col items-start text-start">
-                                                                <span className="font-medium">{t("engines.classic")}</span>
-                                                                <span className="text-xs text-muted-foreground">{classicMissing.length ? missingLabel(classicMissing) : t("engines.classicHint")}</span>
-                                                            </div>
-                                                        </SelectItem>
-                                                        <SelectItem value="deepgram_agent" disabled={dgAgentMissing.length > 0}>
-                                                            <div className="flex flex-col items-start text-start">
-                                                                <span className="font-medium">{t("engines.deepgramAgent")}</span>
-                                                                <span className="text-xs text-muted-foreground">{dgAgentMissing.length ? missingLabel(dgAgentMissing) : t("engines.deepgramAgentHint")}</span>
-                                                            </div>
-                                                        </SelectItem>
-                                                        {/* Gemini Live is SIP-only — the Twilio media path has no branch for
-                                                            its 16k/24k PCM audio. Shown always so it stays discoverable, but
-                                                            disabled against a real Twilio outbound number. */}
-                                                        <SelectItem value="gemini_live" disabled={isNonSipNumber || geminiMissing.length > 0}>
-                                                            <div className="flex flex-col items-start text-start">
-                                                                <span className="font-medium">{t("engines.gemini")}</span>
-                                                                <span className="text-xs text-muted-foreground">
-                                                                    {isNonSipNumber
-                                                                        ? t("engines.geminiSipOnlyOption")
-                                                                        : geminiMissing.length
-                                                                            ? missingLabel(geminiMissing)
-                                                                            : t("engines.geminiHint")}
-                                                                </span>
-                                                            </div>
-                                                        </SelectItem>
-                                                        <SelectItem value="sarvam" disabled={sarvamMissing.length > 0}>
-                                                            <div className="flex flex-col items-start text-start">
-                                                                <span className="font-medium">{t("engines.sarvam")}</span>
-                                                                <span className="text-xs text-muted-foreground">{sarvamMissing.length ? missingLabel(sarvamMissing) : t("engines.sarvamHint")}</span>
-                                                            </div>
-                                                        </SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                                {/* Warn about the SELECTED engine's own missing keys — an agent already
-                                                    saved on an engine whose keys were later removed still lands here. */}
-                                                {engineValue !== "twilio_standard" && missingKeysForEngine(engineValue).length > 0 && (
+                                                            <SelectItem value="deepgram_agent" disabled={dgAgentMissing.length > 0}>
+                                                                <div className="flex flex-col items-start text-start">
+                                                                    <span className="font-medium">{t("engines.deepgramAgent")}</span>
+                                                                    <span className="text-xs text-muted-foreground">{dgAgentMissing.length ? missingLabel(dgAgentMissing) : t("engines.deepgramAgentHint")}</span>
+                                                                </div>
+                                                            </SelectItem>
+                                                            <SelectItem value="sarvam" disabled={sarvamMissing.length > 0}>
+                                                                <div className="flex flex-col items-start text-start">
+                                                                    <span className="font-medium">{t("engines.sarvam")}</span>
+                                                                    <span className="text-xs text-muted-foreground">{sarvamMissing.length ? missingLabel(sarvamMissing) : t("engines.sarvamHint")}</span>
+                                                                </div>
+                                                            </SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                )}
+                                                {/* Warn about the SELECTED engine's own missing keys in BYOK mode */}
+                                                {isByok && engineValue !== "twilio_standard" && missingKeysForEngine(engineValue).length > 0 && (
                                                     <p className="text-[11px] text-destructive font-medium leading-snug">
                                                         {t("engines.notConfiguredWarning", { count: missingKeysForEngine(engineValue).length, keys: missingKeysForEngine(engineValue).join(" and ") })} <Link href="/settings" className="underline">{t("engines.addInSettings", { count: missingKeysForEngine(engineValue).length })}</Link>.
                                                     </p>

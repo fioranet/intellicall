@@ -17,7 +17,7 @@ const LIVE_WS_PATH = '/ws/google.ai.generativelanguage.v1beta.GenerativeService.
  * Swap to gemini-2.5-flash-native-audio-preview-12-2025 for non-blocking tool calls,
  * affective dialog and proactive audio, at the cost of some latency.
  */
-const MODEL = process.env.GEMINI_LIVE_MODEL || 'gemini-3.1-flash-live-preview';
+const MODEL = process.env.GEMINI_LIVE_MODEL || 'gemini-3.8-live';
 
 /**
  * Server-side VAD tuning. Defaults aim at the standing requirement: the caller can always
