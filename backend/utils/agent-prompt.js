@@ -3,7 +3,7 @@ const { applyMergeFields } = require('./merge-fields');
 
 const LANG_MAP = {
     'ar': 'Arabic', 'hi': 'Hindi', 'he': 'Hebrew', 'es': 'Spanish', 'fr': 'French',
-    'de': 'German', 'pt': 'Portuguese', 'pt-BR': 'Portuguese (Brazil)', 'it': 'Italian',
+    'de': 'German', 'pt': 'Brazilian Portuguese (Português do Brasil)', 'pt-BR': 'Brazilian Portuguese (Português do Brasil)', 'it': 'Italian',
     'ru': 'Russian', 'ja': 'Japanese', 'ko': 'Korean', 'nl': 'Dutch', 'ur': 'Urdu', 'ta': 'Tamil'
 };
 

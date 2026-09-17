@@ -24,27 +24,49 @@ import { agentTemplates, type AgentTemplate, type TemplateCategory, type Templat
 import { AgentDrawer } from "@/components/agents/agent-drawer";
 import { useTranslations } from "next-intl";
 
+const CATEGORY_LABELS: Record<TemplateCategory, string> = {
+    Support: "Suporte",
+    Sales: "Vendas",
+    Scheduling: "Agendamento",
+    Hospitality: "Hospitalidade",
+    Healthcare: "Saúde",
+    "Real Estate": "Imobiliária",
+    Outreach: "Prospecção",
+    Finance: "Financeiro",
+    "E-Commerce": "E-Commerce",
+    Fitness: "Fitness",
+};
+
+const DIRECTION_LABELS: Record<TemplateDirection, string> = {
+    Inbound: "Entrada",
+    Outbound: "Saída",
+    Both: "Entrada & Saída",
+};
+
 const LANGUAGE_LABELS: Record<string, string> = {
-    en: "English",
-    ar: "Arabic",
+    pt: "Português (Brasil)",
+    "pt-BR": "Português (Brasil)",
+    en: "Inglês (EUA)",
+    es: "Espanhol",
+    fr: "Francês",
+    de: "Alemão",
+    it: "Italiano",
+    ja: "Japonês",
+    ko: "Coreano",
+    zh: "Chinês",
+    ar: "Árabe",
     hi: "Hindi",
-    he: "Hebrew",
-    es: "Spanish",
-    fr: "French",
-    de: "German",
-    pt: "Portuguese",
-    "pt-BR": "Portuguese (BR)",
-    it: "Italian",
-    ru: "Russian",
-    ja: "Japanese",
-    ko: "Korean",
-    nl: "Dutch",
+    he: "Hebraico",
+    ru: "Russo",
+    nl: "Holandês",
     ur: "Urdu",
     ta: "Tamil",
-    multi: "Multilingual",
+    multi: "Multilíngue",
 };
 
 const LANGUAGE_FLAGS: Record<string, string> = {
+    pt: "\u{1F1E7}\u{1F1F7}",
+    "pt-BR": "\u{1F1E7}\u{1F1F7}",
     en: "\u{1F1FA}\u{1F1F8}",
     ar: "\u{1F1F8}\u{1F1E6}",
     hi: "\u{1F1EE}\u{1F1F3}",
@@ -52,8 +74,6 @@ const LANGUAGE_FLAGS: Record<string, string> = {
     es: "\u{1F1EA}\u{1F1F8}",
     fr: "\u{1F1EB}\u{1F1F7}",
     de: "\u{1F1E9}\u{1F1EA}",
-    pt: "\u{1F1F5}\u{1F1F9}",
-    "pt-BR": "\u{1F1E7}\u{1F1F7}",
     it: "\u{1F1EE}\u{1F1F9}",
     ru: "\u{1F1F7}\u{1F1FA}",
     ja: "\u{1F1EF}\u{1F1F5}",
@@ -154,11 +174,15 @@ export function TemplatePickerDrawer({ open, onOpenChange, onSuccess }: Template
             if (appointmentsOnly && !t.appointmentBookingEnabled) return false;
             if (searchQuery.trim()) {
                 const q = searchQuery.toLowerCase();
+                const catLabel = (CATEGORY_LABELS[t.category] || "").toLowerCase();
+                const dirLabel = (DIRECTION_LABELS[t.direction] || "").toLowerCase();
                 return (
                     t.name.toLowerCase().includes(q) ||
                     t.description.toLowerCase().includes(q) ||
                     t.category.toLowerCase().includes(q) ||
+                    catLabel.includes(q) ||
                     t.direction.toLowerCase().includes(q) ||
+                    dirLabel.includes(q) ||
                     t.recommendedFor.some((r) => r.toLowerCase().includes(q))
                 );
             }
@@ -226,7 +250,7 @@ export function TemplatePickerDrawer({ open, onOpenChange, onSuccess }: Template
                                         <SelectItem key={cat} value={cat}>
                                             <span className="inline-flex items-center gap-1.5">
                                                 <span aria-hidden>{CATEGORY_EMOJIS[cat]}</span>
-                                                {cat}
+                                                {CATEGORY_LABELS[cat] || cat}
                                             </span>
                                         </SelectItem>
                                     ))}
@@ -259,19 +283,19 @@ export function TemplatePickerDrawer({ open, onOpenChange, onSuccess }: Template
                                     <SelectItem value="Inbound">
                                         <span className="inline-flex items-center gap-1.5">
                                             {DIRECTION_ICONS.Inbound}
-                                            {t("templates.inbound")}
+                                            {DIRECTION_LABELS.Inbound}
                                         </span>
                                     </SelectItem>
                                     <SelectItem value="Outbound">
                                         <span className="inline-flex items-center gap-1.5">
                                             {DIRECTION_ICONS.Outbound}
-                                            {t("templates.outbound")}
+                                            {DIRECTION_LABELS.Outbound}
                                         </span>
                                     </SelectItem>
                                     <SelectItem value="Both">
                                         <span className="inline-flex items-center gap-1.5">
                                             {DIRECTION_ICONS.Both}
-                                            {t("templates.both")}
+                                            {DIRECTION_LABELS.Both}
                                         </span>
                                     </SelectItem>
                                 </SelectContent>
@@ -342,11 +366,11 @@ export function TemplatePickerDrawer({ open, onOpenChange, onSuccess }: Template
                                         <div className="flex flex-wrap items-center gap-1.5">
                                             <Badge variant="outline" className="text-[10px] font-medium gap-1 px-1.5 py-0">
                                                 {DIRECTION_ICONS[template.direction]}
-                                                {template.direction}
+                                                {DIRECTION_LABELS[template.direction] || template.direction}
                                             </Badge>
                                             <Badge variant="outline" className="text-[10px] font-medium gap-1 px-1.5 py-0">
                                                 <span aria-hidden>{CATEGORY_EMOJIS[template.category]}</span>
-                                                {template.category}
+                                                {CATEGORY_LABELS[template.category] || template.category}
                                             </Badge>
                                             <Badge variant="secondary" className="text-[10px] font-medium gap-1 px-1.5 py-0">
                                                 {LANGUAGE_FLAGS[template.language]

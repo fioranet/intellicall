@@ -70,7 +70,7 @@ const agentSchema = new mongoose.Schema({
      */
     geminiLanguage: {
         type: String,
-        default: 'auto'
+        default: 'pt'
     },
     /**
      * Voice Quality preset (classic SIP/Twilio engines, ElevenLabs TTS).
@@ -175,7 +175,7 @@ const agentSchema = new mongoose.Schema({
     },
     language: {
         type: String,
-        default: 'en'
+        default: 'pt-BR'
     },
     appointmentBookingEnabled: {
         type: Boolean,

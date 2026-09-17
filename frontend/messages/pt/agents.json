@@ -36,7 +36,7 @@
     "searchPlaceholder": "Pesquisar modelos...",
     "categoryPlaceholder": "Categoria",
     "allCategories": "Todas as categorias",
-    "languagePlaceholder": "Linguagem",
+    "languagePlaceholder": "Idioma",
     "allLanguages": "Todos os idiomas",
     "directionPlaceholder": "Direção",
     "allDirections": "Todas as direções",
@@ -167,7 +167,7 @@
     "twilioStandardNote": "Usa as vozes integradas do Twilio. Mude para um mecanismo de streaming para obter vozes personalizadas de alta qualidade."
   },
   "voiceLanguage": {
-    "label": "Linguagem",
+    "label": "Idioma",
     "placeholder": "Selecione o idioma",
     "selectLanguage": "Selecione o idioma",
     "en": "Inglês (EUA)",

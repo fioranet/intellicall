@@ -222,7 +222,7 @@ async function handleVoice(req, res) {
             console.log(`🎙️ [Voice] Standard Voice Enabled. Using traditional TwiML loop.`);
             const personalizedGreeting = replaceVars(agent.openingMessage, lead);
 
-            const langMap = { 'en': 'en-US', 'ar': 'ar-SA', 'hi': 'hi-IN', 'he': 'he-IL', 'es': 'es-ES', 'fr': 'fr-FR', 'de': 'de-DE', 'pt': 'pt-PT', 'pt-BR': 'pt-BR', 'it': 'it-IT', 'ru': 'ru-RU', 'ja': 'ja-JP', 'ko': 'ko-KR', 'nl': 'nl-NL', 'ur': 'ur-PK', 'ta': 'ta-IN', 'multi': 'en-US' };
+            const langMap = { 'en': 'en-US', 'ar': 'ar-SA', 'hi': 'hi-IN', 'he': 'he-IL', 'es': 'es-ES', 'fr': 'fr-FR', 'de': 'de-DE', 'pt': 'pt-BR', 'pt-BR': 'pt-BR', 'it': 'it-IT', 'ru': 'ru-RU', 'ja': 'ja-JP', 'ko': 'ko-KR', 'nl': 'nl-NL', 'ur': 'ur-PK', 'ta': 'ta-IN', 'multi': 'en-US' };
             const twilioLang = langMap[agent.language] || 'en-US';
 
             const gather = response.gather({
@@ -294,7 +294,7 @@ router.post('/process', async (req, res) => {
             if (agent.language === 'multi') {
                 systemPrompt += "\n\nCRITICAL: You are a multilingual assistant. Always respond in the SAME language the user is speaking. If they speak Arabic, Hindi, Hebrew, Portuguese, Italian, Russian, Japanese, Korean, Dutch, Urdu, or Tamil, respond in that language. If they mix languages, you can also mix appropriately but prioritize clarity.";
             } else {
-                const langMapSimple = { 'ar': 'Arabic', 'hi': 'Hindi', 'he': 'Hebrew', 'es': 'Spanish', 'fr': 'French', 'de': 'German', 'pt': 'Portuguese', 'pt-BR': 'Portuguese (Brazil)', 'it': 'Italian', 'ru': 'Russian', 'ja': 'Japanese', 'ko': 'Korean', 'nl': 'Dutch', 'ur': 'Urdu', 'ta': 'Tamil' };
+                const langMapSimple = { 'ar': 'Arabic', 'hi': 'Hindi', 'he': 'Hebrew', 'es': 'Spanish', 'fr': 'French', 'de': 'German', 'pt': 'Portuguese (Brazil)', 'pt-BR': 'Portuguese (Brazil)', 'it': 'Italian', 'ru': 'Russian', 'ja': 'Japanese', 'ko': 'Korean', 'nl': 'Dutch', 'ur': 'Urdu', 'ta': 'Tamil' };
                 const langName = langMapSimple[agent.language] || agent.language;
                 systemPrompt += `\n\nCRITICAL: Your primary language is ${langName}. Always respond in ${langName} unless the user explicitly asks otherwise.`;
             }
@@ -331,7 +331,7 @@ router.post('/process', async (req, res) => {
             }
         );
 
-        const langMap = { 'en': 'en-US', 'ar': 'ar-SA', 'hi': 'hi-IN', 'he': 'he-IL', 'es': 'es-ES', 'fr': 'fr-FR', 'de': 'de-DE', 'pt': 'pt-PT', 'pt-BR': 'pt-BR', 'it': 'it-IT', 'ru': 'ru-RU', 'ja': 'ja-JP', 'ko': 'ko-KR', 'nl': 'nl-NL', 'ur': 'ur-PK', 'ta': 'ta-IN', 'multi': 'en-US' };
+        const langMap = { 'en': 'en-US', 'ar': 'ar-SA', 'hi': 'hi-IN', 'he': 'he-IL', 'es': 'es-ES', 'fr': 'fr-FR', 'de': 'de-DE', 'pt': 'pt-BR', 'pt-BR': 'pt-BR', 'it': 'it-IT', 'ru': 'ru-RU', 'ja': 'ja-JP', 'ko': 'ko-KR', 'nl': 'nl-NL', 'ur': 'ur-PK', 'ta': 'ta-IN', 'multi': 'en-US' };
         const twilioLang = langMap[agent.language] || 'en-US';
 
         // The agent can end the call itself with [[END_CALL]]. On this path ordering is

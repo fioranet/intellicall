@@ -30,7 +30,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { AgentTemplate } from "@/lib/agent-templates";
 import { SARVAM_SPEAKERS, SARVAM_LANGUAGES, SARVAM_DEFAULT_SPEAKER, resolveSarvamSpeaker } from "./sarvam-options";
-import { GEMINI_VOICES, GEMINI_LANGUAGES, GEMINI_DEFAULT_VOICE, GEMINI_AUTO_LANGUAGE } from "./gemini-options";
+import { GEMINI_VOICES, GEMINI_LANGUAGES, GEMINI_DEFAULT_VOICE, GEMINI_AUTO_LANGUAGE, GEMINI_DEFAULT_LANGUAGE } from "./gemini-options";
 import { missingKeysForEngine as engineMissingKeys, usableEngines, type EngineId, type EngineConfigStatus } from "./voice-engines";
 import { useTranslations } from "next-intl";
 
@@ -239,10 +239,10 @@ export function AgentDrawer({ agent, trigger, onSuccess, templateData, open: con
         sarvamSpeaker: resolveSarvamSpeaker(agent?.sarvamSpeaker),
         sarvamLanguage: agent?.sarvamLanguage || "hi-IN",
         geminiVoice: agent?.geminiVoice || GEMINI_DEFAULT_VOICE,
-        geminiLanguage: agent?.geminiLanguage || GEMINI_AUTO_LANGUAGE,
+        geminiLanguage: agent?.geminiLanguage || GEMINI_DEFAULT_LANGUAGE,
         outboundPhoneNumber: agent?.outboundPhoneNumber?._id || agent?.outboundPhoneNumber || "none",
         knowledgeBaseId: agent?.knowledgeBaseId?._id || agent?.knowledgeBaseId || "none",
-        language: agent?.language || "en",
+        language: agent?.language || "pt-BR",
         appointmentBookingEnabled: agent?.appointmentBookingEnabled || false,
         appointmentDescription: agent?.appointmentDescription || "",
         kbSettings: {
@@ -299,10 +299,10 @@ export function AgentDrawer({ agent, trigger, onSuccess, templateData, open: con
                         sarvamSpeaker: resolveSarvamSpeaker(agent.sarvamSpeaker),
                         sarvamLanguage: agent.sarvamLanguage || "hi-IN",
                         geminiVoice: agent.geminiVoice || GEMINI_DEFAULT_VOICE,
-                        geminiLanguage: agent.geminiLanguage || GEMINI_AUTO_LANGUAGE,
+                        geminiLanguage: agent.geminiLanguage || GEMINI_DEFAULT_LANGUAGE,
                         outboundPhoneNumber: agent.outboundPhoneNumber?._id || agent.outboundPhoneNumber || "none",
                         knowledgeBaseId: agent.knowledgeBaseId?._id || agent.knowledgeBaseId || "none",
-                        language: agent.language || "en",
+                        language: agent.language || "pt-BR",
                         appointmentBookingEnabled: agent.appointmentBookingEnabled ?? false,
                         appointmentDescription: agent.appointmentDescription || "",
                         kbSettings: {
@@ -326,10 +326,10 @@ export function AgentDrawer({ agent, trigger, onSuccess, templateData, open: con
                         sarvamSpeaker: SARVAM_DEFAULT_SPEAKER,
                         sarvamLanguage: "hi-IN",
                         geminiVoice: GEMINI_DEFAULT_VOICE,
-                        geminiLanguage: GEMINI_AUTO_LANGUAGE,
+                        geminiLanguage: GEMINI_DEFAULT_LANGUAGE,
                         outboundPhoneNumber: "none",
                         knowledgeBaseId: "none",
-                        language: templateData.language || "en",
+                        language: templateData.language || "pt-BR",
                         appointmentBookingEnabled: templateData.appointmentBookingEnabled ?? false,
                         appointmentDescription: templateData.appointmentDescription || "",
                         kbSettings: { useBasicInfo: true, useFaqs: true, useOtherInfo: true },
@@ -349,10 +349,10 @@ export function AgentDrawer({ agent, trigger, onSuccess, templateData, open: con
                         sarvamSpeaker: SARVAM_DEFAULT_SPEAKER,
                         sarvamLanguage: "hi-IN",
                         geminiVoice: GEMINI_DEFAULT_VOICE,
-                        geminiLanguage: GEMINI_AUTO_LANGUAGE,
+                        geminiLanguage: GEMINI_DEFAULT_LANGUAGE,
                         outboundPhoneNumber: "none",
                         knowledgeBaseId: "none",
-                        language: "en",
+                        language: "pt-BR",
                         appointmentBookingEnabled: false,
                         appointmentDescription: "",
                         kbSettings: { useBasicInfo: true, useFaqs: true, useOtherInfo: true },
@@ -952,29 +952,14 @@ export function AgentDrawer({ agent, trigger, onSuccess, templateData, open: con
 
                                     return (
                                         <div className="space-y-4">
-                                            {/* 1. Voice Engine — in Managed Mode: official Gemini Live card. In BYOK Mode: selectable dropdown without Gemini Live */}
-                                            <div className="space-y-1.5">
-                                                <div className="flex items-center gap-2">
-                                                    <Zap className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                                                    <Label htmlFor="voice-engine" className="text-sm font-medium">{t("drawer.voiceEngineLabel")}</Label>
-                                                    <Badge variant="outline" className="text-[10px] font-medium border-primary/20 text-primary bg-primary/5">{t("drawer.badgeLowLatency")}</Badge>
-                                                </div>
-                                                {!isByok ? (
-                                                    <div className="p-3 rounded-lg border bg-muted/30 border-primary/20 space-y-1">
-                                                        <div className="flex items-center justify-between">
-                                                            <div className="flex items-center gap-2">
-                                                                <Sparkles className="h-4 w-4 text-primary" />
-                                                                <span className="font-semibold text-sm">Voz em Tempo Real (Gemini Live)</span>
-                                                            </div>
-                                                            <Badge variant="outline" className="text-[10px] font-medium border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10">
-                                                                Oficial • Alta Fidelidade
-                                                            </Badge>
-                                                        </div>
-                                                        <p className="text-xs text-muted-foreground leading-relaxed">
-                                                            Motor de IA gerenciado pela plataforma com processamento nativo de fala ponta a ponta. Não requer chaves externas.
-                                                        </p>
+                                            {/* 1. Voice Engine — only visible in BYOK Mode. In Managed Mode, the platform-managed Gemini Live engine is used automatically and this section is hidden. */}
+                                            {isByok && (
+                                                <div className="space-y-1.5">
+                                                    <div className="flex items-center gap-2">
+                                                        <Zap className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                                                        <Label htmlFor="voice-engine" className="text-sm font-medium">{t("drawer.voiceEngineLabel")}</Label>
+                                                        <Badge variant="outline" className="text-[10px] font-medium border-primary/20 text-primary bg-primary/5">{t("drawer.badgeLowLatency")}</Badge>
                                                     </div>
-                                                ) : (
                                                     <Select value={engineValue} onValueChange={handleEngineChange} disabled={loading}>
                                                         <SelectTrigger id="voice-engine" className="h-9 w-full rounded-md [&_[data-slot=select-value]]:items-start [&_[data-slot=select-value]]:text-start">
                                                             <SelectValue placeholder={t("drawer.selectEngine")} />
@@ -1008,26 +993,26 @@ export function AgentDrawer({ agent, trigger, onSuccess, templateData, open: con
                                                             </SelectItem>
                                                         </SelectContent>
                                                     </Select>
-                                                )}
-                                                {/* Warn about the SELECTED engine's own missing keys in BYOK mode */}
-                                                {isByok && engineValue !== "twilio_standard" && missingKeysForEngine(engineValue).length > 0 && (
-                                                    <p className="text-[11px] text-destructive font-medium leading-snug">
-                                                        {t("engines.notConfiguredWarning", { count: missingKeysForEngine(engineValue).length, keys: missingKeysForEngine(engineValue).join(" and ") })} <Link href="/settings" className="underline">{t("engines.addInSettings", { count: missingKeysForEngine(engineValue).length })}</Link>.
-                                                    </p>
-                                                )}
-                                                {engineValue === "deepgram_agent" && dgAgentMissing.length === 0 && (
-                                                    <p className="text-[11px] text-muted-foreground leading-snug">{t("engines.deepgramAgentNote")}</p>
-                                                )}
-                                                {engineValue === "gemini_live" && geminiMissing.length === 0 && (
-                                                    <p className="text-[11px] text-muted-foreground leading-snug">{t("engines.geminiNote")}</p>
-                                                )}
-                                                {engineValue === "sarvam" && sarvamMissing.length === 0 && (
-                                                    <p className="text-[11px] text-muted-foreground leading-snug">{t("engines.sarvamNote")}</p>
-                                                )}
-                                                {engineValue === "twilio_standard" && (
-                                                    <p className="text-[11px] text-muted-foreground leading-snug">{t("engines.twilioStandardNote")}</p>
-                                                )}
-                                            </div>
+                                                    {/* Warn about the SELECTED engine's own missing keys in BYOK mode */}
+                                                    {engineValue !== "twilio_standard" && missingKeysForEngine(engineValue).length > 0 && (
+                                                        <p className="text-[11px] text-destructive font-medium leading-snug">
+                                                            {t("engines.notConfiguredWarning", { count: missingKeysForEngine(engineValue).length, keys: missingKeysForEngine(engineValue).join(" and ") })} <Link href="/settings" className="underline">{t("engines.addInSettings", { count: missingKeysForEngine(engineValue).length })}</Link>.
+                                                        </p>
+                                                    )}
+                                                    {engineValue === "deepgram_agent" && dgAgentMissing.length === 0 && (
+                                                        <p className="text-[11px] text-muted-foreground leading-snug">{t("engines.deepgramAgentNote")}</p>
+                                                    )}
+                                                    {engineValue === "gemini_live" && geminiMissing.length === 0 && (
+                                                        <p className="text-[11px] text-muted-foreground leading-snug">{t("engines.geminiNote")}</p>
+                                                    )}
+                                                    {engineValue === "sarvam" && sarvamMissing.length === 0 && (
+                                                        <p className="text-[11px] text-muted-foreground leading-snug">{t("engines.sarvamNote")}</p>
+                                                    )}
+                                                    {engineValue === "twilio_standard" && (
+                                                        <p className="text-[11px] text-muted-foreground leading-snug">{t("engines.twilioStandardNote")}</p>
+                                                    )}
+                                                </div>
+                                            )}
 
                                             {/* 2. Language — the available languages depend on the engine */}
                                             {engineValue === "gemini_live" ? (

@@ -132,6 +132,9 @@ class GeminiLiveBridge {
     _languageInstruction() {
         const code = this.agent?.geminiLanguage || 'auto';
         if (!code || code === 'auto') return '';
+        if (code === 'pt' || code === 'pt-BR') {
+            return `\n\nLANGUAGE: Speak only in natural Brazilian Portuguese (Português do Brasil). Use Brazilian colloquial naturalness, vocabulary and phrasing (e.g. use "você", gerunds like "estou fazendo", and avoid European Portuguese structures like "estou a fazer" or "tu"). Every reply must be strictly in Brazilian Portuguese, regardless of which language the caller uses. Do not switch languages even if asked.`;
+        }
         const name = GEMINI_LANGUAGE_NAMES[code] || GEMINI_LANGUAGE_NAMES[code.split('-')[0]];
         if (!name) return '';
         return `\n\nLANGUAGE: Speak only in ${name}. Every reply must be in ${name}, regardless of which language the caller uses. Do not switch languages even if asked.`;
