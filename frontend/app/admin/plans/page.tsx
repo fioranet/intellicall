@@ -676,6 +676,11 @@ export default function AdminPlansPage() {
                                         placeholder="pdt_..."
                                         className="rounded-xl h-10"
                                     />
+                                    <p className="text-[11px] text-muted-foreground leading-snug">
+                                        {locale === "pt"
+                                            ? "Necessário apenas se utilizar o gateway Dodo Payments. Para Stripe, pode deixar em branco."
+                                            : "Only required if using Dodo Payments. For Stripe, you can leave this blank."}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -691,7 +696,9 @@ export default function AdminPlansPage() {
                             className="rounded-xl px-8 shadow-lg shadow-primary/20"
                         >
                             {isSaving && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
-                            {editingPlan ? "Save Changes" : "Create Plan"}
+                            {editingPlan
+                                ? (locale === "pt" ? "Salvar Alterações" : "Save Changes")
+                                : (locale === "pt" ? "Criar Plano" : "Create Plan")}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
