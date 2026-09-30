@@ -37,7 +37,7 @@ const mainMenuItems = [
     { key: "campaigns", href: "/campaigns", icon: Megaphone },
     { key: "callLogs", href: "/call-logs", icon: Phone },
     { key: "appointments", href: "/appointments", icon: Calendar },
-    { key: "credits", href: "/credits", icon: Coins },
+    // { key: "credits", href: "/credits", icon: Coins }, // Managed via Magnus / SGP
     { key: "support", href: "/support", icon: HeadphonesIcon },
 ];
 

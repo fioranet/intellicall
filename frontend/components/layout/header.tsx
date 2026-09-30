@@ -135,16 +135,7 @@ export function Header({ onMenuClick }: HeaderProps) {
                 </div>
 
                 <div className="flex items-center gap-2 sm:gap-3">
-                    {user && (
-                        <Link
-                            href="/credits"
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 transition-all duration-150 text-xs font-semibold shadow-xs"
-                            title="Saldo de Créditos - Clique para recarregar"
-                        >
-                            <Coins className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-                            <span>{(user.credits ?? 0).toLocaleString()} <span className="hidden sm:inline">créditos</span></span>
-                        </Link>
-                    )}
+                    {/* Credits pill removed in Nuvv Managed Mode (billing handled via Magnus / SGP) */}
                     <LocaleToggle />
                     <ModeToggle />
                     <DropdownMenu>

@@ -783,14 +783,14 @@ function SettingsPageContent() {
                                                 <Badge className="bg-emerald-600 text-white text-[10px] h-4">Oficial Nuvv</Badge>
                                             </div>
                                             <p className="text-xs text-muted-foreground mt-1 max-w-2xl">
-                                                Você não precisa fornecer chaves de IA (Gemini, OpenRouter ou ElevenLabs). A plataforma injeta chaves master de alta performance com síntese de voz multimodal em tempo real. O uso é cobrado automaticamente em créditos na sua carteira.
+                                                Você não precisa fornecer chaves de IA (Gemini, OpenRouter ou ElevenLabs). A plataforma injeta chaves master corporativas de alta performance com síntese de voz multimodal em tempo real. A tarifação de minutos e serviços de IA é unificada diretamente pelo MagnusBilling e faturada pelo SGP.
                                             </p>
                                         </div>
                                     </div>
                                     <Link href="/credits">
                                         <Button variant="outline" size="sm" className="border-emerald-300 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 shrink-0">
                                             <Coins className="h-3.5 w-3.5 me-1.5 text-amber-500" />
-                                            Ver Carteira de Créditos
+                                            Faturamento Gerenciado
                                         </Button>
                                     </Link>
                                 </div>

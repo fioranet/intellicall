@@ -65,29 +65,9 @@ const checkLimit = (type) => async (req, res, next) => {
         }
 
         if (type === 'calls') {
-            // Determine allowed calls based purely on per-plan or trial limits
-            const allowedCalls = typeof limits.callsPerMonth === 'number' ? limits.callsPerMonth : null;
-
-            // <= 0 or null means unlimited calls for this plan/trial
-            if (allowedCalls === null || allowedCalls <= 0) {
-                return next();
-            }
-
-            const startOfMonth = new Date();
-            startOfMonth.setDate(1);
-            startOfMonth.setHours(0, 0, 0, 0);
-
-            const currentCalls = await CallLog.countDocuments({
-                userId: userId,
-                createdAt: { $gte: startOfMonth }
-            });
-
-            if (currentCalls >= allowedCalls) {
-                return res.status(403).json({
-                    status: 'error',
-                    message: `You have reached your monthly call limit of ${allowedCalls} calls. Please upgrade your plan or wait until the next billing cycle.`
-                });
-            }
+            // In Nuvv Telecom Managed Service mode, call minutes, concurrency, and balances
+            // are billed and controlled upstream by MagnusBilling and SGP ERP.
+            return next();
         }
 
         next();

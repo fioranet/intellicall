@@ -30,28 +30,9 @@ async function resolveCallAiConfig(userId, agent, provider = 'sip') {
     const billingSettings = user.billingSettings || { type: 'prepaid', billingCadence: 'full_minute', postpaidCreditLimit: 0 };
 
     if (operatingMode === 'managed') {
-        // Superadmin bypasses credit checks
-        if (!user.isSuperAdmin) {
-            const currentCredits = typeof user.credits === 'number' ? user.credits : 0;
-            if (billingSettings.type === 'prepaid') {
-                if (currentCredits <= 0) {
-                    return {
-                        allowed: false,
-                        reason: 'insufficient_credits',
-                        message: 'Saldo de créditos insuficiente para realizar chamadas gerenciadas por IA. Adquira créditos em sua carteira.'
-                    };
-                }
-            } else if (billingSettings.type === 'postpaid') {
-                const limit = billingSettings.postpaidCreditLimit || 0;
-                if (currentCredits < -limit) {
-                    return {
-                        allowed: false,
-                        reason: 'credit_limit_exceeded',
-                        message: `Limite de créditos pós-pago atingido (${limit} créditos). Entre em contato com o suporte.`
-                    };
-                }
-            }
-        }
+        // In Nuvv Telecom Managed Service mode, financial authorization, rating, and call balances
+        // are delegated upstream to MagnusBilling and SGP ERP.
+        // Internal credit balance checks are bypassed so trunk signaling governs authorization.
 
         // Master keys injection
         const masterGeminiKey = adminSettings?.masterAi?.geminiKey || process.env.GEMINI_API_KEY || '';

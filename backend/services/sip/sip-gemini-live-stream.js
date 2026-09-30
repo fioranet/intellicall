@@ -330,7 +330,8 @@ class SipGeminiLiveStream {
                 if (this.operatingMode === 'managed' && duration > 0) {
                     creditsConsumed = calculateCreditUsage(duration, this.billingCadence);
                     try {
-                        await User.findByIdAndUpdate(this.userId, { $inc: { credits: -creditsConsumed } });
+                        // [Nuvv Managed Mode] Telephony and AI minutes billed in real-time by MagnusBilling on SIP trunk.
+                        // await User.findByIdAndUpdate(this.userId, { $inc: { credits: -creditsConsumed } });
                         console.log(`💳 [SIP Gemini] [${this.callId}] Debited ${creditsConsumed} credits for ${duration}s call (cadence: ${this.billingCadence})`);
                     } catch (creditErr) {
                         console.error(`❌ [SIP Gemini] Credit debit error:`, creditErr);

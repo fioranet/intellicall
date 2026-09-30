@@ -151,14 +151,15 @@ const isAdmin = async (req, res, next) => {
 };
 
 const requireActivePlan = async (req, res, next) => {
-    if (req.user && req.user.planStatus === 'active') {
-        next();
-    } else {
-        res.status(403).json({
-            status: 'error',
-            message: 'Please upgrade plan to continue.'
-        });
+    // In Nuvv Telecom Managed Service mode, account authorization and call limits
+    // are enforced upstream by MagnusBilling / SGP ERP directly on the SIP signaling trunk.
+    if (req.user) {
+        return next();
     }
+    return res.status(401).json({
+        status: 'error',
+        message: 'Unauthorized.'
+    });
 };
 
 module.exports = { auth, requireAdmin: isAdmin, isAdmin, requireActivePlan };
