@@ -318,9 +318,28 @@ async function writeAndReload() {
     fs.writeFileSync(path.join(INTELLICALL_DIR, 'http_intellicall.conf'), generateHttpConfig());
 
     // 2. Try to "Auto-Link" them to main Asterisk configs (The "One-Click" magic)
+    // 1.5 Synchronize Nuvv Telco cluster private trunk & dialplan templates if missing
+    const templatesDir = path.join(__dirname, 'templates');
+    const clusterTrunkTarget = path.join(INTELLICALL_DIR, 'nuvv_cluster_trunk.conf');
+    const clusterDialplanTarget = path.join(INTELLICALL_DIR, 'nuvv_cluster_dialplan.conf');
+
+    try {
+        if (!fs.existsSync(clusterTrunkTarget) && fs.existsSync(path.join(templatesDir, 'nuvv_cluster_trunk.conf'))) {
+            fs.copyFileSync(path.join(templatesDir, 'nuvv_cluster_trunk.conf'), clusterTrunkTarget);
+        }
+        if (!fs.existsSync(clusterDialplanTarget) && fs.existsSync(path.join(templatesDir, 'nuvv_cluster_dialplan.conf'))) {
+            fs.copyFileSync(path.join(templatesDir, 'nuvv_cluster_dialplan.conf'), clusterDialplanTarget);
+        }
+    } catch (err) {
+        console.warn('⚠️ Could not auto-copy Nuvv cluster configs:', err.message);
+    }
+
+    // 2. Try to "Auto-Link" them to main Asterisk configs (The "One-Click" magic)
     const links = [
         ensureLinked('pjsip.conf', 'pjsip_intellicall.conf'),
+        ensureLinked('pjsip.conf', 'nuvv_cluster_trunk.conf'),
         ensureLinked('extensions.conf', 'extensions_intellicall.conf'),
+        ensureLinked('extensions.conf', 'nuvv_cluster_dialplan.conf'),
         ensureLinked('ari.conf', 'ari_intellicall.conf'),
         ensureLinked('http.conf', 'http_intellicall.conf')
     ];
