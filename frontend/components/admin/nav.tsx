@@ -5,14 +5,11 @@ import Link from "next/link";
 import {
     Users,
     Layers,
-    CreditCard,
-    ShoppingBag,
     BarChart3,
     Settings as SettingsIcon,
     HeadphonesIcon,
     MessageSquare,
     Plug,
-    Key,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -76,8 +73,6 @@ export function AdminNav({ currentPath }: { currentPath: string }) {
             switch (href) {
                 case "/admin": return "Usuários";
                 case "/admin/plans": return "Planos";
-                case "/admin/gateways": return "Gateways de Pagamento";
-                case "/admin/purchases": return "Compras";
                 case "/admin/analytics": return "Métricas Globais";
                 case "/admin/support": return "Suporte";
                 case "/admin/settings": return "Configurações Admin";
@@ -92,12 +87,9 @@ export function AdminNav({ currentPath }: { currentPath: string }) {
     const navItems = [
         { href: "/admin", label: getAdminNavLabel("/admin", "Users"), icon: Users },
         { href: "/admin/plans", label: getAdminNavLabel("/admin/plans", "Plans"), icon: Layers },
-        { href: "/admin/gateways", label: getAdminNavLabel("/admin/gateways", "Payment Gateways"), icon: CreditCard },
-        { href: "/admin/purchases", label: getAdminNavLabel("/admin/purchases", "Purchases"), icon: ShoppingBag },
         { href: "/admin/analytics", label: getAdminNavLabel("/admin/analytics", "Global Analytics"), icon: BarChart3 },
         { href: "/admin/support", label: getAdminNavLabel("/admin/support", "Support"), icon: HeadphonesIcon },
         { href: "/admin/settings", label: getAdminNavLabel("/admin/settings", "Admin Settings"), icon: SettingsIcon },
-        { href: "/settings?tab=api-keys", label: locale === "pt" ? "Motores de IA / Chaves" : "AI Engines & Keys", icon: Key },
         { href: "/admin/integrations", label: getAdminNavLabel("/admin/integrations", "Integrations"), icon: Plug },
         { href: "/admin/testimonials", label: getAdminNavLabel("/admin/testimonials", "Testimonials"), icon: MessageSquare },
     ];

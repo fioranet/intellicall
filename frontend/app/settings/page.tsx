@@ -730,15 +730,8 @@ function SettingsPageContent() {
                         value="billing"
                         className="flex-none flex items-center gap-2 px-6 py-2 rounded-none transition-all duration-200 shrink-0 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:bg-primary/5 border-b-2 border-transparent data-[state=active]:border-primary text-muted-foreground hover:text-foreground hover:bg-muted shadow-none bg-transparent !border-x-0 !border-t-0 !shadow-none after:hidden"
                     >
-                        <CreditCard className="h-4 w-4" />
+                        <Layers className="h-4 w-4" />
                         <span className="text-sm">{t("page.tabs.billing")}</span>
-                    </TabsTrigger>
-                    <TabsTrigger
-                        value="transactions"
-                        className="flex-none flex items-center gap-2 px-6 py-2 rounded-none transition-all duration-200 shrink-0 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:bg-primary/5 border-b-2 border-transparent data-[state=active]:border-primary text-muted-foreground hover:text-foreground hover:bg-muted shadow-none bg-transparent !border-x-0 !border-t-0 !shadow-none after:hidden"
-                    >
-                        <ShoppingBag className="h-4 w-4" />
-                        <span className="text-sm">{t("page.tabs.transactions")}</span>
                     </TabsTrigger>
                 </TabsList>
 
@@ -1256,234 +1249,141 @@ function SettingsPageContent() {
 
                 <TabsContent value="billing">
                     <div className="grid gap-6">
-                        <Card className="rounded-2xl border-slate-100 shadow-sm">
-                            <CardHeader>
-                                <div className="flex flex-wrap items-start justify-between gap-4">
-                                    <div className="space-y-1">
-                                        <CardTitle className="text-xl font-bold">{t("billing.currentPlanTitle")}</CardTitle>
-                                        <CardDescription>{t("billing.currentPlanDescription")}</CardDescription>
-                                        <div className="flex flex-wrap items-center gap-4 pt-2 text-sm">
-                                            {user?.planStatus != null && (
-                                                <span className="text-slate-600 dark:text-slate-400">
-                                                    <span className="font-medium text-slate-500 dark:text-slate-500">{t("billing.status")}</span>{" "}
-                                                    <span className="capitalize font-medium">{user.planStatus}</span>
-                                                </span>
-                                            )}
-                                            {user?.planExpiry && (() => {
-                                                const expiryDate = new Date(user.planExpiry);
-                                                const isExpired = expiryDate < new Date();
-                                                return (
-                                                    <span className="text-slate-600 dark:text-slate-400">
-                                                        <span className="font-medium text-slate-500 dark:text-slate-500">
-                                                            {isExpired ? t("billing.expiredOn") : t("billing.expires")}
-                                                        </span>{" "}
-                                                        {expiryDate.toLocaleDateString(undefined, { dateStyle: "medium" })}
-                                                    </span>
-                                                );
-                                            })()}
+                        {/* Current Plan Card */}
+                        <Card className="rounded-2xl border-border shadow-sm bg-card">
+                            <CardHeader className="space-y-3 pb-3">
+                                <div className="flex flex-wrap items-center justify-between gap-4">
+                                    <div className="flex items-center gap-2">
+                                        <div className="p-2.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl">
+                                            <ShieldCheck className="h-5 w-5" />
                                         </div>
+                                        <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 font-semibold px-3 py-1">
+                                            {locale === "pt" ? "Plano Ativo" : "Active Plan"}
+                                        </Badge>
                                     </div>
-                                    <Badge className={`px-4 py-1 text-sm bg-primary/10 text-primary border-primary/20 hover:bg-primary/10 ${usage?.isTrial ? 'animate-pulse bg-amber-500/10 text-amber-600 border-amber-500/20 hover:bg-amber-500/10' : ''}`}>
-                                        {user?.plan?.name || t("billing.trialPlan")}
-                                    </Badge>
+
+                                    {user?.techPrefix && (
+                                        <Badge variant="outline" className="font-mono text-xs px-3 py-1.5 border-primary/30 bg-primary/5 text-primary">
+                                            TechPrefix: {user.techPrefix}
+                                        </Badge>
+                                    )}
+                                </div>
+
+                                <div className="pt-2">
+                                    <CardTitle className="text-2xl font-bold font-sora">
+                                        {user?.plan?.name || (locale === "pt" ? "Telefonia Nuvv (PSTN + IA)" : "Nuvv Telephony (PSTN + AI)")}
+                                    </CardTitle>
+                                    <CardDescription className="text-sm mt-1">
+                                        {locale === "pt"
+                                            ? "Sua conta empresarial está ativa e habilitada para campanhas e agentes de IA."
+                                            : "Your enterprise account is active and enabled for campaigns and AI agents."}
+                                    </CardDescription>
                                 </div>
                             </CardHeader>
-                            <CardContent>
-                                <div className={`grid gap-4 ${usage?.isTrial ? 'md:grid-cols-4' : 'md:grid-cols-3'}`}>
-                                    <div className="p-4 rounded-xl border bg-slate-50/50 dark:bg-muted/30 space-y-2">
-                                        <div className="flex justify-between items-center text-xs font-bold uppercase text-slate-400 dark:text-slate-500">
-                                            <span>{t("billing.agents")}</span>
-                                            <span className="text-slate-900 dark:text-slate-100">{usage?.usage?.agents ?? 0} / {usage?.limits?.agents ?? 0}</span>
-                                        </div>
-                                        <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                                            <div
-                                                className="h-full bg-primary"
-                                                style={{ width: `${Math.min(100, ((usage?.usage?.agents ?? 0) / Math.max(1, usage?.limits?.agents ?? 1)) * 100)}%` }}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="p-4 rounded-xl border bg-slate-50/50 dark:bg-muted/30 space-y-2">
-                                        <div className="flex justify-between items-center text-xs font-bold uppercase text-slate-400 dark:text-slate-500">
-                                            <span>{t("billing.campaigns")}</span>
-                                            <span className="text-slate-900 dark:text-slate-100">{usage?.usage?.campaigns ?? 0} / {usage?.limits?.campaigns ?? 0}</span>
-                                        </div>
-                                        <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                                            <div
-                                                className="h-full bg-primary"
-                                                style={{ width: `${Math.min(100, ((usage?.usage?.campaigns ?? 0) / Math.max(1, usage?.limits?.campaigns ?? 1)) * 100)}%` }}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="p-4 rounded-xl border bg-slate-50/50 dark:bg-muted/30 space-y-2">
-                                        <div className="flex justify-between items-center text-xs font-bold uppercase text-slate-400 dark:text-slate-500">
-                                            <span>{t("billing.leads")}</span>
-                                            <span className="text-slate-900 dark:text-slate-100">{usage?.usage?.leads ?? 0} / {usage?.limits?.leads ?? 0}</span>
-                                        </div>
-                                        <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                                            <div
-                                                className="h-full bg-primary"
-                                                style={{ width: `${Math.min(100, ((usage?.usage?.leads ?? 0) / Math.max(1, usage?.limits?.leads ?? 1)) * 100)}%` }}
-                                            />
-                                        </div>
-                                    </div>
-                                    {usage?.isTrial && (
-                                        <div className="p-4 rounded-xl border bg-slate-50/50 dark:bg-muted/30 space-y-2">
-                                            <div className="flex justify-between items-center text-xs font-bold uppercase text-slate-400 dark:text-slate-500">
-                                                <span>{t("billing.calls")}</span>
-                                                <span className="text-slate-900 dark:text-slate-100">
-                                                    {usage?.usage?.calls ?? 0}
-                                                    {" / "}
-                                                    {usage?.limits?.callsPerMonth === -1
-                                                        ? t("billing.unlimited")
-                                                        : usage?.limits?.callsPerMonth ?? 0}
-                                                </span>
-                                            </div>
-                                            <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                                                <div
-                                                    className="h-full bg-amber-500"
-                                                    style={{
-                                                        width: usage?.limits?.callsPerMonth && usage.limits.callsPerMonth > 0
-                                                            ? `${Math.min(100, ((usage?.usage?.calls ?? 0) / Math.max(1, usage.limits.callsPerMonth)) * 100)}%`
-                                                            : "0%"
-                                                    }}
-                                                />
-                                            </div>
-                                        </div>
-                                    )}
+
+                            <CardContent className="space-y-4 pt-1">
+                                <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">
+                                    {locale === "pt" ? "Descritivo do Funcionamento" : "How it Works"}
+                                </div>
+                                <div className="rounded-xl border border-border/60 bg-muted/20 p-4 text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                                    {user?.plan?.description || (locale === "pt" 
+                                        ? "Plano corporativo turn-key com numeração DID nacional e rotas de telefonia PSTN fornecidas diretamente pela Nuvv Telecom. As chamadas são atendidas ou disparadas com baixa latência utilizando inteligência artificial generativa em tempo real. A bilhetagem e tarifação dos minutos trafegados é processada via MagnusBilling e consolidada mensalmente na fatura da sua empresa via SGP."
+                                        : "Corporate turn-key plan with PSTN routing and low latency generative AI.")}
                                 </div>
                             </CardContent>
                         </Card>
 
-                        <div className="space-y-4">
-                            <h2 className="text-xl font-bold px-1">{t("billing.availablePlans")}</h2>
-                            <div className="grid md:grid-cols-3 gap-6">
-                                {plans.map((plan) => (
-                                    <Card key={plan._id} className={`rounded-2xl border-slate-100 shadow-sm flex flex-col ${user?.plan?._id === plan._id ? 'border-primary ring-1 ring-primary/20' : ''}`}>
-                                        <CardHeader>
-                                            <div className="flex justify-between items-start">
-                                                <div className="p-2 bg-primary/5 rounded-lg mb-2">
-                                                    <Zap className="h-5 w-5 text-primary" />
+                        {/* Available Plans Section */}
+                        <div className="space-y-4 pt-2">
+                            <div>
+                                <h2 className="text-xl font-bold font-sora">
+                                    {locale === "pt" ? "Modalidades de Planos Nuvv" : "Nuvv Plan Modalities"}
+                                </h2>
+                                <p className="text-sm text-muted-foreground">
+                                    {locale === "pt" 
+                                        ? "Conheça o funcionamento das modalidades corporativas disponíveis para sua operação."
+                                        : "Understand how each corporate telephony modality operates."}
+                                </p>
+                            </div>
+
+                            <div className="grid md:grid-cols-2 gap-6">
+                                {plans.map((plan) => {
+                                    const isCurrent = user?.plan?._id === plan._id;
+                                    return (
+                                        <Card key={plan._id} className={cn(
+                                            "rounded-2xl border-border shadow-sm flex flex-col justify-between transition-all",
+                                            isCurrent && "border-primary/50 ring-1 ring-primary/20 bg-primary/[0.02]"
+                                        )}>
+                                            <CardHeader className="space-y-3 pb-3">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="p-2.5 bg-primary/10 rounded-xl text-primary">
+                                                        {plan.telephonyType === "byot_sip" ? (
+                                                            <Layers className="h-5 w-5" />
+                                                        ) : (
+                                                            <PhoneCall className="h-5 w-5" />
+                                                        )}
+                                                    </div>
+
+                                                    <div className="flex items-center gap-2">
+                                                        <Badge
+                                                            variant="outline"
+                                                            className={cn(
+                                                                "text-xs px-2.5 py-0.5 font-medium",
+                                                                plan.telephonyType === "byot_sip"
+                                                                    ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20"
+                                                                    : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                                                            )}
+                                                        >
+                                                            {plan.telephonyType === "byot_sip"
+                                                                ? (locale === "pt" ? "Tronco Próprio / BYOT" : "Bring Your Own Trunk")
+                                                                : (locale === "pt" ? "Telefonia Nuvv (PSTN + IA)" : "Nuvv Telephony (PSTN + AI)")}
+                                                        </Badge>
+                                                        {isCurrent && (
+                                                            <Badge className="bg-primary text-white text-xs">
+                                                                {locale === "pt" ? "Plano Atual" : "Current Plan"}
+                                                            </Badge>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                                {user?.plan?._id === plan._id && (
-                                                    <Badge className="bg-primary text-white">{t("billing.currentPlan")}</Badge>
-                                                )}
-                                            </div>
-                                            <CardTitle className="text-xl font-bold pt-2">{plan.name}</CardTitle>
-                                            <CardDescription>{plan.description}</CardDescription>
-                                        </CardHeader>
-                                        <CardContent className="flex-1 space-y-4">
-                                            <div className="flex items-baseline gap-1 py-2">
-                                                <span className="text-3xl font-bold">{currency}{plan.price}</span>
-                                                <span className="text-slate-500 dark:text-slate-400 text-sm">/{plan.interval}</span>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                                                    <Check className="h-4 w-4 text-green-500 shrink-0" />
-                                                    {t("billing.planAgents", { count: plan.limits.agents === -1 ? t("billing.unlimited") : plan.limits.agents })}
+
+                                                <CardTitle className="text-xl font-bold font-sora pt-1">{plan.name}</CardTitle>
+                                            </CardHeader>
+
+                                            <CardContent className="space-y-2 flex-1 pb-6">
+                                                <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">
+                                                    {locale === "pt" ? "Descritivo do Funcionamento" : "How it Works"}
                                                 </div>
-                                                <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                                                    <Check className="h-4 w-4 text-green-500 shrink-0" />
-                                                    {t("billing.planCampaigns", { count: plan.limits.campaigns === -1 ? t("billing.unlimited") : plan.limits.campaigns })}
+                                                <div className="rounded-xl border border-border/60 bg-muted/20 p-4 text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                                                    {plan.description}
                                                 </div>
-                                                <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                                                    <Check className="h-4 w-4 text-green-500 shrink-0" />
-                                                    {t("billing.planLeads", { count: plan.limits.leads === -1 ? t("billing.unlimited") : plan.limits.leads })}
-                                                </div>
-                                                <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                                                    <Check className="h-4 w-4 text-green-500 shrink-0" />
-                                                    {plan.limits.callsPerMonth === -1
-                                                        ? t("billing.planCallsUnlimited")
-                                                        : t("billing.planCalls", { count: plan.limits.callsPerMonth })}
-                                                </div>
-                                            </div>
-                                        </CardContent>
-                                        <CardFooter className="pt-6">
-                                            <Button
-                                                className="w-full rounded-full"
-                                                variant={user?.plan?._id === plan._id ? "outline" : "default"}
-                                                disabled={user?.plan?._id === plan._id}
-                                                onClick={() => handleUpgrade(plan)}
-                                            >
-                                                {user?.plan?._id === plan._id ? t("billing.currentPlan") : t("billing.upgradePlan")}
-                                            </Button>
-                                        </CardFooter>
-                                    </Card>
-                                ))}
+                                            </CardContent>
+                                        </Card>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Help & Support Callout */}
+                            <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-4">
+                                <div className="space-y-1">
+                                    <h4 className="font-bold text-sm font-sora">
+                                        {locale === "pt" ? "Precisa alterar sua modalidade ou adicionar novos troncos?" : "Need to change modality or add new trunks?"}
+                                    </h4>
+                                    <p className="text-xs text-muted-foreground leading-relaxed">
+                                        {locale === "pt"
+                                            ? "Para migração de plano, novas faixas de ramais DID ou suporte de interconexão PJSIP/Asterisk, contate nosso suporte corporativo."
+                                            : "Contact corporate support for modality migration, DID numbers, or SIP interconnect support."}
+                                    </p>
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => window.location.href = "/support"}
+                                    className="rounded-xl shrink-0 font-semibold text-xs border-primary/30 hover:bg-primary/10"
+                                >
+                                    {locale === "pt" ? "Abrir Chamado no Suporte" : "Open Support Ticket"}
+                                </Button>
                             </div>
                         </div>
                     </div>
-                </TabsContent>
-
-                <TabsContent value="transactions">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>{t("transactions.title")}</CardTitle>
-                            <CardDescription>
-                                {t("transactions.description")}
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="rounded-xl border border-slate-100 dark:border-border overflow-hidden">
-                                <table className="w-full text-sm">
-                                    <thead className="bg-slate-50/50 dark:bg-muted/40 border-b border-slate-100 dark:border-border">
-                                        <tr>
-                                            <th className="px-4 py-3 text-start font-bold text-slate-500 dark:text-slate-400 uppercase text-[10px]">{t("transactions.date")}</th>
-                                            <th className="px-4 py-3 text-start font-bold text-slate-500 dark:text-slate-400 uppercase text-[10px]">{t("transactions.plan")}</th>
-                                            <th className="px-4 py-3 text-start font-bold text-slate-500 dark:text-slate-400 uppercase text-[10px]">{t("transactions.amount")}</th>
-                                            <th className="px-4 py-3 text-start font-bold text-slate-500 dark:text-slate-400 uppercase text-[10px]">{t("transactions.method")}</th>
-                                            <th className="px-4 py-3 text-end font-bold text-slate-500 dark:text-slate-400 uppercase text-[10px]">{t("transactions.status")}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-100 dark:divide-border">
-                                        {loadingTransactions ? (
-                                            Array(3).fill(0).map((_, i) => (
-                                                <tr key={i}>
-                                                    <td colSpan={5} className="px-4 py-4">
-                                                        <Skeleton className="h-4 w-full" />
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        ) : transactions.length === 0 ? (
-                                            <tr>
-                                                <td colSpan={5} className="px-4 py-12 text-center text-muted-foreground">
-                                                    {t("transactions.empty")}
-                                                </td>
-                                            </tr>
-                                        ) : (
-                                            transactions.map((tx) => (
-                                                <tr key={tx._id} className="hover:bg-slate-50/30 dark:hover:bg-muted/30 transition-colors">
-                                                    <td className="px-4 py-4 font-medium">
-                                                        {new Date(tx.createdAt).toLocaleDateString()}
-                                                    </td>
-                                                    <td className="px-4 py-4 font-bold text-slate-900 dark:text-slate-100">
-                                                        {tx.plan?.name || t("transactions.premiumPlan")}
-                                                    </td>
-                                                    <td className="px-4 py-4">
-                                                        {currency}{tx.amount}
-                                                    </td>
-                                                    <td className="px-4 py-4 capitalize text-slate-500 dark:text-slate-400">
-                                                        {tx.paymentGateway}
-                                                    </td>
-                                                    <td className="px-4 py-4 text-end">
-                                                        <Badge
-                                                            variant="outline"
-                                                            className={`
-                                                                ${tx.status === 'completed' ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20' :
-                                                                    tx.status === 'pending' ? 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-500/10 dark:text-yellow-400 dark:border-yellow-500/20' :
-                                                                        'bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20'}
-                                                            `}
-                                                        >
-                                                            {tx.status}
-                                                        </Badge>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </CardContent>
-                    </Card>
                 </TabsContent>
 
                 <TabsContent value="system">

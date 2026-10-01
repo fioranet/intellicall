@@ -267,7 +267,7 @@
       "webhooks": "Webhooks",
       "email": "Email",
       "integrations": "Integrations",
-      "billing": "Plan & Billing",
+      "billing": "Plan",
       "transactions": "Transaction History"
     }
   },

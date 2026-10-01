@@ -5,20 +5,12 @@ import { useEffect, useState } from "react";
 import {
     Layers,
     Plus,
-    MoreHorizontal,
     Check,
-    X,
     Loader2,
-    DollarSign,
     Zap,
-    Info,
-    Settings,
-    ShieldCheck,
-    CreditCard,
-    Target,
-    Users,
     PhoneCall,
-    Sparkles
+    Building2,
+    ShieldCheck
 } from "lucide-react";
 import {
     Card,
@@ -34,7 +26,6 @@ import axios from "axios";
 import { toast } from "sonner";
 import { AdminNav } from "@/components/admin/nav";
 import { cn } from "@/lib/utils";
-import { getCurrencySymbol } from "@/lib/currency-symbols";
 
 import {
     Dialog,
@@ -47,15 +38,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
 
@@ -63,191 +46,121 @@ export default function AdminPlansPage() {
     const t = useTranslations("admin");
     const c = useTranslations("common");
     const locale = useLocale();
+
     const [plans, setPlans] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+
+    // Modal state for Creating / Editing Plan
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
     const [editingPlan, setEditingPlan] = useState<any>(null);
+    const [isSaving, setIsSaving] = useState(false);
+
     const [formData, setFormData] = useState({
         name: "",
         description: "",
-        price: 0,
-        interval: "monthly",
-        isActive: true,
-        dodoProductId: "",
         telephonyType: "nuvv_managed",
-        limits: {
-            agents: 1,
-            campaigns: 1,
-            leads: 100,
-            callsPerMonth: 100
-        },
-        creditsConfig: {
-            creditPriceBrl: 0.50,
-            minRechargeCredits: 50,
-            monthlyIncludedCredits: 0
-        }
+        isActive: true,
     });
-    const [currency, setCurrency] = useState("$");
-    const [trialLimits, setTrialLimits] = useState({
-        agents: 1,
-        campaigns: 1,
-        leads: 10,
-        callsPerMonth: 5
-    });
-    const [isTrialModalOpen, setIsTrialModalOpen] = useState(false);
-    const [isSavingTrial, setIsSavingTrial] = useState(false);
-
-    const fetchPlans = async () => {
-        try {
-            setLoading(true);
-            const token = localStorage.getItem("token");
-            const [plansRes, settingsRes] = await Promise.all([
-                axios.get(`${API_BASE_URL}/admin/plans`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                }),
-                axios.get(`${API_BASE_URL}/admin/settings`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                })
-            ]);
-
-            if (plansRes.data?.status === "success") {
-                setPlans(plansRes.data.data.plans);
-            }
-
-            if (settingsRes.data?.status === "success" && settingsRes.data.data.settings) {
-                const settings = settingsRes.data.data.settings;
-                setCurrency(getCurrencySymbol(settings.currency));
-                if (settings.trialLimits) {
-                    setTrialLimits(settings.trialLimits);
-                }
-            }
-        } catch (err: any) {
-            toast.error(t("plans.toast.loadFailed"));
-        } finally {
-            setLoading(false);
-        }
-    };
 
     useEffect(() => {
         fetchPlans();
     }, []);
 
-    const resetForm = () => {
-        setFormData({
-            name: "",
-            description: "",
-            price: 0,
-            interval: "monthly",
-            isActive: true,
-            dodoProductId: "",
-            telephonyType: "nuvv_managed",
-            limits: {
-                agents: 1,
-                campaigns: 1,
-                leads: 100,
-                callsPerMonth: 100
-            },
-            creditsConfig: {
-                creditPriceBrl: 0.50,
-                minRechargeCredits: 50,
-                monthlyIncludedCredits: 0
+    const fetchPlans = async () => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get(`${API_BASE_URL}/admin/plans`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (response.data?.status === "success") {
+                setPlans(response.data.data.plans || []);
             }
-        });
-        setEditingPlan(null);
+        } catch (err: any) {
+            toast.error(err.response?.data?.message || "Erro ao carregar planos");
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleOpenModal = (plan?: any) => {
+    const handleOpenModal = (plan: any = null) => {
         if (plan) {
             setEditingPlan(plan);
             setFormData({
-                name: plan.name,
-                description: plan.description,
-                price: plan.price,
-                interval: plan.interval,
-                isActive: plan.isActive,
-                dodoProductId: plan.dodoProductId || "",
+                name: plan.name || "",
+                description: plan.description || "",
                 telephonyType: plan.telephonyType || "nuvv_managed",
-                limits: {
-                    agents: plan.limits?.agents ?? 1,
-                    campaigns: plan.limits?.campaigns ?? 1,
-                    leads: plan.limits?.leads ?? 100,
-                    callsPerMonth: typeof plan.limits?.callsPerMonth === "number"
-                        ? plan.limits.callsPerMonth
-                        : 100
-                },
-                creditsConfig: {
-                    creditPriceBrl: plan.creditsConfig?.creditPriceBrl ?? 0.50,
-                    minRechargeCredits: plan.creditsConfig?.minRechargeCredits ?? 50,
-                    monthlyIncludedCredits: plan.creditsConfig?.monthlyIncludedCredits ?? 0
-                }
+                isActive: plan.isActive !== undefined ? plan.isActive : true,
             });
         } else {
-            resetForm();
+            setEditingPlan(null);
+            setFormData({
+                name: "",
+                description: "",
+                telephonyType: "nuvv_managed",
+                isActive: true,
+            });
         }
         setIsModalOpen(true);
     };
 
     const handleSave = async () => {
+        if (!formData.name.trim()) {
+            toast.error("Informe o nome do plano.");
+            return;
+        }
+        if (!formData.description.trim()) {
+            toast.error("Informe o descritivo de funcionamento do plano.");
+            return;
+        }
+
+        setIsSaving(true);
         try {
-            setIsSaving(true);
             const token = localStorage.getItem("token");
+            const payload = {
+                name: formData.name.trim(),
+                description: formData.description.trim(),
+                telephonyType: formData.telephonyType,
+                isActive: formData.isActive,
+                price: 0,
+                interval: "monthly",
+                limits: { agents: -1, campaigns: -1, leads: -1, callsPerMonth: -1 }
+            };
+
             let response;
             if (editingPlan) {
-                response = await axios.patch(`${API_BASE_URL}/admin/plans/${editingPlan._id}`, formData, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                response = await axios.patch(`${API_BASE_URL}/admin/plans/${editingPlan._id}`, payload, {
+                    headers: { Authorization: `Bearer ${token}` }
                 });
             } else {
-                response = await axios.post(`${API_BASE_URL}/admin/plans`, formData, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                response = await axios.post(`${API_BASE_URL}/admin/plans`, payload, {
+                    headers: { Authorization: `Bearer ${token}` }
                 });
             }
 
             if (response.data?.status === "success") {
-                toast.success(editingPlan ? "Plan updated" : "Plan created");
+                toast.success(editingPlan ? "Plano atualizado com sucesso!" : "Plano criado com sucesso!");
                 setIsModalOpen(false);
                 fetchPlans();
             }
         } catch (err: any) {
-            toast.error(err.response?.data?.message || t("plans.toast.saveFailed"));
+            toast.error(err.response?.data?.message || "Erro ao salvar plano");
         } finally {
             setIsSaving(false);
         }
     };
 
-    const handleSaveTrial = async () => {
-        try {
-            setIsSavingTrial(true);
-            const token = localStorage.getItem("token");
-            const response = await axios.post(`${API_BASE_URL}/admin/settings`, {
-                trialLimits
-            }, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-
-            if (response.data?.status === "success") {
-                toast.success(t("plans.toast.trialUpdated"));
-                setIsTrialModalOpen(false);
-                fetchPlans();
-            }
-        } catch (err: any) {
-            toast.error(err.response?.data?.message || t("plans.toast.trialFailed"));
-        } finally {
-            setIsSavingTrial(false);
-        }
-    };
-
     const handleDelete = async (id: string) => {
-        if (!window.confirm("Are you sure you want to delete this plan?")) return;
+        if (!window.confirm("Tem certeza que deseja remover este plano corporativo?")) return;
         try {
             const token = localStorage.getItem("token");
             await axios.delete(`${API_BASE_URL}/admin/plans/${id}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { Authorization: `Bearer ${token}` }
             });
-            toast.success(t("plans.toast.deleted"));
+            toast.success("Plano excluído com sucesso!");
             fetchPlans();
         } catch (err: any) {
-            toast.error(t("plans.toast.deleteFailed"));
+            toast.error(err.response?.data?.message || "Erro ao excluir plano");
         }
     };
 
@@ -255,15 +168,21 @@ export default function AdminPlansPage() {
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground font-sora">{t("plans.title")}</h1>
-                    <p className="text-muted-foreground">{t("plans.subtitle")}</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-foreground font-sora">
+                        {locale === "pt" ? "Planos Corporativos" : "Corporate Plans"}
+                    </h1>
+                    <p className="text-muted-foreground text-sm">
+                        {locale === "pt" 
+                            ? "Configure os planos e o descritivo de funcionamento apresentados aos clientes."
+                            : "Configure plan names and operational descriptions presented to clients."}
+                    </p>
                 </div>
                 <Button
                     onClick={() => handleOpenModal()}
-                    className="shadow-lg"
+                    className="shadow-lg font-medium rounded-xl gap-2"
                 >
-                    <Plus className="me-2 h-4 w-4" />
-                    {t("plans.createNew")}
+                    <Plus className="h-4 w-4" />
+                    {locale === "pt" ? "Novo Plano" : "New Plan"}
                 </Button>
             </div>
 
@@ -274,161 +193,120 @@ export default function AdminPlansPage() {
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
             ) : (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {/* Trial / No Plan Card */}
-                    <Card className="rounded-2xl border-primary/20 bg-primary/5 shadow-sm hover:shadow-md transition-shadow">
-                        <CardHeader>
-                            <div className="flex items-center justify-between">
-                                <div className="p-2 bg-primary/10 rounded-xl">
-                                    <ShieldCheck className="h-5 w-5 text-primary" />
-                                </div>
-                                <Badge className="bg-primary/20 text-primary border-primary/20">{t("plans.systemDefault")}</Badge>
-                            </div>
-                            <div className="pt-4">
-                                <CardTitle className="text-xl font-bold text-primary">{t("plans.trialTitle")}</CardTitle>
-                                <CardDescription className="line-clamp-2 mt-1">{t("plans.trialDescription")}</CardDescription>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="flex items-baseline gap-1">
-                                <span className="text-3xl font-bold">{currency}0</span>
-                                <span className="text-muted-foreground text-sm">{t("plans.perTrial")}</span>
-                            </div>
-
-                            <div className="space-y-2 pt-2">
-                                <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground/60">{t("plans.globalLimits")}</div>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
-                                        <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                        {t("plans.agents", { count: trialLimits.agents })}
-                                    </div>
-                                    <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
-                                        <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                        {t("plans.campaigns", { count: trialLimits.campaigns })}
-                                    </div>
-                                    <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
-                                        <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                        {t("plans.leads", { count: trialLimits.leads })}
-                                    </div>
-                                    <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
-                                        <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                        {trialLimits.callsPerMonth > 0 ? t("plans.callsPerMonth", { count: trialLimits.callsPerMonth }) : t("plans.unlimitedCalls")}
-                                    </div>
-                                </div>
-                            </div>
-                        </CardContent>
-                        <CardFooter className="border-t border-primary/10 pt-6">
-                            <Button
-                                onClick={() => setIsTrialModalOpen(true)}
-                                variant="ghost"
-                                className="w-full text-primary hover:text-primary hover:bg-primary/10 font-bold"
-                            >
-                                <Settings className="me-2 h-4 w-4" /> {t("plans.configureTrial")}
-                            </Button>
-                        </CardFooter>
-                    </Card>
-
+                <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6">
                     {plans.map((plan) => (
-                        <Card key={plan._id} className="rounded-2xl border-border shadow-sm hover:shadow-md transition-shadow">
-                            <CardHeader>
+                        <Card key={plan._id} className="rounded-2xl border-border shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+                            <CardHeader className="space-y-3 pb-3">
                                 <div className="flex items-center justify-between">
-                                    <div className="p-2 bg-primary/5 rounded-xl">
-                                        <Zap className="h-5 w-5 text-primary" />
+                                    <div className="flex items-center gap-2">
+                                        <div className="p-2.5 bg-primary/10 rounded-xl text-primary">
+                                            {plan.telephonyType === "byot_sip" ? (
+                                                <Layers className="h-5 w-5" />
+                                            ) : (
+                                                <PhoneCall className="h-5 w-5" />
+                                            )}
+                                        </div>
+                                        <Badge
+                                            variant="outline"
+                                            className={cn(
+                                                "text-xs px-2.5 py-0.5 font-medium",
+                                                plan.telephonyType === "byot_sip"
+                                                    ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20"
+                                                    : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                                            )}
+                                        >
+                                            {plan.telephonyType === "byot_sip"
+                                                ? (locale === "pt" ? "Tronco Próprio / BYOT" : "Bring Your Own Trunk")
+                                                : (locale === "pt" ? "Telefonia Nuvv (PSTN + IA)" : "Nuvv Telephony (PSTN + AI)")}
+                                        </Badge>
                                     </div>
+
                                     {plan.isActive ? (
-                                        <Badge className="bg-green-500/10 text-green-500 hover:bg-green-500/20 border-green-500/20">{t("plans.active")}</Badge>
+                                        <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20">
+                                            {locale === "pt" ? "Ativo" : "Active"}
+                                        </Badge>
                                     ) : (
-                                        <Badge variant="secondary" className="bg-muted text-muted-foreground">{t("plans.inactive")}</Badge>
+                                        <Badge variant="secondary" className="bg-muted text-muted-foreground">
+                                            {locale === "pt" ? "Inativo" : "Inactive"}
+                                        </Badge>
                                     )}
                                 </div>
-                                <div className="pt-4">
-                                    <CardTitle className="text-xl font-bold">{plan.name}</CardTitle>
-                                    <CardDescription className="line-clamp-2 mt-1">{plan.description}</CardDescription>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="flex items-baseline gap-1">
-                                    <span className="text-3xl font-bold">{currency}{plan.price}</span>
-                                    <span className="text-muted-foreground text-sm">/{plan.interval}</span>
-                                </div>
 
-                                <div className="space-y-2 pt-2">
-                                    <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground/60">{t("plans.limits")}</div>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                            {t("plans.agents", { count: plan.limits.agents })}
-                                        </div>
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                            {plan.limits.campaigns === -1
-                                                ? "Campanhas Ilimitadas"
-                                                : t("plans.campaigns", { count: plan.limits.campaigns })}
-                                        </div>
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                            {plan.limits.leads === -1
-                                                ? "Leads Ilimitados"
-                                                : t("plans.leads", { count: plan.limits.leads })}
-                                        </div>
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                            {plan.limits.callsPerMonth === -1
-                                                ? "Chamadas Ilimitadas"
-                                                : `${plan.limits.callsPerMonth} chamadas/mês`}
-                                        </div>
-                                    </div>
+                                <CardTitle className="text-xl font-bold font-sora pt-1">{plan.name}</CardTitle>
+                            </CardHeader>
+
+                            <CardContent className="space-y-3 flex-1 pb-4">
+                                <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">
+                                    {locale === "pt" ? "Descritivo do Funcionamento" : "How it Works"}
+                                </div>
+                                <div className="rounded-xl border border-border/60 bg-muted/20 p-4 text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                                    {plan.description}
                                 </div>
                             </CardContent>
-                            <CardFooter className="border-t border-border pt-6">
-                                <div className="flex items-center justify-between w-full">
-                                    <Button
-                                        onClick={() => handleOpenModal(plan)}
-                                        variant="ghost"
-                                        className="text-primary hover:text-primary hover:bg-primary/5 font-bold"
-                                    >
-                                        {t("plans.editPlan")}
-                                    </Button>
-                                    <Button
-                                        onClick={() => handleDelete(plan._id)}
-                                        variant="ghost"
-                                        className="text-destructive hover:text-destructive hover:bg-destructive/10 font-medium"
-                                    >
-                                        {t("plans.delete")}
-                                    </Button>
-                                </div>
+
+                            <CardFooter className="border-t border-border pt-4 flex items-center justify-between">
+                                <Button
+                                    onClick={() => handleOpenModal(plan)}
+                                    variant="ghost"
+                                    className="text-primary hover:text-primary hover:bg-primary/5 font-semibold text-sm"
+                                >
+                                    {locale === "pt" ? "Editar Plano" : "Edit Plan"}
+                                </Button>
+                                <Button
+                                    onClick={() => handleDelete(plan._id)}
+                                    variant="ghost"
+                                    className="text-destructive hover:text-destructive hover:bg-destructive/10 font-medium text-sm"
+                                >
+                                    {locale === "pt" ? "Excluir" : "Delete"}
+                                </Button>
                             </CardFooter>
                         </Card>
                     ))}
 
                     <button
+                        type="button"
                         onClick={() => handleOpenModal()}
-                        className="flex flex-col items-center justify-center gap-4 p-8 border-2 border-dashed border-border rounded-2xl hover:border-primary hover:bg-primary/5 transition-all text-muted-foreground hover:text-primary group bg-card"
+                        className="flex flex-col items-center justify-center gap-4 p-8 border-2 border-dashed border-border rounded-2xl hover:border-primary hover:bg-primary/5 transition-all text-muted-foreground hover:text-primary group bg-card/50 min-h-[260px]"
                     >
                         <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center group-hover:bg-primary/10 transition-colors">
                             <Plus className="h-6 w-6" />
                         </div>
-                        <span className="font-bold">{t("plans.createPlan")}</span>
+                        <div className="text-center">
+                            <span className="font-bold text-base block">{locale === "pt" ? "Criar Novo Plano" : "Create New Plan"}</span>
+                            <span className="text-xs text-muted-foreground mt-1 block">
+                                {locale === "pt" ? "Adicione um nome e descritivo de funcionamento" : "Add plan name and operational description"}
+                            </span>
+                        </div>
                     </button>
                 </div>
             )}
 
+            {/* Simplified Create / Edit Plan Modal */}
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
                 <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto rounded-3xl p-6 border-none shadow-2xl">
-                    <DialogHeader className="mb-4">
+                    <DialogHeader className="mb-2">
                         <DialogTitle className="text-2xl font-bold font-sora">
-                            {editingPlan ? t("plans.updatePlan") : t("plans.createPlan")}
+                            {editingPlan 
+                                ? (locale === "pt" ? "Editar Plano Corporativo" : "Edit Corporate Plan") 
+                                : (locale === "pt" ? "Criar Plano Corporativo" : "Create Corporate Plan")}
                         </DialogTitle>
-                        <DialogDescription>
-                            {t("plans.dialogDescription")}
+                        <DialogDescription className="text-sm">
+                            {locale === "pt"
+                                ? "Defina o nome da modalidade e o descritivo de funcionamento para os clientes."
+                                : "Define the plan name and operational description for clients."}
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between px-4 h-11 bg-slate-50/50 rounded-xl border">
+                    <div className="space-y-5 pt-2">
+                        {/* Status Switch */}
+                        <div className="flex items-center justify-between px-4 h-12 bg-muted/30 rounded-xl border">
                             <div className="space-y-0.5">
-                                <Label htmlFor="plan-active" className="text-sm font-semibold">{t("plans.planStatus")}</Label>
-                                <p className="text-[10px] text-muted-foreground">{t("plans.planStatusHint")}</p>
+                                <Label htmlFor="plan-active" className="text-sm font-semibold">
+                                    {locale === "pt" ? "Status do Plano" : "Plan Status"}
+                                </Label>
+                                <p className="text-[11px] text-muted-foreground">
+                                    {locale === "pt" ? "Planos ativos ficam visíveis nas configurações dos clientes." : "Active plans are visible in client settings."}
+                                </p>
                             </div>
                             <Switch
                                 id="plan-active"
@@ -437,218 +315,52 @@ export default function AdminPlansPage() {
                             />
                         </div>
 
-                        {/* Basic Info */}
-                        <div className="grid grid-cols-2 gap-3">
-                            <div className="space-y-2">
-                                <Label htmlFor="name">{t("plans.nameLabel")}</Label>
-                                <Input
-                                    id="name"
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    placeholder={t("plans.namePlaceholder")}
-                                    className="rounded-xl h-11"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="interval">{t("plans.billingCycle")}</Label>
-                                <Select
-                                    value={formData.interval}
-                                    onValueChange={(val) => setFormData({ ...formData, interval: val })}
-                                >
-                                    <SelectTrigger className="rounded-xl h-11">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="monthly">{t("plans.monthly")}</SelectItem>
-                                        <SelectItem value="yearly">{t("plans.yearly")}</SelectItem>
-                                        <SelectItem value="one-time">{t("plans.oneTime")}</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
-
+                        {/* Plan Name */}
                         <div className="space-y-2">
-                            <Label htmlFor="description">{t("plans.descriptionLabel")}</Label>
-                            <Textarea
-                                id="description"
-                                value={formData.description}
-                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                placeholder={t("plans.descriptionPlaceholder")}
-                                className="rounded-xl min-h-[80px]"
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="price">{t("plans.priceLabel")}</Label>
+                            <Label htmlFor="name" className="text-sm font-semibold">
+                                {locale === "pt" ? "Nome do Plano" : "Plan Name"}
+                            </Label>
                             <Input
-                                id="price"
-                                type="number"
-                                value={formData.price}
-                                onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
+                                id="name"
+                                value={formData.name}
+                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                placeholder={locale === "pt" ? "Ex: Telefonia Nuvv (PSTN + IA)" : "e.g. Nuvv Telephony (PSTN + AI)"}
                                 className="rounded-xl h-11"
                             />
                         </div>
 
-                        {/* Limits */}
-                        <div className="pt-3 border-t space-y-3">
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("plans.resourceLimits")}</h3>
-
-                            {/* Unlimited Toggles */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                                <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50/70 dark:bg-muted/40 border">
-                                    <div className="space-y-0.5">
-                                        <Label className="text-xs font-semibold">Chamadas Ilimitadas</Label>
-                                        <p className="text-[10px] text-muted-foreground">Sem limite mensal</p>
-                                    </div>
-                                    <Switch
-                                        checked={formData.limits.callsPerMonth === -1}
-                                        onCheckedChange={(checked) => {
-                                            setFormData((prev) => ({
-                                                ...prev,
-                                                limits: {
-                                                    ...prev.limits,
-                                                    callsPerMonth: checked ? -1 : (prev.limits.callsPerMonth === -1 ? 100 : prev.limits.callsPerMonth || 100)
-                                                }
-                                            }));
-                                        }}
-                                    />
-                                </div>
-
-                                <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50/70 dark:bg-muted/40 border">
-                                    <div className="space-y-0.5">
-                                        <Label className="text-xs font-semibold">Campanhas Ilimitadas</Label>
-                                        <p className="text-[10px] text-muted-foreground">Sem limite de campanhas</p>
-                                    </div>
-                                    <Switch
-                                        checked={formData.limits.campaigns === -1}
-                                        onCheckedChange={(checked) => {
-                                            setFormData((prev) => ({
-                                                ...prev,
-                                                limits: {
-                                                    ...prev.limits,
-                                                    campaigns: checked ? -1 : (prev.limits.campaigns === -1 ? 5 : prev.limits.campaigns || 5)
-                                                }
-                                            }));
-                                        }}
-                                    />
-                                </div>
-
-                                <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50/70 dark:bg-muted/40 border">
-                                    <div className="space-y-0.5">
-                                        <Label className="text-xs font-semibold">Leads Ilimitados</Label>
-                                        <p className="text-[10px] text-muted-foreground">Sem limite de contatos</p>
-                                    </div>
-                                    <Switch
-                                        checked={formData.limits.leads === -1}
-                                        onCheckedChange={(checked) => {
-                                            setFormData((prev) => ({
-                                                ...prev,
-                                                limits: {
-                                                    ...prev.limits,
-                                                    leads: checked ? -1 : (prev.limits.leads === -1 ? 500 : prev.limits.leads || 500)
-                                                }
-                                            }));
-                                        }}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="space-y-1.5">
-                                    <Label className="text-xs">{t("plans.agentsLabel")}</Label>
-                                    <Input
-                                        type="number"
-                                        value={formData.limits.agents}
-                                        onChange={(e) => setFormData({
-                                            ...formData,
-                                            limits: { ...formData.limits, agents: parseInt(e.target.value) }
-                                        })}
-                                        className="rounded-xl h-10"
-                                    />
-                                </div>
-                                {formData.limits.campaigns !== -1 && (
-                                    <div className="space-y-1.5">
-                                        <Label className="text-xs">{t("plans.campaignsLabel")}</Label>
-                                        <Input
-                                            type="number"
-                                            value={formData.limits.campaigns}
-                                            onChange={(e) => setFormData({
-                                                ...formData,
-                                                limits: { ...formData.limits, campaigns: parseInt(e.target.value) }
-                                            })}
-                                            className="rounded-xl h-10"
-                                        />
-                                    </div>
-                                )}
-                                {formData.limits.leads !== -1 && (
-                                    <div className="space-y-1.5">
-                                        <Label className="text-xs">{t("plans.leadsLabel")}</Label>
-                                        <Input
-                                            type="number"
-                                            value={formData.limits.leads}
-                                            onChange={(e) => setFormData({
-                                                ...formData,
-                                                limits: { ...formData.limits, leads: parseInt(e.target.value) }
-                                            })}
-                                            className="rounded-xl h-10"
-                                        />
-                                    </div>
-                                )}
-                                {formData.limits.callsPerMonth !== -1 && (
-                                    <div className="space-y-1.5">
-                                        <Label className="text-xs">{t("plans.callsLabel")}</Label>
-                                        <Input
-                                            type="number"
-                                            value={formData.limits.callsPerMonth}
-                                            placeholder="ex: 500"
-                                            onChange={(e) => setFormData({
-                                                ...formData,
-                                                limits: {
-                                                    ...formData.limits,
-                                                    callsPerMonth: parseInt(e.target.value, 10) || 0
-                                                }
-                                            })}
-                                            className="rounded-xl h-10"
-                                        />
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
                         {/* Telephony Modality */}
-                        <div className="pt-3 border-t space-y-3">
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
-                                    <PhoneCall className="h-3.5 w-3.5" />
-                                    Modalidade de Telefonia & Voz
-                                </h3>
-                            </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="space-y-2">
+                            <Label className="text-sm font-semibold">
+                                {locale === "pt" ? "Modalidade de Telefonia" : "Telephony Modality"}
+                            </Label>
+                            <div className="grid grid-cols-2 gap-3">
                                 <div
                                     onClick={() => setFormData({ ...formData, telephonyType: "nuvv_managed" })}
                                     className={cn(
-                                        "p-3.5 rounded-xl border-2 cursor-pointer transition-all",
+                                        "cursor-pointer rounded-xl border p-3.5 transition-all text-start",
                                         formData.telephonyType === "nuvv_managed"
-                                            ? "border-primary bg-primary/5"
+                                            ? "border-primary bg-primary/5 ring-1 ring-primary/20"
                                             : "border-border hover:border-muted-foreground/30"
                                     )}
                                 >
                                     <div className="flex items-center justify-between">
-                                        <span className="font-bold text-sm">Telefonia Nuvv (PSTN + IA)</span>
+                                        <span className="font-bold text-sm">Telefonia Nuvv</span>
                                         <div className={cn("h-4 w-4 rounded-full border flex items-center justify-center", formData.telephonyType === "nuvv_managed" ? "border-primary bg-primary text-white" : "border-muted-foreground")}>
                                             {formData.telephonyType === "nuvv_managed" && <Check className="h-3 w-3" />}
                                         </div>
                                     </div>
-                                    <p className="text-[11px] text-muted-foreground mt-1">
-                                        Rotas públicas PSTN e DIDs gerenciados pela Nuvv, tarifados no MagnusBilling via TechPrefix.
+                                    <p className="text-[11px] text-muted-foreground mt-1 leading-snug">
+                                        Números DID e terminação PSTN fornecidos diretamente pela infraestrutura Nuvv.
                                     </p>
                                 </div>
+
                                 <div
                                     onClick={() => setFormData({ ...formData, telephonyType: "byot_sip" })}
                                     className={cn(
-                                        "p-3.5 rounded-xl border-2 cursor-pointer transition-all",
+                                        "cursor-pointer rounded-xl border p-3.5 transition-all text-start",
                                         formData.telephonyType === "byot_sip"
-                                            ? "border-primary bg-primary/5"
+                                            ? "border-primary bg-primary/5 ring-1 ring-primary/20"
                                             : "border-border hover:border-muted-foreground/30"
                                     )}
                                 >
@@ -658,44 +370,43 @@ export default function AdminPlansPage() {
                                             {formData.telephonyType === "byot_sip" && <Check className="h-3 w-3" />}
                                         </div>
                                     </div>
-                                    <p className="text-[11px] text-muted-foreground mt-1">
-                                        O cliente conecta sua operadora SIP ou PABX (FusionPBX / Asterisk) e consome os agentes de IA.
+                                    <p className="text-[11px] text-muted-foreground mt-1 leading-snug">
+                                        O cliente conecta sua operadora SIP ou PABX IP existente via TechPrefix dedicado.
                                     </p>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Payment IDs */}
-                        <div className="pt-3 border-t space-y-3">
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("plans.paymentConfiguration")}</h3>
-                            <div className="space-y-3">
-                                <div className="space-y-1.5">
-                                    <Label htmlFor="dodoProductId" className="text-xs">{t("plans.dodoProductId")}</Label>
-                                    <Input
-                                        id="dodoProductId"
-                                        value={formData.dodoProductId}
-                                        onChange={(e) => setFormData({ ...formData, dodoProductId: e.target.value })}
-                                        placeholder="pdt_..."
-                                        className="rounded-xl h-10"
-                                    />
-                                    <p className="text-[11px] text-muted-foreground leading-snug">
-                                        {locale === "pt"
-                                            ? "Necessário apenas se utilizar o gateway Dodo Payments. Para Stripe, pode deixar em branco."
-                                            : "Only required if using Dodo Payments. For Stripe, you can leave this blank."}
-                                    </p>
-                                </div>
-                            </div>
+                        {/* Operational Description */}
+                        <div className="space-y-2">
+                            <Label htmlFor="description" className="text-sm font-semibold">
+                                {locale === "pt" ? "Descritivo do Funcionamento" : "Operational Description"}
+                            </Label>
+                            <Textarea
+                                id="description"
+                                value={formData.description}
+                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                placeholder={locale === "pt" 
+                                    ? "Descreva de forma clara e detalhada como este plano funciona para o cliente (regras de roteamento, bilhetagem de minutos, recursos de IA, transbordo)..."
+                                    : "Describe clearly and in detail how this plan works for the client..."}
+                                className="rounded-xl min-h-[140px] text-sm leading-relaxed"
+                            />
+                            <p className="text-[11px] text-muted-foreground">
+                                {locale === "pt" 
+                                    ? "Este texto será exibido na tela de configurações dos clientes para que eles saibam exatamente do que se trata o plano."
+                                    : "This description will be displayed on the client settings screen."}
+                            </p>
                         </div>
                     </div>
 
-                    <DialogFooter className="mt-6 pt-4 border-t">
+                    <DialogFooter className="mt-6 pt-4 border-t gap-2">
                         <Button variant="ghost" onClick={() => setIsModalOpen(false)} className="rounded-xl px-6">
                             {c("actions.cancel")}
                         </Button>
                         <Button
                             onClick={handleSave}
                             disabled={isSaving}
-                            className="rounded-xl px-8 shadow-lg shadow-primary/20"
+                            className="rounded-xl px-8 shadow-lg shadow-primary/20 font-semibold"
                         >
                             {isSaving && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
                             {editingPlan
@@ -705,81 +416,6 @@ export default function AdminPlansPage() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-
-            {/* Trial Limits Modal */}
-            <Dialog open={isTrialModalOpen} onOpenChange={setIsTrialModalOpen}>
-                <DialogContent className="max-w-md rounded-3xl p-6 border-none shadow-2xl">
-                    <DialogHeader className="mb-4">
-                        <DialogTitle className="text-2xl font-bold font-sora">
-                            {t("plans.trialModalTitle")}
-                        </DialogTitle>
-                        <DialogDescription>
-                            {t("plans.trialModalDescription")}
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <div className="grid grid-cols-1 gap-4 py-2">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="trial-agents">{t("plans.maxAgents")}</Label>
-                                <Input
-                                    id="trial-agents"
-                                    type="number"
-                                    value={trialLimits.agents}
-                                    onChange={(e) => setTrialLimits({ ...trialLimits, agents: parseInt(e.target.value) })}
-                                    className="rounded-xl h-11"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="trial-campaigns">{t("plans.maxCampaigns")}</Label>
-                                <Input
-                                    id="trial-campaigns"
-                                    type="number"
-                                    value={trialLimits.campaigns}
-                                    onChange={(e) => setTrialLimits({ ...trialLimits, campaigns: parseInt(e.target.value) })}
-                                    className="rounded-xl h-11"
-                                />
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="trial-leads">{t("plans.maxLeads")}</Label>
-                                <Input
-                                    id="trial-leads"
-                                    type="number"
-                                    value={trialLimits.leads}
-                                    onChange={(e) => setTrialLimits({ ...trialLimits, leads: parseInt(e.target.value) })}
-                                    className="rounded-xl h-11"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="trial-calls">{t("plans.maxCalls")}</Label>
-                                <Input
-                                    id="trial-calls"
-                                    type="number"
-                                    value={trialLimits.callsPerMonth}
-                                    onChange={(e) => setTrialLimits({ ...trialLimits, callsPerMonth: parseInt(e.target.value) })}
-                                    className="rounded-xl h-11"
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    <DialogFooter className="mt-6 pt-4 border-t">
-                        <Button variant="ghost" onClick={() => setIsTrialModalOpen(false)} className="rounded-xl px-6">
-                            {c("actions.cancel")}
-                        </Button>
-                        <Button
-                            onClick={handleSaveTrial}
-                            disabled={isSavingTrial}
-                            className="rounded-xl px-8 shadow-lg shadow-primary/20"
-                        >
-                            {isSavingTrial && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
-                            {t("plans.updateLimits")}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-        </div >
+        </div>
     );
 }

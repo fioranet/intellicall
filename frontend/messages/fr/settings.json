@@ -150,7 +150,7 @@
       "webhooks": "Webhooks",
       "email": "E-mail",
       "integrations": "Intégrations",
-      "billing": "Formule et facturation",
+      "billing": "Formule",
       "transactions": "Historique des transactions"
     }
   },
