@@ -31,7 +31,7 @@ const mainMenuItems = [
     { key: "dashboard", href: "/dashboard", icon: LayoutDashboard },
     { key: "leads", href: "/leads", icon: Users },
     { key: "phoneNumbers", href: "/phone-numbers", icon: Hash },
-    { key: "sipTrunks", href: "/sip-trunks", icon: Server },
+    { key: "sipTrunks", href: "/sip-trunks", icon: Server, adminOnly: true },
     { key: "agents", href: "/agents", icon: Bot },
     { key: "knowledgeBase", href: "/knowledge-base", icon: Database },
     { key: "campaigns", href: "/campaigns", icon: Megaphone },

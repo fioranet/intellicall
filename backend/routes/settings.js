@@ -42,7 +42,7 @@ function eventFlags() {
 
 function publicPlatformDefaults() {
     return {
-        currency: 'USD',
+        currency: 'BRL',
         showCodeCanyonButton: false,
         showSelfHostingSection: false,
         supportEmail: 'support@intellicall.ai',

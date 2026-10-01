@@ -224,7 +224,8 @@ export function AgentDrawer({ agent, trigger, onSuccess, templateData, open: con
         }
         return null;
     });
-    const isByok = user?.operatingMode === "byok";
+    // Nuvv Voice AI is fully managed via native Gemini Live Speech-to-Speech
+    const isByok = false;
 
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({

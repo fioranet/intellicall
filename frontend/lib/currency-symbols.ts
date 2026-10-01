@@ -11,6 +11,6 @@ export const CURRENCY_SYMBOL_MAP: Record<string, string> = {
 };
 
 export function getCurrencySymbol(currencyCode: string | undefined | null): string {
-    if (!currencyCode) return "$";
-    return CURRENCY_SYMBOL_MAP[currencyCode] ?? "$";
+    if (!currencyCode) return "R$";
+    return CURRENCY_SYMBOL_MAP[currencyCode] ?? "R$";
 }
