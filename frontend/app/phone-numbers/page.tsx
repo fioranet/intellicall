@@ -425,70 +425,7 @@ export default function PhoneNumbersPage() {
                             </div>
                         </div>
                     </div>
-                    {/* Twilio info (always show unless user only has SIP numbers) */}
-                    {hasTwilioNumbers && (
-                        <div className="bg-muted/40 p-6 rounded-2xl border border-dashed border-border">
-                            <div className="flex items-start gap-4">
-                                <div className="bg-muted p-3 rounded-xl border border-border shrink-0">
-                                    <Phone className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                                </div>
-                                <div className="space-y-2">
-                                    <h3 className="font-bold text-foreground">{t("twilioInfo.title")}</h3>
-                                    <p className="text-sm text-muted-foreground leading-relaxed">
-                                        {t.rich("twilioInfo.body", { b: (chunks) => <strong className="text-foreground">{chunks}</strong> })}
-                                        <code className="block mt-2 p-3 bg-muted border border-border rounded-lg font-mono text-xs text-primary" dir="ltr">
-                                            {API_BASE_URL.replace(/\/+$/, '')}/twilio/voice
-                                        </code>
-                                        {t("twilioInfo.afterCode")}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    )}
 
-                    {/* SIP info (show when there are SIP numbers or none yet to educate) */}
-                    <div className="bg-muted/40 p-6 rounded-2xl border border-dashed border-border">
-                        <div className="flex items-start gap-4">
-                            <div className="bg-muted p-3 rounded-xl border border-border shrink-0">
-                                <Server className="h-6 w-6 text-violet-600 dark:text-violet-400" />
-                            </div>
-                            <div className="space-y-2">
-                                <h3 className="font-bold text-foreground">{t("sipInfo.title")}</h3>
-                                <p className="text-sm text-muted-foreground leading-relaxed">
-                                    {t.rich("sipInfo.body", { b: (chunks) => <strong className="text-foreground">{chunks}</strong> })}
-                                </p>
-                                {sipOriginationUri && (
-                                    <div className="mt-3 space-y-1.5">
-                                        <p className="text-sm text-muted-foreground">
-                                            {t.rich("sipInfo.originationBody", { b: (chunks) => <strong className="text-foreground">{chunks}</strong> })}
-                                        </p>
-                                        <div className="flex items-center gap-2">
-                                            <code className="flex-1 p-3 bg-muted border border-border rounded-lg font-mono text-xs text-primary" dir="ltr">
-                                                {sipOriginationUri}
-                                            </code>
-                                            <Button
-                                                variant="outline"
-                                                size="icon"
-                                                className="h-9 w-9 shrink-0"
-                                                onClick={() => {
-                                                    navigator.clipboard.writeText(sipOriginationUri);
-                                                    toast.success(t("toast.uriCopied"));
-                                                }}
-                                            >
-                                                <Copy className="h-3.5 w-3.5" />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                )}
-                                <Button variant="outline" size="sm" asChild className="mt-1">
-                                    <Link href="/sip-trunks">
-                                        <Server className="me-2 h-3.5 w-3.5" />
-                                        {t("sipInfo.manageTrunks")}
-                                    </Link>
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
 

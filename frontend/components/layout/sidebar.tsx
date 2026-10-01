@@ -141,6 +141,9 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     <div className="flex flex-col h-full justify-between p-4 min-h-[calc(100vh-6rem)]">
                         <nav className="flex flex-col gap-1">
                             {mainMenuItems.map((item) => {
+                                if ((item as any).adminOnly && (!user || (user.role !== 'admin' && !user.isSuperAdmin))) {
+                                    return null;
+                                }
                                 const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
                                 const Icon = item.icon;
                                 const showMyPendingDot = item.href === "/support" && myPendingSupportCount > 0;

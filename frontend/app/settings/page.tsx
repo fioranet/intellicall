@@ -1715,7 +1715,8 @@ function SettingsPageContent() {
                         </CardContent>
                     </Card>
 
-                    {/* Asterisk / SIP Status Card */}
+                    {/* Asterisk / SIP Status Card (Admin Only) */}
+                    {(user?.isSuperAdmin || user?.role === "admin") && (
                     <Card className="mt-6 max-w-3xl">
                         <CardHeader>
                             <div className="flex items-center gap-2">
@@ -1757,6 +1758,7 @@ function SettingsPageContent() {
                             </div>
                         </CardContent>
                     </Card>
+                    )}
 
                 </TabsContent>
             </Tabs>
