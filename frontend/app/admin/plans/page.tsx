@@ -33,6 +33,7 @@ import { Badge } from "@/components/ui/badge";
 import axios from "axios";
 import { toast } from "sonner";
 import { AdminNav } from "@/components/admin/nav";
+import { cn } from "@/lib/utils";
 import { getCurrencySymbol } from "@/lib/currency-symbols";
 
 import {
@@ -74,6 +75,7 @@ export default function AdminPlansPage() {
         interval: "monthly",
         isActive: true,
         dodoProductId: "",
+        telephonyType: "nuvv_managed",
         limits: {
             agents: 1,
             campaigns: 1,
@@ -164,6 +166,7 @@ export default function AdminPlansPage() {
                 interval: plan.interval,
                 isActive: plan.isActive,
                 dodoProductId: plan.dodoProductId || "",
+                telephonyType: plan.telephonyType || "nuvv_managed",
                 limits: {
                     agents: plan.limits?.agents ?? 1,
                     campaigns: plan.limits?.campaigns ?? 1,
@@ -611,54 +614,52 @@ export default function AdminPlansPage() {
                             </div>
                         </div>
 
-                        {/* AI Credits Configuration */}
+                        {/* Telephony Modality */}
                         <div className="pt-3 border-t space-y-3">
                             <div className="flex items-center justify-between">
                                 <h3 className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
-                                    <Sparkles className="h-3.5 w-3.5" />
-                                    {locale === "pt" ? "Créditos de IA & Chamadas (1 Crédito = 1 Minuto)" : "AI Calling Credits (1 Credit = 1 Minute)"}
+                                    <PhoneCall className="h-3.5 w-3.5" />
+                                    Modalidade de Telefonia & Voz
                                 </h3>
                             </div>
-                            <div className="grid grid-cols-3 gap-3">
-                                <div className="space-y-1.5">
-                                    <Label className="text-xs">{locale === "pt" ? "Tarifa p/ Crédito (R$)" : "Price per Credit (R$)"}</Label>
-                                    <Input
-                                        type="number"
-                                        step="0.05"
-                                        value={formData.creditsConfig.creditPriceBrl}
-                                        onChange={(e) => setFormData({
-                                            ...formData,
-                                            creditsConfig: { ...formData.creditsConfig, creditPriceBrl: parseFloat(e.target.value) || 0.50 }
-                                        })}
-                                        className="rounded-xl h-10 font-mono"
-                                    />
-                                    <p className="text-[10px] text-muted-foreground">{locale === "pt" ? "Ex: 0.50 = R$ 0,50/min" : "Cost per minute"}</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div
+                                    onClick={() => setFormData({ ...formData, telephonyType: "nuvv_managed" })}
+                                    className={cn(
+                                        "p-3.5 rounded-xl border-2 cursor-pointer transition-all",
+                                        formData.telephonyType === "nuvv_managed"
+                                            ? "border-primary bg-primary/5"
+                                            : "border-border hover:border-muted-foreground/30"
+                                    )}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <span className="font-bold text-sm">Telefonia Nuvv (PSTN + IA)</span>
+                                        <div className={cn("h-4 w-4 rounded-full border flex items-center justify-center", formData.telephonyType === "nuvv_managed" ? "border-primary bg-primary text-white" : "border-muted-foreground")}>
+                                            {formData.telephonyType === "nuvv_managed" && <Check className="h-3 w-3" />}
+                                        </div>
+                                    </div>
+                                    <p className="text-[11px] text-muted-foreground mt-1">
+                                        Rotas públicas PSTN e DIDs gerenciados pela Nuvv, tarifados no MagnusBilling via TechPrefix.
+                                    </p>
                                 </div>
-                                <div className="space-y-1.5">
-                                    <Label className="text-xs">{locale === "pt" ? "Recarga Mínima" : "Min. Recharge"}</Label>
-                                    <Input
-                                        type="number"
-                                        value={formData.creditsConfig.minRechargeCredits}
-                                        onChange={(e) => setFormData({
-                                            ...formData,
-                                            creditsConfig: { ...formData.creditsConfig, minRechargeCredits: parseInt(e.target.value, 10) || 50 }
-                                        })}
-                                        className="rounded-xl h-10 font-mono"
-                                    />
-                                    <p className="text-[10px] text-muted-foreground">{locale === "pt" ? "Mínimo de créditos" : "Min credits qty"}</p>
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label className="text-xs">{locale === "pt" ? "Créditos Inclusos" : "Included Credits"}</Label>
-                                    <Input
-                                        type="number"
-                                        value={formData.creditsConfig.monthlyIncludedCredits}
-                                        onChange={(e) => setFormData({
-                                            ...formData,
-                                            creditsConfig: { ...formData.creditsConfig, monthlyIncludedCredits: parseInt(e.target.value, 10) || 0 }
-                                        })}
-                                        className="rounded-xl h-10 font-mono"
-                                    />
-                                    <p className="text-[10px] text-muted-foreground">{locale === "pt" ? "Grátis por ciclo" : "Per cycle"}</p>
+                                <div
+                                    onClick={() => setFormData({ ...formData, telephonyType: "byot_sip" })}
+                                    className={cn(
+                                        "p-3.5 rounded-xl border-2 cursor-pointer transition-all",
+                                        formData.telephonyType === "byot_sip"
+                                            ? "border-primary bg-primary/5"
+                                            : "border-border hover:border-muted-foreground/30"
+                                    )}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <span className="font-bold text-sm">Tronco Próprio / BYOT</span>
+                                        <div className={cn("h-4 w-4 rounded-full border flex items-center justify-center", formData.telephonyType === "byot_sip" ? "border-primary bg-primary text-white" : "border-muted-foreground")}>
+                                            {formData.telephonyType === "byot_sip" && <Check className="h-3 w-3" />}
+                                        </div>
+                                    </div>
+                                    <p className="text-[11px] text-muted-foreground mt-1">
+                                        O cliente conecta sua operadora SIP ou PABX (FusionPBX / Asterisk) e consome os agentes de IA.
+                                    </p>
                                 </div>
                             </div>
                         </div>

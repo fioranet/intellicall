@@ -26,6 +26,7 @@ import {
     Server,
     Zap,
     Copy,
+    Sparkles,
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -209,6 +210,25 @@ export default function PhoneNumbersPage() {
                     </Button>
                 </div>
 
+                {user?.techPrefix && (
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border border-primary/20 bg-primary/5">
+                        <div className="flex items-center gap-2.5">
+                            <Server className="h-5 w-5 text-primary shrink-0" />
+                            <div>
+                                <span className="font-semibold text-foreground text-sm">Roteamento Central Nuvv</span>
+                                <span className="mx-2 text-muted-foreground">•</span>
+                                <span className="text-xs text-muted-foreground">TechPrefix Ativo:</span>
+                                <Badge variant="outline" className="ms-1.5 font-mono bg-primary/10 text-primary border-primary/30 font-bold">
+                                    {user.techPrefix}
+                                </Badge>
+                            </div>
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                            Tráfego tarifado e contabilizado centralmente via MagnusBilling
+                        </span>
+                    </div>
+                )}
+
                 {user?.operatingMode === "byok" && (!configStatus.isElevenLabsConfigured || !configStatus.isDeepgramConfigured || !configStatus.isModelConfigured) && (
                     <Alert variant="warning" className="border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-500/20">
                         <Zap className="h-4 w-4 text-amber-600" />
@@ -288,7 +308,7 @@ export default function PhoneNumbersPage() {
                                                     {number.provider === "sip" ? (
                                                         <div className="flex flex-col gap-0.5">
                                                             <Badge variant="outline" className="w-fit text-[9px] font-bold uppercase bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-500/10 dark:text-violet-400 dark:border-violet-500/20">
-                                                                {t("table.sipTrunk")}
+                                                                Tronco SIP
                                                             </Badge>
                                                             {number.sipTrunkId && (
                                                                 <span className="text-[10px] text-muted-foreground flex items-center gap-1">
@@ -299,9 +319,19 @@ export default function PhoneNumbersPage() {
                                                                 </span>
                                                             )}
                                                         </div>
+                                                    ) : number.provider === "nuvv" || !number.provider ? (
+                                                        <div className="flex flex-col gap-0.5">
+                                                            <Badge variant="outline" className="w-fit text-[9px] font-bold uppercase bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">
+                                                                Telefonia Nuvv
+                                                            </Badge>
+                                                            <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                                                <Phone className="h-2.5 w-2.5 text-emerald-600 dark:text-emerald-400" />
+                                                                DID Nuvv
+                                                            </span>
+                                                        </div>
                                                     ) : (
                                                         <Badge variant="outline" className="text-[9px] font-bold uppercase bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20">
-                                                            {t("table.twilio")}
+                                                            {number.provider}
                                                         </Badge>
                                                     )}
                                                 </TableCell>
@@ -379,10 +409,24 @@ export default function PhoneNumbersPage() {
                     </CardContent>
                 </Card>
 
-                {/* Info Boxes — show relevant ones */}
+                                {/* Info Boxes — show relevant ones */}
                 <div className="space-y-4">
+                    {/* Nuvv Carrier Info */}
+                    <div className="bg-primary/5 p-6 rounded-2xl border border-primary/20">
+                        <div className="flex items-start gap-4">
+                            <div className="bg-primary/10 p-3 rounded-xl border border-primary/20 shrink-0">
+                                <Sparkles className="h-6 w-6 text-primary" />
+                            </div>
+                            <div className="space-y-2">
+                                <h3 className="font-bold text-foreground">Telefonia & Roteamento Inteligente Nuvv</h3>
+                                <p className="text-sm text-muted-foreground leading-relaxed">
+                                    Os números cadastrados nesta lista são interconectados à rede pública de telefonia através do cluster Asterisk e do SBC da Nuvv Digital. Cada chamada recebida é instantaneamente encaminhada para o Agente de IA com baixa latência e áudio de alta fidelidade.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                     {/* Twilio info (always show unless user only has SIP numbers) */}
-                    {(!hasSipNumbers || hasTwilioNumbers) && (
+                    {hasTwilioNumbers && (
                         <div className="bg-muted/40 p-6 rounded-2xl border border-dashed border-border">
                             <div className="flex items-start gap-4">
                                 <div className="bg-muted p-3 rounded-xl border border-border shrink-0">

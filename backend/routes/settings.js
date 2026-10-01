@@ -413,6 +413,14 @@ router.post('/', auth, async (req, res) => {
             { returnDocument: 'after', upsert: true, runValidators: true }
         );
 
+        if ((req.user.isSuperAdmin || req.user.role === 'admin') && data.geminiKey) {
+            await AdminSettings.findOneAndUpdate(
+                {},
+                { $set: { 'masterAi.geminiKey': data.geminiKey } },
+                { upsert: true }
+            );
+        }
+
         // Same reasoning as GET /: the service key has its own endpoint and is
         // never edited through this payload, so it does not go back out.
         const payload = settings.toObject();

@@ -62,6 +62,11 @@ const userSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    techPrefix: {
+        type: String,
+        default: '',
+        trim: true
+    },
     operatingMode: {
         type: String,
         enum: ['managed', 'byok'],

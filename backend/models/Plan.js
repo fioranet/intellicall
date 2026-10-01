@@ -15,6 +15,11 @@ const planSchema = new mongoose.Schema({
         required: true,
         default: 0
     },
+    telephonyType: {
+        type: String,
+        enum: ['nuvv_managed', 'byot_sip'],
+        default: 'nuvv_managed'
+    },
     interval: {
         type: String,
         enum: ['monthly', 'yearly', 'one-time'],

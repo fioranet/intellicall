@@ -112,6 +112,10 @@ router.patch('/users/:id/billing', auth, isAdmin, async (req, res) => {
             user.operatingMode = operatingMode;
         }
 
+        if (req.body.techPrefix !== undefined) {
+            user.techPrefix = String(req.body.techPrefix).trim();
+        }
+
         if (!user.billingSettings) {
             user.billingSettings = { type: 'prepaid', billingCadence: 'full_minute', postpaidCreditLimit: 0 };
         }

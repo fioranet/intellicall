@@ -22,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import axios from "axios";
-import { Plus, Hash, UserCircle, Server, Phone } from "lucide-react";
+import { Plus, Hash, UserCircle, Server, Phone, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
@@ -67,7 +67,7 @@ export function PhoneNumberDialog({ phoneNumber, open, onOpenChange, onSuccess }
         phoneNumber: "",
         name: "",
         inboundAgentId: "none",
-        provider: "twilio",
+        provider: "nuvv",
         sipTrunkId: "none",
         fallbackNumber: "",
     });
@@ -163,18 +163,18 @@ export function PhoneNumberDialog({ phoneNumber, open, onOpenChange, onSuccess }
                     <div className="grid gap-4 py-4">
                         {/* Provider Toggle */}
                         <div className="grid gap-2">
-                            <Label className="text-xs font-bold uppercase text-muted-foreground">{t("dialog.providerLabel")}</Label>
+                            <Label className="text-xs font-bold uppercase text-muted-foreground">Tipo de Telefonia & Roteador</Label>
                             <div className="flex gap-2">
                                 <Button
                                     type="button"
-                                    variant={formData.provider === "twilio" ? "default" : "outline"}
+                                    variant={formData.provider === "nuvv" ? "default" : "outline"}
                                     size="sm"
                                     className="flex-1 h-10"
-                                    onClick={() => setFormData({ ...formData, provider: "twilio", sipTrunkId: "none" })}
+                                    onClick={() => setFormData({ ...formData, provider: "nuvv", sipTrunkId: "none" })}
                                     disabled={loading}
                                 >
                                     <Phone className="me-2 h-4 w-4" />
-                                    Twilio
+                                    Telefonia Nuvv (DID)
                                 </Button>
                                 <Button
                                     type="button"
@@ -185,9 +185,15 @@ export function PhoneNumberDialog({ phoneNumber, open, onOpenChange, onSuccess }
                                     disabled={loading}
                                 >
                                     <Server className="me-2 h-4 w-4" />
-                                    {t("dialog.sipTrunk")}
+                                    Tronco SIP Próprio
                                 </Button>
                             </div>
+                            {formData.provider === "nuvv" && (
+                                <p className="text-[11px] text-muted-foreground bg-muted/40 p-2.5 rounded-lg border border-dashed">
+                                    <Sparkles className="inline h-3 w-3 text-primary me-1" />
+                                    Número conectado diretamente ao cluster de voz da Nuvv. O faturamento e rotas são gerenciados via MagnusBilling / Asterisk.
+                                </p>
+                            )}
                         </div>
 
                         {/* Phone Number */}

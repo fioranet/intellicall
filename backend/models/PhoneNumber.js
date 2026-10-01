@@ -13,8 +13,8 @@ const phoneNumberSchema = new mongoose.Schema({
     },
     provider: {
         type: String,
-        enum: ['twilio', 'sip'],
-        default: 'twilio'
+        enum: ['twilio', 'sip', 'nuvv'],
+        default: 'nuvv'
     },
     sipTrunkId: {
         type: mongoose.Schema.Types.ObjectId,

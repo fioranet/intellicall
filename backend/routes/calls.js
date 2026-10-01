@@ -57,7 +57,7 @@ router.post('/test', auth, async (req, res) => {
         }
 
         // --- BRANCH FOR SIP TRUNKS ---
-        if (fromNumber.provider === 'sip') {
+        if (fromNumber.provider === 'sip' || fromNumber.provider === 'nuvv') {
             const ariService = require('../services/sip/ari-service');
             if (!ariService.isConnected()) {
                 return send(400, { status: 'error', message: 'Asterisk not connected. Ensure the Voice Engine is running.' });
@@ -206,7 +206,7 @@ router.post('/ai-test', auth, async (req, res) => {
             });
         }
 
-        const provider = agent.outboundPhoneNumber.provider || 'twilio';
+        const provider = agent.outboundPhoneNumber.provider || 'nuvv';
 
         // --- AI INFRASTRUCTURE VALIDATION (keys required depend on the agent's voice engine) ---
         const missing = missingEngineKeys(settings, agent, provider);
@@ -218,7 +218,7 @@ router.post('/ai-test', auth, async (req, res) => {
         }
 
         // --- BRANCH FOR SIP ---
-        if (provider === 'sip') {
+        if (provider === 'sip' || provider === 'nuvv') {
             const ariService = require('../services/sip/ari-service');
             if (!ariService.isConnected()) {
                 return res.status(400).json({ status: 'error', message: 'Asterisk not connected. Ensure Voice Engine is running.' });
@@ -362,7 +362,7 @@ router.post('/dial', auth, requireActivePlan, checkLimit('calls'), async (req, r
             leadCreated = true;
         }
 
-        const provider = fromNumber.provider || 'twilio';
+        const provider = fromNumber.provider || 'nuvv';
 
         const missing = missingEngineKeys(settings, agent, provider);
         if (missing.length > 0) {
@@ -373,7 +373,7 @@ router.post('/dial', auth, requireActivePlan, checkLimit('calls'), async (req, r
         }
 
         // 5a. SIP branch
-        if (provider === 'sip') {
+        if (provider === 'sip' || provider === 'nuvv') {
             const ariService = require('../services/sip/ari-service');
             if (!ariService.isConnected()) {
                 return res.status(400).json({ status: 'error', message: 'Asterisk not connected. Ensure Voice Engine is running.' });

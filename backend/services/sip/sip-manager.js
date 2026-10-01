@@ -94,11 +94,24 @@ async function placeCall({ phoneNumber, agent, lead, campaign, userId, testCall 
         fromNumber = await PhoneNumber.findById(agent.outboundPhoneNumber._id || agent.outboundPhoneNumber).populate('sipTrunkId');
     }
 
-    if (!fromNumber || fromNumber.provider !== 'sip' || !fromNumber.sipTrunkId) {
-        throw new Error('Phone number does not have a valid SIP trunk configured');
+    if (!fromNumber) {
+        throw new Error('Número de telefone de origem não encontrado');
     }
 
-    const trunk = fromNumber.sipTrunkId;
+    let trunk = fromNumber.sipTrunkId;
+    if (!trunk) {
+        const SipTrunkModel = require('../../models/SipTrunk');
+        trunk = await SipTrunkModel.findOne({
+            $or: [
+                { name: /nuvv|magnus|carrier|central|default/i },
+                { status: 'active' }
+            ]
+        });
+    }
+
+    if (!trunk) {
+        throw new Error('Nenhum tronco SIP ou rota central Nuvv configurada no sistema. Contate o suporte.');
+    }
     const callId = `sip-${uuidv4()}`;
     const rtpPort = ariService.acquirePort();
 
@@ -169,13 +182,26 @@ async function placeCall({ phoneNumber, agent, lead, campaign, userId, testCall 
         // 3. Originate call via SIP trunk
         console.log(`[SIP] Originating call through trunk...`);
         const destination = lead.phone.startsWith('+') ? lead.phone : `+${lead.phone.replace(/\D/g, '')}`;
+        let effectiveDialPrefix = trunk.dialPrefix || '';
+        if (userId) {
+            try {
+                const UserModel = require('../../models/User');
+                const userDoc = await UserModel.findById(userId);
+                if (userDoc && userDoc.techPrefix) {
+                    effectiveDialPrefix = userDoc.techPrefix.replace(/\D/g, '') + effectiveDialPrefix;
+                }
+            } catch (uErr) {
+                console.warn('[SIP] Could not resolve techPrefix:', uErr.message);
+            }
+        }
+
         const callChannel = await ariService.originateCall(
             trunk._id.toString(), destination, trunk.host,
             {
                 userId, agentId: agent._id.toString(), leadId: lead._id.toString(),
                 campaignId: campaign?._id?.toString() || '',
                 callerId: trunk.defaultCallerId || fromNumber.phoneNumber,
-                dialPrefix: trunk.dialPrefix || ''
+                dialPrefix: effectiveDialPrefix
             }
         );
         console.log(`[SIP] Call originated: ${callChannel.id}`);

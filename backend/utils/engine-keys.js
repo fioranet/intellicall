@@ -17,7 +17,7 @@ function missingEngineKeys(settings, agent, provider) {
     // 'browser' is the in-browser agent test: it always drives a streaming engine
     // (the Twilio TwiML gather loop has no browser equivalent), so the per-engine
     // key requirements always apply there, exactly as they do on SIP.
-    const engineApplies = provider === 'sip' || provider === 'browser' || agent?.useCustomVoice;
+    const engineApplies = provider === 'sip' || provider === 'nuvv' || provider === 'browser' || agent?.useCustomVoice;
     const isSarvam = engineApplies && agent?.voiceEngine === 'sarvam';
     const isGemini = engineApplies && agent?.voiceEngine === 'gemini_live';
     const isDgAgent = engineApplies && agent?.voiceEngine === 'deepgram_agent';

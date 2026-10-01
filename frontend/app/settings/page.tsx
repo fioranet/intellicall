@@ -687,7 +687,7 @@ function SettingsPageContent() {
                 <p className="text-muted-foreground">{t("page.subtitle")}</p>
             </div>
 
-            <Tabs defaultValue="system" className="w-full">
+            <Tabs defaultValue={searchParams.get("tab") || "system"} className="w-full">
                 <TabsList variant="line" className="flex items-center border-b mb-6 bg-card/50 overflow-x-auto scrollbar-hide flex-nowrap w-full justify-start h-auto p-0 rounded-none border-border shadow-none">
                     <TabsTrigger
                         value="system"
@@ -696,7 +696,7 @@ function SettingsPageContent() {
                         <Settings className="h-4 w-4" />
                         <span className="text-sm">{t("page.tabs.preferences")}</span>
                     </TabsTrigger>
-                    {user?.operatingMode === "byok" && (
+                    {(user?.isSuperAdmin || user?.role === "admin" || user?.operatingMode === "byok") && (
                         <TabsTrigger
                             value="api-keys"
                             className="flex-none flex items-center gap-2 px-6 py-2 rounded-none transition-all duration-200 shrink-0 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:bg-primary/5 border-b-2 border-transparent data-[state=active]:border-primary text-muted-foreground hover:text-foreground hover:bg-muted shadow-none bg-transparent !border-x-0 !border-t-0 !shadow-none after:hidden"
@@ -742,18 +742,44 @@ function SettingsPageContent() {
                     </TabsTrigger>
                 </TabsList>
 
-                {user?.operatingMode === "byok" && (
+                {(user?.isSuperAdmin || user?.role === "admin" || user?.operatingMode === "byok") && (
                 <TabsContent value="api-keys">
                     <Card>
                         <CardHeader>
-                            <CardTitle>{t("credentials.title")}</CardTitle>
-                            <CardDescription>
-                                {t("credentials.description")}
-                            </CardDescription>
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <div>
+                                    <CardTitle>{t("credentials.title")}</CardTitle>
+                                    <CardDescription>
+                                        Configure as chaves dos motores de IA e credenciais de comunicação para alimentar seus agentes virtuais.
+                                    </CardDescription>
+                                </div>
+                                {user?.isSuperAdmin && (
+                                    <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 text-xs self-start">
+                                        <Shield className="h-3.5 w-3.5 me-1" /> Chaves Mestras da Plataforma
+                                    </Badge>
+                                )}
+                            </div>
                         </CardHeader>
                         <CardContent>
-                            {/* Operating Mode Banner */}
-                            {user?.operatingMode === "byok" ? (
+                            {/* Operating Mode / Status Banner */}
+                            {user?.isSuperAdmin ? (
+                                <div className="mb-6 p-4 rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50/50 dark:bg-amber-950/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                    <div className="flex items-start gap-3">
+                                        <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                                            <Sparkles className="h-5 w-5" />
+                                        </div>
+                                        <div>
+                                            <h4 className="text-sm font-bold text-foreground">Ambiente SuperAdmin: Motor Gemini Live Ativo</h4>
+                                            <p className="text-xs text-muted-foreground mt-0.5 max-w-2xl">
+                                                A Chave de API Gemini Live informada abaixo é sincronizada automaticamente com a chave mestra do cluster Nuvv Telecom, fornecendo síntese de voz multimodal em tempo real para todos os robôs.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <Badge variant="outline" className="text-amber-600 border-amber-300 shrink-0">
+                                        Cluster Master
+                                    </Badge>
+                                </div>
+                            ) : user?.operatingMode === "byok" ? (
                                 <div className="mb-6 p-4 rounded-xl border border-purple-200 dark:border-purple-900/50 bg-purple-50/50 dark:bg-purple-950/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                                     <div className="flex items-start gap-3">
                                         <div className="p-2 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400">
@@ -763,7 +789,6 @@ function SettingsPageContent() {
                                             <h4 className="text-sm font-bold text-foreground">Modelo 3: BYOK Habilitado</h4>
                                             <p className="text-xs text-muted-foreground mt-0.5">
                                                 Sua conta está autorizada a utilizar chaves próprias de API (OpenRouter, ElevenLabs, Deepgram, Sarvam).
-                                                O motor multimodal Gemini Live permanece exclusivo do Modelo Gerenciado.
                                             </p>
                                         </div>
                                     </div>
@@ -779,41 +804,175 @@ function SettingsPageContent() {
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-2">
-                                                <h4 className="text-sm font-bold text-foreground">Modelo 1: IA Fixa Gerenciada (Ativo)</h4>
-                                                <Badge className="bg-emerald-600 text-white text-[10px] h-4">Oficial Nuvv</Badge>
+                                                <h4 className="text-sm font-bold text-foreground">Modelo 1: IA Fixa Gerenciada (Oficial Nuvv)</h4>
+                                                <Badge className="bg-emerald-600 text-white text-[10px] h-4">Ativo</Badge>
                                             </div>
                                             <p className="text-xs text-muted-foreground mt-1 max-w-2xl">
-                                                Você não precisa fornecer chaves de IA (Gemini, OpenRouter ou ElevenLabs). A plataforma injeta chaves master corporativas de alta performance com síntese de voz multimodal em tempo real. A tarifação de minutos e serviços de IA é unificada diretamente pelo MagnusBilling e faturada pelo SGP.
+                                                A plataforma Nuvv Telecom injeta chaves master corporativas de alta performance por padrão. Você pode definir chaves dedicadas abaixo se necessitar de instâncias de IA isoladas.
                                             </p>
                                         </div>
                                     </div>
-                                    <Link href="/credits">
-                                        <Button variant="outline" size="sm" className="border-emerald-300 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 shrink-0">
-                                            <Coins className="h-3.5 w-3.5 me-1.5 text-amber-500" />
-                                            Faturamento Gerenciado
-                                        </Button>
-                                    </Link>
                                 </div>
                             )}
 
                             <form onSubmit={handleSaveSettings} className="space-y-6">
-                                <div className="grid gap-6 md:grid-cols-2">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="twilio-sid" className="text-xs font-bold uppercase text-muted-foreground">{t("credentials.twilioSid")}</Label>
-                                        <Input
-                                            id="twilio-sid"
-                                            value={apiKeys.twilioSid}
-                                            onChange={(e) =>
-                                                setApiKeys({ ...apiKeys, twilioSid: e.target.value })
-                                            }
-                                            placeholder={t("credentials.twilioSidPlaceholder")}
-                                            className="font-mono text-sm"
-                                        />
+                                {/* Seção Principal: Motores de IA */}
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2 pb-2 border-b border-border/60">
+                                        <Sparkles className="h-4 w-4 text-primary" />
+                                        <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">Motores de Inteligência Artificial & Voz</h3>
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="twilio-token" className="text-xs font-bold uppercase text-muted-foreground">{t("credentials.twilioToken")}</Label>
-                                        <div className="flex gap-2">
+                                    <div className="grid gap-6 md:grid-cols-2">
+                                        {/* Gemini Live - Destaque Principal */}
+                                        <div className="space-y-2 md:col-span-2 rounded-xl border border-primary/20 bg-primary/5 p-4">
+                                            <div className="flex items-center justify-between">
+                                                <Label htmlFor="gemini-key" className="text-xs font-bold uppercase text-foreground flex items-center gap-2">
+                                                    <span>{t("credentials.gemini")}</span>
+                                                    <Badge className="bg-primary text-primary-foreground text-[10px] py-0 px-2">Recomendado (Voz Multimodal Live)</Badge>
+                                                </Label>
+                                            </div>
+                                            <Input
+                                                id="gemini-key"
+                                                type="password"
+                                                value={apiKeys.geminiKey}
+                                                onChange={(e) =>
+                                                    setApiKeys({ ...apiKeys, geminiKey: e.target.value })
+                                                }
+                                                placeholder="AIzaSy••••••••••••••••••••••••••••••••"
+                                                className="font-mono text-sm bg-background"
+                                            />
+                                            <p className="text-[11px] text-muted-foreground">
+                                                {t("credentials.geminiHint")}
+                                            </p>
+                                        </div>
+
+                                        {/* ElevenLabs */}
+                                        <div className="space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <Label htmlFor="elevenlabs-key" className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-2">
+                                                    <span>{t("credentials.elevenLabs")}</span>
+                                                    <Badge variant="outline" className="text-[10px] py-0">Vozes Neurais</Badge>
+                                                </Label>
+                                                {verifyingElevenLabs && (
+                                                    <div className="flex items-center gap-1 text-[10px] text-primary animate-pulse font-bold">
+                                                        <Loader2 className="h-3 w-3 animate-spin" />
+                                                        {t("credentials.verifying")}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <Input
+                                                id="elevenlabs-key"
+                                                type="password"
+                                                value={apiKeys.elevenLabsKey}
+                                                onChange={(e) =>
+                                                    setApiKeys({ ...apiKeys, elevenLabsKey: e.target.value })
+                                                }
+                                                placeholder="••••••••••••••••••••••••••••••••"
+                                                className={`font-mono text-sm ${elevenLabsKeyError ? 'border-destructive focus-visible:ring-destructive' : ''}`}
+                                            />
+                                            {elevenLabsKeyError && (
+                                                <p className="text-[10px] text-destructive font-bold animate-in fade-in slide-in-from-top-1">
+                                                    {elevenLabsKeyError}. {t("credentials.keyErrorSuffix")}
+                                                </p>
+                                            )}
+                                            {!elevenLabsKeyError && !verifyingElevenLabs && apiKeys.elevenLabsKey && (
+                                                <p className="text-[10px] text-emerald-500 font-bold flex items-center gap-1">
+                                                    <Check className="h-3 w-3" /> {t("credentials.validKey")}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        {/* Deepgram */}
+                                        <div className="space-y-2">
+                                            <Label htmlFor="deepgram-key" className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-2">
+                                                <span>{t("credentials.deepgram")}</span>
+                                                <Badge variant="outline" className="text-[10px] py-0">Reconhecimento STT</Badge>
+                                            </Label>
+                                            <Input
+                                                id="deepgram-key"
+                                                type="password"
+                                                value={apiKeys.deepgramKey}
+                                                onChange={(e) =>
+                                                    setApiKeys({ ...apiKeys, deepgramKey: e.target.value })
+                                                }
+                                                placeholder="••••••••••••••••••••••••••••••••"
+                                                className="font-mono text-sm"
+                                            />
+                                            <p className="text-[10px] text-muted-foreground">
+                                                {t("credentials.deepgramHint")}
+                                            </p>
+                                        </div>
+
+                                        {/* OpenRouter */}
+                                        <div className="space-y-2">
+                                            <Label htmlFor="openrouter-key" className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-2">
+                                                <span>{t("credentials.openRouter")}</span>
+                                                <Badge variant="outline" className="text-[10px] py-0">Modelos LLM</Badge>
+                                            </Label>
+                                            <Input
+                                                id="openrouter-key"
+                                                type="password"
+                                                value={apiKeys.openRouterKey}
+                                                onChange={(e) =>
+                                                    setApiKeys({ ...apiKeys, openRouterKey: e.target.value })
+                                                }
+                                                placeholder="sk-or-v1-••••••••••••••••"
+                                                className="font-mono text-sm"
+                                            />
+                                        </div>
+
+                                        {/* Sarvam AI */}
+                                        <div className="space-y-2">
+                                            <Label htmlFor="sarvam-key" className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-2">
+                                                <span>{t("credentials.sarvam")}</span>
+                                                <Badge variant="outline" className="text-[10px] py-0">Multilíngue</Badge>
+                                            </Label>
+                                            <Input
+                                                id="sarvam-key"
+                                                type="password"
+                                                value={apiKeys.sarvamKey}
+                                                onChange={(e) =>
+                                                    setApiKeys({ ...apiKeys, sarvamKey: e.target.value })
+                                                }
+                                                placeholder="••••••••••••••••••••••••••••••••"
+                                                className="font-mono text-sm"
+                                            />
+                                            <p className="text-[10px] text-muted-foreground">
+                                                {t("credentials.sarvamHint")}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Seção Secundária: Twilio (Opcional / Legado) */}
+                                <div className="mt-8 pt-6 border-t border-border/80 space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Telefonia Twilio (Opcional / Legado)</h4>
+                                            <p className="text-[11px] text-muted-foreground mt-0.5">
+                                                A Nuvv Telecom utiliza troncos SIP privados nativos por padrão. Preencha apenas se for integrar números externos da Twilio.
+                                            </p>
+                                        </div>
+                                        <Badge variant="outline" className="text-[10px] text-muted-foreground">Opcional</Badge>
+                                    </div>
+
+                                    <div className="grid gap-6 md:grid-cols-2">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="twilio-sid" className="text-xs font-bold uppercase text-muted-foreground">{t("credentials.twilioSid")}</Label>
+                                            <Input
+                                                id="twilio-sid"
+                                                value={apiKeys.twilioSid}
+                                                onChange={(e) =>
+                                                    setApiKeys({ ...apiKeys, twilioSid: e.target.value })
+                                                }
+                                                placeholder={t("credentials.twilioSidPlaceholder")}
+                                                className="font-mono text-sm"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label htmlFor="twilio-token" className="text-xs font-bold uppercase text-muted-foreground">{t("credentials.twilioToken")}</Label>
                                             <Input
                                                 id="twilio-token"
                                                 type="password"
@@ -821,107 +980,14 @@ function SettingsPageContent() {
                                                 onChange={(e) =>
                                                     setApiKeys({ ...apiKeys, twilioToken: e.target.value })
                                                 }
-                                                placeholder="••••••••••••••••••••••••••••••••"
+                                                placeholder="••••••••"
                                                 className="font-mono text-sm"
                                             />
                                         </div>
                                     </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="openrouter-key" className="text-xs font-bold uppercase text-muted-foreground">{t("credentials.openRouter")}</Label>
-                                        <Input
-                                            id="openrouter-key"
-                                            type="password"
-                                            value={apiKeys.openRouterKey}
-                                            onChange={(e) =>
-                                                setApiKeys({ ...apiKeys, openRouterKey: e.target.value })
-                                            }
-                                            placeholder="sk-or-••••••••••••••••••••••••••••"
-                                            className="font-mono text-sm"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <div className="flex items-center justify-between">
-                                            <Label htmlFor="elevenlabs-key" className="text-xs font-bold uppercase text-muted-foreground">{t("credentials.elevenLabs")}</Label>
-                                            {verifyingElevenLabs && (
-                                                <div className="flex items-center gap-1 text-[10px] text-primary animate-pulse font-bold">
-                                                    <Loader2 className="h-3 w-3 animate-spin" />
-                                                    {t("credentials.verifying")}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <Input
-                                            id="elevenlabs-key"
-                                            type="password"
-                                            value={apiKeys.elevenLabsKey}
-                                            onChange={(e) =>
-                                                setApiKeys({ ...apiKeys, elevenLabsKey: e.target.value })
-                                            }
-                                            placeholder="••••••••••••••••••••••••••••••••"
-                                            className={`font-mono text-sm ${elevenLabsKeyError ? 'border-destructive focus-visible:ring-destructive' : ''}`}
-                                        />
-                                        {elevenLabsKeyError && (
-                                            <p className="text-[10px] text-destructive font-bold animate-in fade-in slide-in-from-top-1">
-                                                {elevenLabsKeyError}. {t("credentials.keyErrorSuffix")}
-                                            </p>
-                                        )}
-                                        {!elevenLabsKeyError && !verifyingElevenLabs && apiKeys.elevenLabsKey && (
-                                            <p className="text-[10px] text-emerald-500 font-bold flex items-center gap-1">
-                                                <Check className="h-3 w-3" /> {t("credentials.validKey")}
-                                            </p>
-                                        )}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="deepgram-key" className="text-xs font-bold uppercase text-muted-foreground">{t("credentials.deepgram")}</Label>
-                                        <Input
-                                            id="deepgram-key"
-                                            type="password"
-                                            value={apiKeys.deepgramKey}
-                                            onChange={(e) =>
-                                                setApiKeys({ ...apiKeys, deepgramKey: e.target.value })
-                                            }
-                                            placeholder="••••••••••••••••••••••••••••••••"
-                                            className="font-mono text-sm"
-                                        />
-                                        <p className="text-[10px] text-muted-foreground">
-                                            {t("credentials.deepgramHint")}
-                                        </p>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="sarvam-key" className="text-xs font-bold uppercase text-muted-foreground">{t("credentials.sarvam")}</Label>
-                                        <Input
-                                            id="sarvam-key"
-                                            type="password"
-                                            value={apiKeys.sarvamKey}
-                                            onChange={(e) =>
-                                                setApiKeys({ ...apiKeys, sarvamKey: e.target.value })
-                                            }
-                                            placeholder="••••••••••••••••••••••••••••••••"
-                                            className="font-mono text-sm"
-                                        />
-                                        <p className="text-[10px] text-muted-foreground">
-                                            {t("credentials.sarvamHint")}
-                                        </p>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="gemini-key" className="text-xs font-bold uppercase text-muted-foreground">{t("credentials.gemini")}</Label>
-                                        <Input
-                                            id="gemini-key"
-                                            type="password"
-                                            value={apiKeys.geminiKey}
-                                            onChange={(e) =>
-                                                setApiKeys({ ...apiKeys, geminiKey: e.target.value })
-                                            }
-                                            placeholder="••••••••••••••••••••••••••••••••"
-                                            className="font-mono text-sm"
-                                        />
-                                        <p className="text-[10px] text-muted-foreground">
-                                            {t("credentials.geminiHint")}
-                                        </p>
-                                    </div>
                                 </div>
 
-                                <div className="flex flex-wrap gap-2 pt-2">
+                                <div className="flex flex-wrap gap-2 pt-4">
                                     <Button type="submit" disabled={saving}>
                                         {saving && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
                                         {c("actions.saveChanges")}

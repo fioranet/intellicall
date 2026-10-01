@@ -62,6 +62,17 @@ export default function SipTrunksPage() {
         asteriskConnected: boolean;
         activeSipCalls: number;
     } | null>(null);
+    const [user, setUser] = useState<any>(() => {
+        if (typeof window !== "undefined") {
+            try {
+                const stored = localStorage.getItem("user");
+                return stored ? JSON.parse(stored) : null;
+            } catch {
+                return null;
+            }
+        }
+        return null;
+    });
 
     const fetchTrunks = useCallback(async () => {
         try {
@@ -211,6 +222,27 @@ export default function SipTrunksPage() {
                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                         <Server className="h-3.5 w-3.5" />
                         <span>{t("status.trunksConfigured", { count: trunks.length })}</span>
+                    </div>
+                </div>
+
+                <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm">
+                    <div className="flex items-start sm:items-center gap-2.5">
+                        <Server className="h-5 w-5 text-primary shrink-0 mt-0.5 sm:mt-0" />
+                        <div>
+                            <span className="font-semibold text-foreground">
+                                {user?.operatingMode === "byok" ? "Modo Interconexão SIP / PABX Próprio" : "Modo Telefonia Gerenciada Nuvv"}
+                            </span>
+                            {user?.techPrefix && (
+                                <span className="ms-2 text-xs font-mono bg-primary/10 text-primary px-2 py-0.5 rounded border border-primary/30 font-bold">
+                                    TechPrefix: {user.techPrefix}
+                                </span>
+                            )}
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                                {user?.operatingMode === "byok"
+                                    ? "Conecte aqui seus troncos SIP / PABX (FusionPBX, Asterisk, FreePBX) para tráfego bidirecional de voz e IA."
+                                    : "Suas chamadas utilizam o cluster central de telefonia da Nuvv. O cadastro de troncos abaixo é opcional para interconectar PABX externos."}
+                            </p>
+                        </div>
                     </div>
                 </div>
 

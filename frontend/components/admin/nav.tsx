@@ -12,6 +12,7 @@ import {
     HeadphonesIcon,
     MessageSquare,
     Plug,
+    Key,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -96,6 +97,7 @@ export function AdminNav({ currentPath }: { currentPath: string }) {
         { href: "/admin/analytics", label: getAdminNavLabel("/admin/analytics", "Global Analytics"), icon: BarChart3 },
         { href: "/admin/support", label: getAdminNavLabel("/admin/support", "Support"), icon: HeadphonesIcon },
         { href: "/admin/settings", label: getAdminNavLabel("/admin/settings", "Admin Settings"), icon: SettingsIcon },
+        { href: "/settings?tab=api-keys", label: locale === "pt" ? "Motores de IA / Chaves" : "AI Engines & Keys", icon: Key },
         { href: "/admin/integrations", label: getAdminNavLabel("/admin/integrations", "Integrations"), icon: Plug },
         { href: "/admin/testimonials", label: getAdminNavLabel("/admin/testimonials", "Testimonials"), icon: MessageSquare },
     ];

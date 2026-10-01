@@ -38,7 +38,7 @@ router.post('/', auth, async (req, res) => {
         name: joi.string().required(),
         inboundAgentId: joi.string().allow(null, ''),
         fallbackNumber: joi.string().allow(null, '').max(20),
-        provider: joi.string().valid('twilio', 'sip').default('twilio'),
+        provider: joi.string().valid('twilio', 'sip', 'nuvv').default('nuvv'),
         sipTrunkId: joi.string().allow(null, '')
     });
 
@@ -104,7 +104,7 @@ router.patch('/:id', auth, async (req, res) => {
         phoneNumber: joi.string().pattern(/^\+?[1-9]\d{1,14}$/),
         inboundAgentId: joi.string().allow(null, ''),
         fallbackNumber: joi.string().allow(null, '').max(20),
-        provider: joi.string().valid('twilio', 'sip'),
+        provider: joi.string().valid('twilio', 'sip', 'nuvv'),
         sipTrunkId: joi.string().allow(null, ''),
         status: joi.string().valid('active', 'inactive')
     });
