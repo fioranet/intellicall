@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import axios from "axios";
-import { Loader2, Clock, Globe, Phone, Lock, Server, Activity, Settings, ShoppingBag, Key, Webhook, ChevronDown, Mail, Plug, Languages, Coins, Sparkles, Shield } from "lucide-react";
+import { Loader2, Clock, Globe, Phone, Lock, Server, Activity, Settings, ShoppingBag, Key, Webhook, ChevronDown, Mail, Plug, Languages, Coins, Sparkles, Shield, Layers, ShieldCheck, PhoneCall } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -31,6 +31,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useSettings } from "@/components/settings-provider";
 import { IntegrationsPanel } from "@/components/settings/integrations-panel";
 import { getCurrencySymbol } from "@/lib/currency-symbols";
+import { cn } from "@/lib/utils";
 import {
     Dialog,
     DialogContent,
