@@ -141,6 +141,7 @@ export default function AdminPlansPage() {
             interval: "monthly",
             isActive: true,
             dodoProductId: "",
+            telephonyType: "nuvv_managed",
             limits: {
                 agents: 1,
                 campaigns: 1,

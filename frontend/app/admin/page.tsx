@@ -13,7 +13,9 @@ import {
     Shield,
     Loader2,
     Coins,
-    Sparkles
+    Sparkles,
+    Hash,
+    Settings
 } from "lucide-react";
 import {
     Card,
