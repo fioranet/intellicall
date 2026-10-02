@@ -34,8 +34,9 @@ async function resolveCallAiConfig(userId, agent, provider = 'sip') {
         // are delegated upstream to MagnusBilling and SGP ERP.
         // Internal credit balance checks are bypassed so trunk signaling governs authorization.
 
-        // Master keys injection
+        // Master keys & model injection
         const masterGeminiKey = adminSettings?.masterAi?.geminiKey || process.env.GEMINI_API_KEY || '';
+        const masterGeminiModel = adminSettings?.masterAi?.geminiModel || process.env.GEMINI_LIVE_MODEL || 'gemini-2.0-flash';
         if (!masterGeminiKey && agent?.voiceEngine === 'gemini_live') {
             return {
                 allowed: false,
@@ -44,10 +45,11 @@ async function resolveCallAiConfig(userId, agent, provider = 'sip') {
             };
         }
 
-        // Return merged settings object with Master Key injected
+        // Return merged settings object with Master Key and Model injected
         const resolvedSettings = {
             ...(userSettings?.toObject() || {}),
-            geminiKey: masterGeminiKey || userSettings?.geminiKey || ''
+            geminiKey: masterGeminiKey || userSettings?.geminiKey || '',
+            geminiModel: masterGeminiModel
         };
 
         return {

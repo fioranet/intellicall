@@ -103,6 +103,7 @@ const adminSettingsSchema = new mongoose.Schema({
     },
     masterAi: {
         geminiKey: { type: String, default: '' },
+        geminiModel: { type: String, default: 'gemini-2.0-flash' },
         defaultEngine: { type: String, default: 'gemini_live' }
     }
 }, {

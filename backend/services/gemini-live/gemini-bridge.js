@@ -96,11 +96,12 @@ const BRAZILIAN_VOICE_MAP = {
  *   onEndCall(reason)              — agent asked to hang up
  */
 class GeminiLiveBridge {
-    constructor({ callId, settings, agent, lead }) {
+    constructor({ callId, settings, agent, lead, model }) {
         this.callId = callId;
         this.settings = settings;
         this.agent = agent;
         this.lead = lead;
+        this.model = model || settings?.geminiModel || process.env.GEMINI_LIVE_MODEL || 'gemini-2.0-flash';
 
         this.ws = null;
         this.active = false;
@@ -285,13 +286,14 @@ class GeminiLiveBridge {
                 },
             },
         };
+        const activeModel = this.model || this.settings?.geminiModel || process.env.GEMINI_LIVE_MODEL || 'gemini-2.0-flash';
         // 3.x uses thinkingLevel; 2.5 uses thinkingBudget. Only set what the model understands.
-        if (MODEL.startsWith('gemini-3')) {
+        if (activeModel.startsWith('gemini-3')) {
             generationConfig.thinkingConfig = { thinkingLevel: 'minimal' };
         }
 
         const setup = {
-            model: `models/${MODEL}`,
+            model: `models/${activeModel}`,
             generationConfig,
             systemInstruction: { parts: [{ text: this._systemInstruction() }] },
             tools: [{ functionDeclarations: this._functionDeclarations() }],
@@ -350,7 +352,8 @@ class GeminiLiveBridge {
         this.setupComplete = false;
         this._goingAway = false;
         const resuming = !!this._resumptionHandle;
-        console.log(`🤖 [Gemini] [${this.callId}] Connecting (model=${MODEL}, resume=${resuming}, attempt=${this.reconnectAttempts})`);
+        const activeModel = this.model || this.settings?.geminiModel || process.env.GEMINI_LIVE_MODEL || 'gemini-2.0-flash';
+        console.log(`🤖 [Gemini] [${this.callId}] Connecting (model=${activeModel}, resume=${resuming}, attempt=${this.reconnectAttempts})`);
 
         const url = `${LIVE_WS_HOST}${LIVE_WS_PATH}?key=${encodeURIComponent(this.settings.geminiKey)}`;
         this.ws = new WebSocket(url);

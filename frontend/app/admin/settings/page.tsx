@@ -216,6 +216,7 @@ export default function AdminSettingsPage() {
         socialLinks: { instagram: "", linkedin: "", youtube: "" },
         masterAi: {
             geminiKey: "",
+            geminiModel: "gemini-2.0-flash",
             defaultEngine: "gemini_live",
         },
         branding: {
@@ -273,6 +274,7 @@ export default function AdminSettingsPage() {
                     },
                     masterAi: {
                         geminiKey: s.masterAi?.geminiKey || "",
+                        geminiModel: s.masterAi?.geminiModel || "gemini-2.0-flash",
                         defaultEngine: s.masterAi?.defaultEngine || "gemini_live",
                     },
                     branding: {
@@ -411,8 +413,60 @@ export default function AdminSettingsPage() {
                             />
                             <p className="text-xs text-muted-foreground">
                                 {locale === "pt" 
-                                    ? "Os clientes no Modelo Gerenciado realizarão chamadas utilizando esta chave, debitando créditos de suas carteiras (1 minuto = 1 crédito)."
-                                    : "Customers on the managed model will route calls through this key, consuming platform credits (1 min = 1 credit)."}
+                                    ? "Chave mestra utilizada por todos os agentes virtuais no cluster Nuvv Telecom com bilhetagem upstream no MagnusBilling / SGP ERP."
+                                    : "Master API key used by all virtual agents across the Nuvv Telecom cluster with upstream billing on MagnusBilling / SGP ERP."}
+                            </p>
+                        </div>
+
+                        {/* Seletor de Modelo Gemini Live */}
+                        <div className="space-y-2 pt-3 border-t border-border/50">
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="geminiModel" className="flex items-center gap-2 font-medium">
+                                    <Sparkles className="h-4 w-4 text-primary" />
+                                    {locale === "pt" ? "Modelo de IA Gemini Live" : "Gemini Live AI Model"}
+                                </Label>
+                                <span className="text-xs font-mono px-2 py-0.5 rounded bg-muted text-muted-foreground border">
+                                    {settings.masterAi?.geminiModel || "gemini-2.0-flash"}
+                                </span>
+                            </div>
+                            <Select
+                                value={settings.masterAi?.geminiModel || "gemini-2.0-flash"}
+                                onValueChange={(val) => setSettings({
+                                    ...settings,
+                                    masterAi: {
+                                        ...(settings.masterAi || {}),
+                                        geminiModel: val
+                                    }
+                                })}
+                            >
+                                <SelectTrigger id="geminiModel" className="w-full">
+                                    <SelectValue placeholder="Selecione o modelo Gemini Live" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="gemini-2.0-flash">
+                                        <div className="flex flex-col py-0.5 text-left">
+                                            <span className="font-medium text-foreground">Gemini 2.0 Flash (Padrão Atual)</span>
+                                            <span className="text-xs text-muted-foreground">Menor latência de voz Speech-to-Speech e alta estabilidade em produção</span>
+                                        </div>
+                                    </SelectItem>
+                                    <SelectItem value="gemini-3.1-flash-live">
+                                        <div className="flex flex-col py-0.5 text-left">
+                                            <span className="font-medium text-foreground">Gemini 3.1 Flash Live</span>
+                                            <span className="text-xs text-muted-foreground">Modelo Live atualizado com raciocínio aprimorado e áudio nativo</span>
+                                        </div>
+                                    </SelectItem>
+                                    <SelectItem value="gemini-3.8-live">
+                                        <div className="flex flex-col py-0.5 text-left">
+                                            <span className="font-medium text-foreground">Gemini 3.8 Live</span>
+                                            <span className="text-xs text-muted-foreground">Modelo multimodal avançado de última geração</span>
+                                        </div>
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <p className="text-xs text-muted-foreground">
+                                {locale === "pt"
+                                    ? "Selecione o modelo do Google Gemini que processará a síntese e compreensão de voz bidirecional de todas as chamadas."
+                                    : "Select the Google Gemini model that handles bidirectional voice synthesis and comprehension for all calls."}
                             </p>
                         </div>
                     </CardContent>

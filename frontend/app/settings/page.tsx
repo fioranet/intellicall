@@ -697,7 +697,8 @@ function SettingsPageContent() {
                         <Settings className="h-4 w-4" />
                         <span className="text-sm">{t("page.tabs.preferences")}</span>
                     </TabsTrigger>
-                    {(user?.isSuperAdmin || user?.role === "admin") && (
+                    {/* Chaves de API movidas para Configurações de Administrador */}
+                    {false && (user?.isSuperAdmin || user?.role === "admin") && (
                         <TabsTrigger
                             value="api-keys"
                             className="flex-none flex items-center gap-2 px-6 py-2 rounded-none transition-all duration-200 shrink-0 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:bg-primary/5 border-b-2 border-transparent data-[state=active]:border-primary text-muted-foreground hover:text-foreground hover:bg-muted shadow-none bg-transparent !border-x-0 !border-t-0 !shadow-none after:hidden"
@@ -1340,7 +1341,7 @@ function SettingsPageContent() {
                                                                 : (locale === "pt" ? "Telefonia Nuvv (PSTN + IA)" : "Nuvv Telephony (PSTN + AI)")}
                                                         </Badge>
                                                         {isCurrent && (
-                                                            <Badge className="bg-primary text-white text-xs">
+                                                            <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 text-xs font-semibold px-2.5 py-0.5">
                                                                 {locale === "pt" ? "Plano Atual" : "Current Plan"}
                                                             </Badge>
                                                         )}
