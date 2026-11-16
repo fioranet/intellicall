@@ -10,32 +10,32 @@ export interface Faq {
 export function buildFaqs(appName: string): Faq[] {
     return [
         {
-            question: `What is ${appName}?`,
-            answer: `${appName} is an AI voice calling platform. Human-like AI agents answer inbound calls and place outbound calls 24/7 — they qualify leads in real time, answer questions from your business knowledge base, book appointments during the call, and follow up with WhatsApp reminders.`,
+            question: `O que é o ${appName}?`,
+            answer: `O ${appName} é uma plataforma de atendimento e telefonia corporativa com agentes de voz inteligentes. Nossos atendentes virtuais atendem chamadas receptivas e realizam ligações ativas 24 horas por dia, 7 dias por semana — qualificando oportunidades, tirando dúvidas com base nas regras do seu negócio, agendando reuniões e enviando lembretes por WhatsApp.`,
         },
         {
-            question: "How do AI voice agents actually work on a call?",
-            answer: "Each call runs a real-time pipeline: speech-to-text transcribes the caller, a large language model decides what to say next based on your agent's instructions and knowledge base, and lifelike text-to-speech responds — fast enough for natural back-and-forth, including interruptions.",
+            question: "Como funcionam as chamadas com os agentes de voz?",
+            answer: "Cada ligação acontece em tempo real com voz ultra-realista em português brasileiro. O agente compreende o contexto com alta precisão e responde de forma instantânea e natural, permitindo inclusive que o cliente o interrompa a qualquer momento como em uma conversa humana real.",
         },
         {
-            question: "Which voice engines and languages are supported?",
-            answer: "Pick a voice engine per agent: a Classic pipeline (Deepgram + OpenRouter + ElevenLabs), the low-latency Deepgram Voice Agent, Gemini Live — one Google model that hears, thinks and speaks in 97 languages (SIP numbers) — or Sarvam AI for native Indian languages like Hindi, Tamil, Telugu, Bengali, Kannada, Malayalam, Marathi, Gujarati, Punjabi and Odia. Agents also converse in English, Spanish, French, German, Arabic, Portuguese, Japanese and more, with automatic language detection on the call.",
+            question: "Preciso contratar serviços técnicos externos ou configurar chaves de API?",
+            answer: "Não. O serviço é totalmente gerenciado e pronto para uso. Toda a inteligência conversacional, telefonia e síntese de voz já vêm integradas na plataforma, sem necessidade de conhecimento técnico ou configurações complexas.",
         },
         {
-            question: "Can the AI book appointments during a call?",
-            answer: "Yes. The agent checks your availability, books a slot mid-conversation, syncs it to Google Calendar, and the client automatically receives a WhatsApp reminder before the meeting. Rescheduling and cancellations are handled too.",
+            question: "O agente consegue agendar compromissos e consultas durante o telefonema?",
+            answer: "Sim. O agente consulta seus horários livres em tempo real, confirma o agendamento diretamente na conversa, sincroniza automaticamente com o Google Calendar e agenda o envio de um lembrete no WhatsApp do cliente.",
         },
         {
-            question: "Does it handle both inbound and outbound calls?",
-            answer: "Both. The same agents can answer incoming calls like a receptionist and run outbound campaigns — import leads from CSV or Google Sheets and the platform dials them automatically on your schedule.",
+            question: "A plataforma realiza chamadas ativas e recebe ligações?",
+            answer: "Sim, ambas as modalidades. O agente pode funcionar como uma recepcionista 24/7 para atender suas linhas de entrada e também pode discar automaticamente para listas de contatos e leads em campanhas ativas, conforme os horários que você definir.",
         },
         {
-            question: "Can I connect my existing tools?",
-            answer: "Yes — native integrations for n8n, HubSpot CRM, Slack, WhatsApp, Google Calendar, and Google Sheets, plus signed webhooks and a documented REST API with personal API keys for anything custom.",
+            question: "Posso conectar a plataforma com as ferramentas que minha empresa já utiliza?",
+            answer: "Sim. Há integração nativa com Google Calendar, Google Sheets, WhatsApp, Slack, HubSpot CRM e n8n, além de Webhooks e API REST para conexão com qualquer CRM, ERP ou sistema interno.",
         },
         {
-            question: "How fast can the AI call a new lead?",
-            answer: "Within seconds. Connect a form or CRM through n8n or the REST API and the AI dials the prospect the moment they submit — speed-to-lead without a human in the loop.",
+            question: "Qual a velocidade para ligar para um novo lead recebido no site?",
+            answer: "Em poucos segundos. Ao conectar seu formulário de contato ou CRM via webhook ou automação, o agente disca para o cliente no momento exato em que ele demonstra interesse, aumentando exponencialmente sua taxa de conversão.",
         },
     ];
 }

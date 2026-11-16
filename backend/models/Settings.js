@@ -51,12 +51,12 @@ const settingsSchema = new mongoose.Schema({
     uiLanguage: {
         // Dashboard interface language. Unrelated to an agent's voice language.
         type: String,
-        default: 'en',
-        enum: ['en', 'es', 'fr', 'de', 'ar']
+        default: 'pt',
+        enum: ['en', 'es', 'fr', 'de', 'ar', 'pt']
     },
     timeZone: {
         type: String, // IANA timezone e.g. 'America/New_York'
-        default: 'UTC'
+        default: 'America/Sao_Paulo'
     },
     googleSheetsAccessToken: {
         type: String,

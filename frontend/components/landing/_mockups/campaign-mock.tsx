@@ -1,47 +1,61 @@
-import { Badge, Progress } from "@wixzel/react";
+import { cn } from "@/lib/utils";
 import { MockFrame } from "./mock-frame";
 
-type Tone = "accent" | "neutral" | "outline";
-
-const ROWS: { name: string; status: string; tone: Tone; score: number }[] = [
-    { name: "Priya Sharma", status: "Qualified", tone: "accent", score: 92 },
-    { name: "Marcus Lee", status: "Voicemail", tone: "neutral", score: 48 },
-    { name: "Anita Desai", status: "Qualified", tone: "accent", score: 87 },
-    { name: "Tom Fischer", status: "No answer", tone: "outline", score: 21 },
+const ROWS: { name: string; status: string; tone: "brand" | "secondary" | "outline"; score: number }[] = [
+    { name: "Juliana Ferreira", status: "Qualificado", tone: "brand", score: 95 },
+    { name: "Carlos Eduardo Silva", status: "Caixa Postal", tone: "secondary", score: 50 },
+    { name: "Mariana Costa", status: "Qualificado", tone: "brand", score: 88 },
+    { name: "Rodrigo Almeida", status: "Sem resposta", tone: "outline", score: 20 },
 ];
 
-function StatusBadge({ status, tone }: { status: string; tone: Tone }) {
-    if (tone === "outline") return <Badge appearance="outline">{status}</Badge>;
-    return <Badge tone={tone}>{status}</Badge>;
+function StatusPill({ status, tone }: { status: string; tone: "brand" | "secondary" | "outline" }) {
+    return (
+        <span
+            className={cn(
+                "rounded-full px-2 py-0.5 text-[11px] font-semibold",
+                tone === "brand" && "bg-brand/15 text-brand",
+                tone === "secondary" && "bg-muted text-muted-foreground",
+                tone === "outline" && "border border-border text-muted-foreground"
+            )}
+        >
+            {status}
+        </span>
+    );
 }
 
 export function CampaignMock() {
     return (
-        <MockFrame title="Outbound Campaign">
-            <div className="flex flex-col gap-4">
-                <div className="flex flex-col gap-2">
-                    <div className="flex items-baseline justify-between gap-3 text-body-sm">
-                        <span className="font-semibold text-fg">Q3 Renewal Outreach</span>
-                        <span className="tabular-nums text-fg-muted">428 / 1,000 called</span>
+        <MockFrame title="Campanha Ativa">
+            <div className="space-y-4">
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                        <span className="font-semibold text-foreground">Renovação &amp; Pós-Venda</span>
+                        <span className="text-muted-foreground">428 / 1.000 chamadas realizadas</span>
                     </div>
-                    <Progress value={428} max={1000} />
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                        <div className="h-full rounded-full bg-brand" style={{ width: "43%" }} />
+                    </div>
                 </div>
 
-                <div className="overflow-hidden rounded-md bg-surface">
-                    <div className="grid grid-cols-[1fr_auto_auto] items-center gap-3 border-b border-border px-3 py-2 text-caption font-medium text-fg-subtle">
-                        <span>Lead</span>
+                <div className="overflow-hidden rounded-xl border border-border">
+                    <div className="grid grid-cols-[1fr_auto_auto] items-center gap-3 border-b border-border bg-muted/50 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                        <span>Contato</span>
                         <span>Status</span>
-                        <span className="w-8 text-end">Score</span>
+                        <span className="text-right">Score</span>
                     </div>
-                    <div className="divide-y divide-border">
-                        {ROWS.map((r) => (
-                            <div key={r.name} className="grid grid-cols-[1fr_auto_auto] items-center gap-3 px-3 py-2.5 text-body-sm">
-                                <span className="truncate font-medium text-fg">{r.name}</span>
-                                <StatusBadge status={r.status} tone={r.tone} />
-                                <span className="w-8 text-end font-semibold tabular-nums text-fg">{r.score}</span>
-                            </div>
-                        ))}
-                    </div>
+                    {ROWS.map((r, i) => (
+                        <div
+                            key={r.name}
+                            className={cn(
+                                "grid grid-cols-[1fr_auto_auto] items-center gap-3 px-3 py-2.5 text-sm",
+                                i !== ROWS.length - 1 && "border-b border-border"
+                            )}
+                        >
+                            <span className="truncate font-medium text-foreground">{r.name}</span>
+                            <StatusPill status={r.status} tone={r.tone} />
+                            <span className="w-8 text-right font-semibold tabular-nums text-foreground">{r.score}</span>
+                        </div>
+                    ))}
                 </div>
             </div>
         </MockFrame>

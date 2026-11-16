@@ -7,7 +7,7 @@ import { useInView } from "./use-in-view";
 interface RevealProps {
     children: React.ReactNode;
     className?: string;
-    /** Distance (px) the element rises from as it reveals. */
+    /** Distance (px) the element lifts up from as it reveals. */
     y?: number;
     delayMs?: number;
     durationMs?: number;
@@ -15,11 +15,11 @@ interface RevealProps {
 }
 
 /**
- * Scroll reveal in the Wixzel entrance: the element sharpens out of a light blur as it rises a
- * few pixels and fades in, landing softly with no overshoot. Staggerable via delayMs.
- * Reduced-motion users see content immediately with no animation.
+ * Scroll reveal: opacity 0→1 and a translateY lift, eased over ~700ms and staggerable via
+ * delayMs — matching the reference design's reveal feel. Reduced-motion users see content
+ * immediately with no animation.
  */
-export function Reveal({ children, className, y = 10, delayMs = 0, durationMs = 420, once = true }: RevealProps) {
+export function Reveal({ children, className, y = 40, delayMs = 0, durationMs = 700, once = true }: RevealProps) {
     const { ref, inView } = useInView<HTMLDivElement>({ once });
     const [reduced, setReduced] = useState(false);
 
@@ -32,10 +32,8 @@ export function Reveal({ children, className, y = 10, delayMs = 0, durationMs = 
         : {
               opacity: inView ? 1 : 0,
               transform: inView ? "translateY(0)" : `translateY(${y}px)`,
-              filter: inView ? "blur(0)" : "blur(6px)",
-              transition: ["opacity", "transform", "filter"]
-                  .map((p) => `${p} ${durationMs}ms var(--wx-ease-move) ${delayMs}ms`)
-                  .join(", "),
+              transition: `opacity ${durationMs}ms cubic-bezier(0.22,1,0.36,1) ${delayMs}ms, transform ${durationMs}ms cubic-bezier(0.22,1,0.36,1) ${delayMs}ms`,
+              willChange: "opacity, transform",
           };
 
     return (

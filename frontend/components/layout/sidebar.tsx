@@ -13,7 +13,7 @@ const mainMenuItems = [
     { key: "dashboard", href: "/dashboard", icon: SquaresFour },
     { key: "leads", href: "/leads", icon: Users },
     { key: "phoneNumbers", href: "/phone-numbers", icon: Hash },
-    { key: "sipTrunks", href: "/sip-trunks", icon: HardDrives },
+    { key: "sipTrunks", href: "/sip-trunks", icon: HardDrives, adminOnly: true },
     { key: "whatsapp", href: "/whatsapp", icon: WhatsAppIcon },
     { key: "meetings", href: "/meetings", icon: VideoCamera },
     { key: "agents", href: "/agents", icon: Robot },
@@ -106,7 +106,8 @@ export function Sidebar() {
                 </Link>
             </SidebarHeader>
             <SidebarSection>
-                {mainMenuItems.map((item) => {
+                {mainMenuItems.map((item: any) => {
+                    if (item.adminOnly && !isAdminUser) return null;
                     const Icon = item.icon;
                     const showMyPendingDot = item.href === "/support" && myPendingSupportCount > 0;
                     return (

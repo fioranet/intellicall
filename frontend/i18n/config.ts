@@ -21,6 +21,7 @@ export interface LocaleDef {
 //   3. Translate the values. Anything you leave out falls back to English.
 // ─────────────────────────────────────────────────────────────────────────────
 export const LOCALES: LocaleDef[] = [
+    { code: "pt", label: "Português (Brasil)", dir: "ltr" },
     { code: "en", label: "English", dir: "ltr" },
     { code: "es", label: "Español", dir: "ltr" },
     { code: "fr", label: "Français", dir: "ltr" },
@@ -28,7 +29,7 @@ export const LOCALES: LocaleDef[] = [
     { code: "ar", label: "العربية", dir: "rtl" },
 ];
 
-export const DEFAULT_LOCALE = "en";
+export const DEFAULT_LOCALE = "pt";
 
 /** Cookie holding the visitor's chosen locale. Read server-side in i18n/request.ts. */
 export const LOCALE_COOKIE = "NEXT_LOCALE";

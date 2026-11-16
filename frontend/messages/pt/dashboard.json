@@ -1,0 +1,30 @@
+{
+  "title": "Dashboard",
+  "newCampaign": "Nova campanha",
+  "overview": {
+    "title": "Visão geral",
+    "description": "Distribuição do volume de chamadas nos últimos 7 dias.",
+    "callsTooltip": "{count, plural, one {# chamada} other {# chamadas}}"
+  },
+  "recentActivity": {
+    "title": "Atividade recente",
+    "description": "Interações recentes do sistema e respostas da rede.",
+    "systemEvent": "Evento do sistema",
+    "withAgent": "com {agent}",
+    "inbound": "Entrada",
+    "viewAllLogs": "Ver todos os registros"
+  },
+  "counts": {
+    "leads": "Leads",
+    "contacted": "{count, plural, one {# contatado} other {# contatados}}",
+    "uncontacted": "{count, plural, one {# sem contato} other {# sem contato}}",
+    "manageLeads": "Gerenciar força de trabalho",
+    "agents": "Agentes de IA",
+    "configureAgents": "Configurar inteligência",
+    "campaigns": "Campanhas",
+    "reviewCampaigns": "Revise as operações"
+  },
+  "toast": {
+    "loadFailed": "Falha ao carregar métricas do dashboard"
+  }
+}

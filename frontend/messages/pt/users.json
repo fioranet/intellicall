@@ -1,0 +1,56 @@
+{
+  "title": "Usuários",
+  "subtitle": "Gerenciar usuários do sistema (somente administrador)",
+  "accessDenied": {
+    "title": "Acesso negado",
+    "description": "Você não tem permissão para visualizar esta página. Esta seção é restrita apenas aos administradores."
+  },
+  "empty": {
+    "title": "Nenhum usuário ainda",
+    "description": "Você ainda não adicionou nenhum usuário. Crie seu primeiro usuário para conceder acesso ao sistema."
+  },
+  "table": {
+    "name": "Nome",
+    "email": "E-mail",
+    "role": "Papel",
+    "sharedAccess": "Acesso Compartilhado",
+    "joined": "Ingressou",
+    "tags": "Etiquetas:",
+    "agents": "Agentes:",
+    "campaigns": "Campanhas:",
+    "unknown": "Desconhecido",
+    "none": "Nenhum"
+  },
+  "roles": {
+    "admin": "Administrador",
+    "member": "Membro",
+    "placeholder": "Selecione uma função"
+  },
+  "create": {
+    "trigger": "Criar usuário",
+    "title": "Criar novo usuário",
+    "description": "Adicione um novo usuário ao sistema.",
+    "nameLabel": "Nome",
+    "namePlaceholder": "John Doe",
+    "emailLabel": "E-mail",
+    "passwordLabel": "Senha",
+    "roleLabel": "Papel"
+  },
+  "edit": {
+    "title": "Editar usuário: {name}",
+    "description": "Atualize a função e gerencie recursos compartilhados.",
+    "roleLabel": "Papel",
+    "sharedTags": "Tags compartilhadas (acesso a leads)",
+    "noTags": "Nenhuma tag encontrada nos leads",
+    "manualTag": "Ou adicione manualmente a tag:",
+    "add": "Adicionar",
+    "sharedAgents": "Agentes Compartilhados",
+    "noAgents": "Nenhum agente disponível",
+    "sharedCampaigns": "Campanhas compartilhadas",
+    "noCampaigns": "Nenhuma campanha disponível"
+  },
+  "toast": {
+    "created": "Usuário criado com sucesso!",
+    "updated": "Usuário atualizado com sucesso!"
+  }
+}

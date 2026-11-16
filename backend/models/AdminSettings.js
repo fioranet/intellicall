@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const adminSettingsSchema = new mongoose.Schema({
     branding: {
-        appName: { type: String, default: 'IntelliCallAI' },
+        appName: { type: String, default: 'Nuvv Flow' },
         primaryColor: { type: String, default: '#8078F0' },
         logoLight: { type: String, default: '/images/logo_black.png' },
         logoDark: { type: String, default: '/images/logo_white.png' },
@@ -10,7 +10,7 @@ const adminSettingsSchema = new mongoose.Schema({
     },
     currency: {
         type: String,
-        default: 'USD'
+        default: 'BRL'
     },
     showCodeCanyonButton: {
         type: Boolean,
@@ -23,7 +23,7 @@ const adminSettingsSchema = new mongoose.Schema({
     },
     supportEmail: {
         type: String,
-        default: 'support@intellicall.ai'
+        default: 'contato@nuvv.com.br'
     },
     /** Shown on Privacy Policy (data protection contact) */
     privacyEmail: {

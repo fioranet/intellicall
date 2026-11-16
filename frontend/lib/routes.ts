@@ -9,6 +9,7 @@ export const PUBLIC_ROUTES = [
     "/signup",
     "/auth/callback",
     "/deactivated",
+    "/landing",
     "/about",
     "/contact",
     "/privacy",

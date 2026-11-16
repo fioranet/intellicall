@@ -42,21 +42,21 @@ function eventFlags() {
 
 function publicPlatformDefaults() {
     return {
-        currency: 'USD',
+        currency: 'BRL',
         showCodeCanyonButton: false,
         showSelfHostingSection: false,
-        supportEmail: 'support@intellicall.ai',
-        privacyEmail: 'privacy@intellicall.ai',
-        legalEmail: 'legal@intellicall.ai',
-        contactEmail: '',
-        hqAddress: '',
+        supportEmail: 'contato@nuvv.com.br',
+        privacyEmail: 'privacidade@nuvv.com.br',
+        legalEmail: 'juridico@nuvv.com.br',
+        contactEmail: 'contato@nuvv.com.br',
+        hqAddress: 'São Paulo, SP - Brasil',
         socialLinks: {
             instagram: '',
             linkedin: '',
             youtube: ''
         },
         branding: {
-            appName: 'IntelliCallAI',
+            appName: 'Nuvv Flow',
             primaryColor: '#8078F0',
             logoLight: '/images/logo_black.png',
             logoDark: '/images/logo_white.png',

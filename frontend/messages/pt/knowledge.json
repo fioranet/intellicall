@@ -1,0 +1,82 @@
+{
+  "title": "Base de conhecimento",
+  "subtitle": "Armazene e gerencie informações comerciais para seus agentes de IA",
+  "create": {
+    "trigger": "Criar base de conhecimento",
+    "manual": "Insira manualmente",
+    "fromWebsite": "Do site"
+  },
+  "view": {
+    "cards": "Cartões",
+    "list": "Lista"
+  },
+  "badges": {
+    "basicInfo": "Informações básicas",
+    "faqs": "{count, plural, one {# FAQ} other {# FAQs}}",
+    "faqsLabel": "Perguntas frequentes",
+    "otherInfo": "Outras informações"
+  },
+  "card": {
+    "fallbackDescription": "Contém dados específicos de negócios para agentes de IA.",
+    "created": "Criado {date}",
+    "edit": "Editar",
+    "delete": "Excluir"
+  },
+  "table": {
+    "name": "Nome da base de conhecimento",
+    "sections": "Seções",
+    "faqs": "Perguntas frequentes",
+    "createdAt": "Criado em",
+    "actions": "Ações",
+    "items": "{count, plural, one {# item} other {# itens}}"
+  },
+  "empty": {
+    "title": "Ainda não há bases de conhecimento",
+    "description": "Armazene informações comerciais, perguntas frequentes e muito mais para fornecer contexto extra aos seus agentes de IA."
+  },
+  "dialog": {
+    "editTitle": "Editar base de conhecimento",
+    "createTitle": "Criar base de conhecimento",
+    "description": "Armazene informações reutilizáveis ​​que seus agentes de IA podem usar durante as chamadas.",
+    "importNotes": "Notas de importação",
+    "nameLabel": "Nome da base de conhecimento",
+    "namePlaceholder": "por exemplo Informações Gerais da Empresa",
+    "descriptionLabel": "Descrição (interna)",
+    "descriptionPlaceholder": "Breve descrição do que esta informação cobre",
+    "basicInfoLabel": "Informações Básicas",
+    "basicInfoPlaceholder": "Descreva sua empresa, serviços, horário de expediente, etc.",
+    "faqsLabel": "Perguntas frequentes (FAQ)",
+    "addFaq": "Adicionar perguntas frequentes",
+    "questionLabel": "Pergunta {number}",
+    "questionPlaceholder": "por exemplo Qual é a sua política de reembolso?",
+    "answerLabel": "Responder",
+    "answerPlaceholder": "por exemplo Oferecemos uma garantia de devolução do dinheiro em 30 dias...",
+    "noFaqs": "Nenhuma FAQ adicionada ainda. Clique em \"Adicionar FAQ\" para começar.",
+    "otherInfoLabel": "Outras informações",
+    "otherInfoPlaceholder": "Qualquer contexto adicional, tabelas de preços ou conhecimento especializado...",
+    "updating": "Atualizando...",
+    "creating": "Criando...",
+    "save": "Salvar base de conhecimento",
+    "create": "Criar base de conhecimento"
+  },
+  "fromWebsite": {
+    "title": "Importar do site",
+    "description": "Buscaremos a página e usaremos IA para sugerir informações básicas, perguntas frequentes e outros campos. Os resultados dependem do site; sempre revise antes de salvar. Requer uma chave de API OpenRouter em Configurações.",
+    "urlLabel": "URL do site",
+    "generating": "Gerando…",
+    "generate": "Gerar rascunho"
+  },
+  "toast": {
+    "loadFailed": "Falha ao carregar bases de conhecimento",
+    "deleted": "Base de conhecimento excluída com sucesso",
+    "deleteFailed": "Falha ao excluir base de conhecimento",
+    "updated": "Base de conhecimento atualizada com sucesso!",
+    "created": "Base de conhecimento criada com sucesso!",
+    "generic": "Algo deu errado",
+    "urlRequired": "Insira o URL de um site",
+    "urlInvalid": "Insira um URL válido (por exemplo, https://example.com)",
+    "urlScheme": "Somente URLs http e https são permitidos",
+    "draftFailed": "Não foi possível gerar o rascunho",
+    "draftReady": "Rascunho pronto – revise e salve sua base de conhecimento"
+  }
+}

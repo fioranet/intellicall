@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 
 /**
- * Fixed vertical section indicator (end-center). The current section's dot is inked and
- * grows taller; the rest stay quiet. Hidden on small screens.
+ * Fixed vertical section indicator (right-center). The active section's dot grows taller.
+ * `mix-blend-difference` keeps the white dots legible over any section background (light,
+ * dark, or brand). Hidden on small screens.
  */
 export function SectionDots({ ids }: { ids: string[] }) {
     const [active, setActive] = useState(0);
@@ -31,17 +32,17 @@ export function SectionDots({ ids }: { ids: string[] }) {
     }, [ids.join(",")]);
 
     return (
-        <div aria-hidden className="fixed end-4 top-1/2 z-40 hidden -translate-y-1/2 flex-col gap-2 md:flex">
+        <div
+            aria-hidden
+            className="fixed right-4 top-1/2 z-40 hidden -translate-y-1/2 flex-col gap-2.5 md:flex"
+            style={{ mixBlendMode: "difference" }}
+        >
             {ids.map((id, i) => (
                 <a
                     key={id}
                     href={`#${id}`}
-                    tabIndex={-1}
-                    className={
-                        active === i
-                            ? "block h-5 w-1.5 rounded-full bg-fg transition-[height,background-color] duration-(--wx-duration-move) ease-move"
-                            : "block h-1.5 w-1.5 rounded-full bg-border-strong transition-[height,background-color] duration-(--wx-duration-move) ease-move hover:bg-fg-subtle"
-                    }
+                    className="block w-2 rounded-full bg-white transition-all duration-300"
+                    style={{ height: active === i ? 24 : 8, opacity: active === i ? 1 : 0.4 }}
                 />
             ))}
         </div>
