@@ -1200,7 +1200,7 @@ function SettingsPageContent() {
                                                         {t("billing.upgradePlan")}
                                                     </Button>
                                                 ) : (
-                                                    <Button block variant="outline" asChild>
+                                                    <Button block variant="secondary" asChild>
                                                         <a href="https://www.nuvv.com.br/suporte" target="_blank" rel="noopener noreferrer">
                                                             Solicitar com Nuvv
                                                         </a>
