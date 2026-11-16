@@ -9,15 +9,32 @@ const LIVE_WS_HOST = 'wss://generativelanguage.googleapis.com';
 const LIVE_WS_PATH = '/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent';
 
 /**
- * Live API model. 3.1 Flash Live is the low-latency choice — thinking defaults to
- * "minimal" and it is built for audio-to-audio dialogue. Its documented limitation is
- * that function calls are synchronous (the model stays silent until the tool returns),
- * which costs nothing here: every tool below is a local Mongo lookup.
+ * Live API model. gemini-3.8-live is the stable (GA) model Google recommends for low-latency
+ * voice agents, and the named replacement for gemini-3.1-flash-live-preview and
+ * gemini-2.5-flash-native-audio-preview-12-2025, both shut down on 17 November 2026.
  *
- * Swap to gemini-2.5-flash-native-audio-preview-12-2025 for non-blocking tool calls,
- * affective dialog and proactive audio, at the cost of some latency.
+ * GEMINI_LIVE_MODEL can still pin an older model until then; the setup below adapts the
+ * thinking and tool settings to whichever model is in use.
  */
-const MODEL = process.env.GEMINI_LIVE_MODEL || 'gemini-3.1-flash-live-preview';
+const MODEL = process.env.GEMINI_LIVE_MODEL || 'gemini-3.8-live';
+
+/**
+ * 3.1 Flash Live takes thinkingLevel (minimal is its fastest). 3.8 Live rejects the field, and
+ * the 3.8 extended-thinking variant has no 'minimal' — neither gets a thinkingConfig.
+ */
+function thinkingConfigFor(model) {
+    return model.startsWith('gemini-3.1-flash-live') ? { thinkingLevel: 'minimal' } : null;
+}
+
+/**
+ * 3.8 Live makes function calls non-blocking by default: the model keeps talking while
+ * end_call or book_appointment runs. These tools must finish before it speaks, so ask for
+ * blocking calls. The extended-thinking variant only supports non-blocking, and older models
+ * are blocking anyway, so neither is sent the field.
+ */
+function wantsBlockingTools(model) {
+    return model.startsWith('gemini-3.8-live') && !model.includes('extended-thinking');
+}
 
 /**
  * Server-side VAD tuning. Defaults aim at the standing requirement: the caller can always
@@ -31,6 +48,44 @@ const VAD_PREFIX_PADDING_MS = parseInt(process.env.GEMINI_VAD_PREFIX_PADDING_MS)
 const VAD_SILENCE_MS = parseInt(process.env.GEMINI_VAD_SILENCE_MS) || 700;
 
 const MAX_RECONNECT_ATTEMPTS = 3;
+/**
+ * Close codes the Live API uses to refuse a session: 1007 for an invalid argument in the
+ * setup (e.g. "Thinking level is not supported for this model."), 1008 for a policy
+ * refusal (model not found, permission denied).
+ */
+const SETUP_REJECTED_CLOSE_CODES = new Set([1007, 1008]);
+/**
+ * An exhausted key comes back as 1011, the code Google also uses for a passing internal
+ * error, so only the reason tells them apart. Retrying an exhausted key just repeats it.
+ */
+const QUOTA_EXCEEDED = /quota|resource.?exhausted/i;
+/** onEndCall reason when the engine is gone, so the transport can hang up at once. */
+const ENGINE_UNAVAILABLE = 'voice engine unavailable';
+
+/**
+ * The CallLog error for a Live session that closed for good. It carries Google's own
+ * reason, which is the only thing that says why; without it every failure reads
+ * "connection lost" and the reason exists only in the server log.
+ */
+function describeLiveClose({ code, reason, model, beforeSetup, rejected }) {
+    const said = reason ? `Google said: "${reason}" (code ${code}).` : `Google gave no reason (code ${code}).`;
+    let hint = '';
+    if (/api key|permission|unauthori[sz]ed|forbidden|denied/i.test(reason)) {
+        hint = ' Check that the Gemini API key is valid and has Live API access.';
+    } else if (QUOTA_EXCEEDED.test(reason) || /rate limit|billing/i.test(reason)) {
+        hint = ' The Gemini API key has used up its quota. Enable billing or raise the limit for this key in Google AI Studio.';
+    } else if (/not found|not supported|unsupported/i.test(reason)) {
+        hint = ` The model ${model} is not available to this Gemini API key, or does not accept one of the session settings.`;
+    } else if (/invalid|unknown name|cannot find field/i.test(reason)) {
+        hint = ` The model ${model} did not accept the session settings.`;
+    }
+    const what = rejected
+        ? 'Gemini refused to start the voice session, so the caller heard nothing.'
+        : beforeSetup
+            ? 'Could not open a voice session with Gemini, so the caller heard nothing.'
+            : 'Gemini Live connection lost mid-call and could not be restored.';
+    return `${what} ${said}${hint}`;
+}
 /** Backstop: hang up even if generationComplete never arrives after end_call. */
 const END_CALL_SAFETY_MS = 15000;
 /** An agent asking to hang up this early in a call is hallucinating, not deciding. */
@@ -63,7 +118,9 @@ const IDLE_HANGUP_MESSAGE = "I haven't heard back from you, so I'll go ahead and
  *   onEndCall(reason)              — agent asked to hang up
  */
 class GeminiLiveBridge {
-    constructor({ callId, settings, agent, lead }) {
+    constructor({ callId, settings, agent, lead, idleTimeoutMs = IDLE_TIMEOUT_MS }) {
+        /** Silence from the caller this long ends the call. A meeting passes a longer one. */
+        this.idleTimeoutMs = idleTimeoutMs;
         this.callId = callId;
         this.settings = settings;
         this.agent = agent;
@@ -99,6 +156,8 @@ class GeminiLiveBridge {
          * browser test this stays null, and the capability is never offered to the model.
          */
         this.transferHandler = null;
+        /** The call's tools (services/tools/agent-tool-session.js), or null. Set before connect(). */
+        this.toolSession = null;
 
         /** Handle from the last sessionResumptionUpdate, used to survive goAway. */
         this._resumptionHandle = null;
@@ -146,6 +205,15 @@ class GeminiLiveBridge {
         this.transferHandler = fn;
     }
 
+    /**
+     * Give this call its tools (services/tools/agent-tool-session.js): the account's
+     * webhook tools, connected apps and WhatsApp built-ins. Must be called before
+     * connect(), since the function list goes out with the setup message.
+     */
+    setToolSession(session) {
+        this.toolSession = session || null;
+    }
+
     /** Enabled transfer destinations, or [] when the transport or the agent has it off. */
     _transferDestinations() {
         if (!this.transferHandler || !this.agent?.humanTransfer?.enabled) return [];
@@ -160,6 +228,8 @@ class GeminiLiveBridge {
             commandTags: false, // native function calling — no [[..]] text protocol
             lead: this.lead,
             humanTransfer: !!this.transferHandler,
+            connectedApps: this.toolSession ? this.toolSession.appNames() : [],
+            toolNames: this.toolSession ? this.toolSession.tools.filter(t => t.type !== 'integration').map(t => t.name) : [],
         });
         // Gemini has no greeting setting, so the opening line lives in the instruction and
         // a text nudge after setup triggers the first turn.
@@ -196,6 +266,8 @@ class GeminiLiveBridge {
                 },
             });
         }
+
+        if (this.toolSession) fns.push(...this.toolSession.geminiDeclarations());
 
         if (!this.agent?.appointmentBookingEnabled) return fns;
 
@@ -247,16 +319,19 @@ class GeminiLiveBridge {
                 },
             },
         };
-        // 3.x uses thinkingLevel; 2.5 uses thinkingBudget. Only set what the model understands.
-        if (MODEL.startsWith('gemini-3')) {
-            generationConfig.thinkingConfig = { thinkingLevel: 'minimal' };
+        const thinkingConfig = thinkingConfigFor(MODEL);
+        if (thinkingConfig) generationConfig.thinkingConfig = thinkingConfig;
+
+        const functionDeclarations = this._functionDeclarations();
+        if (wantsBlockingTools(MODEL)) {
+            for (const fn of functionDeclarations) fn.behavior = 'BLOCKING';
         }
 
         const setup = {
             model: `models/${MODEL}`,
             generationConfig,
             systemInstruction: { parts: [{ text: this._systemInstruction() }] },
-            tools: [{ functionDeclarations: this._functionDeclarations() }],
+            tools: [{ functionDeclarations }],
             realtimeInputConfig: {
                 automaticActivityDetection: {
                     startOfSpeechSensitivity: VAD_START_SENSITIVITY,
@@ -299,7 +374,7 @@ class GeminiLiveBridge {
         if (this._idleWatchdog) return;
         this._idleWatchdog = setInterval(() => {
             if (!this.active || this._endCallArmed || this._endCallFired) return;
-            if (Date.now() - this._lastActivityAt < IDLE_TIMEOUT_MS) return;
+            if (Date.now() - this._lastActivityAt < this.idleTimeoutMs) return;
             console.log(`💤 [Gemini] [${this.callId}] No activity for ${IDLE_TIMEOUT_MS}ms — ending call`);
             this._endCallReason = 'idle timeout';
             this.injectAgentMessage(IDLE_HANGUP_MESSAGE);
@@ -328,24 +403,7 @@ class GeminiLiveBridge {
             this._handleMessage(data);
         });
 
-        this.ws.on('close', (code, reason) => {
-            const why = reason?.toString() || 'none';
-            console.log(`⚪ [Gemini] [${this.callId}] Socket closed (code=${code}, reason=${why})`);
-            if (!this.active || this.closing) return;
-
-            // A goAway close is expected — the far end recycles connections roughly every
-            // 10 minutes. Reconnecting with the resumption handle is not a failure path.
-            if (this._goingAway || this.reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
-                if (!this._goingAway) this.reconnectAttempts++;
-                const delay = this._goingAway ? 0 : 500;
-                console.log(`🔄 [Gemini] [${this.callId}] Reconnecting${this._goingAway ? ' (session resumption)' : ` (${this.reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`}...`);
-                setTimeout(() => { if (this.active && !this.closing) this._openSocket(); }, delay);
-            } else {
-                const msg = 'Gemini Live connection lost and could not be restored.';
-                console.error(`❌ [Gemini] [${this.callId}] ${msg}`);
-                if (this.onError) this.onError('gemini', 'live_disconnected', msg);
-            }
-        });
+        this.ws.on('close', (code, reason) => this._handleClose(code, reason?.toString() || ''));
 
         this.ws.on('error', (err) => {
             console.error(`🔴 [Gemini] [${this.callId}] Socket error:`, err.message);
@@ -353,6 +411,37 @@ class GeminiLiveBridge {
                 this.onError('gemini', 'live_connect_error', `Gemini Live connection failed: ${err.message}. Verify the Gemini API key has Live API access.`);
             }
         });
+    }
+
+    _handleClose(code, why) {
+        console.log(`⚪ [Gemini] [${this.callId}] Socket closed (code=${code}, reason=${why || 'none'})`);
+        if (!this.active || this.closing) return;
+
+        // Google answers a setup it will not run (a field the model rejects, an unknown
+        // model, a key without access or quota) by closing before setupComplete. Sending
+        // the same setup again gets the same answer, so stop now rather than after three.
+        const rejected = !this.setupComplete && !this._goingAway
+            && (SETUP_REJECTED_CLOSE_CODES.has(code) || QUOTA_EXCEEDED.test(why));
+
+        // A goAway close is expected — the far end recycles connections roughly every
+        // 10 minutes. Reconnecting with the resumption handle is not a failure path.
+        if (!rejected && (this._goingAway || this.reconnectAttempts < MAX_RECONNECT_ATTEMPTS)) {
+            if (!this._goingAway) this.reconnectAttempts++;
+            const delay = this._goingAway ? 0 : 500;
+            console.log(`🔄 [Gemini] [${this.callId}] Reconnecting${this._goingAway ? ' (session resumption)' : ` (${this.reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`}...`);
+            setTimeout(() => { if (this.active && !this.closing) this._openSocket(); }, delay);
+            return;
+        }
+
+        const msg = describeLiveClose({ code, reason: why, model: MODEL, beforeSetup: !this.setupComplete, rejected });
+        console.error(`❌ [Gemini] [${this.callId}] ${msg}`);
+        if (this.onError) this.onError('gemini', rejected ? 'live_setup_rejected' : 'live_disconnected', msg);
+
+        // Nothing is left to speak for the agent. Without this the caller sits in silence
+        // until they give up and hang up themselves.
+        this.active = false;
+        this._endCallReason = ENGINE_UNAVAILABLE;
+        if (this.onEndCall) this.onEndCall(ENGINE_UNAVAILABLE);
     }
 
     _handleMessage(data) {
@@ -565,6 +654,7 @@ class GeminiLiveBridge {
             case 'cancel_appointment':
                 return AppointmentService.cancelAppointment(userId, clientPhone, args.date, args.time);
             default:
+                if (this.toolSession?.has(name)) return this.toolSession.call(name, args);
                 return `Unknown function: ${name}`;
         }
     }
@@ -651,4 +741,4 @@ class GeminiLiveBridge {
     }
 }
 
-module.exports = { GeminiLiveBridge, GEMINI_LIVE_MODEL: MODEL };
+module.exports = { GeminiLiveBridge, GEMINI_LIVE_MODEL: MODEL, thinkingConfigFor, wantsBlockingTools, ENGINE_UNAVAILABLE };

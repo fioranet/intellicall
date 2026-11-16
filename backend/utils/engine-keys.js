@@ -9,6 +9,7 @@
  *  - 'gemini_live'    → fully self-contained (one audio-in/audio-out model), so it needs
  *                       ONLY a Gemini key.
  *  - 'deepgram_agent' → Deepgram + ElevenLabs (LLM is Deepgram-managed, no OpenRouter).
+ *                       With a Deepgram Aura voice (agent.deepgramVoice) it needs only Deepgram.
  *  - 'classic'        → Deepgram + ElevenLabs + OpenRouter.
  *
  * @returns {string[]} human-readable names of the missing keys ([] when all present).
@@ -32,7 +33,8 @@ function missingEngineKeys(settings, agent, provider) {
         return missing;
     }
     if (!settings?.deepgramKey) missing.push('Deepgram');
-    if (!settings?.elevenLabsKey) missing.push('ElevenLabs');
+    const speaksWithAura = isDgAgent && !!agent?.deepgramVoice;
+    if (!speaksWithAura && !settings?.elevenLabsKey) missing.push('ElevenLabs');
     if (!isDgAgent && !settings?.openRouterKey) missing.push('OpenRouter');
     return missing;
 }

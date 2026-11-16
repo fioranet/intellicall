@@ -1,54 +1,45 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, type CSSProperties } from "react";
+import { Phone, Clock, Timer, Calendar, Robot, User, ChatText, CheckCircle, XCircle, Brain, Pulse, ArrowsClockwise, DownloadSimple, Warning, PhoneTransfer, Wrench, VideoCamera } from "@phosphor-icons/react";
 import {
-    Phone,
-    Clock,
-    Timer,
-    Calendar,
-    Search,
-    Bot,
-    User,
-    MessageSquare,
-    Loader2,
-    Filter,
-    Mic,
-    CheckCircle2,
-    XCircle,
-    PhoneOff,
-    Brain,
-    Activity,
-    History,
-    RefreshCw,
-    Download,
-    Play,
-    AlertTriangle,
-    PhoneForwarded,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-    Sheet,
-    SheetContent,
-    SheetHeader,
-    SheetTitle,
-    SheetDescription
-} from "@/components/ui/sheet";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import axios from "axios";
-import { toast } from "sonner";
-import {
+    Alert,
+    Badge,
+    type BadgeProps,
+    Button,
+    DescriptionList,
+    Drawer,
+    DrawerBody,
+    DrawerContent,
+    DrawerDescription,
+    DrawerHeader,
+    DrawerTitle,
+    EmptyState,
+    Message,
+    PageHeader,
+    Section,
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select";
+    Skeleton,
+    Spinner,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+    Transcript,
+    toast,
+} from "@wixzel/react";
+import axios from "axios";
 import Papa from "papaparse";
 import { ModernAudioPlayer } from "@/components/ui/modern-audio-player";
 import { useSettings, formatTime } from "@/components/settings-provider";
@@ -70,6 +61,18 @@ const formatDate = (isoString: string) => {
  *  asking next-intl for a key that does not exist. */
 const TRANSFER_STATUSES = ["ringing", "connected", "completed", "busy", "no_answer", "rejected", "unavailable", "failed"];
 
+/** Transfer statuses as Badge tones. A ringing or connected transfer is live, so it pulses. */
+const TRANSFER_TONES: Record<string, { tone: BadgeProps["tone"]; pulse?: boolean }> = {
+    ringing: { tone: "warning", pulse: true },
+    connected: { tone: "success", pulse: true },
+    completed: { tone: "success" },
+    busy: { tone: "danger" },
+    no_answer: { tone: "danger" },
+    rejected: { tone: "danger" },
+    unavailable: { tone: "danger" },
+    failed: { tone: "danger" },
+};
+
 /** Transfer durations arrive in ms; show them the way a human reads a call timer. */
 const formatTransferMs = (ms?: number) => {
     if (!ms) return "—";
@@ -79,11 +82,53 @@ const formatTransferMs = (ms?: number) => {
     return `${Math.floor(totalSeconds / 60)}m ${totalSeconds % 60}s`;
 };
 
+/** Call statuses as Badge tones. Live states (ringing, in conversation) pulse. */
+const CALL_STATUS: Record<string, { label: string; tone: BadgeProps["tone"]; pulse?: boolean }> = {
+    pending: { label: "Pending Execution", tone: "neutral" },
+    queued: { label: "Queued", tone: "info" },
+    ringing: { label: "Ringing...", tone: "warning", pulse: true },
+    "in-progress": { label: "In Conversation", tone: "accent", pulse: true },
+    completed: { label: "Contact Successful", tone: "success" },
+    failed: { label: "Call Failed", tone: "danger" },
+    busy: { label: "Line Busy", tone: "warning" },
+    "no-answer": { label: "No Answer", tone: "neutral" },
+    canceled: { label: "Canceled", tone: "neutral" },
+    initiated: { label: "Initiating...", tone: "info" },
+};
+
+const StatusBadge = ({ status }: { status: string }) => {
+    const current = CALL_STATUS[status] || CALL_STATUS.pending;
+    return (
+        <Badge tone={current.tone} dot pulse={current.pulse}>
+            {current.label}
+        </Badge>
+    );
+};
+
+/** A grid of small measures: a label over a tabular value. */
+const MetricGrid = ({ items, columns }: { items: [string, string][]; columns: 3 | 4 }) => (
+    <dl className={cn("grid gap-x-3 gap-y-3", columns === 4 ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-2 sm:grid-cols-3")}>
+        {items.map(([label, value]) => (
+            <div key={label} className="flex min-w-0 flex-col gap-0.5">
+                <dt className="truncate text-caption text-fg-subtle">{label}</dt>
+                <dd className="text-body-sm font-medium tabular-nums">{value}</dd>
+            </div>
+        ))}
+    </dl>
+);
+
 interface TranscriptItem {
     role: "system" | "assistant" | "user";
     content: string;
     timestamp: string;
 }
+
+/** The transcript minus the system prompt, which every call is seeded with. */
+const conversationTurns = (log: { transcript?: TranscriptItem[] }) =>
+    (log.transcript || []).filter(item => item.role !== "system");
+
+/** How long after a call ends its automatic analysis still counts as on its way. */
+const ANALYSIS_GRACE_MS = 5 * 60 * 1000;
 
 interface CallLog {
     _id: string;
@@ -93,12 +138,29 @@ interface CallLog {
     status: string;
     duration: number;
     createdAt: string;
+    updatedAt?: string;
+    endTime?: string;
     direction?: 'inbound' | 'outbound';
+    /** Where the call ran. 'meeting' is an agent in a Zoom, Meet or Teams meeting. */
+    provider?: 'twilio' | 'sip' | 'meeting';
+    /** The meeting bot behind a provider 'meeting' call. Absent on phone calls. */
+    meeting?: {
+        platform?: string | null;
+        botName?: string | null;
+        meetingUrl?: string | null;
+        respondWhen?: string | null;
+        joinedAt?: string | null;
+        endReason?: string | null;
+        mutedReplies?: number;
+        error?: string | null;
+    };
     transcript: TranscriptItem[];
     recordingUrl?: string;
     summary?: string;
+    /** Why the last analysis attempt produced nothing. Cleared when one succeeds. */
+    analysisError?: { message: string; at: string };
     errors?: {
-        service: 'elevenlabs' | 'deepgram' | 'openrouter' | 'twilio' | 'sarvam' | 'gemini' | 'system';
+        service: 'elevenlabs' | 'deepgram' | 'openrouter' | 'twilio' | 'sarvam' | 'gemini' | 'sip' | 'system';
         code: string;
         message: string;
         timestamp: string;
@@ -116,6 +178,18 @@ interface CallLog {
         connectedDurationMs?: number;
         failureCode?: string;
         sipCause?: number | null;
+    }[];
+    /** Tools the agent called during this call. Absent on calls that used none. */
+    toolCalls?: {
+        type: 'webhook' | 'integration' | 'whatsapp';
+        tool: string;
+        /** The app an integration tool belongs to. */
+        serverName?: string;
+        arguments: Record<string, unknown> | null;
+        ok: boolean;
+        error: string | null;
+        durationMs: number;
+        at: string;
     }[];
     voiceMetrics?: {
         turns?: number;
@@ -139,8 +213,46 @@ interface CallLog {
     };
 }
 
+/** The platform's own name for a meeting row; the raw code when it is one we do not know. */
+function meetingPlatformName(platform?: string | null): string {
+    switch (platform) {
+        case 'google_meet': return 'Google Meet';
+        case 'teams': return 'Microsoft Teams';
+        case 'zoom': return 'Zoom';
+        default: return platform || '';
+    }
+}
+
+/** Just the host of a meeting link, for the compact row. */
+function hostOfUrl(url: string): string {
+    try { return new URL(url).host; } catch { return url; }
+}
+
 export default function CallLogsPage() {
     const t = useTranslations("calls");
+
+    /**
+     * One line on why a call went wrong, for the table row. The first recorded error is
+     * the cause; later ones are usually its knock-on effects. A failed call with nothing
+     * recorded still gets a reason, so the row is never a bare "Call Failed".
+     */
+    const failureReason = (log: CallLog) => {
+        if (log.errors?.length) return log.errors[0].message;
+        if (log.status === "failed") return t("detail.failedNoConversation");
+        return null;
+    };
+
+    /**
+     * Why a completed call has no AI score, or null while its automatic analysis may
+     * still be running. Shown in the row instead of a "Pending" that never ends.
+     */
+    const missingAnalysisReason = (log: CallLog): string | null => {
+        if (log.analysisError?.message) return log.analysisError.message;
+        if (conversationTurns(log).length === 0) return t("table.nothingToAnalyze");
+        const ended = new Date(log.endTime || log.updatedAt || log.createdAt).getTime();
+        if (Date.now() - ended < ANALYSIS_GRACE_MS) return null;
+        return t("table.notAutoAnalyzed");
+    };
     const [logs, setLogs] = useState<CallLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedCampaignId, setSelectedCampaignId] = useState<string>("all");
@@ -176,13 +288,19 @@ export default function CallLogsPage() {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.data?.status === "success") {
-                const updatedLog = { ...selectedLog, ...response.data.data } as CallLog;
+                const updatedLog = { ...selectedLog, ...response.data.data, analysisError: undefined } as CallLog;
                 setSelectedLog(updatedLog);
                 setLogs(prev => prev.map(log => log._id === id ? updatedLog : log));
                 toast.success(t("toast.analysisComplete"));
             }
         } catch (err: any) {
-            toast.error(err.response?.data?.message || t("toast.analysisFailed"));
+            const message = err.response?.data?.message || t("toast.analysisFailed");
+            // The server keeps the owner's own wording on the call; the row shows that
+            // after the next refresh. Until then show what this attempt said.
+            const analysisError = { message, at: new Date().toISOString() };
+            setSelectedLog(prev => prev && prev._id === id ? { ...prev, analysisError } : prev);
+            setLogs(prev => prev.map(log => log._id === id ? { ...log, analysisError } : log));
+            toast.error(message);
         } finally {
             setAnalyzing(false);
         }
@@ -257,43 +375,18 @@ export default function CallLogsPage() {
         return matchesCampaign && matchesQualification && matchesDirection;
     });
 
-    const StatusBadge = ({ status }: { status: string }) => {
-        const config = {
-            pending: { label: "Pending Execution", variant: "secondary" as const },
-            queued: { label: "Queued", variant: "secondary" as const, className: "bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 border-blue-200 dark:border-blue-500/20" },
-            ringing: { label: "Ringing...", variant: "default" as const, className: "bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 border-amber-200 dark:border-amber-500/20 animate-pulse" },
-            "in-progress": { label: "In Conversation", variant: "default" as const, className: "bg-primary/10 text-primary border-primary/20" },
-            completed: { label: "Contact Successful", variant: "outline" as const, className: "bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400 border-green-200 dark:border-green-500/20" },
-            failed: { label: "Call Failed", variant: "destructive" as const, className: "bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400 border-red-200 dark:border-red-500/20" },
-            busy: { label: "Line Busy", variant: "destructive" as const, className: "bg-orange-100 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400 border-orange-200 dark:border-orange-500/20" },
-            "no-answer": { label: "No Answer", variant: "destructive" as const, className: "bg-gray-100 text-gray-700 dark:bg-gray-500/10 dark:text-gray-400 border-gray-300 dark:border-gray-500/20" },
-            canceled: { label: "Canceled", variant: "secondary" as const, className: "bg-gray-50 text-gray-500 dark:bg-gray-500/10 dark:text-gray-400 border-gray-200 dark:border-gray-500/20" },
-            initiated: { label: "Initiating...", variant: "secondary" as const, className: "bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 border-blue-100 dark:border-blue-500/20" },
-        };
-
-        const current = config[status as keyof typeof config] || config.pending;
-
-        return (
-            <Badge
-                variant={current.variant}
-                className={`text-[9px] font-black px-2 h-5 uppercase tracking-tighter ${"className" in current ? current.className : ""}`}
-            >
-                {current.label}
-            </Badge>
-        );
-    };
+    const scoreInk = (score: number) =>
+        score >= 70 ? "text-success-ink" : score >= 40 ? "text-warning-ink" : "text-danger-ink";
 
     return (
-        <div className="flex-col md:flex">
-            <div className="flex-1 space-y-4">
-                <div className="flex items-center justify-between space-y-2">
-                    <div>
-                        <h2 className="text-3xl font-bold tracking-tight">{t("title")}</h2>
-                        <p className="text-muted-foreground">{t("subtitle")}</p>
-                    </div>
-                    <div className="flex items-center space-x-2">
+        <div className="flex flex-col gap-6">
+            <PageHeader
+                title={t("title")}
+                description={t("subtitle")}
+                actions={
+                    <>
                         <Select value={qualificationFilter} onValueChange={setQualificationFilter}>
-                            <SelectTrigger className="w-[140px] h-9">
+                            <SelectTrigger size="sm" className="w-[140px]">
                                 <SelectValue placeholder={t("filters.qualification")} />
                             </SelectTrigger>
                             <SelectContent>
@@ -303,7 +396,7 @@ export default function CallLogsPage() {
                             </SelectContent>
                         </Select>
                         <Select value={directionFilter} onValueChange={setDirectionFilter}>
-                            <SelectTrigger className="w-[130px] h-9">
+                            <SelectTrigger size="sm" className="w-[130px]">
                                 <SelectValue placeholder={t("filters.direction")} />
                             </SelectTrigger>
                             <SelectContent>
@@ -313,7 +406,7 @@ export default function CallLogsPage() {
                             </SelectContent>
                         </Select>
                         <Select value={selectedCampaignId} onValueChange={setSelectedCampaignId}>
-                            <SelectTrigger className="w-[180px] h-9">
+                            <SelectTrigger size="sm" className="w-[180px]">
                                 <SelectValue placeholder={t("filters.campaign")} />
                             </SelectTrigger>
                             <SelectContent>
@@ -325,412 +418,469 @@ export default function CallLogsPage() {
                                 ))}
                             </SelectContent>
                         </Select>
-                        <Button variant="outline" size="sm" onClick={() => fetchLogs(true)}>
-                            <RefreshCw className={`me-2 h-4 w-4 ${loading && "animate-spin"}`} />
+                        <Button size="sm" onClick={() => fetchLogs(true)} loading={loading} iconStart={<ArrowsClockwise />}>
                             {t("filters.refresh")}
                         </Button>
-                        <Button variant="outline" size="sm" onClick={exportToCSV}>
-                            <Download className="me-2 h-4 w-4" />
+                        <Button size="sm" onClick={exportToCSV} iconStart={<DownloadSimple />}>
                             {t("filters.export")}
                         </Button>
-                    </div>
-                </div>
+                    </>
+                }
+            />
 
-                <Card>
-                    <CardContent className="p-0">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead className="w-[200px]">{t("table.lead")}</TableHead>
-                                    <TableHead>{t("table.context")}</TableHead>
-                                    <TableHead>{t("table.dateTime")}</TableHead>
-                                    <TableHead>{t("table.duration")}</TableHead>
-                                    <TableHead>{t("table.status")}</TableHead>
-                                    <TableHead>{t("table.score")}</TableHead>
-                                    <TableHead>{t("table.recording")}</TableHead>
-                                    <TableHead className="text-end">{t("table.action")}</TableHead>
+            {!loading && filteredLogs.length === 0 ? (
+                <EmptyState icon={<Phone />} title={t("table.noLogs")} />
+            ) : (
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="w-[200px]">{t("table.lead")}</TableHead>
+                            <TableHead>{t("table.context")}</TableHead>
+                            <TableHead>{t("table.dateTime")}</TableHead>
+                            <TableHead>{t("table.duration")}</TableHead>
+                            <TableHead>{t("table.status")}</TableHead>
+                            <TableHead>{t("table.score")}</TableHead>
+                            <TableHead>{t("table.recording")}</TableHead>
+                            <TableHead align="end">{t("table.action")}</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {loading && filteredLogs.length === 0 ? (
+                            Array.from({ length: 5 }).map((_, i) => (
+                                <TableRow key={i}>
+                                    {Array.from({ length: 8 }).map((_, j) => (
+                                        <TableCell key={j} className="py-3">
+                                            <Skeleton className="h-4 w-full max-w-[120px]" />
+                                        </TableCell>
+                                    ))}
                                 </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {loading && filteredLogs.length === 0 ? (
-                                    <TableRow>
-                                        <TableCell colSpan={7} className="h-24 text-center">
-                                            <Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
-                                        </TableCell>
-                                    </TableRow>
-                                ) : filteredLogs.length === 0 ? (
-                                    <TableRow>
-                                        <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
-                                            {t("table.noLogs")}
-                                        </TableCell>
-                                    </TableRow>
-                                ) : (
-                                    filteredLogs.map((log) => (
-                                        <TableRow key={log._id}>
-                                            <TableCell>
-                                                <div className="flex flex-col">
+                            ))
+                        ) : (
+                            filteredLogs.map((log) => (
+                                <TableRow key={log._id}>
+                                    <TableCell className="py-3">
+                                        <div className="flex flex-col gap-0.5">
+                                            {log.provider === 'meeting' ? (
+                                                <>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="font-medium">{log.meeting?.botName || log.agentId?.name || t("meeting.label")}</span>
+                                                        <Badge size="sm" tone="info">{t("meeting.label")}</Badge>
+                                                    </div>
+                                                    <span className="text-caption text-fg-muted ltr-data truncate max-w-[220px]" title={log.meeting?.meetingUrl || undefined}>
+                                                        {meetingPlatformName(log.meeting?.platform)}{log.meeting?.meetingUrl ? ` · ${hostOfUrl(log.meeting.meetingUrl)}` : ''}
+                                                    </span>
+                                                </>
+                                            ) : (
+                                                <>
                                                     <div className="flex items-center gap-2">
                                                         <span className="font-medium">{log.leadId?.name || "Unknown"}</span>
-                                                        <Badge variant="outline" className={cn(
-                                                            "text-[8px] h-4 px-1.5 uppercase tracking-tighter",
-                                                            log.direction === 'inbound'
-                                                                ? "bg-blue-50 text-blue-600 border-blue-200"
-                                                                : "bg-gray-50 text-gray-600 border-gray-200"
-                                                        )}>
+                                                        <Badge size="sm" tone={log.direction === 'inbound' ? "info" : "neutral"} className="capitalize">
                                                             {log.direction || 'outbound'}
                                                         </Badge>
                                                     </div>
-                                                    <span className="text-xs text-muted-foreground ltr-data">{log.leadId?.phone}</span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="flex flex-col">
-                                                    <span className="text-xs font-semibold uppercase text-muted-foreground tracking-tighter">
-                                                        {log.campaignId?.name || "One-off Call"}
-                                                    </span>
-                                                    <div className="flex items-center gap-1 mt-0.5">
-                                                        <Bot className="h-3 w-3 text-primary" />
-                                                        <span className="text-sm font-medium">{log.agentId?.name}</span>
-                                                    </div>
-                                                    {log.agentId?.outboundPhoneNumber?.phoneNumber && (
-                                                        <div className="flex items-center gap-1 mt-0.5 text-[10px] text-muted-foreground">
-                                                            <Phone className="h-2.5 w-2.5" />
-                                                            <span className="ltr-data">{log.agentId.outboundPhoneNumber.phoneNumber}</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="flex flex-col">
-                                                    <span className="text-sm">{formatDate(log.createdAt)}</span>
-                                                    <span className="text-xs text-muted-foreground">{formatTime(log.createdAt, timeFormat)}</span>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="flex items-center gap-1.5 text-sm">
-                                                    <Timer className="h-3.5 w-3.5 text-muted-foreground" />
-                                                    {log.duration > 0 ? `${Math.floor(log.duration / 60)}m ${log.duration % 60}s` : "---"}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="flex items-center gap-2">
-                                                    <StatusBadge status={log.status} />
-                                                    {log.errors && log.errors.length > 0 && (
-                                                        <span title={log.errors[0].message} className="flex items-center">
-                                                            <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                {log.analysis ? (
-                                                    <div className="flex flex-col">
-                                                        <span className={cn(
-                                                            "text-sm font-black",
-                                                            log.analysis.qualificationScore >= 70 ? "text-green-600" :
-                                                                log.analysis.qualificationScore >= 40 ? "text-amber-600" :
-                                                                    "text-red-600"
-                                                        )}>
-                                                            {log.analysis.qualificationScore}%
-                                                        </span>
-                                                        <span className="text-[9px] uppercase font-bold text-muted-foreground leading-none">
-                                                            {log.analysis.isQualified ? t("filters.qualified") : t("filters.unqualified")}
-                                                        </span>
-                                                    </div>
-                                                ) : (['no-answer', 'failed', 'busy', 'canceled'].includes(log.status)) ? (
-                                                    <div className="flex flex-col">
-                                                        <span className="text-sm font-black text-red-600">0%</span>
-                                                        <span className="text-[9px] uppercase font-bold text-muted-foreground leading-none">{t("filters.unqualified")}</span>
-                                                    </div>
-                                                ) : (
-                                                    <span className="text-xs text-muted-foreground italic">
-                                                        {log.status === 'completed' ? t("table.pending") : '---'}
-                                                    </span>
-                                                )}
-                                            </TableCell>
-                                            <TableCell>
-                                                {log.recordingUrl ? (
-                                                    <ModernAudioPlayer
-                                                        src={`${API_BASE_URL}/call-logs/${log._id}/recording?token=${localStorage.getItem("token")}`}
-                                                    />
-                                                ) : (
-                                                    <span className="text-xs text-muted-foreground italic">{t("table.notAvailable")}</span>
-                                                )}
-                                            </TableCell>
-                                            <TableCell className="text-end">
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className="h-7 text-xs"
-                                                    onClick={() => setSelectedLog(log)}
-                                                    disabled={!log.transcript || log.transcript.length === 0}
-                                                >
-                                                    <MessageSquare className="me-1.5 h-3 w-3" />
-                                                    {t("table.details")}
-                                                </Button>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                                )}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
-
-                {/* Transcript Sheet */}
-                <Sheet open={!!selectedLog} onOpenChange={(open) => !open && setSelectedLog(null)}>
-                    <SheetContent className="sm:max-w-xl flex flex-col p-0 gap-0">
-                        <SheetHeader className="p-6 pb-2 border-b space-y-1 text-start">
-                            <div className="flex items-center justify-between pe-8">
-                                <div>
-                                    <SheetTitle className="text-xl font-bold">{t("detail.title")}</SheetTitle>
-                                    <SheetDescription>
-                                        {t("detail.description")}
-                                    </SheetDescription>
-                                </div>
-                                <div className="text-end">
-                                    <Badge variant="outline" className="font-mono text-[10px]">
-                                        {selectedLog?._id.slice(-8).toUpperCase()}
-                                    </Badge>
-                                </div>
-                            </div>
-                        </SheetHeader>
-
-                        <Tabs defaultValue="summary" className="flex-1 flex flex-col min-h-0">
-                            <div className="px-6 py-2 border-b bg-muted/20">
-                                <TabsList className="grid w-full grid-cols-2">
-                                    <TabsTrigger value="summary">{t("detail.tabSummary")}</TabsTrigger>
-                                    <TabsTrigger value="transcript">{t("detail.tabTranscript")}</TabsTrigger>
-                                </TabsList>
-                            </div>
-
-                            <TabsContent value="summary" className="flex-1 m-0 p-0 overflow-hidden outline-none">
-                                <ScrollArea className="h-full p-6">
-                                    <div className="space-y-6">
-                                        {/* Meta Information Cards */}
-                                        <div className="grid grid-cols-3 gap-3">
-                                            <div className="p-3 rounded-lg border bg-card flex flex-col items-center justify-center text-center">
-                                                <Calendar className="h-4 w-4 text-muted-foreground mb-1.5" />
-                                                <p className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-1">{t("detail.date")}</p>
-                                                <p className="text-xs font-semibold">{selectedLog && formatDate(selectedLog.createdAt)}</p>
-                                            </div>
-                                            <div className="p-3 rounded-lg border bg-card flex flex-col items-center justify-center text-center">
-                                                <Clock className="h-4 w-4 text-muted-foreground mb-1.5" />
-                                                <p className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-1">{t("detail.time")}</p>
-                                                <p className="text-xs font-semibold">{selectedLog && formatTime(selectedLog.createdAt, timeFormat)}</p>
-                                            </div>
-                                            <div className="p-3 rounded-lg border bg-card flex flex-col items-center justify-center text-center">
-                                                <Timer className="h-4 w-4 text-muted-foreground mb-1.5" />
-                                                <p className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-1">{t("detail.duration")}</p>
-                                                <p className="text-xs font-semibold">{selectedLog && selectedLog.duration}s</p>
-                                            </div>
+                                                    <span className="text-caption text-fg-muted ltr-data">{log.leadId?.phone}</span>
+                                                </>
+                                            )}
                                         </div>
-
-                                        {/* Error Alerts */}
-                                        {selectedLog?.errors && selectedLog.errors.length > 0 && (
-                                            <div className="rounded-lg border border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10 p-4 space-y-2">
-                                                <div className="flex items-center gap-2">
-                                                    <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
-                                                    <h4 className="text-sm font-bold text-red-700 dark:text-red-400 uppercase tracking-wider">{t("detail.issuesDetected")}</h4>
-                                                </div>
-                                                <div className="space-y-1.5">
-                                                    {selectedLog.errors.map((error, index) => {
-                                                        const serviceColors: Record<string, string> = {
-                                                            elevenlabs: 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 border-purple-200 dark:border-purple-500/30',
-                                                            deepgram: 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 border-blue-200 dark:border-blue-500/30',
-                                                            openrouter: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/30',
-                                                            sarvam: 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 border-amber-200 dark:border-amber-500/30',
-                                                            gemini: 'bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 border-sky-200 dark:border-sky-500/30',
-                                                            twilio: 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300 border-red-200 dark:border-red-500/30',
-                                                            system: 'bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300 border-gray-200 dark:border-gray-500/30',
-                                                        };
-                                                        return (
-                                                            <div key={index} className="flex items-start gap-2 text-sm">
-                                                                <Badge variant="outline" className={`text-[8px] h-4 px-1.5 uppercase tracking-tighter shrink-0 mt-0.5 border ${serviceColors[error.service] || serviceColors.system}`}>
-                                                                    {error.service}
-                                                                </Badge>
-                                                                <span className="text-red-700 dark:text-red-300 text-xs leading-relaxed">{error.message}</span>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
+                                    </TableCell>
+                                    <TableCell className="py-3">
+                                        <div className="flex flex-col gap-0.5">
+                                            <span className="text-caption text-fg-subtle">
+                                                {log.campaignId?.name || "One-off Call"}
+                                            </span>
+                                            <div className="flex items-center gap-1.5">
+                                                <Robot className="size-3.5 text-fg-subtle" />
+                                                <span className="font-medium">{log.agentId?.name}</span>
                                             </div>
-                                        )}
-
-                                        {/* Human Transfers — only on calls that actually attempted one */}
-                                        {(selectedLog?.transfers?.length ?? 0) > 0 && (
-                                            <div className="rounded-lg border bg-card p-4 space-y-3">
-                                                <div className="flex items-center gap-2">
-                                                    <PhoneForwarded className="h-4 w-4 text-primary" />
-                                                    <h4 className="text-sm font-bold uppercase tracking-wider">{t("detail.transfers.title")}</h4>
-                                                </div>
-                                                <div className="space-y-2.5">
-                                                    {selectedLog!.transfers!.map((transfer, index) => (
-                                                        <div key={transfer.attemptId || index} className="rounded-md border bg-muted/20 p-3 space-y-2">
-                                                            <div className="flex items-start justify-between gap-2">
-                                                                <div className="min-w-0">
-                                                                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider leading-tight mb-0.5">{t("detail.transfers.destination")}</p>
-                                                                    <p className="text-xs font-semibold truncate">{transfer.destinationName || transfer.destinationId || "—"}</p>
-                                                                </div>
-                                                                <Badge variant={transfer.status === "completed" || transfer.status === "connected" ? "default" : "secondary"} className="shrink-0 text-[10px]">
-                                                                    {transferStatusLabel(transfer.status)}
-                                                                </Badge>
-                                                            </div>
-                                                            <div className="grid grid-cols-4 gap-x-3 gap-y-2">
-                                                                {([
-                                                                    [t("detail.transfers.attempt"), `${transfer.attempt ?? 1}`],
-                                                                    [t("detail.transfers.ringTime"), formatTransferMs(transfer.ringDurationMs)],
-                                                                    [t("detail.transfers.talkTime"), formatTransferMs(transfer.connectedDurationMs)],
-                                                                    [t("detail.transfers.sipCause"), transfer.sipCause ? `${transfer.sipCause}` : "—"],
-                                                                ] as [string, string][]).map(([label, value]) => (
-                                                                    <div key={label}>
-                                                                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider leading-tight mb-0.5">{label}</p>
-                                                                        <p className="text-xs font-semibold tabular-nums">{value}</p>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* Voice Quality diagnostics (classic-engine calls) */}
-                                        {selectedLog?.voiceMetrics && (selectedLog.voiceMetrics.turns || 0) > 0 && (
-                                            <div className="rounded-lg border bg-card p-4 space-y-3">
-                                                <div className="flex items-center gap-2">
-                                                    <Activity className="h-4 w-4 text-primary" />
-                                                    <h4 className="text-sm font-bold uppercase tracking-wider">{t("detail.voiceQuality.title")}</h4>
-                                                </div>
-                                                <div className="grid grid-cols-3 gap-x-3 gap-y-2.5">
-                                                    {([
-                                                        [t("detail.voiceQuality.turns"), `${selectedLog.voiceMetrics.turns ?? 0}`],
-                                                        [t("detail.voiceQuality.interruptions"), `${selectedLog.voiceMetrics.interruptions ?? 0}`],
-                                                        [t("detail.voiceQuality.falseVad"), `${selectedLog.voiceMetrics.falseVadEvents ?? 0}`],
-                                                        [t("detail.voiceQuality.ttsChunks"), `${selectedLog.voiceMetrics.ttsChunksSent ?? 0}`],
-                                                        [t("detail.voiceQuality.rtpDrops"), `${selectedLog.voiceMetrics.rtpQueueDrops ?? 0}`],
-                                                        [t("detail.voiceQuality.llmFirstToken"), `${selectedLog.voiceMetrics.avgLlmFirstTokenMs ?? 0} ms`],
-                                                        [t("detail.voiceQuality.ttsFirstText"), `${selectedLog.voiceMetrics.avgTtsFirstTextMs ?? 0} ms`],
-                                                        [t("detail.voiceQuality.firstAudio"), `${selectedLog.voiceMetrics.avgFirstAudioMs ?? 0} ms`],
-                                                        [t("detail.voiceQuality.maxFirstAudio"), `${selectedLog.voiceMetrics.maxFirstAudioMs ?? 0} ms`],
-                                                    ] as [string, string][]).map(([label, value]) => (
-                                                        <div key={label}>
-                                                            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider leading-tight mb-0.5">{label}</p>
-                                                            <p className="text-xs font-semibold tabular-nums">{value}</p>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* AI Analysis Section */}
-                                        <div className="space-y-4">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-2">
-                                                    <Brain className="h-5 w-5 text-primary" />
-                                                    <h3 className="font-bold text-sm uppercase tracking-widest">{t("detail.aiIntelligence")}</h3>
-                                                </div>
-                                                {!selectedLog?.analysis && (
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        className="h-7 text-[10px] font-bold uppercase tracking-wider"
-                                                        onClick={() => selectedLog && analyzeCall(selectedLog._id)}
-                                                        disabled={analyzing}
-                                                    >
-                                                        {analyzing ? <Loader2 className="h-3 w-3 animate-spin me-1.5" /> : <Activity className="h-3 w-3 me-1.5" />}
-                                                        {analyzing ? "Analyzing..." : "Analyze Now"}
-                                                    </Button>
-                                                )}
-                                            </div>
-
-                                            {selectedLog?.analysis ? (
-                                                <div className="space-y-4">
-                                                    <Card className="bg-primary/5 border-primary/20 overflow-hidden">
-                                                        <CardContent className="p-4 space-y-4">
-                                                            <div className="flex items-start justify-between gap-4">
-                                                                <div className="space-y-1 flex-1">
-                                                                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{t("detail.conversationSummary")}</p>
-                                                                    <p className="text-sm leading-relaxed">{selectedLog.summary}</p>
-                                                                </div>
-                                                                <div className="text-end shrink-0">
-                                                                    <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-black uppercase mb-1 ${selectedLog.analysis.isQualified ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                                                        {selectedLog.analysis.isQualified ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
-                                                                        {selectedLog.analysis.isQualified ? 'Qualified' : 'Unqualified'}
-                                                                    </div>
-                                                                    <p className="text-2xl font-black text-primary leading-none">{selectedLog.analysis.qualificationScore}%</p>
-                                                                    <p className="text-[8px] font-bold text-muted-foreground uppercase">{t("detail.score")}</p>
-                                                                </div>
-                                                            </div>
-
-                                                            <div className="grid grid-cols-2 gap-3 pt-2 border-t border-primary/10">
-                                                                <div>
-                                                                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">{t("detail.estimatedBudget")}</p>
-                                                                    <p className="text-xs font-semibold">{selectedLog.analysis.budget}</p>
-                                                                </div>
-                                                                <div>
-                                                                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">{t("detail.timeline")}</p>
-                                                                    <p className="text-xs font-semibold">{selectedLog.analysis.timeline}</p>
-                                                                </div>
-                                                            </div>
-
-                                                            <div className="space-y-1">
-                                                                <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">{t("detail.reasoning")}</p>
-                                                                <p className="text-xs italic text-muted-foreground leading-relaxed">"{selectedLog.analysis.reason}"</p>
-                                                            </div>
-
-                                                            <div className="p-3 bg-white/50 dark:bg-black/20 rounded-lg border border-primary/10">
-                                                                <p className="text-[9px] font-bold text-primary uppercase tracking-wider mb-1">{t("detail.nextSteps")}</p>
-                                                                <p className="text-xs font-medium">{selectedLog.analysis.nextSteps}</p>
-                                                            </div>
-                                                        </CardContent>
-                                                    </Card>
-                                                </div>
-                                            ) : (
-                                                <div className="h-40 rounded-xl border border-dashed border-border flex flex-col items-center justify-center text-center p-6 bg-muted/20">
-                                                    <Brain className="h-10 w-10 text-muted-foreground/30 mb-2" />
-                                                    <p className="text-sm text-muted-foreground font-semibold">{t("detail.noAnalysis")}</p>
-                                                    <p className="text-xs text-muted-foreground/60 mt-1 max-w-[280px]">{t("detail.noAnalysisHint")}</p>
+                                            {log.agentId?.outboundPhoneNumber?.phoneNumber && (
+                                                <div className="flex items-center gap-1.5 text-caption text-fg-muted">
+                                                    <Phone className="size-3" />
+                                                    <span className="ltr-data">{log.agentId.outboundPhoneNumber.phoneNumber}</span>
                                                 </div>
                                             )}
                                         </div>
-                                    </div>
-                                </ScrollArea>
-                            </TabsContent>
+                                    </TableCell>
+                                    <TableCell className="py-3">
+                                        <div className="flex flex-col gap-0.5 whitespace-nowrap">
+                                            <span>{formatDate(log.createdAt)}</span>
+                                            <span className="text-caption text-fg-muted">{formatTime(log.createdAt, timeFormat)}</span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="py-3">
+                                        <div className="flex items-center gap-1.5 whitespace-nowrap">
+                                            <Timer className="size-3.5 text-fg-subtle" />
+                                            {log.duration > 0 ? `${Math.floor(log.duration / 60)}m ${log.duration % 60}s` : "---"}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="py-3">
+                                        <div className="flex flex-col gap-1">
+                                            <div className="flex items-center gap-2">
+                                                <StatusBadge status={log.status} />
+                                                {(log.errors?.length ?? 0) > 0 && (
+                                                    <Warning className="size-3.5 shrink-0 text-warning-ink" aria-hidden />
+                                                )}
+                                            </div>
+                                            {failureReason(log) && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setSelectedLog(log)}
+                                                    title={failureReason(log) ?? undefined}
+                                                    className="line-clamp-2 max-w-[240px] whitespace-normal text-start text-caption text-danger-ink hover:underline"
+                                                >
+                                                    {failureReason(log)}
+                                                </button>
+                                            )}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="py-3">
+                                        {log.analysis ? (
+                                            <div className="flex flex-col">
+                                                <span className={cn("font-semibold tabular-nums", scoreInk(log.analysis.qualificationScore))}>
+                                                    {log.analysis.qualificationScore}%
+                                                </span>
+                                                <span className="text-caption text-fg-subtle">
+                                                    {log.analysis.isQualified ? t("filters.qualified") : t("filters.unqualified")}
+                                                </span>
+                                            </div>
+                                        ) : (['no-answer', 'failed', 'busy', 'canceled'].includes(log.status)) ? (
+                                            <div className="flex flex-col">
+                                                <span className="font-semibold tabular-nums text-danger-ink">0%</span>
+                                                <span className="text-caption text-fg-subtle">{t("filters.unqualified")}</span>
+                                            </div>
+                                        ) : log.status !== 'completed' ? (
+                                            <span className="text-caption text-fg-subtle">---</span>
+                                        ) : missingAnalysisReason(log) ? (
+                                            <button
+                                                type="button"
+                                                onClick={() => setSelectedLog(log)}
+                                                title={missingAnalysisReason(log) ?? undefined}
+                                                className="flex max-w-[160px] flex-col text-start hover:underline"
+                                            >
+                                                <span className="text-caption font-medium text-fg-muted">{t("table.notAnalyzed")}</span>
+                                                <span className="line-clamp-2 whitespace-normal text-caption text-fg-subtle">
+                                                    {missingAnalysisReason(log)}
+                                                </span>
+                                            </button>
+                                        ) : (
+                                            <span className="inline-flex items-center gap-1.5 text-caption text-fg-muted">
+                                                <Spinner size="sm" />
+                                                {t("table.analyzing")}
+                                            </span>
+                                        )}
+                                    </TableCell>
+                                    <TableCell className="py-3">
+                                        {log.recordingUrl ? (
+                                            <ModernAudioPlayer
+                                                src={`${API_BASE_URL}/call-logs/${log._id}/recording?token=${localStorage.getItem("token")}`}
+                                            />
+                                        ) : (
+                                            <span className="text-caption text-fg-subtle">{t("table.notAvailable")}</span>
+                                        )}
+                                    </TableCell>
+                                    <TableCell align="end" className="py-3">
+                                        <Button
+                                            size="xs"
+                                            iconStart={<ChatText />}
+                                            onClick={() => setSelectedLog(log)}
+                                            disabled={conversationTurns(log).length === 0 && !failureReason(log)}
+                                        >
+                                            {t("table.details")}
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
+            )}
 
-                            <TabsContent value="transcript" className="flex-1 m-0 p-0 overflow-hidden outline-none">
-                                <ScrollArea className="h-full p-6">
-                                    <div className="space-y-6 pb-4">
-                                        {selectedLog?.transcript.map((item, index) => (
-                                            <div key={index} className={`flex ${item.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                                <div className={`max-w-[85%] space-y-1 ${item.role === 'user' ? 'items-end' : 'items-start'} flex flex-col`}>
-                                                    <div className="flex items-center gap-1.5 px-1 opacity-70">
-                                                        {item.role === 'assistant' ? (
-                                                            <><Bot className="h-3 w-3" /><span className="text-[10px] font-bold uppercase tracking-wider">{t("detail.roleAgent")}</span></>
-                                                        ) : item.role === 'user' ? (
-                                                            <><span className="text-[10px] font-bold uppercase tracking-wider">{selectedLog?.leadId?.name || t("detail.roleLead")}</span><User className="h-3 w-3" /></>
-                                                        ) : (
-                                                            <><Brain className="h-3 w-3 text-amber-500" /><span className="text-[10px] font-bold uppercase tracking-wider">{t("detail.roleSystem")}</span></>
-                                                        )}
+            {/* Call detail drawer */}
+            <Drawer open={!!selectedLog} onOpenChange={(open) => !open && setSelectedLog(null)}>
+                <DrawerContent side="right" style={{ "--wx-drawer-size": "576px" } as CSSProperties}>
+                    <DrawerHeader>
+                        <div className="flex items-start justify-between gap-3">
+                            <div className="flex min-w-0 flex-col gap-1">
+                                <DrawerTitle>{t("detail.title")}</DrawerTitle>
+                                <DrawerDescription>
+                                    {t("detail.description")}
+                                </DrawerDescription>
+                            </div>
+                            <Badge appearance="outline" className="font-mono">
+                                {selectedLog?._id.slice(-8).toUpperCase()}
+                            </Badge>
+                        </div>
+                    </DrawerHeader>
+
+                    <Tabs variant="segment" defaultValue="summary" className="min-h-0 flex-1 gap-0">
+                        <div className="px-5 pt-4">
+                            <TabsList>
+                                <TabsTrigger value="summary">{t("detail.tabSummary")}</TabsTrigger>
+                                <TabsTrigger value="transcript">{t("detail.tabTranscript")}</TabsTrigger>
+                            </TabsList>
+                        </div>
+
+                        <TabsContent value="summary" asChild>
+                            <DrawerBody className="flex flex-col gap-4">
+                                {/* Call metadata */}
+                                <Section>
+                                    <DescriptionList
+                                        items={[
+                                            { icon: <Calendar />, term: t("detail.date"), value: selectedLog && formatDate(selectedLog.createdAt) },
+                                            { icon: <Clock />, term: t("detail.time"), value: selectedLog && formatTime(selectedLog.createdAt, timeFormat) },
+                                            { icon: <Timer />, term: t("detail.duration"), value: selectedLog && `${selectedLog.duration}s` },
+                                        ]}
+                                    />
+                                </Section>
+
+                                {/* A failed call with no recorded error still says why it failed */}
+                                {selectedLog && !selectedLog.errors?.length && failureReason(selectedLog) && (
+                                    <Alert tone="danger">{failureReason(selectedLog)}</Alert>
+                                )}
+
+                                {/* Error Alerts */}
+                                {selectedLog?.errors && selectedLog.errors.length > 0 && (
+                                    <Alert tone="danger" title={t("detail.issuesDetected")}>
+                                        <ul className="mt-1 flex flex-col gap-1.5">
+                                            {selectedLog.errors.map((error, index) => (
+                                                <li key={index} className="flex items-start gap-2">
+                                                    <Badge size="sm" appearance="outline" className="mt-0.5">
+                                                        {error.service}
+                                                    </Badge>
+                                                    <span className="text-caption text-danger-ink">{error.message}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </Alert>
+                                )}
+
+                                {/* Human Transfers — only on calls that actually attempted one */}
+                                {(selectedLog?.transfers?.length ?? 0) > 0 && (
+                                    <Section icon={<PhoneTransfer />} title={t("detail.transfers.title")}>
+                                        <div className="flex flex-col gap-2.5">
+                                            {selectedLog!.transfers!.map((transfer, index) => {
+                                                const tone = TRANSFER_TONES[transfer.status] || { tone: "neutral" as const };
+                                                return (
+                                                    <div key={transfer.attemptId || index} className="flex flex-col gap-3 rounded-md bg-surface p-3">
+                                                        <div className="flex items-start justify-between gap-2">
+                                                            <div className="flex min-w-0 flex-col gap-0.5">
+                                                                <p className="text-caption text-fg-subtle">{t("detail.transfers.destination")}</p>
+                                                                <p className="truncate text-body-sm font-medium">{transfer.destinationName || transfer.destinationId || "—"}</p>
+                                                            </div>
+                                                            <Badge tone={tone.tone} dot pulse={tone.pulse}>
+                                                                {transferStatusLabel(transfer.status)}
+                                                            </Badge>
+                                                        </div>
+                                                        <MetricGrid
+                                                            columns={4}
+                                                            items={[
+                                                                [t("detail.transfers.attempt"), `${transfer.attempt ?? 1}`],
+                                                                [t("detail.transfers.ringTime"), formatTransferMs(transfer.ringDurationMs)],
+                                                                [t("detail.transfers.talkTime"), formatTransferMs(transfer.connectedDurationMs)],
+                                                                [t("detail.transfers.sipCause"), transfer.sipCause ? `${transfer.sipCause}` : "—"],
+                                                            ]}
+                                                        />
                                                     </div>
-                                                    <div className={`p-3 rounded-xl text-sm ${item.role === 'assistant'
-                                                        ? 'bg-muted border border-border text-foreground rounded-tl-none'
-                                                        : item.role === 'user'
-                                                            ? 'bg-primary text-primary-foreground rounded-tr-none'
-                                                            : 'bg-amber-50 border border-amber-100 text-amber-900 italic text-[13px] rounded-sm'
-                                                        }`}>
-                                                        {item.content}
+                                                );
+                                            })}
+                                        </div>
+                                    </Section>
+                                )}
+
+                                {/* The meeting behind a meeting call — only on meeting calls */}
+                                {selectedLog?.provider === 'meeting' && (
+                                    <Section icon={<VideoCamera />} title={t("meeting.title")}>
+                                        <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-body-sm sm:grid-cols-2">
+                                            <div>
+                                                <dt className="text-caption text-fg-muted">{t("meeting.platform")}</dt>
+                                                <dd>{meetingPlatformName(selectedLog.meeting?.platform)}</dd>
+                                            </div>
+                                            <div>
+                                                <dt className="text-caption text-fg-muted">{t("meeting.botName")}</dt>
+                                                <dd>{selectedLog.meeting?.botName || selectedLog.agentId?.name || '—'}</dd>
+                                            </div>
+                                            <div className="sm:col-span-2">
+                                                <dt className="text-caption text-fg-muted">{t("meeting.link")}</dt>
+                                                <dd className="ltr-data break-all">{selectedLog.meeting?.meetingUrl || '—'}</dd>
+                                            </div>
+                                            <div>
+                                                <dt className="text-caption text-fg-muted">{t("meeting.speaks")}</dt>
+                                                <dd>{selectedLog.meeting?.respondWhen === 'always' ? t("meeting.speaksAlways") : t("meeting.speaksAddressed")}</dd>
+                                            </div>
+                                            <div>
+                                                <dt className="text-caption text-fg-muted">{t("meeting.mutedReplies")}</dt>
+                                                <dd>{selectedLog.meeting?.mutedReplies ?? 0}</dd>
+                                            </div>
+                                            {selectedLog.meeting?.endReason && (
+                                                <div className="sm:col-span-2">
+                                                    <dt className="text-caption text-fg-muted">{t("meeting.endReason")}</dt>
+                                                    <dd className="font-mono text-caption">{selectedLog.meeting.endReason}</dd>
+                                                </div>
+                                            )}
+                                        </dl>
+                                    </Section>
+                                )}
+
+                                {/* Tools the agent called — only on calls that used one */}
+                                {(selectedLog?.toolCalls?.length ?? 0) > 0 && (
+                                    <Section icon={<Wrench />} title={t("detail.tools.title")}>
+                                        <div className="flex flex-col gap-2.5">
+                                            {selectedLog!.toolCalls!.map((call, index) => (
+                                                <div key={`${call.at}-${index}`} className="flex flex-col gap-2 rounded-md bg-surface p-3">
+                                                    <div className="flex items-start justify-between gap-2">
+                                                        <div className="flex min-w-0 flex-col gap-0.5">
+                                                            <p className="truncate text-body-sm font-medium">
+                                                                <span className="ltr-data font-mono">{call.tool}</span>
+                                                                {call.type === "integration" && call.serverName && (
+                                                                    <span className="ms-2 text-caption font-normal text-fg-muted">{t("detail.tools.viaApp", { app: call.serverName })}</span>
+                                                                )}
+                                                                {call.type === "whatsapp" && (
+                                                                    <span className="ms-2 text-caption font-normal text-fg-muted">{t("detail.tools.viaWhatsApp")}</span>
+                                                                )}
+                                                            </p>
+                                                            <p className="text-caption text-fg-subtle tabular-nums">
+                                                                {formatTime(call.at, timeFormat)} · {formatTransferMs(call.durationMs)}
+                                                            </p>
+                                                        </div>
+                                                        <Badge tone={call.ok ? "success" : "danger"} dot>
+                                                            {call.ok ? t("detail.tools.ok") : t("detail.tools.failed")}
+                                                        </Badge>
                                                     </div>
+                                                    {!call.ok && call.error && (
+                                                        <p className="text-caption text-danger-ink">{call.error}</p>
+                                                    )}
+                                                    {call.arguments && Object.keys(call.arguments).length > 0 ? (
+                                                        <code className="ltr-data block overflow-x-auto whitespace-pre-wrap break-all rounded-sm bg-bg-muted px-2 py-1.5 font-mono text-caption text-fg-muted">
+                                                            {JSON.stringify(call.arguments)}
+                                                        </code>
+                                                    ) : (
+                                                        <p className="text-caption text-fg-subtle">{t("detail.tools.noArguments")}</p>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </Section>
+                                )}
+
+                                {/* Voice Quality diagnostics (classic-engine calls) */}
+                                {selectedLog?.voiceMetrics && (selectedLog.voiceMetrics.turns || 0) > 0 && (
+                                    <Section icon={<Pulse />} title={t("detail.voiceQuality.title")}>
+                                        <MetricGrid
+                                            columns={3}
+                                            items={[
+                                                [t("detail.voiceQuality.turns"), `${selectedLog.voiceMetrics.turns ?? 0}`],
+                                                [t("detail.voiceQuality.interruptions"), `${selectedLog.voiceMetrics.interruptions ?? 0}`],
+                                                [t("detail.voiceQuality.falseVad"), `${selectedLog.voiceMetrics.falseVadEvents ?? 0}`],
+                                                [t("detail.voiceQuality.ttsChunks"), `${selectedLog.voiceMetrics.ttsChunksSent ?? 0}`],
+                                                [t("detail.voiceQuality.rtpDrops"), `${selectedLog.voiceMetrics.rtpQueueDrops ?? 0}`],
+                                                [t("detail.voiceQuality.llmFirstToken"), `${selectedLog.voiceMetrics.avgLlmFirstTokenMs ?? 0} ms`],
+                                                [t("detail.voiceQuality.ttsFirstText"), `${selectedLog.voiceMetrics.avgTtsFirstTextMs ?? 0} ms`],
+                                                [t("detail.voiceQuality.firstAudio"), `${selectedLog.voiceMetrics.avgFirstAudioMs ?? 0} ms`],
+                                                [t("detail.voiceQuality.maxFirstAudio"), `${selectedLog.voiceMetrics.maxFirstAudioMs ?? 0} ms`],
+                                            ]}
+                                        />
+                                    </Section>
+                                )}
+
+                                {/* AI Analysis Section */}
+                                <Section
+                                    icon={<Brain />}
+                                    title={t("detail.aiIntelligence")}
+                                    actions={!selectedLog?.analysis && selectedLog && conversationTurns(selectedLog).length > 0 && (
+                                        <Button
+                                            size="xs"
+                                            iconStart={<Pulse />}
+                                            loading={analyzing}
+                                            onClick={() => selectedLog && analyzeCall(selectedLog._id)}
+                                        >
+                                            {analyzing ? t("detail.analyzingNow") : t("detail.analyzeNow")}
+                                        </Button>
+                                    )}
+                                >
+                                    {selectedLog?.analysis ? (
+                                        <div className="flex flex-col gap-4">
+                                            <div className="flex items-start justify-between gap-4">
+                                                <div className="flex flex-1 flex-col gap-1">
+                                                    <p className="text-caption text-fg-subtle">{t("detail.conversationSummary")}</p>
+                                                    <p className="text-body-sm">{selectedLog.summary}</p>
+                                                </div>
+                                                <div className="flex shrink-0 flex-col items-end gap-1">
+                                                    <Badge tone={selectedLog.analysis.isQualified ? "success" : "danger"}>
+                                                        {selectedLog.analysis.isQualified ? <CheckCircle /> : <XCircle />}
+                                                        {selectedLog.analysis.isQualified ? 'Qualified' : 'Unqualified'}
+                                                    </Badge>
+                                                    <p className="text-heading-lg tabular-nums text-accent-ink">{selectedLog.analysis.qualificationScore}%</p>
+                                                    <p className="text-caption text-fg-subtle">{t("detail.score")}</p>
                                                 </div>
                                             </div>
-                                        ))}
-                                    </div>
-                                </ScrollArea>
-                            </TabsContent>
-                        </Tabs>
-                    </SheetContent>
-                </Sheet>
-            </div>
+
+                                            <DescriptionList
+                                                className="border-t border-border pt-3"
+                                                items={[
+                                                    { term: t("detail.estimatedBudget"), value: selectedLog.analysis.budget },
+                                                    { term: t("detail.timeline"), value: selectedLog.analysis.timeline },
+                                                ]}
+                                            />
+
+                                            <div className="flex flex-col gap-1">
+                                                <p className="text-caption text-fg-subtle">{t("detail.reasoning")}</p>
+                                                <p className="text-body-sm italic text-fg-muted">"{selectedLog.analysis.reason}"</p>
+                                            </div>
+
+                                            <div className="flex flex-col gap-1 rounded-md bg-surface p-3">
+                                                <p className="text-caption font-medium text-accent-ink">{t("detail.nextSteps")}</p>
+                                                <p className="text-body-sm">{selectedLog.analysis.nextSteps}</p>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <EmptyState
+                                            className="py-6"
+                                            icon={<Brain />}
+                                            title={t("detail.noAnalysis")}
+                                            description={selectedLog?.analysisError?.message || t("detail.noAnalysisHint")}
+                                        />
+                                    )}
+                                </Section>
+                            </DrawerBody>
+                        </TabsContent>
+
+                        <TabsContent value="transcript" asChild>
+                            <DrawerBody>
+                                {selectedLog && conversationTurns(selectedLog).length === 0 && (
+                                    <EmptyState
+                                        icon={<ChatText />}
+                                        title={t("detail.noConversation")}
+                                        description={failureReason(selectedLog) ? t("detail.noConversationHint", { tab: t("detail.tabSummary") }) : undefined}
+                                    />
+                                )}
+                                <Transcript>
+                                    {selectedLog?.transcript.map((item, index) => item.role === 'system' ? (
+                                        // Wixzel's Message has no system turn: a quiet note across the log.
+                                        <div key={index} className="flex flex-col gap-1 self-stretch rounded-md bg-bg-subtle px-3 py-2">
+                                            <span className="flex items-center gap-1.5 text-caption font-medium text-fg-subtle">
+                                                <Brain className="size-3.5" />
+                                                {t("detail.roleSystem")}
+                                            </span>
+                                            <p className="text-caption italic text-fg-muted">{item.content}</p>
+                                        </div>
+                                    ) : (
+                                        <Message
+                                            key={index}
+                                            from={item.role === 'assistant' ? "agent" : "person"}
+                                            name={item.role === 'assistant' ? (
+                                                <span className="inline-flex items-center gap-1"><Robot className="size-3" />{t("detail.roleAgent")}</span>
+                                            ) : (
+                                                <span className="inline-flex items-center gap-1">{selectedLog?.leadId?.name || t("detail.roleLead")}<User className="size-3" /></span>
+                                            )}
+                                        >
+                                            {item.content}
+                                        </Message>
+                                    ))}
+                                </Transcript>
+                            </DrawerBody>
+                        </TabsContent>
+                    </Tabs>
+                </DrawerContent>
+            </Drawer>
         </div>
     );
 }

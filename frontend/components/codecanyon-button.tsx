@@ -1,7 +1,8 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "@phosphor-icons/react";
+import { Badge, Button } from "@wixzel/react";
 import { useSettings } from "@/components/settings-provider";
 
 import { useTranslations } from "next-intl";
@@ -23,17 +24,17 @@ export function CodeCanyonButton() {
     return (
         <div className="fixed bottom-6 end-6 z-50 flex flex-col items-end gap-2">
             {LINKS.map((l) => (
-                <a
+                <Button
                     key={l.label}
-                    href={l.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group flex items-center gap-2 rounded-full border border-border bg-background/90 px-4 py-2.5 text-sm font-semibold text-foreground backdrop-blur-md transition-colors hover:border-brand hover:text-brand"
+                    asChild
+                    size="lg"
+                    iconStart={<Badge tone="accent" appearance="solid" size="sm">{t("selfHost.badge")}</Badge>}
+                    iconEnd={<ArrowUpRight className="rtl:-scale-x-100" />}
                 >
-                    <span className="rounded-full bg-brand px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-white">{t("selfHost.badge")}</span>
-                    {t("selfHost.buyOn", { marketplace: l.label })}
-                    <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-brand rtl:-scale-x-100" />
-                </a>
+                    <a href={l.href} target="_blank" rel="noopener noreferrer">
+                        {t("selfHost.buyOn", { marketplace: l.label })}
+                    </a>
+                </Button>
             ))}
         </div>
     );

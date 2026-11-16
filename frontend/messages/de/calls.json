@@ -27,7 +27,11 @@
     "noLogs": "Keine Protokolle gefunden.",
     "pending": "Ausstehend",
     "notAvailable": "Nicht verfügbar",
-    "details": "Details"
+    "details": "Details",
+    "analyzing": "Wird analysiert…",
+    "notAnalyzed": "Nicht analysiert",
+    "nothingToAnalyze": "In diesem Anruf hat niemand gesprochen, daher gibt es nichts zu analysieren.",
+    "notAutoAnalyzed": "Dieser Anruf wurde nicht automatisch analysiert. Öffnen Sie die Details und klicken Sie auf „Jetzt analysieren“."
   },
   "detail": {
     "title": "Anrufprotokoll-Details",
@@ -50,6 +54,9 @@
     "roleAgent": "KI-AGENT",
     "roleLead": "LEAD",
     "roleSystem": "SYSTEM",
+    "failedNoConversation": "Der Anruf endete, bevor Agent und Anrufer miteinander gesprochen haben.",
+    "noConversation": "Es wurde kein Gespräch aufgezeichnet",
+    "noConversationHint": "Was schiefgelaufen ist, steht im Tab {tab}.",
     "voiceQuality": {
       "title": "Sprachqualität",
       "turns": "Gesprächszüge",
@@ -80,6 +87,16 @@
         "unavailable": "Nicht erreichbar",
         "failed": "Fehlgeschlagen"
       }
+    },
+    "analyzeNow": "Jetzt analysieren",
+    "analyzingNow": "Wird analysiert...",
+    "tools": {
+      "title": "Verwendete Tools",
+      "ok": "OK",
+      "failed": "Fehlgeschlagen",
+      "viaApp": "über {app}",
+      "viaWhatsApp": "über WhatsApp",
+      "noArguments": "Ohne Argumente aufgerufen."
     }
   },
   "toast": {
@@ -89,5 +106,17 @@
     "fetchFailed": "Anrufprotokolle konnten nicht abgerufen werden",
     "noExportData": "Keine Daten zum Exportieren",
     "exported": "Erfolgreich exportiert"
+  },
+  "meeting": {
+    "label": "Meeting",
+    "title": "Meeting",
+    "platform": "Plattform",
+    "botName": "Name im Meeting",
+    "link": "Meeting-Link",
+    "speaks": "Spricht",
+    "speaksAlways": "Immer",
+    "speaksAddressed": "Wenn es beim Namen angesprochen wird",
+    "mutedReplies": "Vom Namensfilter zurückgehaltene Antworten",
+    "endReason": "Beendet wegen"
   }
 }

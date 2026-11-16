@@ -1,21 +1,30 @@
 import type { Metadata } from "next";
-import { Sora, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
-import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/components/auth/auth-provider";
 
-const sora = Sora({
-  subsets: ["latin"],
-  variable: "--font-sora",
-  weight: ["300", "400", "500", "600", "700"],
+// Both faces ship in app/fonts (variable woff2, latin subset, SIL OFL; the licences sit next
+// to them). next/font/google fetched them from Google at build time, and on some servers
+// Google answers with /l/font?kit=…&skey=… URLs that Next 16 cannot parse ("next/font/google
+// queries have exactly one entry"), failing the build. Local files keep the build working
+// offline and on any VPS.
+//
+// Manrope is Wixzel UI's one typeface; @wixzel/tokens reads it through --font-manrope.
+const manrope = localFont({
+  src: "./fonts/Manrope.woff2",
+  variable: "--font-manrope",
+  weight: "200 800",
+  display: "swap",
 });
 
-// Monospace face for the editorial numbered eyebrow labels on the landing page.
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-jetbrains-mono",
-  weight: ["400", "500", "600"],
+// Monospace face for keys, IDs and the landing page's numbered eyebrow labels; Wixzel's
+// mono stack reads it through --font-mono-face.
+const jetbrainsMono = localFont({
+  src: "./fonts/JetBrainsMono.woff2",
+  variable: "--font-mono-face",
+  weight: "100 800",
+  display: "swap",
 });
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
@@ -48,9 +57,12 @@ export async function generateMetadata(): Promise<Metadata> {
       appName = data?.data?.branding?.appName || appName;
       const dbFavicon = data?.data?.branding?.favicon;
       if (dbFavicon) {
-        faviconUrl = dbFavicon.startsWith('/uploads/')
-          ? `${API_BASE_URL.replace(/\/api$/, '')}${dbFavicon}`
-          : dbFavicon;
+        // /favicon.ico is blank on purpose (see logoToShow in settings-provider); saved, it means none was chosen.
+        faviconUrl = dbFavicon === '/favicon.ico'
+          ? '/images/originals/favicon.ico'
+          : dbFavicon.startsWith('/uploads/')
+            ? `${API_BASE_URL.replace(/\/api$/, '')}${dbFavicon}`
+            : dbFavicon;
       }
       const dbLogo = data?.data?.branding?.logoLight;
       if (dbLogo) {
@@ -121,11 +133,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 import { ThemeProvider } from "@/components/theme-provider";
+import { WixzelRoot } from "@/components/wixzel-root";
 import { SettingsProvider } from "@/components/settings-provider";
 import { CodeCanyonButton } from "@/components/codecanyon-button";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale } from "next-intl/server";
-import { DirectionProvider } from "@/components/direction-provider";
 import { dirFor } from "@/i18n/config";
 
 export default async function RootLayout({
@@ -139,25 +151,26 @@ export default async function RootLayout({
   const dir = dirFor(locale);
 
   return (
-    <html lang={locale} dir={dir} className={`${sora.variable} ${jetbrainsMono.variable} scroll-smooth`} suppressHydrationWarning>
-      <body className={`${sora.className} antialiased`}>
+    // data-product washes the whole app in IntelliCall's violet before React loads; an
+    // admin's own brand colour replaces it at runtime (lib/brand-colour.ts).
+    <html lang={locale} dir={dir} data-product="intellicall" className={`${manrope.variable} ${jetbrainsMono.variable} scroll-smooth`} suppressHydrationWarning>
+      <body>
         <NextIntlClientProvider>
-          <DirectionProvider dir={dir}>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="light"
-              enableSystem={false}
-              disableTransitionOnChange
-            >
+          <ThemeProvider
+            attribute="data-theme"
+            defaultTheme="light"
+            enableSystem={false}
+            disableTransitionOnChange
+          >
+            <WixzelRoot dir={dir}>
               <AuthProvider>
                 <SettingsProvider>
                   <DashboardLayout>{children}</DashboardLayout>
-                  <Toaster dir={dir} />
                   <CodeCanyonButton />
                 </SettingsProvider>
               </AuthProvider>
-            </ThemeProvider>
-          </DirectionProvider>
+            </WixzelRoot>
+          </ThemeProvider>
         </NextIntlClientProvider>
       </body>
     </html>

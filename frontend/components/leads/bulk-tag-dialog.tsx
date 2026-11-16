@@ -1,20 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
+    Button,
     Dialog,
     DialogContent,
     DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tag } from "lucide-react";
+    Field,
+    Input,
+    toast,
+} from "@wixzel/react";
+import { Tag } from "@phosphor-icons/react";
 import axios from "axios";
-import { toast } from "sonner";
 
 import { useTranslations } from "next-intl";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
@@ -66,35 +66,31 @@ export function BulkTagDialog({ selectedIds, open, onOpenChange, onSuccess }: Bu
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent size="sm">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                        <Tag className="h-5 w-5" />
+                        <Tag className="size-5 text-fg-muted" />
                         {t("bulkTag.title")}
                     </DialogTitle>
                     <DialogDescription>
                         {t("bulkTag.description", { count: selectedIds.length })}
                     </DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleSubmit}>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
-                            <Label htmlFor="bulk-add-tags">{t("bulkTag.tagsLabel")}</Label>
-                            <Input
-                                id="bulk-add-tags"
-                                placeholder={t("bulkTag.tagsPlaceholder")}
-                                value={tags}
-                                onChange={(e) => setTags(e.target.value)}
-                                required
-                                disabled={loading}
-                            />
-                        </div>
-                    </div>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                    <Field id="bulk-add-tags" label={t("bulkTag.tagsLabel")}>
+                        <Input
+                            placeholder={t("bulkTag.tagsPlaceholder")}
+                            value={tags}
+                            onChange={(e) => setTags(e.target.value)}
+                            required
+                            disabled={loading}
+                        />
+                    </Field>
                     <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
+                        <Button type="button" variant="secondary" onClick={() => onOpenChange(false)} disabled={loading}>
                             {c("actions.cancel")}
                         </Button>
-                        <Button type="submit" disabled={loading}>
+                        <Button type="submit" variant="primary" loading={loading}>
                             {loading ? "Adding..." : "Add Tags"}
                         </Button>
                     </DialogFooter>

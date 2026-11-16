@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
+    Button,
     Dialog,
     DialogContent,
     DialogDescription,
@@ -10,13 +10,15 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+    Field,
+    Input,
+    toast,
+} from "@wixzel/react";
 import axios from "axios";
-import { toast } from "sonner";
-import { Plus } from "lucide-react";
+import { Plus } from "@phosphor-icons/react";
 import { CustomFieldsEditor, sanitizeCustomFields, type CustomFieldRow } from "./custom-fields-editor";
+import { leadPhoneIssue } from "@/lib/phone-checks";
+import { FormIssues, hasErrors } from "@/components/ui/form-issues";
 
 import { useTranslations } from "next-intl";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
@@ -32,6 +34,9 @@ export function AddLeadDialog({ onSuccess }: { onSuccess?: () => void }) {
         tags: "",
     });
     const [customFields, setCustomFields] = useState<CustomFieldRow[]>([{ name: "company", value: "" }]);
+
+    const phoneIssue = leadPhoneIssue(formData.phone, c);
+    const issues = phoneIssue ? [phoneIssue] : [];
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -68,21 +73,19 @@ export function AddLeadDialog({ onSuccess }: { onSuccess?: () => void }) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button><Plus className="h-4 w-4" />{t("add.trigger")}</Button>
+                <Button variant="primary" iconStart={<Plus />}>{t("add.trigger")}</Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent size="sm">
                 <DialogHeader>
                     <DialogTitle>{t("add.title")}</DialogTitle>
                     <DialogDescription>
                         {t("add.description")}
                     </DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleSubmit}>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
-                            <Label htmlFor="name">{t("add.nameLabel")}</Label>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                    <div className="flex flex-col gap-4">
+                        <Field id="name" label={t("add.nameLabel")}>
                             <Input
-                                id="name"
                                 value={formData.name}
                                 onChange={(e) =>
                                     setFormData({ ...formData, name: e.target.value })
@@ -90,11 +93,9 @@ export function AddLeadDialog({ onSuccess }: { onSuccess?: () => void }) {
                                 placeholder={t("add.namePlaceholder")}
                                 required
                             />
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="phone">{t("add.phoneLabel")}</Label>
+                        </Field>
+                        <Field id="phone" label={t("add.phoneLabel")}>
                             <Input
-                                id="phone"
                                 type="tel"
                                 value={formData.phone}
                                 onChange={(e) =>
@@ -103,25 +104,24 @@ export function AddLeadDialog({ onSuccess }: { onSuccess?: () => void }) {
                                 placeholder="+1234567890"
                                 required
                             />
-                        </div>
+                            <FormIssues issues={issues} />
+                        </Field>
                         <CustomFieldsEditor fields={customFields} onChange={setCustomFields} idPrefix="add-field" />
-                        <div className="grid gap-2">
-                            <Label htmlFor="tags">{t("add.tagsLabel")}</Label>
+                        <Field id="tags" label={t("add.tagsLabel")}>
                             <Input
-                                id="tags"
                                 value={formData.tags}
                                 onChange={(e) =>
                                     setFormData({ ...formData, tags: e.target.value })
                                 }
                                 placeholder={t("add.tagsPlaceholder")}
                             />
-                        </div>
+                        </Field>
                     </div>
                     <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                        <Button type="button" variant="secondary" onClick={() => setOpen(false)}>
                             {c("actions.cancel")}
                         </Button>
-                        <Button type="submit" disabled={loading}>
+                        <Button type="submit" variant="primary" loading={loading} disabled={hasErrors(issues)}>
                             {loading ? "Saving..." : "Save Lead"}
                         </Button>
                     </DialogFooter>

@@ -1,28 +1,22 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, type CSSProperties } from "react";
 import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetHeader,
-    SheetTitle,
-} from "@/components/ui/sheet";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-    CheckCircle2,
-    XCircle,
-    HelpCircle,
-    Loader2,
-    RefreshCw,
-    ScrollText,
-    Stethoscope,
-    Server,
-    Trash2,
-} from "lucide-react";
+    Badge,
+    Button,
+    Drawer,
+    DrawerContent,
+    DrawerDescription,
+    DrawerHeader,
+    DrawerTitle,
+    Spinner,
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+} from "@wixzel/react";
+import { CheckCircle, XCircle, Question, ArrowsClockwise, Scroll, Stethoscope, HardDrives, Trash } from "@phosphor-icons/react";
 import axios from "axios";
 import { cn } from "@/lib/utils";
 
@@ -57,33 +51,33 @@ interface LogEntry {
 }
 
 const statusIcon = (status: HealthCheck["status"]) => {
-    if (status === "pass") return <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400 shrink-0" />;
-    if (status === "fail") return <XCircle className="h-4 w-4 text-red-500 dark:text-red-400 shrink-0" />;
-    return <HelpCircle className="h-4 w-4 text-muted-foreground shrink-0" />;
+    if (status === "pass") return <CheckCircle className="size-4 shrink-0 text-success-ink" />;
+    if (status === "fail") return <XCircle className="size-4 shrink-0 text-danger-ink" />;
+    return <Question className="size-4 shrink-0 text-fg-muted" />;
 };
 
 const registrationBadge = (registration: TrunkCheck["registration"], t: (key: string) => string) => {
     switch (registration) {
         case "registered":
-            return <Badge variant="outline" className="text-[9px] font-bold uppercase bg-green-50 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20">{t("debug.registration.registered")}</Badge>;
+            return <Badge tone="success" dot>{t("debug.registration.registered")}</Badge>;
         case "failed":
-            return <Badge variant="outline" className="text-[9px] font-bold uppercase bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20">{t("debug.registration.failed")}</Badge>;
+            return <Badge tone="danger" dot>{t("debug.registration.failed")}</Badge>;
         case "missing":
-            return <Badge variant="outline" className="text-[9px] font-bold uppercase bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20">{t("debug.registration.missing")}</Badge>;
+            return <Badge tone="danger" dot>{t("debug.registration.missing")}</Badge>;
         case "pending":
-            return <Badge variant="outline" className="text-[9px] font-bold uppercase bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-500/10 dark:text-yellow-400 dark:border-yellow-500/20">{t("debug.registration.pending")}</Badge>;
+            return <Badge tone="warning" dot>{t("debug.registration.pending")}</Badge>;
         case "not_applicable":
-            return <Badge variant="outline" className="text-[9px] font-bold uppercase bg-muted text-muted-foreground border-border">{t("debug.registration.ipAuth")}</Badge>;
+            return <Badge>{t("debug.registration.ipAuth")}</Badge>;
         default:
-            return <Badge variant="outline" className="text-[9px] font-bold uppercase bg-muted text-muted-foreground border-border">{t("debug.registration.unknown")}</Badge>;
+            return <Badge>{t("debug.registration.unknown")}</Badge>;
     }
 };
 
 const levelStyles: Record<LogEntry["level"], string> = {
-    error: "text-red-600 dark:text-red-400",
-    warn: "text-yellow-700 dark:text-yellow-400",
-    success: "text-green-700 dark:text-green-400",
-    info: "text-muted-foreground",
+    error: "text-danger-ink",
+    warn: "text-warning-ink",
+    success: "text-success-ink",
+    info: "text-fg-muted",
 };
 
 export function SipDebugPanel({
@@ -162,182 +156,176 @@ export function SipDebugPanel({
     }, [logs]);
 
     return (
-        <Sheet open={open} onOpenChange={onOpenChange}>
-            <SheetContent className="w-full sm:max-w-2xl flex flex-col p-0 gap-0">
-                <SheetHeader className="px-6 pt-6 pb-4 border-b">
-                    <SheetTitle className="flex items-center gap-2">
-                        <Stethoscope className="h-5 w-5 text-primary" />
+        <Drawer open={open} onOpenChange={onOpenChange}>
+            <DrawerContent side="right" style={{ "--wx-drawer-size": "672px" } as CSSProperties}>
+                <DrawerHeader>
+                    <DrawerTitle className="flex items-center gap-2">
+                        <Stethoscope className="size-5 text-accent-ink" />
                         {t("debug.title")}
-                    </SheetTitle>
-                    <SheetDescription>
+                    </DrawerTitle>
+                    <DrawerDescription>
                         {t("debug.description")}
-                    </SheetDescription>
-                </SheetHeader>
+                    </DrawerDescription>
+                </DrawerHeader>
 
-                <Tabs defaultValue="health" className="flex-1 flex flex-col min-h-0 px-6 pb-6 pt-4">
-                    <TabsList className="grid w-full grid-cols-2">
+                <Tabs defaultValue="health" variant="segment" className="min-h-0 flex-1 p-5">
+                    <TabsList>
                         <TabsTrigger value="health">
-                            <Stethoscope className="me-1.5 h-3.5 w-3.5" />
+                            <Stethoscope />
                             {t("debug.tabHealth")}
                         </TabsTrigger>
                         <TabsTrigger value="logs">
-                            <ScrollText className="me-1.5 h-3.5 w-3.5" />
+                            <Scroll />
                             {t("debug.tabLogs")}
                         </TabsTrigger>
                     </TabsList>
 
                     {/* ── Health Checks ─────────────────────────── */}
-                    <TabsContent value="health" className="flex-1 min-h-0 overflow-y-auto mt-4 space-y-4">
-                        <div className="flex items-center justify-between">
-                            <p className="text-xs text-muted-foreground">
+                    <TabsContent value="health" className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
+                        <div className="flex items-center justify-between gap-3">
+                            <p className="text-caption text-fg-muted">
                                 {health?.checkedAt
                                     ? `Last checked ${new Date(health.checkedAt).toLocaleTimeString()}`
                                     : "Running checks…"}
                             </p>
-                            <Button variant="outline" size="sm" className="h-7 text-xs" onClick={fetchHealth} disabled={healthLoading}>
-                                {healthLoading ? (
-                                    <Loader2 className="me-1.5 h-3 w-3 animate-spin" />
-                                ) : (
-                                    <RefreshCw className="me-1.5 h-3 w-3" />
-                                )}
+                            <Button size="xs" onClick={fetchHealth} loading={healthLoading} iconStart={<ArrowsClockwise />}>
                                 {t("debug.rerun")}
                             </Button>
                         </div>
 
                         {!health && healthLoading ? (
                             <div className="flex justify-center py-12">
-                                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                                <Spinner size="xl" className="text-accent-ink" />
                             </div>
                         ) : health ? (
                             <>
-                                <div className="space-y-2">
+                                <ul className="divide-y divide-border overflow-hidden rounded-md bg-bg-muted">
                                     {health.checks.map((check) => (
-                                        <div
+                                        <li
                                             key={check.id}
                                             className={cn(
-                                                "flex items-start gap-3 rounded-lg border p-3",
-                                                check.status === "fail" && "border-red-200 bg-red-50/50 dark:border-red-500/20 dark:bg-red-500/5"
+                                                "flex items-start gap-3 p-3",
+                                                check.status === "fail" && "bg-danger-subtle"
                                             )}
                                         >
                                             <div className="mt-0.5">{statusIcon(check.status)}</div>
                                             <div className="min-w-0">
-                                                <p className="text-sm font-medium">{check.label}</p>
-                                                <p className="text-xs text-muted-foreground break-words">{check.detail}</p>
+                                                <p className="text-body-sm font-medium">{check.label}</p>
+                                                <p className="break-words text-caption text-fg-muted">{check.detail}</p>
                                                 {check.hint && (
-                                                    <p className="text-xs mt-1.5 text-red-700 dark:text-red-400">
+                                                    <p className="mt-1.5 text-caption text-danger-ink">
                                                         <strong>{t("debug.fix")}</strong> {check.hint}
                                                     </p>
                                                 )}
                                             </div>
-                                        </div>
+                                        </li>
                                     ))}
-                                </div>
+                                </ul>
 
-                                <div>
-                                    <h4 className="text-sm font-semibold mb-2 flex items-center gap-1.5">
-                                        <Server className="h-3.5 w-3.5 text-primary" />
+                                <div className="flex flex-col gap-2">
+                                    <h4 className="flex items-center gap-1.5 text-heading-sm">
+                                        <HardDrives className="size-4 text-accent-ink" />
                                         {t("debug.trunkStatus")}
                                     </h4>
                                     {health.trunks.length === 0 ? (
-                                        <p className="text-xs text-muted-foreground italic">{t("debug.noTrunks")}</p>
+                                        <p className="text-caption italic text-fg-muted">{t("debug.noTrunks")}</p>
                                     ) : (
-                                        <div className="space-y-2">
+                                        <ul className="flex flex-col gap-2">
                                             {health.trunks.map((trunk) => (
-                                                <div key={trunk.trunkId} className="rounded-lg border p-3 space-y-1.5">
+                                                <li key={trunk.trunkId} className="flex flex-col gap-1.5 rounded-md bg-bg-muted p-3">
                                                     <div className="flex items-center justify-between gap-2">
-                                                        <p className="text-sm font-medium truncate">{trunk.name}</p>
+                                                        <p className="truncate text-body-sm font-medium">{trunk.name}</p>
                                                         {registrationBadge(trunk.registration, t)}
                                                     </div>
-                                                    <p className="text-xs text-muted-foreground font-mono truncate">
+                                                    <p className="truncate font-mono text-caption text-fg-muted">
                                                         {trunk.host}
                                                         {trunk.transport ? ` · ${trunk.transport.toUpperCase()}` : ""}
                                                     </p>
-                                                    <div className="flex items-center gap-1.5 text-xs">
+                                                    <div className="flex items-center gap-1.5 text-caption">
                                                         {trunk.endpointLoaded === true ? (
                                                             <>
-                                                                <CheckCircle2 className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
-                                                                <span className="text-muted-foreground">{t("debug.endpointLoaded")}</span>
+                                                                <CheckCircle className="size-3.5 text-success-ink" />
+                                                                <span className="text-fg-muted">{t("debug.endpointLoaded")}</span>
                                                             </>
                                                         ) : trunk.endpointLoaded === false ? (
                                                             <>
-                                                                <XCircle className="h-3.5 w-3.5 text-red-500" />
-                                                                <span className="text-red-700 dark:text-red-400">
+                                                                <XCircle className="size-3.5 text-danger-ink" />
+                                                                <span className="text-danger-ink">
                                                                     {t("debug.endpointNotLoaded")}
                                                                 </span>
                                                             </>
                                                         ) : (
                                                             <>
-                                                                <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
-                                                                <span className="text-muted-foreground">{t("debug.endpointUnknown")}</span>
+                                                                <Question className="size-3.5 text-fg-muted" />
+                                                                <span className="text-fg-muted">{t("debug.endpointUnknown")}</span>
                                                             </>
                                                         )}
                                                     </div>
-                                                    <div className="flex items-center gap-1.5 text-xs">
+                                                    <div className="flex items-center gap-1.5 text-caption">
                                                         {trunk.contactStatus === "available" ? (
                                                             <>
-                                                                <CheckCircle2 className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
-                                                                <span className="text-muted-foreground">{t("debug.providerReachable")}</span>
+                                                                <CheckCircle className="size-3.5 text-success-ink" />
+                                                                <span className="text-fg-muted">{t("debug.providerReachable")}</span>
                                                             </>
                                                         ) : trunk.contactStatus === "unavailable" ? (
                                                             <>
-                                                                <XCircle className="h-3.5 w-3.5 text-red-500" />
-                                                                <span className="text-red-700 dark:text-red-400">
+                                                                <XCircle className="size-3.5 text-danger-ink" />
+                                                                <span className="text-danger-ink">
                                                                     {t("debug.providerUnreachable")}
                                                                 </span>
                                                             </>
                                                         ) : trunk.contactStatus === "not_qualified" ? (
                                                             <>
-                                                                <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
-                                                                <span className="text-muted-foreground">{t("debug.providerNotQualified")}</span>
+                                                                <Question className="size-3.5 text-fg-muted" />
+                                                                <span className="text-fg-muted">{t("debug.providerNotQualified")}</span>
                                                             </>
                                                         ) : trunk.contactStatus === "missing" ? (
                                                             <>
-                                                                <XCircle className="h-3.5 w-3.5 text-red-500" />
-                                                                <span className="text-red-700 dark:text-red-400">
+                                                                <XCircle className="size-3.5 text-danger-ink" />
+                                                                <span className="text-danger-ink">
                                                                     {t("debug.noContact")}
                                                                 </span>
                                                             </>
                                                         ) : (
                                                             <>
-                                                                <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
-                                                                <span className="text-muted-foreground">{t("debug.providerUnknown")}</span>
+                                                                <Question className="size-3.5 text-fg-muted" />
+                                                                <span className="text-fg-muted">{t("debug.providerUnknown")}</span>
                                                             </>
                                                         )}
                                                     </div>
-                                                </div>
+                                                </li>
                                             ))}
-                                        </div>
+                                        </ul>
                                     )}
                                 </div>
                             </>
                         ) : (
-                            <p className="text-sm text-muted-foreground text-center py-8">
+                            <p className="py-8 text-center text-body-sm text-fg-muted">
                                 {t("debug.healthFailed")}
                             </p>
                         )}
                     </TabsContent>
 
                     {/* ── Live Logs ─────────────────────────────── */}
-                    <TabsContent value="logs" className="flex-1 min-h-0 flex flex-col mt-4">
-                        <div className="flex items-center justify-between mb-2">
-                            <p className="text-xs text-muted-foreground">
+                    <TabsContent value="logs" className="flex min-h-0 flex-1 flex-col gap-2">
+                        <div className="flex items-center justify-between gap-3">
+                            <p className="text-caption text-fg-muted">
                                 {t("debug.autoRefresh", { seconds: LOG_POLL_INTERVAL_MS / 1000 })}
                             </p>
                             <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-7 text-xs"
+                                size="xs"
+                                iconStart={<Trash />}
                                 onClick={() => {
                                     lastLogId.current = 0;
                                     setLogs([]);
                                 }}
                             >
-                                <Trash2 className="me-1.5 h-3 w-3" />
                                 {t("debug.clearView")}
                             </Button>
                         </div>
+                        {/* A tonal log: one line per event, newest at the bottom, in the level's colour. */}
                         <div
-                            className="flex-1 min-h-0 overflow-y-auto rounded-lg border bg-muted/30 p-3 font-mono text-xs space-y-1"
+                            className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto rounded-md bg-bg-muted p-3 font-mono text-caption"
                             onScroll={(e) => {
                                 const el = e.currentTarget;
                                 autoScroll.current = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
@@ -345,22 +333,22 @@ export function SipDebugPanel({
                         >
                             {logsLoading ? (
                                 <div className="flex justify-center py-8">
-                                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                                    <Spinner size="lg" className="text-accent-ink" />
                                 </div>
                             ) : logs.length === 0 ? (
-                                <p className="text-muted-foreground italic py-8 text-center">
+                                <p className="py-8 text-center italic text-fg-muted">
                                     {t("debug.noEvents")}
                                 </p>
                             ) : (
                                 logs.map((log) => (
                                     <div key={log.id} className="flex gap-2 leading-relaxed">
-                                        <span className="text-muted-foreground/60 shrink-0">
+                                        <span className="shrink-0 tabular-nums text-fg-subtle">
                                             {new Date(log.ts).toLocaleTimeString()}
                                         </span>
-                                        <span className={cn("break-words min-w-0", levelStyles[log.level])}>
+                                        <span className={cn("min-w-0 break-words", levelStyles[log.level])}>
                                             {log.message}
                                             {log.detail && (
-                                                <span className="block text-muted-foreground/70">{log.detail}</span>
+                                                <span className="block text-fg-muted">{log.detail}</span>
                                             )}
                                         </span>
                                     </div>
@@ -370,7 +358,7 @@ export function SipDebugPanel({
                         </div>
                     </TabsContent>
                 </Tabs>
-            </SheetContent>
-        </Sheet>
+            </DrawerContent>
+        </Drawer>
     );
 }

@@ -3,26 +3,31 @@
 import { useTranslations } from "next-intl";
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { toast } from "sonner";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Loader2, Save, Eye, EyeOff } from "lucide-react";
+import { toast } from "@wixzel/react";
+import { Section, Button, Input, Field, Alert, CopyField, PageHeader, Tooltip, Spinner } from "@wixzel/react";
+import { WhatsAppMark } from "@/components/whatsapp/parts";
+import { FloppyDisk, Eye, EyeSlash } from "@phosphor-icons/react";
 import { AdminNav } from "@/components/admin/nav";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
 
-const PROVIDER_LABELS: Record<string, string> = { google: "Google", hubspot: "HubSpot", slack: "Slack" };
+const PROVIDER_LABELS: Record<string, string> = { google: "Google", hubspot: "HubSpot", slack: "Slack", meta: "Meta" };
 
 type ProviderForm = { clientId: string; clientSecret: string; callbackUrl: string };
 type Provider = "google" | "hubspot" | "slack";
 type IntegrationsState = Record<Provider, ProviderForm>;
 
+/** The platform's Meta app, for WhatsApp Embedded Signup and the shared webhook (GET /admin/integrations → meta). */
+type MetaForm = { appId: string; appSecret: string; esConfigId: string; webhookVerifyToken: string; systemUserToken: string; systemUserId: string };
+type MetaInfo = { webhookUrl: string; envConfigured: boolean };
+const BLANK_META: MetaForm = { appId: "", appSecret: "", esConfigId: "", webhookVerifyToken: "", systemUserToken: "", systemUserId: "" };
+
 export default function AdminIntegrationsPage() {
     const t = useTranslations("admin");
     const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState<Provider | null>(null);
+    const [saving, setSaving] = useState<Provider | "meta" | null>(null);
+    const [meta, setMeta] = useState<MetaForm>(BLANK_META);
+    const [metaInfo, setMetaInfo] = useState<MetaInfo>({ webhookUrl: "", envConfigured: false });
     const [showSecret, setShowSecret] = useState<Record<Provider, boolean>>({ google: false, hubspot: false, slack: false });
     const [state, setState] = useState<IntegrationsState>({
         google: { clientId: "", clientSecret: "", callbackUrl: "" },
@@ -55,6 +60,16 @@ export default function AdminIntegrationsPage() {
                         callbackUrl: data.slack?.callbackUrl || ""
                     }
                 });
+                const m = data.meta || {};
+                setMeta({
+                    appId: m.appId || "",
+                    appSecret: m.appSecret || "",
+                    esConfigId: m.esConfigId || "",
+                    webhookVerifyToken: m.webhookVerifyToken || "",
+                    systemUserToken: m.systemUserToken || "",
+                    systemUserId: m.systemUserId || ""
+                });
+                setMetaInfo({ webhookUrl: m.webhookUrl || "", envConfigured: Boolean(m.envConfigured) });
             }
         } catch (err: any) {
             toast.error(err.response?.data?.message || t("integrations.toast.loadFailed"));
@@ -84,27 +99,40 @@ export default function AdminIntegrationsPage() {
         }
     };
 
+    const handleSaveMeta = async () => {
+        setSaving("meta");
+        try {
+            const token = localStorage.getItem("token");
+            await axios.patch(
+                `${API_BASE_URL}/admin/integrations`,
+                { meta },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            toast.success(t("integrations.toast.saved", { provider: PROVIDER_LABELS.meta }));
+        } catch (err) {
+            const message = (err as { response?: { data?: { message?: string } } }).response?.data?.message;
+            toast.error(message || t("integrations.toast.saveFailed"));
+        } finally {
+            setSaving(null);
+        }
+    };
+
     const updateField = (provider: Provider, field: keyof ProviderForm, value: string) => {
         setState((s) => ({ ...s, [provider]: { ...s[provider], [field]: value } }));
     };
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight text-foreground font-sora">{t("integrations.title")}</h1>
-                <p className="text-muted-foreground">
-                    {t("integrations.subtitle")}
-                </p>
-            </div>
+        <div className="flex flex-col gap-6">
+            <PageHeader title={t("integrations.title")} description={t("integrations.subtitle")} />
 
             <AdminNav currentPath="/admin/integrations" />
 
             {loading ? (
-                <div className="flex items-center justify-center py-20 text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin me-2" /> {t("loading")}
+                <div className="flex items-center justify-center gap-2 py-20 text-fg-muted">
+                    <Spinner /> {t("loading")}
                 </div>
             ) : (
-            <div className="grid gap-6 max-w-3xl">
+            <div className="grid gap-4 max-w-3xl">
                 <ProviderCard
                     title={t("integrations.googleTitle")}
                     description={t("integrations.googleDescription")}
@@ -148,6 +176,14 @@ export default function AdminIntegrationsPage() {
                     onSave={() => handleSave("slack")}
                     saving={saving === "slack"}
                 />
+
+                <MetaCard
+                    form={meta}
+                    info={metaInfo}
+                    onChange={(field, v) => setMeta((m) => ({ ...m, [field]: v }))}
+                    onSave={handleSaveMeta}
+                    saving={saving === "meta"}
+                />
             </div>
             )}
         </div>
@@ -183,96 +219,148 @@ function ProviderCard({
     // rather than something the admin has to assemble by hand.
     const origin = API_BASE_URL.replace(/\/api\/?$/, "");
     return (
-        <Card>
-            <CardHeader>
-                <div className="flex items-start gap-3">
-                    <img src={logoSrc} alt={title} width={32} height={32} className="shrink-0 object-contain" />
-                    <div className="flex-1">
-                        <CardTitle>{title}</CardTitle>
-                        <CardDescription className="mt-1">
-                            {description}{" "}
-                            <a href={docsUrl} target="_blank" className="underline text-primary">{t("integrations.openDocs")}</a>
-                        </CardDescription>
-                    </div>
-                </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                {notice && (
-                    <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-                        {notice}
-                    </div>
-                )}
+        <Section
+            icon={<img src={logoSrc} alt={title} width={20} height={20} className="size-5 object-contain" />}
+            title={title}
+            description={
+                <>
+                    {description}{" "}
+                    <a href={docsUrl} target="_blank" className="text-accent-ink underline underline-offset-2">{t("integrations.openDocs")}</a>
+                </>
+            }
+        >
+            {notice && <Alert tone="warning">{notice}</Alert>}
 
-                <div className="space-y-2">
-                    <Label className="text-xs font-bold uppercase text-muted-foreground">{t("integrations.clientId")}</Label>
+            <Field label={t("integrations.clientId")}>
+                <Input
+                    value={form.clientId}
+                    onChange={(e) => onChange("clientId", e.target.value)}
+                    placeholder={clientIdPlaceholder || "••••-••••-••••-••••"}
+                    className="font-mono"
+                />
+            </Field>
+
+            <Field label={t("integrations.clientSecret")}>
+                <Input
+                    type={showSecret ? "text" : "password"}
+                    value={form.clientSecret}
+                    onChange={(e) => onChange("clientSecret", e.target.value)}
+                    placeholder="••••••••••••••••"
+                    className="font-mono"
+                    trailing={
+                        <Tooltip content={showSecret ? t("integrations.hide") : t("integrations.show")}>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon-xs"
+                                onClick={onToggleSecret}
+                                aria-label={showSecret ? t("integrations.hide") : t("integrations.show")}
+                            >
+                                {showSecret ? <EyeSlash /> : <Eye />}
+                            </Button>
+                        </Tooltip>
+                    }
+                />
+            </Field>
+
+            {callbackPath && (
+                <Field label={t("integrations.callbackUrl")} hint={t("integrations.callbackHint")}>
                     <Input
-                        value={form.clientId}
-                        onChange={(e) => onChange("clientId", e.target.value)}
-                        placeholder={clientIdPlaceholder || "••••-••••-••••-••••"}
-                        className="font-mono text-sm"
+                        value={form.callbackUrl}
+                        onChange={(e) => onChange("callbackUrl", e.target.value)}
+                        placeholder={`https://api.yourdomain.com${callbackPath}`}
+                        className="font-mono"
                     />
+                </Field>
+            )}
+
+            {redirectPaths && redirectPaths.length > 0 && (
+                <div className="flex flex-col gap-1.5">
+                    <span className="text-body-sm font-medium">{t("integrations.redirectUris")}</span>
+                    {redirectPaths.map((path) => (
+                        <CopyField key={path} value={`${origin}${path}`} className="ltr-data" />
+                    ))}
+                    <p className="text-caption text-fg-muted">
+                        {t("integrations.redirectUrisHint")}
+                    </p>
                 </div>
+            )}
 
-                <div className="space-y-2">
-                    <Label className="text-xs font-bold uppercase text-muted-foreground">{t("integrations.clientSecret")}</Label>
-                    <div className="flex gap-2">
-                        <Input
-                            type={showSecret ? "text" : "password"}
-                            value={form.clientSecret}
-                            onChange={(e) => onChange("clientSecret", e.target.value)}
-                            placeholder="••••••••••••••••"
-                            className="font-mono text-sm flex-1"
-                        />
-                        <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            onClick={onToggleSecret}
-                            title={showSecret ? t("integrations.hide") : t("integrations.show")}
-                        >
-                            {showSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </Button>
-                    </div>
+            <div className="flex justify-end">
+                <Button variant="primary" onClick={onSave} loading={saving} iconStart={<FloppyDisk />}>
+                    {t("integrations.save", { provider: title })}
+                </Button>
+            </div>
+        </Section>
+    );
+}
+
+/**
+ * The platform's Meta app: what "Connect WhatsApp" (Embedded Signup) runs
+ * with, and the webhook every connected number's messages arrive through. The
+ * same values can come from the environment; then the form only shows them.
+ */
+function MetaCard({ form, info, onChange, onSave, saving }: {
+    form: MetaForm;
+    info: MetaInfo;
+    onChange: (field: keyof MetaForm, v: string) => void;
+    onSave: () => void;
+    saving: boolean;
+}) {
+    const t = useTranslations("admin");
+    const [show, setShow] = useState<Record<string, boolean>>({});
+    const secretToggle = (key: string) => (
+        <Tooltip content={show[key] ? t("integrations.hide") : t("integrations.show")}>
+            <Button type="button" variant="ghost" size="icon-xs" onClick={() => setShow((s) => ({ ...s, [key]: !s[key] }))}
+                aria-label={show[key] ? t("integrations.hide") : t("integrations.show")}>
+                {show[key] ? <EyeSlash /> : <Eye />}
+            </Button>
+        </Tooltip>
+    );
+    const text = (field: keyof MetaForm, label: string, hint?: string, placeholder?: string) => (
+        <Field label={label} hint={hint}>
+            <Input value={form[field]} onChange={(e) => onChange(field, e.target.value)} placeholder={placeholder || "••••••••••••••••"} className="font-mono" dir="ltr" />
+        </Field>
+    );
+    const secret = (field: keyof MetaForm, label: string, hint?: string) => (
+        <Field label={label} hint={hint}>
+            <Input type={show[field] ? "text" : "password"} value={form[field]} onChange={(e) => onChange(field, e.target.value)}
+                placeholder="••••••••••••••••" className="font-mono" dir="ltr" autoComplete="off" trailing={secretToggle(field)} />
+        </Field>
+    );
+    return (
+        <Section
+            icon={<WhatsAppMark size={12} />}
+            title={t("integrations.metaTitle")}
+            description={
+                <>
+                    {t("integrations.metaDescription")}{" "}
+                    <a href="https://developers.facebook.com/apps" target="_blank" className="text-accent-ink underline underline-offset-2">{t("integrations.openDocs")}</a>
+                </>
+            }
+        >
+            {info.envConfigured && <Alert tone="info">{t("integrations.metaEnvNotice")}</Alert>}
+
+            {text("appId", t("integrations.metaAppId"), undefined, "1234567890123456")}
+            {secret("appSecret", t("integrations.metaAppSecret"))}
+            {text("esConfigId", t("integrations.metaEsConfigId"), t("integrations.metaEsConfigIdHint"), "1234567890123456")}
+            {text("webhookVerifyToken", t("integrations.metaVerifyToken"), t("integrations.metaVerifyTokenHint"))}
+            {secret("systemUserToken", t("integrations.metaSystemUserToken"), t("integrations.metaSystemUserTokenHint"))}
+            {text("systemUserId", t("integrations.metaSystemUserId"), t("integrations.metaSystemUserIdHint"), "1234567890123456")}
+
+            {info.webhookUrl && (
+                <div className="flex flex-col gap-1.5">
+                    <span className="text-body-sm font-medium">{t("integrations.metaWebhookUrl")}</span>
+                    <CopyField value={info.webhookUrl} className="ltr-data" />
+                    <p className="text-caption text-fg-muted">{t("integrations.metaWebhookHint")}</p>
                 </div>
+            )}
 
-                {callbackPath && (
-                    <div className="space-y-2">
-                        <Label className="text-xs font-bold uppercase text-muted-foreground">{t("integrations.callbackUrl")}</Label>
-                        <Input
-                            value={form.callbackUrl}
-                            onChange={(e) => onChange("callbackUrl", e.target.value)}
-                            placeholder={`https://api.yourdomain.com${callbackPath}`}
-                            className="font-mono text-sm"
-                        />
-                        <p className="text-xs text-muted-foreground">
-                            {t("integrations.callbackHint")}
-                        </p>
-                    </div>
-                )}
-
-                {redirectPaths && redirectPaths.length > 0 && (
-                    <div className="space-y-2">
-                        <Label className="text-xs font-bold uppercase text-muted-foreground">{t("integrations.redirectUris")}</Label>
-                        <div className="rounded-xl border bg-muted/40 p-3 space-y-1">
-                            {redirectPaths.map((path) => (
-                                <code key={path} className="block font-mono text-xs text-foreground break-all">
-                                    {origin}{path}
-                                </code>
-                            ))}
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                            {t("integrations.redirectUrisHint")}
-                        </p>
-                    </div>
-                )}
-
-                <div className="flex justify-end pt-2">
-                    <Button onClick={onSave} disabled={saving} className="gap-2">
-                        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                        {t("integrations.save", { provider: title })}
-                    </Button>
-                </div>
-            </CardContent>
-        </Card>
+            <div className="flex justify-end">
+                <Button variant="primary" onClick={onSave} loading={saving} iconStart={<FloppyDisk />}>
+                    {t("integrations.save", { provider: PROVIDER_LABELS.meta })}
+                </Button>
+            </div>
+        </Section>
     );
 }

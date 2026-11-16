@@ -5,12 +5,8 @@ export function SpotlightVoiceEngines() {
     return (
         <SpotlightLayout
             id="voice-engines"
-            variant="brand"
-            strokes="a"
-            number="02"
             eyebrow="Voice Engines"
-            watermark="voice"
-            title={<>Choose the voice engine <span className="italic underline decoration-white/50 decoration-4 underline-offset-[6px]">per agent</span></>}
+            title={<>Choose the voice engine <span className="text-accent-ink">per agent</span></>}
             description="Every agent picks its own engine — from a fully self-contained pipeline to the lowest-latency managed stack — so you tune quality, cost, and language for each use case."
             bullets={[
                 "Classic pipeline: Deepgram STT + OpenRouter LLM + ElevenLabs voices.",

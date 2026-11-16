@@ -1,28 +1,32 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { disallowedSipUsernameChars } from "@/lib/sip-username";
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import {
+    Button,
+    Checkbox,
     Dialog,
     DialogContent,
     DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog";
-import {
+    Field,
+    Input,
+    Label,
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
+    Tile,
+    toast,
+} from "@wixzel/react";
 import axios from "axios";
-import { Server, Loader2, PencilLine } from "lucide-react";
+import { HardDrives, PencilLine } from "@phosphor-icons/react";
+import { sipTrunkIssues } from "@/lib/sip-trunk-checks";
+import { FormIssues, hasErrors, type FormIssue } from "@/components/ui/form-issues";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
 
@@ -205,6 +209,7 @@ const DEFAULT_FORM = {
     authRealm: "",
     defaultCallerId: "",
     dialPrefix: "",
+    stripPlus: false,
     codecs: "PCMU,PCMA",
     providerName: "",
     region: "",
@@ -220,6 +225,7 @@ type TrunkFormData = {
     authRealm: string;
     defaultCallerId: string;
     dialPrefix: string;
+    stripPlus: boolean;
     codecs: string;
     providerName: string;
     region: string;
@@ -235,6 +241,7 @@ interface SipTrunk {
     authRealm: string;
     defaultCallerId: string;
     dialPrefix: string;
+    stripPlus: boolean;
     codecs: string;
     providerName: string;
     region: string;
@@ -255,8 +262,48 @@ export function SipTrunkDialog({ trunk, open, onOpenChange, onSuccess }: SipTrun
     const [clearCredentials, setClearCredentials] = useState(false);
     const [showFormFields, setShowFormFields] = useState(false);
     const [formData, setFormData] = useState<TrunkFormData>({ ...DEFAULT_FORM });
+    // Same rule the server applies on save; shown as you type so it is never a surprise.
+    const badUsernameChars = clearCredentials ? [] : disallowedSipUsernameChars(formData.username);
+    const usernameError = badUsernameChars.length
+        ? t("dialog.usernameInvalid", {
+            chars: [...new Set(badUsernameChars.map(ch => (/\s/.test(ch) ? t("dialog.usernameSpaces") : `"${ch}"`)))].join(", "),
+        })
+        : null;
 
     const isEditing = !!trunk;
+
+    // This server's own SIP address in SIP Host, asked of the server (it knows its IPs and
+    // resolves names) a moment after typing stops.
+    const [ownHost, setOwnHost] = useState(false);
+    useEffect(() => {
+        const host = formData.host.trim();
+        if (!open || !showFormFields || !host) {
+            setOwnHost(false);
+            return;
+        }
+        let cancelled = false;
+        const timer = setTimeout(async () => {
+            try {
+                const token = localStorage.getItem("token");
+                const res = await axios.post(`${API_BASE_URL}/sip-trunks/check-host`, { host, port: formData.port }, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                if (!cancelled) setOwnHost(res.data?.data?.ok === false);
+            } catch {
+                if (!cancelled) setOwnHost(false);
+            }
+        }, 500);
+        return () => {
+            cancelled = true;
+            clearTimeout(timer);
+        };
+    }, [formData.host, formData.port, open, showFormFields]);
+
+    const issues: FormIssue[] = [
+        ...(ownHost ? [{ level: "error" as const, message: t("checks.ownHost") }] : []),
+        ...sipTrunkIssues(formData, { isEditing, clearCredentials }, { t, c }),
+    ];
+    const blocked = !!usernameError || hasErrors(issues);
 
     useEffect(() => {
         if (open) {
@@ -273,6 +320,7 @@ export function SipTrunkDialog({ trunk, open, onOpenChange, onSuccess }: SipTrun
                     authRealm: trunk.authRealm || "",
                     defaultCallerId: trunk.defaultCallerId || "",
                     dialPrefix: trunk.dialPrefix || "",
+                    stripPlus: trunk.stripPlus || false,
                     codecs: trunk.codecs || "PCMU,PCMA",
                     providerName: trunk.providerName || "",
                     region: trunk.region || "",
@@ -306,6 +354,15 @@ export function SipTrunkDialog({ trunk, open, onOpenChange, onSuccess }: SipTrun
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (usernameError) {
+            toast.error(usernameError);
+            return;
+        }
+        const firstError = issues.find((i) => i.level === "error");
+        if (firstError) {
+            toast.error(firstError.message);
+            return;
+        }
         setLoading(true);
         try {
             const token = localStorage.getItem("token");
@@ -326,16 +383,19 @@ export function SipTrunkDialog({ trunk, open, onOpenChange, onSuccess }: SipTrun
                 }
             }
 
-            if (isEditing) {
-                await axios.patch(`${API_BASE_URL}/sip-trunks/${trunk._id}`, payload, {
+            const res = isEditing
+                ? await axios.patch(`${API_BASE_URL}/sip-trunks/${trunk._id}`, payload, {
+                    headers: { Authorization: `Bearer ${token}` },
+                })
+                : await axios.post(`${API_BASE_URL}/sip-trunks`, payload, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-                toast.success(t("toast.updated"));
+            // Saved is not the same as usable: Asterisk has to load the trunk too.
+            const asterisk = res.data?.data?.asterisk as { loaded: boolean; message?: string } | undefined;
+            if (asterisk && !asterisk.loaded) {
+                toast.warning(t("toast.savedNotLoaded"), { description: asterisk.message, duration: 15000 });
             } else {
-                await axios.post(`${API_BASE_URL}/sip-trunks`, payload, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                toast.success(t("toast.created"));
+                toast.success(isEditing ? t("toast.updated") : t("toast.created"));
             }
             onOpenChange(false);
             onSuccess?.();
@@ -346,15 +406,12 @@ export function SipTrunkDialog({ trunk, open, onOpenChange, onSuccess }: SipTrun
         }
     };
 
-    const fieldLabelClass = "text-xs font-medium uppercase tracking-wide text-muted-foreground";
-    const helperTextClass = "text-xs text-muted-foreground mt-1";
-
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[640px] max-h-[90vh] overflow-y-auto">
+            <DialogContent size="lg">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                        <Server className="h-5 w-5 text-primary" />
+                        <HardDrives className="size-5 text-accent-ink" />
                         {isEditing ? "Edit SIP Trunk" : "Add SIP Trunk"}
                     </DialogTitle>
                     <DialogDescription>
@@ -368,102 +425,87 @@ export function SipTrunkDialog({ trunk, open, onOpenChange, onSuccess }: SipTrun
 
                 {!isEditing && !showFormFields ? (
                     <>
-                        <div className="grid gap-4 py-4">
-                            <Label className={fieldLabelClass}>{t("dialog.quickSetup")}</Label>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        <div className="flex flex-col gap-3">
+                            <p className="text-body-sm font-medium">{t("dialog.quickSetup")}</p>
+                            {/* Each preset fills the form and moves on, so these are actions, not a choice to confirm. */}
+                            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                                 {SIP_PROVIDER_PRESETS.map((preset) => (
-                                    <button
+                                    <Tile
                                         key={preset.id}
-                                        type="button"
+                                        icon={<HardDrives />}
+                                        title={preset.name}
                                         onClick={() => applyProviderPreset(preset)}
-                                        className="inline-flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                                    >
-                                        <Server className="h-4 w-4 text-muted-foreground shrink-0" />
-                                        {preset.name}
-                                    </button>
+                                    />
                                 ))}
                             </div>
-                            <div className="pt-2 border-t border-border">
-                                <button
-                                    type="button"
-                                    onClick={startManualEntry}
-                                    className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-md px-1 py-1"
-                                >
-                                    <PencilLine className="h-4 w-4 shrink-0" />
+                            <div className="flex flex-col items-start gap-1 border-t border-border pt-3">
+                                <Button variant="ghost" size="sm" onClick={startManualEntry} iconStart={<PencilLine />}>
                                     {t("dialog.manual")}
-                                </button>
-                                <p className={helperTextClass + " mt-1 ms-7"}>
+                                </Button>
+                                <p className="ms-2.5 text-caption text-fg-muted">
                                     {t("dialog.manualHint")}
                                 </p>
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                            <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
                                 {c("actions.cancel")}
                             </Button>
                         </DialogFooter>
                     </>
                 ) : (
-                    <form onSubmit={handleSubmit}>
-                        <div className="grid gap-5 py-4">
+                    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                        <div className="grid gap-5">
                             {/* Row 1: Name + Provider */}
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="grid gap-1.5">
-                                    <Label htmlFor="trunk-name" className={fieldLabelClass}>{t("dialog.nameLabel")}</Label>
+                                <Field id="trunk-name" label={t("dialog.nameLabel")}>
                                     <Input
-                                        id="trunk-name"
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                         placeholder={t("dialog.namePlaceholder")}
                                         required
                                         disabled={loading}
                                     />
-                                </div>
-                                <div className="grid gap-1.5">
-                                    <Label htmlFor="provider-name" className={fieldLabelClass}>{t("dialog.providerLabel")}</Label>
+                                </Field>
+                                <Field id="provider-name" label={t("dialog.providerLabel")}>
                                     <Input
-                                        id="provider-name"
                                         value={formData.providerName}
                                         onChange={(e) => setFormData({ ...formData, providerName: e.target.value })}
                                         placeholder={t("dialog.providerPlaceholder")}
                                         disabled={loading}
                                     />
-                                </div>
+                                </Field>
                             </div>
 
                             {/* Row 2: Host + Port + Transport — balanced grid, Transport gets room to avoid overflow */}
-                            <div className="grid grid-cols-[1fr_5rem_minmax(10rem,1fr)] gap-4 items-start">
-                                <div className="grid gap-1.5 min-w-0">
-                                    <Label htmlFor="trunk-host" className={fieldLabelClass}>{t("dialog.hostLabel")}</Label>
+                            <div className="grid grid-cols-[1fr_5rem_minmax(10rem,1fr)] items-start gap-4">
+                                <Field id="trunk-host" label={t("dialog.hostLabel")} className="min-w-0">
                                     <Input
-                                        id="trunk-host"
                                         value={formData.host}
                                         onChange={(e) => setFormData({ ...formData, host: e.target.value })}
                                         placeholder={t("dialog.hostPlaceholder")}
                                         required
                                         disabled={loading}
-                                        className="font-mono text-sm"
+                                        aria-invalid={ownHost}
+                                        className="font-mono"
                                     />
-                                </div>
-                                <div className="grid gap-1.5">
-                                    <Label htmlFor="trunk-port" className={fieldLabelClass}>{t("dialog.portLabel")}</Label>
+                                </Field>
+                                <Field id="trunk-port" label={t("dialog.portLabel")}>
                                     <Input
-                                        id="trunk-port"
                                         type="number"
                                         value={formData.port}
                                         onChange={(e) => setFormData({ ...formData, port: e.target.value })}
                                         disabled={loading}
-                                        className="font-mono text-sm"
+                                        className="font-mono"
                                     />
-                                </div>
-                                <div className="grid gap-1.5 min-w-0">
-                                    <Label className={fieldLabelClass}>{t("dialog.transportLabel")}</Label>
+                                </Field>
+                                <Field label={t("dialog.transportLabel")} hint={t("dialog.transportHint")} className="min-w-0">
                                     <Select
                                         value={formData.transport}
                                         onValueChange={(val) => setFormData({ ...formData, transport: val })}
                                         disabled={loading}
                                     >
-                                        <SelectTrigger className="w-full min-w-0">
+                                        <SelectTrigger>
                                             <SelectValue placeholder={t("dialog.transportPlaceholder")} />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -472,60 +514,59 @@ export function SipTrunkDialog({ trunk, open, onOpenChange, onSuccess }: SipTrun
                                             <SelectItem value="tls">{t("dialog.tls")}</SelectItem>
                                         </SelectContent>
                                     </Select>
-                                    <p className={helperTextClass}>{t("dialog.transportHint")}</p>
-                                </div>
+                                </Field>
                             </div>
 
                             {/* Row 3: Auth — 3 equal columns */}
                             <div className="grid grid-cols-3 gap-4">
-                                <div className="grid gap-1.5 min-w-0">
-                                    <Label htmlFor="trunk-user" className={fieldLabelClass}>{t("dialog.usernameLabel")}</Label>
+                                <Field id="trunk-user" label={t("dialog.usernameLabel")} className="min-w-0">
                                     <Input
-                                        id="trunk-user"
                                         value={formData.username}
                                         onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                                         placeholder="trunk_user"
                                         disabled={loading || clearCredentials}
-                                        className="font-mono text-sm"
+                                        aria-invalid={!!usernameError}
+                                        aria-describedby={usernameError ? "trunk-user-error" : undefined}
+                                        className="font-mono"
                                     />
-                                </div>
-                                <div className="grid gap-1.5 min-w-0">
-                                    <Label htmlFor="trunk-pass" className={fieldLabelClass}>{t("dialog.passwordLabel")}</Label>
+                                </Field>
+                                <Field id="trunk-pass" label={t("dialog.passwordLabel")} className="min-w-0">
                                     <Input
-                                        id="trunk-pass"
                                         type="password"
                                         value={formData.password}
                                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                         placeholder={isEditing ? "(unchanged)" : "••••••••"}
                                         disabled={loading || clearCredentials}
-                                        className="font-mono text-sm"
+                                        className="font-mono"
                                     />
-                                </div>
-                                <div className="grid gap-1.5 min-w-0">
-                                    <Label htmlFor="trunk-realm" className={fieldLabelClass}>{t("dialog.authRealmLabel")}</Label>
+                                </Field>
+                                <Field id="trunk-realm" label={t("dialog.authRealmLabel")} className="min-w-0">
                                     <Input
-                                        id="trunk-realm"
                                         value={formData.authRealm}
                                         onChange={(e) => setFormData({ ...formData, authRealm: e.target.value })}
                                         placeholder={t("dialog.authRealmPlaceholder")}
                                         disabled={loading || clearCredentials}
-                                        className="font-mono text-sm"
+                                        className="font-mono"
                                     />
-                                </div>
+                                </Field>
                             </div>
+
+                            {usernameError && (
+                                <p id="trunk-user-error" role="alert" className="-mt-2 text-caption font-medium text-danger-ink">
+                                    {usernameError}
+                                </p>
+                            )}
 
                             {/* IP-Based Auth Checkbox (for editing) */}
                             {isEditing && (
-                                <div className="flex items-center gap-2 rounded-md border border-border/50 bg-muted/30 px-3 py-2">
-                                    <input
-                                        type="checkbox"
+                                <div className="flex items-center gap-2.5 rounded-md bg-bg-muted px-3 py-2.5">
+                                    <Checkbox
                                         id="clear-creds"
                                         checked={clearCredentials}
-                                        onChange={(e) => setClearCredentials(e.target.checked)}
+                                        onCheckedChange={(checked) => setClearCredentials(checked === true)}
                                         disabled={loading}
-                                        className="h-4 w-4 rounded border-input"
                                     />
-                                    <Label htmlFor="clear-creds" className="text-sm text-muted-foreground cursor-pointer flex-1">
+                                    <Label htmlFor="clear-creds" className="flex-1 cursor-pointer font-normal text-fg-muted">
                                         {t("dialog.ipAuth")}
                                     </Label>
                                 </div>
@@ -533,63 +574,66 @@ export function SipTrunkDialog({ trunk, open, onOpenChange, onSuccess }: SipTrun
 
                             {/* Row 4: Caller ID + Region */}
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="grid gap-1.5">
-                                    <Label htmlFor="trunk-cid" className={fieldLabelClass}>{t("dialog.callerIdLabel")}</Label>
+                                <Field id="trunk-cid" label={t("dialog.callerIdLabel")}>
                                     <Input
-                                        id="trunk-cid"
                                         value={formData.defaultCallerId}
                                         onChange={(e) => setFormData({ ...formData, defaultCallerId: e.target.value })}
                                         placeholder="+966501234567"
                                         disabled={loading}
-                                        className="font-mono text-sm"
+                                        className="font-mono"
                                     />
-                                </div>
-                                <div className="grid gap-1.5">
-                                    <Label htmlFor="trunk-region" className={fieldLabelClass}>{t("dialog.regionLabel")}</Label>
+                                </Field>
+                                <Field id="trunk-region" label={t("dialog.regionLabel")}>
                                     <Input
-                                        id="trunk-region"
                                         value={formData.region}
                                         onChange={(e) => setFormData({ ...formData, region: e.target.value })}
                                         placeholder={t("dialog.regionPlaceholder")}
                                         disabled={loading}
                                     />
-                                </div>
+                                </Field>
                             </div>
 
                             {/* Row 5: Codecs + Dial Prefix */}
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="grid gap-1.5">
-                                    <Label htmlFor="trunk-codecs" className={fieldLabelClass}>{t("dialog.codecsLabel")}</Label>
+                                <Field id="trunk-codecs" label={t("dialog.codecsLabel")} hint={t("dialog.codecsHint")}>
                                     <Input
-                                        id="trunk-codecs"
                                         value={formData.codecs}
                                         onChange={(e) => setFormData({ ...formData, codecs: e.target.value })}
                                         placeholder={t("dialog.codecsPlaceholder")}
                                         disabled={loading}
-                                        className="font-mono text-sm"
+                                        className="font-mono"
                                     />
-                                    <p className={helperTextClass}>{t("dialog.codecsHint")}</p>
-                                </div>
-                                <div className="grid gap-1.5">
-                                    <Label htmlFor="trunk-dial-prefix" className={fieldLabelClass}>{t("dialog.dialPrefixLabel")}</Label>
+                                </Field>
+                                <Field id="trunk-dial-prefix" label={t("dialog.dialPrefixLabel")} hint={t("dialog.dialPrefixHint")}>
                                     <Input
-                                        id="trunk-dial-prefix"
                                         value={formData.dialPrefix}
                                         onChange={(e) => setFormData({ ...formData, dialPrefix: e.target.value })}
                                         placeholder={t("dialog.dialPrefixPlaceholder")}
                                         disabled={loading}
-                                        className="font-mono text-sm"
+                                        className="font-mono"
                                     />
-                                    <p className={helperTextClass}>{t("dialog.dialPrefixHint")}</p>
-                                </div>
+                                </Field>
+                            </div>
+
+                            {/* Strip the leading "+" for PBXs that reject it */}
+                            <div className="flex items-center gap-2.5 rounded-md bg-bg-muted px-3 py-2.5">
+                                <Checkbox
+                                    id="trunk-strip-plus"
+                                    checked={formData.stripPlus}
+                                    onCheckedChange={(checked) => setFormData({ ...formData, stripPlus: checked === true })}
+                                    disabled={loading}
+                                />
+                                <Label htmlFor="trunk-strip-plus" className="flex-1 cursor-pointer font-normal text-fg-muted">
+                                    {t("dialog.stripPlusLabel")}
+                                </Label>
                             </div>
                         </div>
+                        <FormIssues issues={issues} />
                         <DialogFooter>
-                            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
+                            <Button type="button" variant="secondary" onClick={() => onOpenChange(false)} disabled={loading}>
                                 {c("actions.cancel")}
                             </Button>
-                            <Button type="submit" disabled={loading}>
-                                {loading && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
+                            <Button type="submit" variant="primary" loading={loading} disabled={blocked}>
                                 {loading ? (isEditing ? "Saving..." : "Creating...") : (isEditing ? "Save Changes" : "Create Trunk")}
                             </Button>
                         </DialogFooter>

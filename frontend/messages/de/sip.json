@@ -29,7 +29,8 @@
     "port": "{transport} · Port {port}",
     "never": "Nie",
     "edit": "Bearbeiten",
-    "delete": "Löschen"
+    "delete": "Löschen",
+    "moreIssues": "(+{count} weitere; öffnen Sie Bearbeiten, um alle zu sehen)"
   },
   "info": {
     "title": "So funktionieren SIP-Trunks",
@@ -54,6 +55,8 @@
     "tls": "TLS (verschlüsselt)",
     "transportHint": "Prüfen Sie die Dokumentation Ihres Anbieters. Die meisten verwenden UDP.",
     "usernameLabel": "Benutzername",
+    "usernameInvalid": "Der SIP-Benutzername darf {chars} nicht enthalten. Verwenden Sie nur Buchstaben, Ziffern und . _ - + (wenn Ihr Anbieter Ihnen eine E-Mail-Adresse als Benutzernamen gegeben hat, bitten Sie ihn um einen einfachen Benutzernamen).",
+    "usernameSpaces": "Leerzeichen",
     "passwordLabel": "Passwort",
     "authRealmLabel": "Auth-Realm",
     "authRealmPlaceholder": "sip.anbieter.com",
@@ -66,7 +69,8 @@
     "codecsHint": "Durch Komma getrennte Audio-Codecs",
     "dialPrefixLabel": "Wählpräfix",
     "dialPrefixPlaceholder": "999",
-    "dialPrefixHint": "Optionales Technik-Präfix, das vor der Nummer gewählt wird"
+    "dialPrefixHint": "Optionales Technik-Präfix, das vor der Nummer gewählt wird",
+    "stripPlusLabel": "Nummern ohne das +-Zeichen senden (manche Telefonanlagen lehnen ein führendes + ab)"
   },
   "debug": {
     "registration": {
@@ -107,6 +111,20 @@
     "reloadFailed": "Neuladen fehlgeschlagen",
     "updated": "SIP-Trunk aktualisiert",
     "created": "SIP-Trunk erstellt",
-    "saveFailed": "SIP-Trunk konnte nicht gespeichert werden"
+    "saveFailed": "SIP-Trunk konnte nicht gespeichert werden",
+    "savedNotLoaded": "SIP-Trunk gespeichert, aber Asterisk hat ihn nicht geladen"
+  },
+  "checks": {
+    "ownHost": "Das ist die Adresse des eigenen Asterisk dieses Servers: die Adresse, die Sie Ihrem Anbieter geben, damit er Anrufe an Sie sendet. Geben Sie hier stattdessen den SIP-Host Ihres Anbieters ein. Anrufe über diesen Trunk würden an diesen Server zurückgehen und fehlschlagen.",
+    "hostPlaceholder": "Der SIP-Host enthält noch den Platzhaltertext der Vorlage. Ersetzen Sie ihn durch den Host, den Ihr Anbieter Ihnen gegeben hat.",
+    "hostFormat": "Geben Sie unter SIP-Host nur den Hostnamen oder die IP-Adresse ein (zum Beispiel sip.telnyx.com). Lassen Sie sip:, Benutzernamen und Pfade weg und tragen Sie den Port unter Port ein.",
+    "realmPlaceholder": "Der Auth-Realm enthält noch Platzhaltertext. Ersetzen Sie ihn oder lassen Sie ihn leer.",
+    "portRange": "Der Port muss eine Zahl von 1 bis 65535 sein (meist 5060).",
+    "tlsOn5060": "TLS verwendet normalerweise Port 5061; Port 5060 ist für UDP und TCP. Prüfen Sie die Einstellungen Ihres Anbieters.",
+    "port5061NotTls": "Port 5061 ist normalerweise für TLS. Verwenden Sie mit UDP oder TCP Port 5060, sofern Ihr Anbieter nichts anderes angibt.",
+    "ipHostDomainRealm": "Der SIP-Host ist eine IP-Adresse, aber der Auth-Realm ist {realm}. Bei den meisten Anbietern ist der SIP-Host genau diese Domain. Stellen Sie sicher, dass die IP die Ihres Anbieters ist und nicht die Adresse, die Sie für eingehende Anrufe erhalten haben.",
+    "usernameNoPassword": "Es gibt einen Benutzernamen, aber kein Passwort. Die meisten Anbieter lehnen Anrufe ohne beides ab (Fehler 401 oder 407).",
+    "passwordNoUsername": "Ohne Benutzernamen wird das Passwort ignoriert.",
+    "stripPlusWithPrefix": "Mit einem Wählpräfix werden Nummern immer ohne + gesendet, daher ändert die Option „ohne das +-Zeichen“ nichts."
   }
 }

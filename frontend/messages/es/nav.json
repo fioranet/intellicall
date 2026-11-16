@@ -4,21 +4,34 @@
     "leads": "Contactos",
     "phoneNumbers": "Números de teléfono",
     "sipTrunks": "Troncales SIP",
+    "whatsapp": "WhatsApp",
+    "meetings": "Reuniones",
     "agents": "Agentes de IA",
     "knowledgeBase": "Base de conocimiento",
+    "tools": "Herramientas",
+    "integrations": "Integraciones",
     "campaigns": "Campañas",
     "callLogs": "Registro de llamadas",
     "appointments": "Citas",
     "support": "Soporte"
   },
-  "secondary": { "admin": "Administración", "settings": "Ajustes" },
+  "secondary": {
+    "admin": "Administración",
+    "settings": "Ajustes"
+  },
   "badge": {
     "myOpenTickets": "{count, plural, one {# ticket abierto o en curso} other {# tickets abiertos o en curso}}",
     "pendingTickets": "{count, plural, one {# ticket de soporte pendiente} other {# tickets de soporte pendientes}}"
   },
   "closeMenu": "Cerrar menú",
   "openMenu": "Abrir menú",
-  "user": { "account": "Mi cuenta", "settings": "Ajustes", "logout": "Cerrar sesión" },
-  "toast": { "loggedOut": "Sesión cerrada correctamente" },
+  "user": {
+    "account": "Mi cuenta",
+    "settings": "Ajustes",
+    "logout": "Cerrar sesión"
+  },
+  "toast": {
+    "loggedOut": "Sesión cerrada correctamente"
+  },
   "pendingTickets": "Tickets de soporte pendientes"
 }

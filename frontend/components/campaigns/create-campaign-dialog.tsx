@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-import { Button } from "@/components/ui/button";
 import {
+    Button,
+    Checkbox,
     Dialog,
     DialogContent,
     DialogDescription,
@@ -12,21 +13,18 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
+    Field,
+    Input,
+    Label,
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { toast } from "sonner";
+    toast,
+} from "@wixzel/react";
 import axios from "axios";
-import { Plus, Search, CalendarClock } from "lucide-react";
+import { Plus, MagnifyingGlass, CalendarCheck } from "@phosphor-icons/react";
 import { useTranslations } from "next-intl";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
@@ -85,7 +83,8 @@ export function CreateCampaignDialog({ onSuccess }: CreateCampaignDialogProps) {
         try {
             const token = localStorage.getItem("token");
             const [agentsRes, leadsRes] = await Promise.all([
-                axios.get(`${API_BASE_URL}/agents`, {
+                // Only your own agents: a campaign can't run another account's agent.
+                axios.get(`${API_BASE_URL}/agents?mine=1`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 }),
                 axios.get(`${API_BASE_URL}/leads`, {
@@ -193,24 +192,21 @@ export function CreateCampaignDialog({ onSuccess }: CreateCampaignDialogProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button>
-                    <Plus className="h-4 w-4" />
+                <Button variant="primary" iconStart={<Plus />}>
                     {t("create.trigger")}
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
+            <DialogContent size="md">
                 <DialogHeader>
                     <DialogTitle>{t("create.title")}</DialogTitle>
                     <DialogDescription>
                         {t("create.description")}
                     </DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleSubmit}>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
-                            <Label htmlFor="campaign-name">{t("create.nameLabel")}</Label>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                    <div className="flex flex-col gap-4">
+                        <Field id="campaign-name" label={t("create.nameLabel")}>
                             <Input
-                                id="campaign-name"
                                 value={formData.name}
                                 onChange={(e) =>
                                     setFormData({ ...formData, name: e.target.value })
@@ -219,10 +215,9 @@ export function CreateCampaignDialog({ onSuccess }: CreateCampaignDialogProps) {
                                 required
                                 disabled={loading}
                             />
-                        </div>
+                        </Field>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="agent">{t("create.agentLabel")}</Label>
+                        <Field id="agent" label={t("create.agentLabel")}>
                             <Select
                                 value={formData.agentId}
                                 onValueChange={(value) =>
@@ -231,7 +226,7 @@ export function CreateCampaignDialog({ onSuccess }: CreateCampaignDialogProps) {
                                 required
                                 disabled={loading}
                             >
-                                <SelectTrigger id="agent">
+                                <SelectTrigger>
                                     <SelectValue placeholder={t("create.agentPlaceholder")} />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -242,55 +237,50 @@ export function CreateCampaignDialog({ onSuccess }: CreateCampaignDialogProps) {
                                     ))}
                                 </SelectContent>
                             </Select>
-                        </div>
+                        </Field>
 
-                        <div className="grid gap-2">
+                        <div className="flex flex-col gap-3">
                             <div className="flex items-center gap-2">
-                                <input
-                                    type="checkbox"
+                                <Checkbox
                                     id="schedule-campaign"
                                     checked={formData.scheduleEnabled}
-                                    onChange={(e) => setFormData({ ...formData, scheduleEnabled: e.target.checked })}
+                                    onCheckedChange={(checked) => setFormData({ ...formData, scheduleEnabled: checked === true })}
                                     disabled={loading}
-                                    className="h-4 w-4 rounded border-input"
                                 />
-                                <Label htmlFor="schedule-campaign" className="flex items-center gap-1.5 cursor-pointer">
-                                    <CalendarClock className="h-4 w-4 text-muted-foreground" />
+                                <Label htmlFor="schedule-campaign" className="cursor-pointer">
+                                    <CalendarCheck className="size-4 text-fg-muted" />
                                     {t("create.scheduleLater")}
                                 </Label>
                             </div>
                             {formData.scheduleEnabled && (
-                                <div className="grid gap-1.5">
-                                    <Label htmlFor="scheduled-at">{t("create.dateTimeLabel")}</Label>
-                                    <input
-                                        id="scheduled-at"
+                                <Field id="scheduled-at" label={t("create.dateTimeLabel")}>
+                                    <Input
                                         type="datetime-local"
                                         value={formData.scheduledAt}
                                         onChange={(e) => setFormData({ ...formData, scheduledAt: e.target.value })}
                                         disabled={loading}
                                         min={new Date().toISOString().slice(0, 16)}
-                                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                                     />
-                                </div>
+                                </Field>
                             )}
                         </div>
 
-                        <div className="grid gap-2">
-                            <div className="flex items-center justify-between mb-1">
+                        <div className="flex flex-col gap-2">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
                                 <Label>{t("create.selectLeads", { count: formData.selectedLeads.length })}</Label>
                                 <div className="flex items-center gap-4">
                                     <Select onValueChange={(tag) => handleTagToggle(tag, true)}>
-                                        <SelectTrigger className="h-7 w-fit text-xs px-2 border-dashed">
+                                        <SelectTrigger size="sm" className="w-fit gap-2">
                                             <SelectValue placeholder={t("create.addByTag")} />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {allTags.map(tag => (
-                                                <SelectItem key={tag} value={tag} className="text-xs">
+                                                <SelectItem key={tag} value={tag}>
                                                     {tag}
                                                 </SelectItem>
                                             ))}
                                             {allTags.length === 0 && (
-                                                <div className="px-2 py-1.5 text-xs text-muted-foreground">{t("create.noTags")}</div>
+                                                <div className="px-2 py-1.5 text-caption text-fg-muted">{t("create.noTags")}</div>
                                             )}
                                         </SelectContent>
                                     </Select>
@@ -301,25 +291,23 @@ export function CreateCampaignDialog({ onSuccess }: CreateCampaignDialogProps) {
                                             checked={formData.selectedLeads.length === filteredLeads.length && filteredLeads.length > 0}
                                             onCheckedChange={(checked) => handleSelectAll(!!checked)}
                                         />
-                                        <label htmlFor="select-all" className="text-xs text-muted-foreground cursor-pointer">{t("create.selectAll")}</label>
+                                        <label htmlFor="select-all" className="cursor-pointer text-caption text-fg-muted">{t("create.selectAll")}</label>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="relative mb-2">
-                                <Search className="absolute start-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
-                                <Input
-                                    placeholder={t("create.searchLeads")}
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="h-8 ps-8 text-xs"
-                                />
-                            </div>
+                            <Input
+                                size="sm"
+                                leading={<MagnifyingGlass />}
+                                placeholder={t("create.searchLeads")}
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
 
-                            <ScrollArea className="h-[200px] rounded-md border p-4">
-                                <div className="space-y-3">
+                            <div className="h-[200px] overflow-y-auto rounded-md bg-bg-subtle p-3">
+                                <div className="flex flex-col gap-3">
                                     {filteredLeads.map((lead) => (
-                                        <div key={lead._id} className="flex items-center space-x-2">
+                                        <div key={lead._id} className="flex items-center gap-2">
                                             <Checkbox
                                                 id={`lead-${lead._id}`}
                                                 checked={formData.selectedLeads.includes(lead._id)}
@@ -328,29 +316,29 @@ export function CreateCampaignDialog({ onSuccess }: CreateCampaignDialogProps) {
                                             />
                                             <label
                                                 htmlFor={`lead-${lead._id}`}
-                                                className="flex-1 cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                                className="flex-1 cursor-pointer text-body-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                                             >
                                                 {lead.name}
-                                                <span className="ms-2 text-xs font-normal text-muted-foreground">
+                                                <span className="ms-2 text-caption font-normal text-fg-muted">
                                                     <span className="ltr-data">{lead.phone}</span>
                                                 </span>
                                             </label>
                                         </div>
                                     ))}
                                     {filteredLeads.length === 0 && (
-                                        <p className="text-center text-xs text-muted-foreground py-4">
+                                        <p className="py-4 text-center text-caption text-fg-muted">
                                             {t("create.noLeadsFound")}
                                         </p>
                                     )}
                                 </div>
-                            </ScrollArea>
+                            </div>
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>
+                        <Button type="button" variant="secondary" onClick={() => setOpen(false)} disabled={loading}>
                             {c("actions.cancel")}
                         </Button>
-                        <Button type="submit" disabled={loading}>
+                        <Button type="submit" variant="primary" loading={loading}>
                             {loading ? t("create.creating") : t("create.trigger")}
                         </Button>
                     </DialogFooter>

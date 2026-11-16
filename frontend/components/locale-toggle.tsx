@@ -1,20 +1,20 @@
 "use client";
 
 import * as React from "react";
-import { Check, Languages } from "lucide-react";
+import { Check, Translate } from "@phosphor-icons/react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 
-import { Button } from "@/components/ui/button";
 import {
+    Button,
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@wixzel/react";
 import { LOCALES } from "@/i18n/config";
 import { setLocaleCookie, applyDocumentDir } from "@/lib/locale-client";
 
@@ -52,14 +52,8 @@ export function LocaleToggle() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    disabled={isPending}
-                    className="rounded-full w-10 h-10 hover:bg-muted transition-colors"
-                >
-                    <Languages className="h-[1.2rem] w-[1.2rem]" />
-                    <span className="sr-only">{t("language.change")}</span>
+                <Button variant="ghost" size="icon" loading={isPending} aria-label={t("language.change")}>
+                    <Translate />
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-44">
@@ -72,7 +66,7 @@ export function LocaleToggle() {
                         className="justify-between"
                     >
                         <span>{option.label}</span>
-                        {option.code === locale && <Check className="h-4 w-4" />}
+                        {option.code === locale && <Check />}
                     </DropdownMenuItem>
                 ))}
             </DropdownMenuContent>

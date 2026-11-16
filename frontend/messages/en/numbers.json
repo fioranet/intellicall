@@ -63,7 +63,16 @@
     "inboundAgentHint": "Incoming calls to this number will be handled by the selected agent.",
     "fallbackLabel": "Fallback Number",
     "optional": "(optional)",
-    "fallbackHint": "If no agent is assigned, inbound calls will be forwarded to this number instead of hanging up."
+    "fallbackHint": "If no agent is assigned, inbound calls will be forwarded to this number instead of hanging up.",
+    "issues": {
+      "noTrunk": "Choose the SIP trunk this number belongs to. SIP numbers can't call or answer without one.",
+      "trunkInactive": "SIP trunk \"{name}\" is inactive, so calls on this number will fail until it is turned back on.",
+      "trunkCallerId": "SIP trunk \"{name}\" has the default caller ID {callerId}, so outbound calls from this number will show that number instead. Clear the trunk's caller ID if that isn't intended.",
+      "fallbackIsSelf": "The fallback number can't be this same number: the call would be forwarded back to itself.",
+      "noAgentHangsUp": "No inbound agent is chosen, so incoming calls to this number will be hung up.",
+      "fallbackUnused": "The fallback number is only used when no agent is chosen, so it won't be used while an agent is set.",
+      "noAgents": "You have no agents yet. Create one under Agents to answer calls on this number."
+    }
   },
   "toast": {
     "loadFailed": "Failed to load phone numbers",

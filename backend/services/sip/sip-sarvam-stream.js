@@ -3,6 +3,7 @@ const Settings = require('../../models/Settings');
 const Agent = require('../../models/Agent');
 const Lead = require('../../models/Lead');
 const CallLog = require('../../models/CallLog');
+const { attachToolSession, finishToolSession } = require('../tools/attach');
 const { analyzeCallLog } = require('../../utils/analyzer');
 const WebhookService = require('../webhook-service');
 const EmailService = require('../email-service');
@@ -138,6 +139,8 @@ class SipSarvamStream {
                 testCall: this.testCall, testPhrase: this.testPhrase,
             });
             if (this.transferHandler) this.bridge.setTransferHandler(this.transferHandler);
+            // The agent's tools (webhook tools, connected apps, WhatsApp). Never blocks the call.
+            this.toolSession = await attachToolSession(this.bridge, this.agent, this.userId, { testCall: !!this.testCall, callId: this.callId, lead: this.lead, logPrefix: `[SIP Sarvam] [${this.callId}]` });
             this.bridge.onAudio = (buf) => this._sendRtp(buf);
             this.bridge.onBargeIn = () => this._clearPlayback();
             // Agent audio is paced out at 20ms/packet, so the queue can hold seconds of speech
@@ -320,6 +323,7 @@ class SipSarvamStream {
         if (this._rtpWatchdog) { clearInterval(this._rtpWatchdog); this._rtpWatchdog = null; }
         if (this._endCallSafetyTimer) { clearTimeout(this._endCallSafetyTimer); this._endCallSafetyTimer = null; }
         this._rtpQueue = [];
+        if (this.toolSession) { finishToolSession(this.toolSession, this.callId); this.toolSession = null; }
         if (this.bridge) this.bridge.close();
         try { if (this.udpSocket) this.udpSocket.close(); } catch (_) { }
         this.udpSocket = null;

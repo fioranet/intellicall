@@ -1,16 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
+    Button,
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@wixzel/react";
 import { KBDialog } from "@/components/knowledge-base/kb-dialog";
 import { KbFromWebsiteDialog, type KbDraftPrefill } from "@/components/knowledge-base/kb-from-website-dialog";
-import { ChevronDown, Keyboard, Globe, Plus } from "lucide-react";
+import { CaretDown, Keyboard, Globe, Plus } from "@phosphor-icons/react";
 
 import { useTranslations } from "next-intl";
 interface CreateKbMenuProps {
@@ -42,19 +42,18 @@ export function CreateKbMenu({ onSuccess }: CreateKbMenuProps) {
         <>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button className="gap-1.5">
-                        <Plus className="h-4 w-4" />
+                    <Button variant="primary" iconStart={<Plus />}>
                         {t("create.trigger")}
-                        <ChevronDown className="h-4 w-4 opacity-70" />
+                        <CaretDown className="opacity-70" />
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-52">
-                    <DropdownMenuItem className="gap-2 cursor-pointer" onSelect={() => openManual()}>
-                        <Keyboard className="h-4 w-4 text-muted-foreground" />
+                    <DropdownMenuItem onSelect={() => openManual()}>
+                        <Keyboard />
                         {t("create.manual")}
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="gap-2 cursor-pointer" onSelect={() => setWebsiteOpen(true)}>
-                        <Globe className="h-4 w-4 text-muted-foreground" />
+                    <DropdownMenuItem onSelect={() => setWebsiteOpen(true)}>
+                        <Globe />
                         {t("create.fromWebsite")}
                     </DropdownMenuItem>
                 </DropdownMenuContent>

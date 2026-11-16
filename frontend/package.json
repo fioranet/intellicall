@@ -1,9 +1,10 @@
 {
   "name": "intellicall-ai",
-  "version": "11.7.0",
+  "version": "13.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/remove-retired-files.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -12,26 +13,20 @@
     "i18n:unused": "node scripts/i18n-unused-keys.mjs"
   },
   "dependencies": {
-    "@base-ui/react": "^1.2.0",
     "@paypal/react-paypal-js": "^9.0.0",
+    "@phosphor-icons/react": "^2.1.10",
+    "@wixzel/react": "file:vendor/wixzel-react-0.1.0.tgz",
+    "@wixzel/tokens": "file:vendor/wixzel-tokens-0.1.0.tgz",
     "axios": "^1.15.0",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
-    "lucide-react": "^0.576.0",
+    "libphonenumber-js": "^1.13.15",
     "next": "^16.2.6",
     "next-intl": "^4.13.7",
     "next-themes": "^0.4.6",
     "papaparse": "^5.5.3",
-    "radix-ui": "^1.4.3",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
-    "react-icons": "^5.5.0",
-    "recharts": "^3.7.0",
-    "sonner": "^2.0.7",
-    "tailwind-merge": "^3.5.0",
-    "tw-animate-css": "^1.4.0",
-    "vaul": "^1.1.2"
+    "recharts": "^3.7.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -42,8 +37,10 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.3",
-    "shadcn": "^3.8.5",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "overrides": {
+    "@wixzel/tokens": "file:vendor/wixzel-tokens-0.1.0.tgz"
   }
 }

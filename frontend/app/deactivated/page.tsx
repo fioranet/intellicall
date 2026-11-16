@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { ShieldAlert, Mail, LogOut } from "lucide-react";
+import { Button } from "@wixzel/react";
+import { ShieldWarning, Envelope, SignOut } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -35,42 +35,29 @@ export default function DeactivatedPage() {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4 text-center">
-            <div className="w-20 h-20 bg-destructive/10 rounded-full flex items-center justify-center mb-6">
-                <ShieldAlert className="w-10 h-10 text-destructive" />
+        <div className="flex min-h-screen flex-col items-center justify-center bg-bg p-4 text-center">
+            <div className="flex w-full max-w-md flex-col items-center gap-5 rounded-xl bg-card px-8 py-10">
+                <span className="grid size-14 place-items-center rounded-lg bg-danger-subtle text-danger-ink [&_svg]:size-7">
+                    <ShieldWarning />
+                </span>
+                <div className="flex flex-col gap-2">
+                    <h1 className="text-heading-xl">{t("deactivated.title")}</h1>
+                    <p className="text-body-md text-fg-muted">{t("deactivated.description")}</p>
+                </div>
+                <div className="flex w-full flex-col gap-2 sm:flex-row">
+                    <Button
+                        className="flex-1"
+                        iconStart={<Envelope />}
+                        onClick={() => window.location.href = `mailto:${supportEmail}`}
+                    >
+                        {t("deactivated.contactSupport")}
+                    </Button>
+                    <Button variant="ghost" className="flex-1" iconStart={<SignOut />} onClick={handleLogout}>
+                        {t("deactivated.logout")}
+                    </Button>
+                </div>
             </div>
-
-            <h1 className="text-3xl font-bold tracking-tight text-foreground font-sora mb-2">
-                {t("deactivated.title")}
-            </h1>
-
-            <p className="text-muted-foreground text-lg max-w-md mb-8">
-                {t("deactivated.description")}
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 w-full max-w-sm">
-                <Button
-                    variant="outline"
-                    className="flex-1 gap-2"
-                    onClick={() => window.location.href = `mailto:${supportEmail}`}
-                >
-                    <Mail className="w-4 h-4" />
-                    {t("deactivated.contactSupport")}
-                </Button>
-
-                <Button
-                    variant="ghost"
-                    className="flex-1 gap-2"
-                    onClick={handleLogout}
-                >
-                    <LogOut className="w-4 h-4" />
-                    {t("deactivated.logout")}
-                </Button>
-            </div>
-
-            <p className="mt-12 text-sm text-muted-foreground">
-                {t("deactivated.mistakeNote")}
-            </p>
+            <p className="mt-8 text-body-sm text-fg-muted">{t("deactivated.mistakeNote")}</p>
         </div>
     );
 }

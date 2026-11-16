@@ -12,6 +12,9 @@ const Lead = require('../../models/Lead');
 const CallLog = require('../../models/CallLog');
 const WebhookService = require('../webhook-service');
 const EmailService = require('../email-service');
+const { resolveTrunkDialNumber } = require('../../utils/dial-number');
+const { ownSipHostError } = require('../../utils/own-sip-host');
+const { planFallback } = require('./fallback-plan');
 
 // Track all active SIP calls for cleanup
 const activeCalls = new Map();
@@ -99,11 +102,20 @@ async function placeCall({ phoneNumber, agent, lead, campaign, userId, testCall 
     }
 
     const trunk = fromNumber.sipTrunkId;
+
+    // Mistakes the carrier would only answer with "unallocated number". Refused before a
+    // port is taken or anything rings; `callError` is what the campaign runner logs.
+    const hostError = await ownSipHostError(trunk.host, trunk.port);
+    if (hostError) throw callRefusal('trunk_is_this_server', `SIP trunk "${trunk.name}": ${hostError}`, { userId, trunkId: trunk._id });
+    const dial = resolveTrunkDialNumber(lead.phone, fromNumber.phoneNumber || trunk.defaultCallerId, trunk);
+    if (dial.error) throw callRefusal('invalid_number', dial.error, { userId, trunkId: trunk._id });
+    const destination = dial.number;
+
     const callId = `sip-${uuidv4()}`;
     const rtpPort = ariService.acquirePort();
 
-    console.log(`📞 [SIP] Calling ${lead.phone} via ${trunk.name} (${trunk.host})`);
-    sipLog('info', `${testCall ? 'Test call' : 'Call'} to ${lead.phone} via trunk "${trunk.name}" (${trunk.host})`, {
+    console.log(`📞 [SIP] Calling ${destination} via ${trunk.name} (${trunk.host})`);
+    sipLog('info', `${testCall ? 'Test call' : 'Call'} to ${destination} via trunk "${trunk.name}" (${trunk.host})`, {
         userId, callId, trunkId: trunk._id
     });
 
@@ -168,16 +180,26 @@ async function placeCall({ phoneNumber, agent, lead, campaign, userId, testCall 
 
         // 3. Originate call via SIP trunk
         console.log(`[SIP] Originating call through trunk...`);
-        const destination = lead.phone.startsWith('+') ? lead.phone : `+${lead.phone.replace(/\D/g, '')}`;
-        const callChannel = await ariService.originateCall(
-            trunk._id.toString(), destination, trunk.host,
-            {
-                userId, agentId: agent._id.toString(), leadId: lead._id.toString(),
-                campaignId: campaign?._id?.toString() || '',
-                callerId: trunk.defaultCallerId || fromNumber.phoneNumber,
-                dialPrefix: trunk.dialPrefix || ''
+        let callChannel;
+        try {
+            callChannel = await ariService.originateCall(
+                trunk._id.toString(), destination, trunk.host,
+                {
+                    userId, agentId: agent._id.toString(), leadId: lead._id.toString(),
+                    campaignId: campaign?._id?.toString() || '',
+                    callerId: trunk.defaultCallerId || fromNumber.phoneNumber,
+                    dialPrefix: trunk.dialPrefix || '',
+                    stripPlus: trunk.stripPlus || false
+                }
+            );
+        } catch (origErr) {
+            // Asterisk never dialled. Without this the call log said "failed" and nothing
+            // else; the reason lived only in the SIP debug log.
+            if (typeof voiceStream?._pushError === 'function') {
+                voiceStream._pushError('sip', 'originate_failed', originateFailureMessage(origErr, trunk, destination));
             }
-        );
+            throw origErr;
+        }
         console.log(`[SIP] Call originated: ${callChannel.id}`);
 
         // 4. When call enters Stasis, bridge channels
@@ -243,7 +265,7 @@ async function placeCall({ phoneNumber, agent, lead, campaign, userId, testCall 
                 if (hungUpDuringSetup) return;
 
                 console.log(`✅ [SIP] Call ${callId} bridged`);
-                sipLog('success', `Call to ${lead.phone} answered and bridged`, { userId, callId, trunkId: trunk._id });
+                sipLog('success', `Call to ${destination} answered and bridged`, { userId, callId, trunkId: trunk._id });
 
                 // Signal the voice stream that the bridge is up — greeting can now be sent
                 voiceStream.setBridgeReady();
@@ -278,12 +300,12 @@ async function placeCall({ phoneNumber, agent, lead, campaign, userId, testCall 
 
                 // Step 3.5: Notify dashboard
                 emitEvent('sip:call-started', {
-                    callId, direction: 'outbound', to: lead.phone,
+                    callId, direction: 'outbound', to: destination,
                     agentName: agent.name, trunkName: trunk.name, userId
                 });
             } catch (err) {
                 console.error(`❌ [SIP] Bridge failed: ${err.message}`);
-                sipLog('error', `Bridge setup failed for call to ${lead.phone}: ${err.message}`, { userId, callId, trunkId: trunk._id });
+                sipLog('error', `Bridge setup failed for call to ${destination}: ${err.message}`, { userId, callId, trunkId: trunk._id });
                 emitEvent('sip:call-failed', {
                     callId, userId,
                     reason: `Bridge setup failed: ${err.message}`,
@@ -306,14 +328,22 @@ async function placeCall({ phoneNumber, agent, lead, campaign, userId, testCall 
             console.error(`❌ [SIP] Call did not connect (cause ${causeCode}: ${cause})`);
 
             // Q.850 cause → what the buyer should actually do about it
-            const userMessage = HANGUP_CAUSE_MESSAGES[causeCode] || `Call failed: ${cause}.`;
+            // Cause 1 is also what our own Asterisk says when a trunk points back at it.
+            const userMessage = causeCode === 1
+                ? `The carrier says ${destination} does not exist (404). Check the number has the right country code, and that the trunk's SIP host is your carrier's, not this server's own address. If your carrier needs a technical dial prefix, set it in the trunk's Dial Prefix field.`
+                : (HANGUP_CAUSE_MESSAGES[causeCode] || `Call failed: ${cause}.`);
 
             // Ringing-but-unanswered and busy are normal call outcomes, not faults —
             // logging them as errors sends buyers hunting for a problem that isn't there.
             const level = (causeCode === 17 || causeCode === 19) ? 'info' : 'error';
-            sipLog(level, `Call to ${lead.phone} via trunk "${trunk.name}" did not connect (cause ${causeCode}: ${cause}). ${userMessage}`, {
+            sipLog(level, `Call to ${destination} via trunk "${trunk.name}" did not connect (cause ${causeCode}: ${cause}). ${userMessage}`, {
                 userId, callId, trunkId: trunk._id
             });
+            // A real failure would otherwise read as a bare "failed" in Call Logs, so put
+            // the carrier's answer on the call itself. Busy and no answer are not faults.
+            if (level === 'error' && typeof voiceStream?._pushError === 'function') {
+                voiceStream._pushError('sip', `cause_${causeCode}`, `The call to ${destination} was rejected by SIP trunk "${trunk.name}" (cause ${causeCode}: ${cause}). ${userMessage}`);
+            }
             emitEvent('sip:call-failed', {
                 callId, userId,
                 reason: userMessage,
@@ -338,6 +368,28 @@ async function placeCall({ phoneNumber, agent, lead, campaign, userId, testCall 
         ariService.releasePort(rtpPort);
         throw err;
     }
+}
+
+/** A call refused before dialling: a 400 for the manual routes, `callError` for the call log. */
+function callRefusal(code, message, logMeta) {
+    sipLog('error', `Call not placed: ${message}`, logMeta);
+    const err = new Error(message);
+    err.status = 400;
+    err.callError = { service: 'sip', code, message };
+    return err;
+}
+
+/**
+ * Why Asterisk would not dial an outbound call, worded for whoever owns the trunk.
+ * "Allocation failed" almost always means the trunk's endpoint is not loaded in
+ * Asterisk, not that the number is wrong.
+ */
+function originateFailureMessage(err, trunk, destination) {
+    const said = typeof err?.body === 'object' ? JSON.stringify(err.body) : String(err?.body || err?.message || '');
+    if (/Allocation failed/i.test(said)) {
+        return `The call to ${destination} was not placed: SIP trunk "${trunk.name}" is not loaded in Asterisk. Open SIP Trunks, click "Reload Asterisk", and check the trunk's status in Debug.`;
+    }
+    return `The call to ${destination} was not placed: Asterisk refused to dial through SIP trunk "${trunk.name}" (${said || 'no reason given'}).`;
 }
 
 // ─── Inbound ─────────────────────────────────────────────────
@@ -493,18 +545,9 @@ async function handleInboundCall(channel, calledNumber, callerNumber) {
             userId: phoneConfig.createdBy, trunkId: phoneConfig.sipTrunkId
         });
 
-        // Try fallback number
         if (phoneConfig.fallbackNumber) {
-            console.log(`[SIP Inbound] Forwarding to fallback: ${phoneConfig.fallbackNumber}`);
-            try {
-                // Dial the fallback number through the same trunk
-                const trunkId = phoneConfig.sipTrunkId?.toString();
-                if (trunkId) {
-                    await channel.continueInDialplan({ context: 'intellicall-inbound', extension: phoneConfig.fallbackNumber });
-                }
-            } catch (fwdErr) {
-                console.error(`[SIP Inbound] Fallback forward failed: ${fwdErr.message}`);
-            }
+            await forwardToFallback(channel, phoneConfig, { callerNumber, reason: 'no inbound agent is assigned' });
+            return;
         }
         try { await channel.hangup(); } catch (_) { }
         return;
@@ -514,9 +557,13 @@ async function handleInboundCall(channel, calledNumber, callerNumber) {
     const agent = await Agent.findOne({ _id: phoneConfig.inboundAgentId, createdBy: userId });
     if (!agent) {
         console.error(`[SIP Inbound] Agent not found or not owned by user: ${phoneConfig.inboundAgentId}`);
-        sipLog('error', `Inbound call to ${phoneConfig.phoneNumber} dropped: the assigned inbound agent no longer exists. Re-assign an agent on the Phone Numbers page.`, {
+        sipLog('error', `Inbound call to ${phoneConfig.phoneNumber} ${phoneConfig.fallbackNumber ? `not answered by the AI: the assigned inbound agent no longer exists. Forwarding to fallback ${phoneConfig.fallbackNumber}.` : 'dropped: the assigned inbound agent no longer exists.'} Re-assign an agent on the Phone Numbers page.`, {
             userId, trunkId: phoneConfig.sipTrunkId
         });
+        if (phoneConfig.fallbackNumber) {
+            await forwardToFallback(channel, phoneConfig, { callerNumber, reason: 'the assigned inbound agent no longer exists' });
+            return;
+        }
         try { await channel.hangup(); } catch (_) { }
         return;
     }
@@ -686,6 +733,177 @@ async function handleInboundCall(channel, calledNumber, callerNumber) {
             ariService.releasePort(rtpPort);
         }
         try { await channel.hangup(); } catch (_) { }
+    }
+}
+
+// ─── Fallback forwarding ─────────────────────────────────────
+// When no AI agent will take an inbound call (none assigned, or the assigned one was
+// deleted), the caller is put through to the number's fallback. The dialplan can't do it:
+// every extension in intellicall-inbound goes straight back into this app
+// (generateExtensionsConfig in asterisk-config.js). So it is done like a Human Transfer: a
+// second leg dialled over the number's own trunk, bridged to the caller once it answers.
+// No engine runs. A CallLog needs an agent, so a forward is recorded in the SIP log only.
+
+/** Asterisk's own originate timeout (ARI's default), plus a margin for the backstop timer. */
+const FALLBACK_RING_SECONDS = 30;
+
+/**
+ * Put the inbound caller on `channel` through to phoneConfig.fallbackNumber, or hang up if
+ * that can't be done. Owns the channel from here on either way, and never throws.
+ *
+ * @param {object} channel      the caller's channel, answered (by the dialplan) and in Stasis
+ * @param {object} phoneConfig  the PhoneNumber that was called
+ * @param {object} opts
+ * @param {string} opts.callerNumber
+ * @param {string} opts.reason   why the AI didn't answer, for the SIP log
+ */
+async function forwardToFallback(channel, phoneConfig, { callerNumber, reason = '' }) {
+    const userId = phoneConfig.createdBy;
+    const callId = `sip-${uuidv4()}`;
+    const meta = { userId, callId, trunkId: phoneConfig.sipTrunkId };
+
+    /** Nothing was dialled: say why and drop the caller. */
+    const refuse = async (code, message, media = null) => {
+        console.warn(`[SIP Fallback] [${callId}] ${code}: ${message}`);
+        sipLog('error', `Inbound call to ${phoneConfig.phoneNumber} not forwarded: ${message}`, meta);
+        if (media) { try { await channel.play({ media }).catch(() => { }); } catch (_) { } }
+        try { await channel.hangup(); } catch (_) { }
+    };
+
+    try {
+        const trunk = phoneConfig.sipTrunkId ? await SipTrunk.findById(phoneConfig.sipTrunkId).catch(() => null) : null;
+        const plan = planFallback(phoneConfig, trunk);
+        if (plan.error) return await refuse(plan.code, plan.error);
+        const hostError = await ownSipHostError(trunk.host, trunk.port);
+        if (hostError) return await refuse('trunk_is_this_server', `SIP trunk "${trunk.name}": ${hostError}`);
+
+        const ari = ariService.getAri();
+        if (!ari || !ariService.isConnected()) return await refuse('ari_down', 'the telephony server is not reachable right now.');
+
+        let target = null;
+        let answeredAt = null;
+        let outcome = null;   // why the fallback never answered, for the SIP log
+        let ringTimer = null;
+        let ringback = null;
+
+        const stopWatching = () => {
+            ari.removeListener('StasisStart', onAnswered);
+            ari.removeListener('ChannelDestroyed', onDestroyed);
+            if (ringTimer) { clearTimeout(ringTimer); ringTimer = null; }
+        };
+
+        // Tracked like any call, so a hangup on either side, endAllCalls and the reconcile
+        // sweep all close it through endCall(). It counts against MAX_CONCURRENT_CALLS too.
+        activeCalls.set(callId, {
+            voiceStream: null, callChannel: channel, emChannel: null, bridge: null, rtpPort: null, userId,
+            agentId: null, trunkId: trunk._id, sourcePhoneNumberId: phoneConfig._id,
+            transferCount: 0, transferChannel: null,
+            // endCall() runs this where a voice stream's cleanup() would close the CallLog.
+            finish: async () => {
+                stopWatching();
+                if (answeredAt) {
+                    const duration = Math.round((Date.now() - answeredAt) / 1000);
+                    sipLog('info', `Forwarded call to ${plan.number} ended after ${duration}s`, meta);
+                } else {
+                    sipLog('warn', `Fallback number ${plan.number} was not reached (${outcome || 'failed'}); the caller was hung up`, meta);
+                }
+            }
+        });
+
+        const onDestroyed = (evt) => {
+            const id = evt.channel?.id;
+            if (id === channel.id) {
+                // The caller hung up, while it rang or mid-conversation.
+                if (!answeredAt) outcome = 'the caller hung up';
+                endCall(callId);
+                return;
+            }
+            if (!target || id !== target.id) return;
+            if (!answeredAt) outcome = transferOutcomeFromCause(evt).toLowerCase().replace('_', ' ');
+            endCall(callId);
+        };
+
+        const onAnswered = async (event, ch) => {
+            if (!target || ch.id !== target.id) return;
+            ari.removeListener('StasisStart', onAnswered);
+            if (ringTimer) { clearTimeout(ringTimer); ringTimer = null; }
+            if (!activeCalls.has(callId)) {
+                await ariService.hangupChannel(ch.id);
+                return;
+            }
+            answeredAt = Date.now();
+            try {
+                if (ringback) await ringback.stop().catch(() => { });
+                const bridge = await ariService.createBridge([channel.id, ch.id]);
+                const tracked = activeCalls.get(callId);
+                if (!tracked) {
+                    // endCall() already ran and could not have seen this bridge.
+                    await ariService.destroyBridge(bridge.id);
+                    return;
+                }
+                tracked.bridge = bridge;
+                console.log(`✅ [SIP Fallback] [${callId}] ${plan.number} answered — caller bridged`);
+                sipLog('success', `Inbound call to ${phoneConfig.phoneNumber} forwarded to ${plan.number}`, meta);
+                emitEvent('sip:call-started', {
+                    callId, direction: 'inbound', from: callerNumber, to: phoneConfig.phoneNumber,
+                    agentName: '', forwardedTo: plan.number, userId
+                });
+            } catch (err) {
+                console.error(`❌ [SIP Fallback] [${callId}] Bridge failed: ${err.message}`);
+                answeredAt = null;
+                outcome = `bridge failed: ${err.message}`;
+                endCall(callId);
+            }
+        };
+
+        ari.on('StasisStart', onAnswered);
+        ari.on('ChannelDestroyed', onDestroyed);
+
+        // The caller is already answered by the dialplan, so they'd hear silence while it
+        // rings. Best effort: a missing tone is no reason to fail the forward.
+        try {
+            ringback = ari.Playback();
+            await channel.play({ media: 'tone:ring' }, ringback);
+        } catch (_) { ringback = null; }
+
+        console.log(`↪️  [SIP Fallback] [${callId}] ${callerNumber} → ${plan.number} via ${trunk.name} (${reason})`);
+        sipLog('info', `Forwarding inbound call to ${phoneConfig.phoneNumber} to fallback ${plan.number} via trunk "${trunk.name}" (${reason})`, meta);
+        try {
+            target = await ariService.originateCall(trunk._id.toString(), plan.number, trunk.host, {
+                userId: String(userId || ''), agentId: '', leadId: '', campaignId: '',
+                callerId: plan.callerId,
+                // The number's own trunk settings apply to the fallback leg too.
+                dialPrefix: trunk.dialPrefix || '',
+                stripPlus: trunk.stripPlus || false
+            });
+        } catch (err) {
+            outcome = `Asterisk would not dial it (${typeof err?.body === 'object' ? JSON.stringify(err.body) : String(err?.body || err?.message || err)})`;
+            await endCall(callId);
+            return;
+        }
+
+        const tracked = activeCalls.get(callId);
+        if (!tracked) {
+            // The caller hung up while it was being dialled.
+            await ariService.hangupChannel(target.id);
+            return;
+        }
+        tracked.transferChannel = target;
+
+        // Backstop for a ring that never ends and for a hangup event we never see.
+        ringTimer = setTimeout(() => {
+            if (answeredAt || !activeCalls.has(callId)) return;
+            outcome = 'no answer';
+            endCall(callId).catch(e => console.error(`[SIP Fallback] [${callId}] timeout handling: ${e.message}`));
+        }, (FALLBACK_RING_SECONDS + 5) * 1000);
+        if (typeof ringTimer.unref === 'function') ringTimer.unref();
+    } catch (err) {
+        console.error(`❌ [SIP Fallback] [${callId}] Failed: ${err.message}`);
+        if (activeCalls.has(callId)) {
+            await endCall(callId).catch(() => { });
+        } else {
+            await refuse('forward_failed', `call forwarding failed (${err.message}).`);
+        }
     }
 }
 
@@ -972,7 +1190,8 @@ async function transferCall(callId, requestedDestinationId = '', reason = '') {
                         agentId: String(call.agentId || ''),
                         leadId: '', campaignId: '',
                         callerId,
-                        dialPrefix: trunk.dialPrefix || ''
+                        dialPrefix: trunk.dialPrefix || '',
+                        stripPlus: trunk.stripPlus || false
                     }
                 );
                 call.transferChannel = targetChannel;
@@ -1008,8 +1227,10 @@ async function endCall(callId) {
     console.log(`🛑 [SIP] Ending call ${callId}`);
     sipLog('info', 'Call ended', { userId: call.userId, callId });
 
-    // Cleanup voice stream (saves transcript, triggers analysis)
+    // Cleanup voice stream (saves transcript, triggers analysis). A forwarded call has
+    // no voice stream and closes itself out.
     if (call.voiceStream) await call.voiceStream.cleanup();
+    else if (call.finish) await call.finish();
 
     // Cleanup Asterisk resources
     // A transferred call still has the human's leg up — drop it with everything else.
@@ -1074,7 +1295,7 @@ async function stopCampaignCalls(campaignId) {
 
     const terminations = [];
     for (const [callId, call] of activeCalls.entries()) {
-        if (call.voiceStream.campaignId?.toString() === cid) {
+        if (call.voiceStream?.campaignId?.toString() === cid) {
             terminations.push(endCall(callId));
         }
     }
@@ -1096,4 +1317,4 @@ function getActiveCallIds() {
     return Array.from(activeCalls.keys());
 }
 
-module.exports = { placeCall, handleInboundCall, transferCall, endCall, endAllCalls, reconcileActiveChannels, getActiveCallCount, getActiveCallIds, setWsBroadcast, stopCampaignCalls };
+module.exports = { placeCall, handleInboundCall, transferCall, endCall, endAllCalls, reconcileActiveChannels, getActiveCallCount, getActiveCallIds, setWsBroadcast, stopCampaignCalls, originateFailureMessage };

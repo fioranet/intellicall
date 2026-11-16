@@ -8,52 +8,62 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Script from "next/script";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import dynamic from 'next/dynamic';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { toast } from "sonner";
-import axios from "axios";
-import { Loader2, Clock, Globe, Phone, Lock, Server, Activity, Settings, ShoppingBag, Key, Webhook, ChevronDown, Mail, Plug, Languages } from "lucide-react";
-import Link from "next/link";
-import Image from "next/image";
-import { Skeleton } from "@/components/ui/skeleton";
-
-import { useSettings } from "@/components/settings-provider";
-import { IntegrationsPanel } from "@/components/settings/integrations-panel";
-import { getCurrencySymbol } from "@/lib/currency-symbols";
-import {
+    Badge,
+    Button,
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+    CheckboxCard,
+    CheckboxCards,
+    CopyField,
     Dialog,
     DialogContent,
     DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import {
-    Zap,
-    Check,
-    CreditCard,
-    Plus,
-    BarChart3,
-    ChevronDown as ChevronDownIcon
-} from "lucide-react";
-import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+    Field,
+    Input,
+    PageHeader,
+    Progress,
+    Section,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+    Separator,
+    Skeleton,
+    Spinner,
+    Switch,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+    toast,
+} from "@wixzel/react";
+import axios from "axios";
+import { Clock, Globe, Phone, Lock, HardDrives, Pulse, Gear, ShoppingBag, Key, WebhooksLogo, CaretDown, Envelope, Translate, Lightning, Check, CreditCard, ChartBar, ArrowsClockwise } from "@phosphor-icons/react";
+import Link from "next/link";
+import Image from "next/image";
+
+import { useSettings } from "@/components/settings-provider";
+import { SettingRow, SettingRows } from "@/components/settings/setting-row";
+import { getCurrencySymbol } from "@/lib/currency-symbols";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
 
@@ -70,16 +80,16 @@ const EMAIL_EVENT_IDS = [
     "leadQualified", "inboundCall", "callCompleted",
 ] as const;
 
+// The events each "Send test" menu offers, in menu order.
+const WEBHOOK_TEST_EVENT_IDS = [
+    "inboundCall", "outboundCall", "callCompleted", "leadCreated",
+    "leadQualified", "campaignCompleted", "appointmentBooked", "appointmentCanceled",
+] as const;
+
+const EMAIL_TEST_EVENT_IDS = EMAIL_EVENT_IDS;
+
 // Common IANA timezones for appointment and display (user can set any valid IANA string via API)
 const COMMON_TIMEZONES = [
-    "America/Sao_Paulo",
-    "America/Manaus",
-    "America/Belem",
-    "America/Fortaleza",
-    "America/Recife",
-    "America/Cuiaba",
-    "America/Rio_Branco",
-    "America/Noronha",
     "UTC",
     "America/New_York",
     "America/Chicago",
@@ -143,6 +153,9 @@ function SettingsPageContent() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [user, setUser] = useState<any>(null);
+    const [hasPassword, setHasPassword] = useState(true);
+    const [passwordForm, setPasswordForm] = useState({ current: "", next: "", confirm: "" });
+    const [savingPassword, setSavingPassword] = useState(false);
     const [plans, setPlans] = useState<any[]>([]);
     const [currency, setCurrency] = useState("$");
     const [currencyCode, setCurrencyCode] = useState("USD");
@@ -340,6 +353,7 @@ function SettingsPageContent() {
 
             if (userRes.data?.status === "success") {
                 setUser(userRes.data.data.user);
+                setHasPassword(userRes.data.data.hasPassword !== false);
             }
 
             if (plansRes.data?.status === "success") {
@@ -402,6 +416,32 @@ function SettingsPageContent() {
         }
     }, [refreshSettings]);
 
+    const handleSavePassword = async () => {
+        if (passwordForm.next.length < 8) {
+            toast.error(t("password.tooShort"));
+            return;
+        }
+        if (passwordForm.next !== passwordForm.confirm) {
+            toast.error(t("password.mismatch"));
+            return;
+        }
+        setSavingPassword(true);
+        try {
+            const token = localStorage.getItem("token");
+            await axios.post(`${API_BASE_URL}/users/password`, {
+                currentPassword: hasPassword ? passwordForm.current : undefined,
+                newPassword: passwordForm.next
+            }, { headers: { 'Authorization': `Bearer ${token}` } });
+            toast.success(hasPassword ? t("password.updated") : t("password.set"));
+            setHasPassword(true);
+            setPasswordForm({ current: "", next: "", confirm: "" });
+        } catch (err: any) {
+            toast.error(err.response?.data?.message || t("password.failed"));
+        } finally {
+            setSavingPassword(false);
+        }
+    };
+
     const verifyStripeSession = useCallback(async (sessionId: string) => {
         try {
             const token = localStorage.getItem("token");
@@ -440,6 +480,16 @@ function SettingsPageContent() {
     }, [fetchData, router]);
 
 
+
+    // The native integrations moved to /integrations. OAuth callbacks and old
+    // bookmarks still land here with ?slack=connected and the like: hand them on
+    // with the same query so the right card opens there.
+    useEffect(() => {
+        const providers = ["slack", "hubspot", "google_calendar", "google_sheets", "whatsapp", "n8n"];
+        if (providers.some((p) => searchParams.has(p))) {
+            router.replace(`/integrations?${searchParams.toString()}`);
+        }
+    }, [searchParams, router]);
 
     useEffect(() => {
         fetchData();
@@ -664,827 +714,646 @@ function SettingsPageContent() {
     if (loading) {
         return (
             <div className="flex h-[400px] items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <Spinner size="xl" className="text-fg-muted" />
             </div>
         );
     }
 
-    return (
-        <div className="space-y-6">
-            <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
-            <div>
-                <h1 className="text-3xl font-bold">{t("page.title")}</h1>
-                <p className="text-muted-foreground">{t("page.subtitle")}</p>
+    // A usage meter on the current plan: "used / limit" over a thin bar.
+    const usageMeter = (label: string, used: number, limit: number) => (
+        <div className="flex flex-col gap-2 rounded-md bg-surface p-4">
+            <div className="flex items-center justify-between gap-2 text-caption font-medium">
+                <span className="text-fg-muted">{label}</span>
+                <span className="tabular-nums text-fg">{used} / {limit}</span>
             </div>
+            <Progress value={used} max={Math.max(1, limit)} />
+        </div>
+    );
 
-            <Tabs defaultValue="system" className="w-full">
-                <TabsList variant="line" className="flex items-center border-b mb-6 bg-card/50 overflow-x-auto scrollbar-hide flex-nowrap w-full justify-start h-auto p-0 rounded-none border-border shadow-none">
-                    <TabsTrigger
-                        value="system"
-                        className="flex-none flex items-center gap-2 px-6 py-2 rounded-none transition-all duration-200 shrink-0 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:bg-primary/5 border-b-2 border-transparent data-[state=active]:border-primary text-muted-foreground hover:text-foreground hover:bg-muted shadow-none bg-transparent !border-x-0 !border-t-0 !shadow-none after:hidden"
-                    >
-                        <Settings className="h-4 w-4" />
-                        <span className="text-sm">{t("page.tabs.preferences")}</span>
+    return (
+        <div className="flex flex-col gap-6">
+            <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
+            <PageHeader title={t("page.title")} description={t("page.subtitle")} />
+
+            <Tabs defaultValue="system" variant="line" className="w-full gap-6">
+                <TabsList className="max-w-full justify-start overflow-x-auto scrollbar-hide">
+                    <TabsTrigger value="system">
+                        <Gear />
+                        {t("page.tabs.preferences")}
                     </TabsTrigger>
-                    <TabsTrigger
-                        value="api-keys"
-                        className="flex-none flex items-center gap-2 px-6 py-2 rounded-none transition-all duration-200 shrink-0 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:bg-primary/5 border-b-2 border-transparent data-[state=active]:border-primary text-muted-foreground hover:text-foreground hover:bg-muted shadow-none bg-transparent !border-x-0 !border-t-0 !shadow-none after:hidden"
-                    >
-                        <Key className="h-4 w-4" />
-                        <span className="text-sm">{t("page.tabs.apiKeys")}</span>
+                    <TabsTrigger value="api-keys">
+                        <Key />
+                        {t("page.tabs.apiKeys")}
                     </TabsTrigger>
-                    <TabsTrigger
-                        value="webhooks"
-                        className="flex-none flex items-center gap-2 px-6 py-2 rounded-none transition-all duration-200 shrink-0 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:bg-primary/5 border-b-2 border-transparent data-[state=active]:border-primary text-muted-foreground hover:text-foreground hover:bg-muted shadow-none bg-transparent !border-x-0 !border-t-0 !shadow-none after:hidden"
-                    >
-                        <Webhook className="h-4 w-4" />
-                        <span className="text-sm">{t("page.tabs.webhooks")}</span>
+                    <TabsTrigger value="webhooks">
+                        <WebhooksLogo />
+                        {t("page.tabs.webhooks")}
                     </TabsTrigger>
-                    <TabsTrigger
-                        value="email"
-                        className="flex-none flex items-center gap-2 px-6 py-2 rounded-none transition-all duration-200 shrink-0 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:bg-primary/5 border-b-2 border-transparent data-[state=active]:border-primary text-muted-foreground hover:text-foreground hover:bg-muted shadow-none bg-transparent !border-x-0 !border-t-0 !shadow-none after:hidden"
-                    >
-                        <Mail className="h-4 w-4" />
-                        <span className="text-sm">{t("page.tabs.email")}</span>
+                    <TabsTrigger value="email">
+                        <Envelope />
+                        {t("page.tabs.email")}
                     </TabsTrigger>
-                    <TabsTrigger
-                        value="integrations"
-                        className="flex-none flex items-center gap-2 px-6 py-2 rounded-none transition-all duration-200 shrink-0 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:bg-primary/5 border-b-2 border-transparent data-[state=active]:border-primary text-muted-foreground hover:text-foreground hover:bg-muted shadow-none bg-transparent !border-x-0 !border-t-0 !shadow-none after:hidden"
-                    >
-                        <Plug className="h-4 w-4" />
-                        <span className="text-sm">{t("page.tabs.integrations")}</span>
+                    <TabsTrigger value="billing">
+                        <CreditCard />
+                        {t("page.tabs.billing")}
                     </TabsTrigger>
-                    <TabsTrigger
-                        value="billing"
-                        className="flex-none flex items-center gap-2 px-6 py-2 rounded-none transition-all duration-200 shrink-0 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:bg-primary/5 border-b-2 border-transparent data-[state=active]:border-primary text-muted-foreground hover:text-foreground hover:bg-muted shadow-none bg-transparent !border-x-0 !border-t-0 !shadow-none after:hidden"
-                    >
-                        <CreditCard className="h-4 w-4" />
-                        <span className="text-sm">{t("page.tabs.billing")}</span>
-                    </TabsTrigger>
-                    <TabsTrigger
-                        value="transactions"
-                        className="flex-none flex items-center gap-2 px-6 py-2 rounded-none transition-all duration-200 shrink-0 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:bg-primary/5 border-b-2 border-transparent data-[state=active]:border-primary text-muted-foreground hover:text-foreground hover:bg-muted shadow-none bg-transparent !border-x-0 !border-t-0 !shadow-none after:hidden"
-                    >
-                        <ShoppingBag className="h-4 w-4" />
-                        <span className="text-sm">{t("page.tabs.transactions")}</span>
+                    <TabsTrigger value="transactions">
+                        <ShoppingBag />
+                        {t("page.tabs.transactions")}
                     </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="api-keys">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>{t("credentials.title")}</CardTitle>
-                            <CardDescription>
-                                {t("credentials.description")}
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <form onSubmit={handleSaveSettings} className="space-y-6">
-                                <div className="grid gap-6 md:grid-cols-2">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="twilio-sid" className="text-xs font-bold uppercase text-muted-foreground">{t("credentials.twilioSid")}</Label>
-                                        <Input
-                                            id="twilio-sid"
-                                            value={apiKeys.twilioSid}
-                                            onChange={(e) =>
-                                                setApiKeys({ ...apiKeys, twilioSid: e.target.value })
-                                            }
-                                            placeholder={t("credentials.twilioSidPlaceholder")}
-                                            className="font-mono text-sm"
-                                        />
-                                    </div>
+                    <Section icon={<Key />} title={t("credentials.title")} description={t("credentials.description")}>
+                        <form onSubmit={handleSaveSettings} className="flex flex-col gap-6">
+                            <div className="grid gap-5 md:grid-cols-2">
+                                <Field label={t("credentials.twilioSid")} id="twilio-sid">
+                                    <Input
+                                        value={apiKeys.twilioSid}
+                                        onChange={(e) =>
+                                            setApiKeys({ ...apiKeys, twilioSid: e.target.value })
+                                        }
+                                        placeholder={t("credentials.twilioSidPlaceholder")}
+                                        className="font-mono"
+                                    />
+                                </Field>
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="twilio-token" className="text-xs font-bold uppercase text-muted-foreground">{t("credentials.twilioToken")}</Label>
-                                        <div className="flex gap-2">
-                                            <Input
-                                                id="twilio-token"
-                                                type="password"
-                                                value={apiKeys.twilioToken}
-                                                onChange={(e) =>
-                                                    setApiKeys({ ...apiKeys, twilioToken: e.target.value })
-                                                }
-                                                placeholder="••••••••••••••••••••••••••••••••"
-                                                className="font-mono text-sm"
-                                            />
-                                        </div>
-                                    </div>
+                                <Field label={t("credentials.twilioToken")} id="twilio-token">
+                                    <Input
+                                        type="password"
+                                        value={apiKeys.twilioToken}
+                                        onChange={(e) =>
+                                            setApiKeys({ ...apiKeys, twilioToken: e.target.value })
+                                        }
+                                        placeholder="••••••••••••••••••••••••••••••••"
+                                        className="font-mono"
+                                    />
+                                </Field>
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="openrouter-key" className="text-xs font-bold uppercase text-muted-foreground">{t("credentials.openRouter")}</Label>
-                                        <Input
-                                            id="openrouter-key"
-                                            type="password"
-                                            value={apiKeys.openRouterKey}
-                                            onChange={(e) =>
-                                                setApiKeys({ ...apiKeys, openRouterKey: e.target.value })
-                                            }
-                                            placeholder="sk-or-••••••••••••••••••••••••••••"
-                                            className="font-mono text-sm"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <div className="flex items-center justify-between">
-                                            <Label htmlFor="elevenlabs-key" className="text-xs font-bold uppercase text-muted-foreground">{t("credentials.elevenLabs")}</Label>
-                                            {verifyingElevenLabs && (
-                                                <div className="flex items-center gap-1 text-[10px] text-primary animate-pulse font-bold">
-                                                    <Loader2 className="h-3 w-3 animate-spin" />
-                                                    {t("credentials.verifying")}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <Input
-                                            id="elevenlabs-key"
-                                            type="password"
-                                            value={apiKeys.elevenLabsKey}
-                                            onChange={(e) =>
-                                                setApiKeys({ ...apiKeys, elevenLabsKey: e.target.value })
-                                            }
-                                            placeholder="••••••••••••••••••••••••••••••••"
-                                            className={`font-mono text-sm ${elevenLabsKeyError ? 'border-destructive focus-visible:ring-destructive' : ''}`}
-                                        />
-                                        {elevenLabsKeyError && (
-                                            <p className="text-[10px] text-destructive font-bold animate-in fade-in slide-in-from-top-1">
-                                                {elevenLabsKeyError}. {t("credentials.keyErrorSuffix")}
-                                            </p>
-                                        )}
-                                        {!elevenLabsKeyError && !verifyingElevenLabs && apiKeys.elevenLabsKey && (
-                                            <p className="text-[10px] text-emerald-500 font-bold flex items-center gap-1">
-                                                <Check className="h-3 w-3" /> {t("credentials.validKey")}
-                                            </p>
-                                        )}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="deepgram-key" className="text-xs font-bold uppercase text-muted-foreground">{t("credentials.deepgram")}</Label>
-                                        <Input
-                                            id="deepgram-key"
-                                            type="password"
-                                            value={apiKeys.deepgramKey}
-                                            onChange={(e) =>
-                                                setApiKeys({ ...apiKeys, deepgramKey: e.target.value })
-                                            }
-                                            placeholder="••••••••••••••••••••••••••••••••"
-                                            className="font-mono text-sm"
-                                        />
-                                        <p className="text-[10px] text-muted-foreground">
-                                            {t("credentials.deepgramHint")}
-                                        </p>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="sarvam-key" className="text-xs font-bold uppercase text-muted-foreground">{t("credentials.sarvam")}</Label>
-                                        <Input
-                                            id="sarvam-key"
-                                            type="password"
-                                            value={apiKeys.sarvamKey}
-                                            onChange={(e) =>
-                                                setApiKeys({ ...apiKeys, sarvamKey: e.target.value })
-                                            }
-                                            placeholder="••••••••••••••••••••••••••••••••"
-                                            className="font-mono text-sm"
-                                        />
-                                        <p className="text-[10px] text-muted-foreground">
-                                            {t("credentials.sarvamHint")}
-                                        </p>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="gemini-key" className="text-xs font-bold uppercase text-muted-foreground">{t("credentials.gemini")}</Label>
-                                        <Input
-                                            id="gemini-key"
-                                            type="password"
-                                            value={apiKeys.geminiKey}
-                                            onChange={(e) =>
-                                                setApiKeys({ ...apiKeys, geminiKey: e.target.value })
-                                            }
-                                            placeholder="••••••••••••••••••••••••••••••••"
-                                            className="font-mono text-sm"
-                                        />
-                                        <p className="text-[10px] text-muted-foreground">
-                                            {t("credentials.geminiHint")}
-                                        </p>
-                                    </div>
-                                </div>
+                                <Field label={t("credentials.openRouter")} id="openrouter-key">
+                                    <Input
+                                        type="password"
+                                        value={apiKeys.openRouterKey}
+                                        onChange={(e) =>
+                                            setApiKeys({ ...apiKeys, openRouterKey: e.target.value })
+                                        }
+                                        placeholder="sk-or-••••••••••••••••••••••••••••"
+                                        className="font-mono"
+                                    />
+                                </Field>
+                                <Field
+                                    label={t("credentials.elevenLabs")}
+                                    id="elevenlabs-key"
+                                    error={elevenLabsKeyError ? `${elevenLabsKeyError}. ${t("credentials.keyErrorSuffix")}` : undefined}
+                                    labelAside={
+                                        verifyingElevenLabs ? (
+                                            <span className="flex items-center gap-1 text-accent-ink">
+                                                <Spinner size="sm" />
+                                                {t("credentials.verifying")}
+                                            </span>
+                                        ) : !elevenLabsKeyError && apiKeys.elevenLabsKey ? (
+                                            <span className="flex items-center gap-1 font-medium text-success-ink">
+                                                <Check className="size-3" /> {t("credentials.validKey")}
+                                            </span>
+                                        ) : undefined
+                                    }
+                                >
+                                    <Input
+                                        type="password"
+                                        value={apiKeys.elevenLabsKey}
+                                        onChange={(e) =>
+                                            setApiKeys({ ...apiKeys, elevenLabsKey: e.target.value })
+                                        }
+                                        placeholder="••••••••••••••••••••••••••••••••"
+                                        className="font-mono"
+                                    />
+                                </Field>
+                                <Field label={t("credentials.deepgram")} hint={t("credentials.deepgramHint")} id="deepgram-key">
+                                    <Input
+                                        type="password"
+                                        value={apiKeys.deepgramKey}
+                                        onChange={(e) =>
+                                            setApiKeys({ ...apiKeys, deepgramKey: e.target.value })
+                                        }
+                                        placeholder="••••••••••••••••••••••••••••••••"
+                                        className="font-mono"
+                                    />
+                                </Field>
+                                <Field label={t("credentials.sarvam")} hint={t("credentials.sarvamHint")} id="sarvam-key">
+                                    <Input
+                                        type="password"
+                                        value={apiKeys.sarvamKey}
+                                        onChange={(e) =>
+                                            setApiKeys({ ...apiKeys, sarvamKey: e.target.value })
+                                        }
+                                        placeholder="••••••••••••••••••••••••••••••••"
+                                        className="font-mono"
+                                    />
+                                </Field>
+                                <Field label={t("credentials.gemini")} hint={t("credentials.geminiHint")} id="gemini-key">
+                                    <Input
+                                        type="password"
+                                        value={apiKeys.geminiKey}
+                                        onChange={(e) =>
+                                            setApiKeys({ ...apiKeys, geminiKey: e.target.value })
+                                        }
+                                        placeholder="••••••••••••••••••••••••••••••••"
+                                        className="font-mono"
+                                    />
+                                </Field>
+                            </div>
 
-                                <div className="flex flex-wrap gap-2 pt-2">
-                                    <Button type="submit" disabled={saving}>
-                                        {saving && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
-                                        {c("actions.saveChanges")}
-                                    </Button>
-                                </div>
-                            </form>
-                        </CardContent>
-                    </Card>
+                            <div className="flex flex-wrap gap-2">
+                                <Button type="submit" variant="primary" loading={saving}>
+                                    {c("actions.saveChanges")}
+                                </Button>
+                            </div>
+                        </form>
+                    </Section>
                 </TabsContent>
                 <TabsContent value="webhooks">
-                    <Card className="max-w-3xl">
-                        <CardHeader>
-                            <CardTitle>{t("webhooks.title")}</CardTitle>
-                            <CardDescription>
-                                {t("webhooks.description")}
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                            <div className="flex items-center justify-between rounded-xl border p-4 bg-muted/20 max-w-2xl">
-                                <div className="space-y-1">
-                                    <Label className="text-sm font-bold uppercase tracking-wider">{t("webhooks.enable")}</Label>
-                                    <p className="text-xs text-muted-foreground">{t("webhooks.enableHint")}</p>
-                                </div>
-                                <Switch
-                                    checked={webhookSettings.enabled}
-                                    onCheckedChange={(checked) => setWebhookSettings({ ...webhookSettings, enabled: checked })}
-                                />
-                            </div>
-
-                            <div className="grid gap-6 md:grid-cols-1 max-w-2xl mt-6">
-                                <div className="space-y-2">
-                                    <Label htmlFor="webhook-url" className="text-xs font-bold uppercase text-muted-foreground/80">{t("webhooks.payloadUrl")}</Label>
-                                    <Input
-                                        id="webhook-url"
-                                        placeholder="https://your-app.com/webhooks"
-                                        value={webhookSettings.url}
-                                        onChange={(e) => setWebhookSettings({ ...webhookSettings, url: e.target.value })}
-                                        className="font-mono text-sm h-11"
+                    <Section
+                        className="max-w-3xl"
+                        icon={<WebhooksLogo />}
+                        title={t("webhooks.title")}
+                        description={t("webhooks.description")}
+                    >
+                        <SettingRows inset>
+                            <SettingRow
+                                htmlFor="webhooks-enabled"
+                                label={t("webhooks.enable")}
+                                description={t("webhooks.enableHint")}
+                                control={
+                                    <Switch
+                                        id="webhooks-enabled"
+                                        checked={webhookSettings.enabled}
+                                        onCheckedChange={(checked) => setWebhookSettings({ ...webhookSettings, enabled: checked })}
                                     />
-                                    <p className="text-[11px] text-muted-foreground">{t("webhooks.payloadUrlHint")}</p>
-                                </div>
+                                }
+                            />
+                        </SettingRows>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="webhook-secret" className="text-xs font-bold uppercase text-muted-foreground/80">{t("webhooks.signingSecret")}</Label>
-                                    <div className="flex gap-2">
-                                        <Input
-                                            id="webhook-secret"
-                                            readOnly
-                                            value={webhookSettings.secret}
-                                            className="font-mono text-sm bg-muted/30"
-                                        />
-                                        <Button variant="outline" size="sm" onClick={handleRegenerateSecret}>
-                                            {t("webhooks.regenerate")}
-                                        </Button>
-                                    </div>
-                                    <p className="text-[11px] text-muted-foreground">{t("webhooks.signingSecretHint")}</p>
-                                </div>
-                            </div>
+                        <Field label={t("webhooks.payloadUrl")} hint={t("webhooks.payloadUrlHint")} id="webhook-url">
+                            <Input
+                                placeholder="https://your-app.com/webhooks"
+                                value={webhookSettings.url}
+                                onChange={(e) => setWebhookSettings({ ...webhookSettings, url: e.target.value })}
+                                className="font-mono"
+                            />
+                        </Field>
 
-                            <div className="pt-4 border-t max-w-2xl">
-                                <Label className="text-sm font-bold uppercase tracking-wider mb-4 block">{t("webhooks.triggerEvents")}</Label>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-                                    {WEBHOOK_EVENT_IDS.map((id) => (
-                                        <div key={id} className="flex items-start space-x-3 p-3 rounded-lg border bg-card/50 hover:bg-muted/10 transition-colors">
-                                            <Switch
-                                                id={`event-${id}`}
-                                                className="mt-1"
-                                                checked={(webhookSettings.events as any)[id]}
-                                                onCheckedChange={(checked) => {
-                                                    setWebhookSettings({
-                                                        ...webhookSettings,
-                                                        events: { ...webhookSettings.events, [id]: checked }
-                                                    });
-                                                }}
-                                            />
-                                            <div className="grid gap-0.5 pointer-events-none">
-                                                <Label htmlFor={`event-${id}`} className="text-sm font-semibold">{t(`events.${id}.label`)}</Label>
-                                                <span className="text-[10px] text-muted-foreground leading-tight">{t(`events.${id}.desc`)}</span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="pt-6 flex gap-3">
-                                <Button onClick={() => handleSaveSettings()} disabled={saving}>
-                                    {saving && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
-                                    {t("webhooks.save")}
+                        <div className="flex flex-col gap-1.5">
+                            <span className="text-body-sm font-medium text-fg">{t("webhooks.signingSecret")}</span>
+                            <div className="flex gap-2">
+                                <CopyField value={webhookSettings.secret} secret className="flex-1" />
+                                <Button variant="secondary" onClick={handleRegenerateSecret} iconStart={<ArrowsClockwise />}>
+                                    {t("webhooks.regenerate")}
                                 </Button>
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="outline">
-                                            {t("webhooks.sendTest")}
-                                            <ChevronDown className="ms-2 h-4 w-4 opacity-50" />
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="start" className="w-[200px] rounded-xl">
-                                        <DropdownMenuItem className="cursor-pointer" onClick={() => handleSendTestEvent('inboundCall', t(`events.inboundCall.short`))}>
-                                            {t(`events.inboundCall.label`)}
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem className="cursor-pointer" onClick={() => handleSendTestEvent('outboundCall', t(`events.outboundCall.short`))}>
-                                            {t(`events.outboundCall.label`)}
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem className="cursor-pointer" onClick={() => handleSendTestEvent('callCompleted', t(`events.callCompleted.short`))}>
-                                            {t(`events.callCompleted.label`)}
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem className="cursor-pointer" onClick={() => handleSendTestEvent('leadCreated', t(`events.leadCreated.short`))}>
-                                            {t(`events.leadCreated.label`)}
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem className="cursor-pointer" onClick={() => handleSendTestEvent('leadQualified', t(`events.leadQualified.short`))}>
-                                            {t(`events.leadQualified.label`)}
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem className="cursor-pointer" onClick={() => handleSendTestEvent('campaignCompleted', t(`events.campaignCompleted.short`))}>
-                                            {t(`events.campaignCompleted.label`)}
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem className="cursor-pointer" onClick={() => handleSendTestEvent('appointmentBooked', t(`events.appointmentBooked.short`))}>
-                                            {t(`events.appointmentBooked.label`)}
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem className="cursor-pointer" onClick={() => handleSendTestEvent('appointmentCanceled', t(`events.appointmentCanceled.short`))}>
-                                            {t(`events.appointmentCanceled.label`)}
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
                             </div>
-                        </CardContent>
-                    </Card>
+                            <p className="text-caption text-fg-muted">{t("webhooks.signingSecretHint")}</p>
+                        </div>
+
+                        <div className="flex flex-col gap-3 border-t border-border pt-4">
+                            <h3 className="text-body-sm font-semibold">{t("webhooks.triggerEvents")}</h3>
+                            <CheckboxCards
+                                columns={2}
+                                value={WEBHOOK_EVENT_IDS.filter((id) => (webhookSettings.events as any)[id])}
+                                onValueChange={(ids) => {
+                                    setWebhookSettings({
+                                        ...webhookSettings,
+                                        events: {
+                                            ...webhookSettings.events,
+                                            ...Object.fromEntries(WEBHOOK_EVENT_IDS.map((id) => [id, ids.includes(id)])),
+                                        }
+                                    });
+                                }}
+                            >
+                                {WEBHOOK_EVENT_IDS.map((id) => (
+                                    <CheckboxCard
+                                        key={id}
+                                        value={id}
+                                        id={`event-${id}`}
+                                        title={t(`events.${id}.label`)}
+                                        description={t(`events.${id}.desc`)}
+                                    />
+                                ))}
+                            </CheckboxCards>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2 pt-2">
+                            <Button variant="primary" onClick={() => handleSaveSettings()} loading={saving}>
+                                {t("webhooks.save")}
+                            </Button>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="secondary" iconEnd={<CaretDown />}>
+                                        {t("webhooks.sendTest")}
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="start" className="w-52">
+                                    {WEBHOOK_TEST_EVENT_IDS.map((id) => (
+                                        <DropdownMenuItem key={id} onClick={() => handleSendTestEvent(id, t(`events.${id}.short`))}>
+                                            {t(`events.${id}.label`)}
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    </Section>
                 </TabsContent>
 
                 <TabsContent value="email">
-                    <Card className="max-w-3xl">
-                        <CardHeader>
-                            <CardTitle>{t("emailNotifications.title")}</CardTitle>
-                            <CardDescription>
-                                {t("emailNotifications.description")}
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                            <div className="flex items-center justify-between rounded-xl border p-4 bg-muted/20 max-w-2xl">
-                                <div className="space-y-1">
-                                    <Label className="text-sm font-bold uppercase tracking-wider">{t("emailNotifications.enable")}</Label>
-                                    <p className="text-xs text-muted-foreground">{t("emailNotifications.enableHint")}</p>
-                                </div>
-                                <Switch
-                                    checked={emailSettings.enabled}
-                                    onCheckedChange={(checked) => setEmailSettings({ ...emailSettings, enabled: checked })}
+                    <Section
+                        className="max-w-3xl"
+                        icon={<Envelope />}
+                        title={t("emailNotifications.title")}
+                        description={t("emailNotifications.description")}
+                    >
+                        <SettingRows inset>
+                            <SettingRow
+                                htmlFor="email-enabled"
+                                label={t("emailNotifications.enable")}
+                                description={t("emailNotifications.enableHint")}
+                                control={
+                                    <Switch
+                                        id="email-enabled"
+                                        checked={emailSettings.enabled}
+                                        onCheckedChange={(checked) => setEmailSettings({ ...emailSettings, enabled: checked })}
+                                    />
+                                }
+                            />
+                        </SettingRows>
+
+                        <div className="grid gap-5 md:grid-cols-2">
+                            <Field label={t("emailNotifications.brevoKey")} hint={t("emailNotifications.brevoKeyHint")} id="brevo-key">
+                                <Input
+                                    type="password"
+                                    placeholder={t("emailNotifications.brevoKeyPlaceholder")}
+                                    value={emailSettings.brevoKey}
+                                    onChange={(e) => setEmailSettings({ ...emailSettings, brevoKey: e.target.value })}
+                                    className="font-mono"
                                 />
-                            </div>
+                            </Field>
 
-                            <div className="grid gap-6 md:grid-cols-2 max-w-2xl mt-6">
-                                <div className="space-y-2">
-                                    <Label htmlFor="brevo-key" className="text-xs font-bold uppercase text-muted-foreground/80">{t("emailNotifications.brevoKey")}</Label>
-                                    <Input
-                                        id="brevo-key"
-                                        type="password"
-                                        placeholder={t("emailNotifications.brevoKeyPlaceholder")}
-                                        value={emailSettings.brevoKey}
-                                        onChange={(e) => setEmailSettings({ ...emailSettings, brevoKey: e.target.value })}
-                                        className="font-mono text-sm h-11"
+                            <Field label={t("emailNotifications.recipientEmail")} hint={t("emailNotifications.recipientEmailHint")} id="recipient-email">
+                                <Input
+                                    type="email"
+                                    placeholder="you@example.com"
+                                    value={emailSettings.recipientEmail}
+                                    onChange={(e) => setEmailSettings({ ...emailSettings, recipientEmail: e.target.value })}
+                                />
+                            </Field>
+
+                            <Field label={t("emailNotifications.senderName")} id="sender-name">
+                                <Input
+                                    placeholder={branding.appName}
+                                    value={emailSettings.senderName}
+                                    onChange={(e) => setEmailSettings({ ...emailSettings, senderName: e.target.value })}
+                                />
+                            </Field>
+
+                            <Field label={t("emailNotifications.senderEmail")} id="sender-email">
+                                <Input
+                                    placeholder="notifications@yourdomain.com"
+                                    value={emailSettings.senderEmail}
+                                    onChange={(e) => setEmailSettings({ ...emailSettings, senderEmail: e.target.value })}
+                                />
+                            </Field>
+                        </div>
+
+                        <div className="flex flex-col gap-3 border-t border-border pt-4">
+                            <h3 className="text-body-sm font-semibold">{t("emailNotifications.notificationEvents")}</h3>
+                            <CheckboxCards
+                                columns={2}
+                                value={EMAIL_EVENT_IDS.filter((id) => (emailSettings.events as any)[id])}
+                                onValueChange={(ids) => {
+                                    setEmailSettings({
+                                        ...emailSettings,
+                                        events: {
+                                            ...emailSettings.events,
+                                            ...Object.fromEntries(EMAIL_EVENT_IDS.map((id) => [id, ids.includes(id)])),
+                                        }
+                                    });
+                                }}
+                            >
+                                {EMAIL_EVENT_IDS.map((id) => (
+                                    <CheckboxCard
+                                        key={id}
+                                        value={id}
+                                        id={`email-event-${id}`}
+                                        title={t(`events.${id}.label`)}
+                                        description={t(`events.${id}.desc`)}
                                     />
-                                    <p className="text-[11px] text-muted-foreground">{t("emailNotifications.brevoKeyHint")}</p>
-                                </div>
+                                ))}
+                            </CheckboxCards>
+                        </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="recipient-email" className="text-xs font-bold uppercase text-muted-foreground/80">{t("emailNotifications.recipientEmail")}</Label>
-                                    <Input
-                                        id="recipient-email"
-                                        type="email"
-                                        placeholder="you@example.com"
-                                        value={emailSettings.recipientEmail}
-                                        onChange={(e) => setEmailSettings({ ...emailSettings, recipientEmail: e.target.value })}
-                                        className="text-sm h-11"
-                                    />
-                                    <p className="text-[11px] text-muted-foreground">{t("emailNotifications.recipientEmailHint")}</p>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="sender-name" className="text-xs font-bold uppercase text-muted-foreground/80">{t("emailNotifications.senderName")}</Label>
-                                    <Input
-                                        id="sender-name"
-                                        placeholder={branding.appName}
-                                        value={emailSettings.senderName}
-                                        onChange={(e) => setEmailSettings({ ...emailSettings, senderName: e.target.value })}
-                                        className="text-sm h-11"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="sender-email" className="text-xs font-bold uppercase text-muted-foreground/80">{t("emailNotifications.senderEmail")}</Label>
-                                    <Input
-                                        id="sender-email"
-                                        placeholder="notifications@yourdomain.com"
-                                        value={emailSettings.senderEmail}
-                                        onChange={(e) => setEmailSettings({ ...emailSettings, senderEmail: e.target.value })}
-                                        className="text-sm h-11"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="pt-4 border-t max-w-2xl">
-                                <Label className="text-sm font-bold uppercase tracking-wider mb-4 block">{t("emailNotifications.notificationEvents")}</Label>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-                                    {EMAIL_EVENT_IDS.map((id) => (
-                                        <div key={id} className="flex items-start space-x-3 p-3 rounded-lg border bg-card/50 hover:bg-muted/10 transition-colors">
-                                            <Switch
-                                                id={`email-event-${id}`}
-                                                className="mt-1"
-                                                checked={(emailSettings.events as any)[id]}
-                                                onCheckedChange={(checked) => {
-                                                    setEmailSettings({
-                                                        ...emailSettings,
-                                                        events: { ...emailSettings.events, [id]: checked }
-                                                    });
-                                                }}
-                                            />
-                                            <div className="grid gap-0.5 pointer-events-none">
-                                                <Label htmlFor={`email-event-${id}`} className="text-sm font-semibold">{t(`events.${id}.label`)}</Label>
-                                                <p className="text-[11px] text-muted-foreground leading-tight">{t(`events.${id}.desc`)}</p>
-                                            </div>
-                                        </div>
+                        <div className="flex flex-wrap gap-2 pt-2">
+                            <Button variant="primary" onClick={() => handleSaveSettings()} loading={saving}>
+                                {t("emailNotifications.save")}
+                            </Button>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="secondary" iconEnd={<CaretDown />}>
+                                        {t("emailNotifications.sendTest")}
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="start" className="w-52">
+                                    {EMAIL_TEST_EVENT_IDS.map((id) => (
+                                        <DropdownMenuItem key={id} onClick={() => handleSendTestEmail(id, t(`events.${id}.short`))}>
+                                            {t(`events.${id}.label`)}
+                                        </DropdownMenuItem>
                                     ))}
-                                </div>
-                            </div>
-
-                            <div className="pt-6 flex gap-3">
-                                <Button onClick={() => handleSaveSettings()} disabled={saving}>
-                                    {saving && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
-                                    {t("emailNotifications.save")}
-                                </Button>
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="outline">
-                                            {t("emailNotifications.sendTest")}
-                                            <ChevronDown className="ms-2 h-4 w-4 opacity-50" />
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="start" className="w-[200px] rounded-xl">
-                                        <DropdownMenuItem className="cursor-pointer" onClick={() => handleSendTestEmail('appointmentBooked', t(`events.appointmentBooked.short`))}>
-                                            {t(`events.appointmentBooked.label`)}
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem className="cursor-pointer" onClick={() => handleSendTestEmail('appointmentCanceled', t(`events.appointmentCanceled.short`))}>
-                                            {t(`events.appointmentCanceled.label`)}
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem className="cursor-pointer" onClick={() => handleSendTestEmail('leadCreated', t(`events.leadCreated.short`))}>
-                                            {t(`events.leadCreated.label`)}
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem className="cursor-pointer" onClick={() => handleSendTestEmail('leadQualified', t(`events.leadQualified.short`))}>
-                                            {t(`events.leadQualified.label`)}
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem className="cursor-pointer" onClick={() => handleSendTestEmail('inboundCall', t(`events.inboundCall.short`))}>
-                                            {t(`events.inboundCall.label`)}
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem className="cursor-pointer" onClick={() => handleSendTestEmail('callCompleted', t(`events.callCompleted.short`))}>
-                                            {t(`events.callCompleted.label`)}
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-
-                <TabsContent value="integrations">
-                    <IntegrationsPanel />
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    </Section>
                 </TabsContent>
 
                 <TabsContent value="billing">
-                    <div className="grid gap-6">
-                        <Card className="rounded-2xl border-slate-100 shadow-sm">
-                            <CardHeader>
-                                <div className="flex flex-wrap items-start justify-between gap-4">
-                                    <div className="space-y-1">
-                                        <CardTitle className="text-xl font-bold">{t("billing.currentPlanTitle")}</CardTitle>
-                                        <CardDescription>{t("billing.currentPlanDescription")}</CardDescription>
-                                        <div className="flex flex-wrap items-center gap-4 pt-2 text-sm">
-                                            {user?.planStatus != null && (
-                                                <span className="text-slate-600 dark:text-slate-400">
-                                                    <span className="font-medium text-slate-500 dark:text-slate-500">{t("billing.status")}</span>{" "}
-                                                    <span className="capitalize font-medium">{user.planStatus}</span>
-                                                </span>
-                                            )}
-                                            {user?.planExpiry && (() => {
-                                                const expiryDate = new Date(user.planExpiry);
-                                                const isExpired = expiryDate < new Date();
-                                                return (
-                                                    <span className="text-slate-600 dark:text-slate-400">
-                                                        <span className="font-medium text-slate-500 dark:text-slate-500">
-                                                            {isExpired ? t("billing.expiredOn") : t("billing.expires")}
-                                                        </span>{" "}
-                                                        {expiryDate.toLocaleDateString(undefined, { dateStyle: "medium" })}
-                                                    </span>
-                                                );
-                                            })()}
-                                        </div>
-                                    </div>
-                                    <Badge className={`px-4 py-1 text-sm bg-primary/10 text-primary border-primary/20 hover:bg-primary/10 ${usage?.isTrial ? 'animate-pulse bg-amber-500/10 text-amber-600 border-amber-500/20 hover:bg-amber-500/10' : ''}`}>
-                                        {user?.plan?.name || t("billing.trialPlan")}
-                                    </Badge>
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                <div className={`grid gap-4 ${usage?.isTrial ? 'md:grid-cols-4' : 'md:grid-cols-3'}`}>
-                                    <div className="p-4 rounded-xl border bg-slate-50/50 dark:bg-muted/30 space-y-2">
-                                        <div className="flex justify-between items-center text-xs font-bold uppercase text-slate-400 dark:text-slate-500">
-                                            <span>{t("billing.agents")}</span>
-                                            <span className="text-slate-900 dark:text-slate-100">{usage?.usage?.agents ?? 0} / {usage?.limits?.agents ?? 0}</span>
-                                        </div>
-                                        <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                                            <div
-                                                className="h-full bg-primary"
-                                                style={{ width: `${Math.min(100, ((usage?.usage?.agents ?? 0) / Math.max(1, usage?.limits?.agents ?? 1)) * 100)}%` }}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="p-4 rounded-xl border bg-slate-50/50 dark:bg-muted/30 space-y-2">
-                                        <div className="flex justify-between items-center text-xs font-bold uppercase text-slate-400 dark:text-slate-500">
-                                            <span>{t("billing.campaigns")}</span>
-                                            <span className="text-slate-900 dark:text-slate-100">{usage?.usage?.campaigns ?? 0} / {usage?.limits?.campaigns ?? 0}</span>
-                                        </div>
-                                        <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                                            <div
-                                                className="h-full bg-primary"
-                                                style={{ width: `${Math.min(100, ((usage?.usage?.campaigns ?? 0) / Math.max(1, usage?.limits?.campaigns ?? 1)) * 100)}%` }}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="p-4 rounded-xl border bg-slate-50/50 dark:bg-muted/30 space-y-2">
-                                        <div className="flex justify-between items-center text-xs font-bold uppercase text-slate-400 dark:text-slate-500">
-                                            <span>{t("billing.leads")}</span>
-                                            <span className="text-slate-900 dark:text-slate-100">{usage?.usage?.leads ?? 0} / {usage?.limits?.leads ?? 0}</span>
-                                        </div>
-                                        <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                                            <div
-                                                className="h-full bg-primary"
-                                                style={{ width: `${Math.min(100, ((usage?.usage?.leads ?? 0) / Math.max(1, usage?.limits?.leads ?? 1)) * 100)}%` }}
-                                            />
-                                        </div>
-                                    </div>
-                                    {usage?.isTrial && (
-                                        <div className="p-4 rounded-xl border bg-slate-50/50 dark:bg-muted/30 space-y-2">
-                                            <div className="flex justify-between items-center text-xs font-bold uppercase text-slate-400 dark:text-slate-500">
-                                                <span>{t("billing.calls")}</span>
-                                                <span className="text-slate-900 dark:text-slate-100">
-                                                    {usage?.usage?.calls ?? 0}
-                                                    {" / "}
-                                                    {usage?.limits?.callsPerMonth === -1
-                                                        ? t("billing.unlimited")
-                                                        : usage?.limits?.callsPerMonth ?? 0}
-                                                </span>
-                                            </div>
-                                            <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                                                <div
-                                                    className="h-full bg-amber-500"
-                                                    style={{
-                                                        width: usage?.limits?.callsPerMonth && usage.limits.callsPerMonth > 0
-                                                            ? `${Math.min(100, ((usage?.usage?.calls ?? 0) / Math.max(1, usage.limits.callsPerMonth)) * 100)}%`
-                                                            : "0%"
-                                                    }}
-                                                />
-                                            </div>
-                                        </div>
+                    <div className="flex flex-col gap-6">
+                        <Section
+                            icon={<ChartBar />}
+                            title={t("billing.currentPlanTitle")}
+                            description={t("billing.currentPlanDescription")}
+                            actions={
+                                <Badge tone={usage?.isTrial ? "warning" : "accent"}>
+                                    {user?.plan?.name || t("billing.trialPlan")}
+                                </Badge>
+                            }
+                        >
+                            {(user?.planStatus != null || user?.planExpiry) && (
+                                <div className="flex flex-wrap items-center gap-4 text-body-sm">
+                                    {user?.planStatus != null && (
+                                        <span className="text-fg-muted">
+                                            <span className="font-medium text-fg-subtle">{t("billing.status")}</span>{" "}
+                                            <span className="font-medium capitalize text-fg">{user.planStatus}</span>
+                                        </span>
                                     )}
+                                    {user?.planExpiry && (() => {
+                                        const expiryDate = new Date(user.planExpiry);
+                                        const isExpired = expiryDate < new Date();
+                                        return (
+                                            <span className="text-fg-muted">
+                                                <span className="font-medium text-fg-subtle">
+                                                    {isExpired ? t("billing.expiredOn") : t("billing.expires")}
+                                                </span>{" "}
+                                                {expiryDate.toLocaleDateString(undefined, { dateStyle: "medium" })}
+                                            </span>
+                                        );
+                                    })()}
                                 </div>
-                            </CardContent>
-                        </Card>
+                            )}
+                            <div className={`grid gap-3 ${usage?.isTrial ? 'md:grid-cols-4' : 'md:grid-cols-3'}`}>
+                                {usageMeter(t("billing.agents"), usage?.usage?.agents ?? 0, usage?.limits?.agents ?? 0)}
+                                {usageMeter(t("billing.campaigns"), usage?.usage?.campaigns ?? 0, usage?.limits?.campaigns ?? 0)}
+                                {usageMeter(t("billing.leads"), usage?.usage?.leads ?? 0, usage?.limits?.leads ?? 0)}
+                                {usage?.isTrial && (
+                                    <div className="flex flex-col gap-2 rounded-md bg-surface p-4">
+                                        <div className="flex items-center justify-between gap-2 text-caption font-medium">
+                                            <span className="text-fg-muted">{t("billing.calls")}</span>
+                                            <span className="tabular-nums text-fg">
+                                                {usage?.usage?.calls ?? 0}
+                                                {" / "}
+                                                {usage?.limits?.callsPerMonth === -1
+                                                    ? t("billing.unlimited")
+                                                    : usage?.limits?.callsPerMonth ?? 0}
+                                            </span>
+                                        </div>
+                                        <Progress
+                                            tone="warning"
+                                            value={usage?.limits?.callsPerMonth && usage.limits.callsPerMonth > 0 ? (usage?.usage?.calls ?? 0) : 0}
+                                            max={usage?.limits?.callsPerMonth && usage.limits.callsPerMonth > 0 ? usage.limits.callsPerMonth : 1}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        </Section>
 
-                        <div className="space-y-4">
-                            <h2 className="text-xl font-bold px-1">{t("billing.availablePlans")}</h2>
-                            <div className="grid md:grid-cols-3 gap-6">
-                                {plans.map((plan) => (
-                                    <Card key={plan._id} className={`rounded-2xl border-slate-100 shadow-sm flex flex-col ${user?.plan?._id === plan._id ? 'border-primary ring-1 ring-primary/20' : ''}`}>
-                                        <CardHeader>
-                                            <div className="flex justify-between items-start">
-                                                <div className="p-2 bg-primary/5 rounded-lg mb-2">
-                                                    <Zap className="h-5 w-5 text-primary" />
+                        <div className="flex flex-col gap-4">
+                            <h2 className="text-heading-md">{t("billing.availablePlans")}</h2>
+                            <div className="grid gap-4 md:grid-cols-3">
+                                {plans.map((plan) => {
+                                    const isCurrent = user?.plan?._id === plan._id;
+                                    return (
+                                        <Card key={plan._id} selected={isCurrent}>
+                                            <CardHeader>
+                                                <span className="mb-2 grid size-9 place-items-center rounded-md bg-accent-subtle text-accent-ink">
+                                                    <Lightning className="size-5" />
+                                                </span>
+                                                <CardTitle className="flex flex-wrap items-center gap-2">
+                                                    {plan.name}
+                                                    {isCurrent && (
+                                                        <Badge tone="accent" appearance="solid">{t("billing.currentPlan")}</Badge>
+                                                    )}
+                                                </CardTitle>
+                                                <CardDescription>{plan.description}</CardDescription>
+                                            </CardHeader>
+                                            <CardContent className="flex flex-1 flex-col gap-4">
+                                                <div className="flex items-baseline gap-1">
+                                                    <span className="text-heading-xl tabular-nums">{currency}{plan.price}</span>
+                                                    <span className="text-body-sm text-fg-subtle">/{plan.interval}</span>
                                                 </div>
-                                                {user?.plan?._id === plan._id && (
-                                                    <Badge className="bg-primary text-white">{t("billing.currentPlan")}</Badge>
-                                                )}
-                                            </div>
-                                            <CardTitle className="text-xl font-bold pt-2">{plan.name}</CardTitle>
-                                            <CardDescription>{plan.description}</CardDescription>
-                                        </CardHeader>
-                                        <CardContent className="flex-1 space-y-4">
-                                            <div className="flex items-baseline gap-1 py-2">
-                                                <span className="text-3xl font-bold">{currency}{plan.price}</span>
-                                                <span className="text-slate-500 dark:text-slate-400 text-sm">/{plan.interval}</span>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                                                    <Check className="h-4 w-4 text-green-500 shrink-0" />
-                                                    {t("billing.planAgents", { count: plan.limits.agents === -1 ? t("billing.unlimited") : plan.limits.agents })}
-                                                </div>
-                                                <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                                                    <Check className="h-4 w-4 text-green-500 shrink-0" />
-                                                    {t("billing.planCampaigns", { count: plan.limits.campaigns === -1 ? t("billing.unlimited") : plan.limits.campaigns })}
-                                                </div>
-                                                <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                                                    <Check className="h-4 w-4 text-green-500 shrink-0" />
-                                                    {t("billing.planLeads", { count: plan.limits.leads === -1 ? t("billing.unlimited") : plan.limits.leads })}
-                                                </div>
-                                                <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                                                    <Check className="h-4 w-4 text-green-500 shrink-0" />
-                                                    {plan.limits.callsPerMonth === -1
-                                                        ? t("billing.planCallsUnlimited")
-                                                        : t("billing.planCalls", { count: plan.limits.callsPerMonth })}
-                                                </div>
-                                            </div>
-                                        </CardContent>
-                                        <CardFooter className="pt-6">
-                                            <Button
-                                                className="w-full rounded-full"
-                                                variant={user?.plan?._id === plan._id ? "outline" : "default"}
-                                                disabled={user?.plan?._id === plan._id}
-                                                onClick={() => handleUpgrade(plan)}
-                                            >
-                                                {user?.plan?._id === plan._id ? t("billing.currentPlan") : t("billing.upgradePlan")}
-                                            </Button>
-                                        </CardFooter>
-                                    </Card>
-                                ))}
+                                                <ul className="flex flex-col gap-2 text-body-sm text-fg-muted">
+                                                    <li className="flex items-center gap-2">
+                                                        <Check className="size-4 shrink-0 text-accent-ink" />
+                                                        {t("billing.planAgents", { count: plan.limits.agents === -1 ? t("billing.unlimited") : plan.limits.agents })}
+                                                    </li>
+                                                    <li className="flex items-center gap-2">
+                                                        <Check className="size-4 shrink-0 text-accent-ink" />
+                                                        {t("billing.planCampaigns", { count: plan.limits.campaigns === -1 ? t("billing.unlimited") : plan.limits.campaigns })}
+                                                    </li>
+                                                    <li className="flex items-center gap-2">
+                                                        <Check className="size-4 shrink-0 text-accent-ink" />
+                                                        {t("billing.planLeads", { count: plan.limits.leads === -1 ? t("billing.unlimited") : plan.limits.leads })}
+                                                    </li>
+                                                    <li className="flex items-center gap-2">
+                                                        <Check className="size-4 shrink-0 text-accent-ink" />
+                                                        {plan.limits.callsPerMonth === -1
+                                                            ? t("billing.planCallsUnlimited")
+                                                            : t("billing.planCalls", { count: plan.limits.callsPerMonth })}
+                                                    </li>
+                                                </ul>
+                                            </CardContent>
+                                            <CardFooter>
+                                                <Button
+                                                    block
+                                                    variant={isCurrent ? "secondary" : "primary"}
+                                                    disabled={isCurrent}
+                                                    onClick={() => handleUpgrade(plan)}
+                                                >
+                                                    {isCurrent ? t("billing.currentPlan") : t("billing.upgradePlan")}
+                                                </Button>
+                                            </CardFooter>
+                                        </Card>
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>
                 </TabsContent>
 
                 <TabsContent value="transactions">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>{t("transactions.title")}</CardTitle>
-                            <CardDescription>
-                                {t("transactions.description")}
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="rounded-xl border border-slate-100 dark:border-border overflow-hidden">
-                                <table className="w-full text-sm">
-                                    <thead className="bg-slate-50/50 dark:bg-muted/40 border-b border-slate-100 dark:border-border">
-                                        <tr>
-                                            <th className="px-4 py-3 text-start font-bold text-slate-500 dark:text-slate-400 uppercase text-[10px]">{t("transactions.date")}</th>
-                                            <th className="px-4 py-3 text-start font-bold text-slate-500 dark:text-slate-400 uppercase text-[10px]">{t("transactions.plan")}</th>
-                                            <th className="px-4 py-3 text-start font-bold text-slate-500 dark:text-slate-400 uppercase text-[10px]">{t("transactions.amount")}</th>
-                                            <th className="px-4 py-3 text-start font-bold text-slate-500 dark:text-slate-400 uppercase text-[10px]">{t("transactions.method")}</th>
-                                            <th className="px-4 py-3 text-end font-bold text-slate-500 dark:text-slate-400 uppercase text-[10px]">{t("transactions.status")}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-100 dark:divide-border">
-                                        {loadingTransactions ? (
-                                            Array(3).fill(0).map((_, i) => (
-                                                <tr key={i}>
-                                                    <td colSpan={5} className="px-4 py-4">
-                                                        <Skeleton className="h-4 w-full" />
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        ) : transactions.length === 0 ? (
-                                            <tr>
-                                                <td colSpan={5} className="px-4 py-12 text-center text-muted-foreground">
-                                                    {t("transactions.empty")}
-                                                </td>
-                                            </tr>
-                                        ) : (
-                                            transactions.map((tx) => (
-                                                <tr key={tx._id} className="hover:bg-slate-50/30 dark:hover:bg-muted/30 transition-colors">
-                                                    <td className="px-4 py-4 font-medium">
-                                                        {new Date(tx.createdAt).toLocaleDateString()}
-                                                    </td>
-                                                    <td className="px-4 py-4 font-bold text-slate-900 dark:text-slate-100">
-                                                        {tx.plan?.name || t("transactions.premiumPlan")}
-                                                    </td>
-                                                    <td className="px-4 py-4">
-                                                        {currency}{tx.amount}
-                                                    </td>
-                                                    <td className="px-4 py-4 capitalize text-slate-500 dark:text-slate-400">
-                                                        {tx.paymentGateway}
-                                                    </td>
-                                                    <td className="px-4 py-4 text-end">
-                                                        <Badge
-                                                            variant="outline"
-                                                            className={`
-                                                                ${tx.status === 'completed' ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20' :
-                                                                    tx.status === 'pending' ? 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-500/10 dark:text-yellow-400 dark:border-yellow-500/20' :
-                                                                        'bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20'}
-                                                            `}
-                                                        >
-                                                            {tx.status}
-                                                        </Badge>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </CardContent>
-                    </Card>
+                    <Section icon={<ShoppingBag />} title={t("transactions.title")} description={t("transactions.description")}>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>{t("transactions.date")}</TableHead>
+                                    <TableHead>{t("transactions.plan")}</TableHead>
+                                    <TableHead>{t("transactions.amount")}</TableHead>
+                                    <TableHead>{t("transactions.method")}</TableHead>
+                                    <TableHead align="end">{t("transactions.status")}</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {loadingTransactions ? (
+                                    Array(3).fill(0).map((_, i) => (
+                                        <TableRow key={i}>
+                                            <TableCell colSpan={5}>
+                                                <Skeleton className="h-4 w-full" />
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : transactions.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={5} align="center" className="py-12 text-fg-muted">
+                                            {t("transactions.empty")}
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (
+                                    transactions.map((tx) => (
+                                        <TableRow key={tx._id}>
+                                            <TableCell className="font-medium">
+                                                {new Date(tx.createdAt).toLocaleDateString()}
+                                            </TableCell>
+                                            <TableCell className="font-semibold">
+                                                {tx.plan?.name || t("transactions.premiumPlan")}
+                                            </TableCell>
+                                            <TableCell>
+                                                {currency}{tx.amount}
+                                            </TableCell>
+                                            <TableCell className="capitalize text-fg-subtle">
+                                                {tx.paymentGateway}
+                                            </TableCell>
+                                            <TableCell align="end">
+                                                <Badge
+                                                    dot
+                                                    tone={tx.status === 'completed' ? 'success' : tx.status === 'pending' ? 'warning' : 'danger'}
+                                                >
+                                                    {tx.status}
+                                                </Badge>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
+                    </Section>
                 </TabsContent>
 
                 <TabsContent value="system">
-                    <Card className="max-w-3xl">
-                        <CardHeader>
-                            <CardTitle>{t("preferences.title")}</CardTitle>
-                            <CardDescription>
-                                {t("preferences.description")}
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-6">
+                    <div className="flex max-w-3xl flex-col gap-6">
+                        <Section icon={<Gear />} title={t("preferences.title")} description={t("preferences.description")}>
+                            <SettingRows inset>
                                 {/* Applies on change rather than on Save — a language
                                     selector that needs a separate save is a papercut. */}
-                                <div className="flex items-center justify-between rounded-xl border p-4 bg-muted/20 max-w-2xl">
-                                    <div className="space-y-0.5">
-                                        <Label htmlFor="ui-language" className="text-sm font-bold uppercase">{t("preferences.language")}</Label>
-                                        <p className="text-xs text-muted-foreground">
-                                            {t("preferences.languageHint")}
-                                        </p>
-                                    </div>
-                                    <Select value={locale} onValueChange={handleLocaleChange}>
-                                        <SelectTrigger id="ui-language" className="w-[180px]">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {LOCALES.map((option) => (
-                                                <SelectItem key={option.code} value={option.code}>
-                                                    <div className="flex items-center gap-2">
-                                                        <Languages className="h-4 w-4 text-muted-foreground" />
-                                                        <span>{option.label}</span>
-                                                    </div>
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="flex items-center justify-between rounded-xl border p-4 bg-muted/20 max-w-2xl">
-                                    <div className="space-y-0.5">
-                                        <Label htmlFor="time-format" className="text-sm font-bold uppercase">{t("preferences.timeFormat")}</Label>
-                                        <p className="text-xs text-muted-foreground">
-                                            {t("preferences.timeFormatHint")}
-                                        </p>
-                                    </div>
-                                    <Select
-                                        value={systemSettings.timeFormat}
-                                        onValueChange={(val) => {
-                                            setSystemSettings({ ...systemSettings, timeFormat: val });
-                                        }}
-                                    >
-                                        <SelectTrigger className="w-[140px]">
-                                            <SelectValue placeholder={t("preferences.selectFormat")} />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="12">
-                                                <div className="flex items-center gap-2">
-                                                    <Clock className="h-4 w-4 text-muted-foreground" />
-                                                    <span>{t("preferences.hour12")}</span>
-                                                </div>
-                                            </SelectItem>
-                                            <SelectItem value="24">
-                                                <div className="flex items-center gap-2">
-                                                    <Clock className="h-4 w-4 text-muted-foreground" />
-                                                    <span>{t("preferences.hour24")}</span>
-                                                </div>
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="flex items-center justify-between rounded-xl border p-4 bg-muted/20 max-w-2xl">
-                                    <div className="space-y-0.5">
-                                        <Label htmlFor="time-zone" className="text-sm font-bold uppercase">{t("preferences.timeZone")}</Label>
-                                        <p className="text-xs text-muted-foreground">
-                                            {t("preferences.timeZoneHint")}
-                                        </p>
-                                    </div>
-                                    <Select
-                                        value={systemSettings.timeZone || "UTC"}
-                                        onValueChange={(val) => {
-                                            setSystemSettings({ ...systemSettings, timeZone: val });
-                                        }}
-                                    >
-                                        <SelectTrigger className="w-[280px]">
-                                            <SelectValue placeholder={t("preferences.selectTimeZone")} />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {(() => {
-                                                const current = systemSettings.timeZone || "America/Sao_Paulo";
-                                                const list = COMMON_TIMEZONES.includes(current) ? COMMON_TIMEZONES : [current, ...COMMON_TIMEZONES];
-                                                const formatTzName = (tz: string) => {
-                                                    if (tz === "America/Sao_Paulo") return "America/Sao Paulo (Brasília, UTC-3)";
-                                                    if (tz === "America/Manaus") return "America/Manaus (Amazonas, UTC-4)";
-                                                    if (tz === "America/Belem") return "America/Belém (Norte, UTC-3)";
-                                                    if (tz === "America/Fortaleza") return "America/Fortaleza (Nordeste, UTC-3)";
-                                                    if (tz === "America/Recife") return "America/Recife (Nordeste, UTC-3)";
-                                                    if (tz === "America/Cuiaba") return "America/Cuiabá (Mato Grosso, UTC-4)";
-                                                    if (tz === "America/Rio_Branco") return "America/Rio Branco (Acre, UTC-5)";
-                                                    if (tz === "America/Noronha") return "America/Noronha (Fernando de Noronha, UTC-2)";
-                                                    return tz.replace(/_/g, " ");
-                                                };
-                                                return list.map((tz) => (
-                                                    <SelectItem key={tz} value={tz}>
-                                                        <div className="flex items-center gap-2">
-                                                            <Globe className="h-4 w-4 text-muted-foreground shrink-0" />
-                                                            <span>{formatTzName(tz)}</span>
-                                                        </div>
+                                <SettingRow
+                                    htmlFor="ui-language"
+                                    label={t("preferences.language")}
+                                    description={t("preferences.languageHint")}
+                                    control={
+                                        <Select value={locale} onValueChange={handleLocaleChange}>
+                                            <SelectTrigger id="ui-language" className="w-[180px]">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {LOCALES.map((option) => (
+                                                    <SelectItem key={option.code} value={option.code}>
+                                                        <span className="flex items-center gap-2">
+                                                            <Translate className="size-4 text-fg-muted" />
+                                                            <span>{option.label}</span>
+                                                        </span>
                                                     </SelectItem>
-                                                ));
-                                            })()}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-2">
-                                        <Phone className="h-4 w-4 text-primary" />
-                                        <h3 className="text-sm font-bold uppercase tracking-wider">{t("preferences.callSettings")}</h3>
-                                    </div>
-                                    <div className="grid gap-4">
-                                        <div className="flex items-center justify-between rounded-xl border p-4 bg-muted/20 max-w-2xl">
-                                            <div className="space-y-0.5">
-                                                <Label htmlFor="recording-enabled" className="text-sm font-bold uppercase">{t("preferences.callRecording")}</Label>
-                                                <p className="text-xs text-muted-foreground">
-                                                    {t("preferences.callRecordingHint")}
-                                                </p>
-                                            </div>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    }
+                                />
+                                <SettingRow
+                                    htmlFor="time-format"
+                                    label={t("preferences.timeFormat")}
+                                    description={t("preferences.timeFormatHint")}
+                                    control={
+                                        <Select
+                                            value={systemSettings.timeFormat}
+                                            onValueChange={(val) => {
+                                                setSystemSettings({ ...systemSettings, timeFormat: val });
+                                            }}
+                                        >
+                                            <SelectTrigger id="time-format" className="w-[140px]">
+                                                <SelectValue placeholder={t("preferences.selectFormat")} />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="12">
+                                                    <span className="flex items-center gap-2">
+                                                        <Clock className="size-4 text-fg-muted" />
+                                                        <span>{t("preferences.hour12")}</span>
+                                                    </span>
+                                                </SelectItem>
+                                                <SelectItem value="24">
+                                                    <span className="flex items-center gap-2">
+                                                        <Clock className="size-4 text-fg-muted" />
+                                                        <span>{t("preferences.hour24")}</span>
+                                                    </span>
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    }
+                                />
+                                <SettingRow
+                                    htmlFor="time-zone"
+                                    label={t("preferences.timeZone")}
+                                    description={t("preferences.timeZoneHint")}
+                                    control={
+                                        <Select
+                                            value={systemSettings.timeZone || "UTC"}
+                                            onValueChange={(val) => {
+                                                setSystemSettings({ ...systemSettings, timeZone: val });
+                                            }}
+                                        >
+                                            <SelectTrigger id="time-zone" className="w-[220px]">
+                                                <SelectValue placeholder={t("preferences.selectTimeZone")} />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {(() => {
+                                                    const current = systemSettings.timeZone || "UTC";
+                                                    const list = COMMON_TIMEZONES.includes(current) ? COMMON_TIMEZONES : [current, ...COMMON_TIMEZONES];
+                                                    return list.map((tz) => (
+                                                        <SelectItem key={tz} value={tz}>
+                                                            <span className="flex items-center gap-2">
+                                                                <Globe className="size-4 shrink-0 text-fg-muted" />
+                                                                <span>{tz.replace(/_/g, " ")}</span>
+                                                            </span>
+                                                        </SelectItem>
+                                                    ));
+                                                })()}
+                                            </SelectContent>
+                                        </Select>
+                                    }
+                                />
+                            </SettingRows>
+
+                            <div className="flex flex-col gap-3">
+                                <h3 className="flex items-center gap-2 text-body-sm font-semibold">
+                                    <Phone className="size-4 text-fg-muted" />
+                                    {t("preferences.callSettings")}
+                                </h3>
+                                <SettingRows inset>
+                                    <SettingRow
+                                        htmlFor="recording-enabled"
+                                        label={t("preferences.callRecording")}
+                                        description={t("preferences.callRecordingHint")}
+                                        control={
                                             <Switch
                                                 id="recording-enabled"
                                                 checked={systemSettings.recordingEnabled}
@@ -1492,14 +1361,13 @@ function SettingsPageContent() {
                                                     setSystemSettings({ ...systemSettings, recordingEnabled: checked });
                                                 }}
                                             />
-                                        </div>
-                                        <div className="flex items-center justify-between rounded-xl border p-4 bg-muted/20 max-w-2xl">
-                                            <div className="space-y-0.5">
-                                                <Label htmlFor="auto-analysis" className="text-sm font-bold uppercase">{t("preferences.autoAnalysis")}</Label>
-                                                <p className="text-xs text-muted-foreground">
-                                                    {t("preferences.autoAnalysisHint")}
-                                                </p>
-                                            </div>
+                                        }
+                                    />
+                                    <SettingRow
+                                        htmlFor="auto-analysis"
+                                        label={t("preferences.autoAnalysis")}
+                                        description={t("preferences.autoAnalysisHint")}
+                                        control={
                                             <Switch
                                                 id="auto-analysis"
                                                 checked={systemSettings.autoAnalysisEnabled}
@@ -1507,172 +1375,190 @@ function SettingsPageContent() {
                                                     setSystemSettings({ ...systemSettings, autoAnalysisEnabled: checked });
                                                 }}
                                             />
-                                        </div>
-
-                                        <div className="flex flex-col space-y-4 rounded-xl border p-4 bg-muted/20 max-w-2xl">
-                                            <div className="flex items-center justify-between">
-                                                <div className="space-y-0.5">
-                                                    <div className="flex items-center gap-2">
-                                                        <Label htmlFor="auto-hangup" className="text-sm font-bold uppercase">{t("preferences.autoHangup")}</Label>
-                                                        {systemSettings.autoHangupEnabled && (systemSettings.incomingHangupLimit === 0 || systemSettings.outgoingHangupLimit === 0) && (
-                                                            <Badge variant="destructive" className="text-[10px] h-4 px-1.5 uppercase">{t("preferences.immediateHangup")}</Badge>
+                                        }
+                                    />
+                                    <SettingRow
+                                        htmlFor="auto-hangup"
+                                        label={
+                                            <span className="flex flex-wrap items-center gap-2">
+                                                {t("preferences.autoHangup")}
+                                                {systemSettings.autoHangupEnabled && (systemSettings.incomingHangupLimit === 0 || systemSettings.outgoingHangupLimit === 0) && (
+                                                    <Badge tone="danger" size="sm">{t("preferences.immediateHangup")}</Badge>
+                                                )}
+                                            </span>
+                                        }
+                                        description={t("preferences.autoHangupHint")}
+                                        control={
+                                            <Switch
+                                                id="auto-hangup"
+                                                checked={systemSettings.autoHangupEnabled}
+                                                onCheckedChange={(checked) => {
+                                                    setSystemSettings({ ...systemSettings, autoHangupEnabled: checked });
+                                                }}
+                                            />
+                                        }
+                                    >
+                                        {systemSettings.autoHangupEnabled && (
+                                            <div className="flex animate-wx-fade-in flex-col gap-4 border-t border-border pt-3">
+                                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                                    <Field
+                                                        label={t("preferences.incomingTimeout")}
+                                                        id="incoming-limit"
+                                                        labelAside={systemSettings.incomingHangupLimit === 0 && (
+                                                            <Badge tone="danger" size="sm">{t("preferences.immediate")}</Badge>
                                                         )}
-                                                    </div>
-                                                    <p className="text-xs text-muted-foreground">
-                                                        {t("preferences.autoHangupHint")}
-                                                    </p>
+                                                    >
+                                                        <Input
+                                                            type="number"
+                                                            min="0"
+                                                            className="w-36"
+                                                            trailing={t("preferences.minutesAbbrev")}
+                                                            value={systemSettings.incomingHangupLimit}
+                                                            onChange={(e) => setSystemSettings({ ...systemSettings, incomingHangupLimit: parseInt(e.target.value) || 0 })}
+                                                        />
+                                                    </Field>
+                                                    <Field
+                                                        label={t("preferences.outgoingTimeout")}
+                                                        id="outgoing-limit"
+                                                        labelAside={systemSettings.outgoingHangupLimit === 0 && (
+                                                            <Badge tone="danger" size="sm">{t("preferences.immediate")}</Badge>
+                                                        )}
+                                                    >
+                                                        <Input
+                                                            type="number"
+                                                            min="0"
+                                                            className="w-36"
+                                                            trailing={t("preferences.minutesAbbrev")}
+                                                            value={systemSettings.outgoingHangupLimit}
+                                                            onChange={(e) => setSystemSettings({ ...systemSettings, outgoingHangupLimit: parseInt(e.target.value) || 0 })}
+                                                        />
+                                                    </Field>
                                                 </div>
-                                                <Switch
-                                                    id="auto-hangup"
-                                                    checked={systemSettings.autoHangupEnabled}
-                                                    onCheckedChange={(checked) => {
-                                                        setSystemSettings({ ...systemSettings, autoHangupEnabled: checked });
-                                                    }}
-                                                />
+                                                <p className="text-caption text-fg-muted">
+                                                    {t("preferences.hangupHint")}
+                                                </p>
                                             </div>
+                                        )}
+                                    </SettingRow>
+                                </SettingRows>
+                            </div>
 
-                                            {systemSettings.autoHangupEnabled && (
-                                                <div className="flex flex-col gap-4 pt-2 border-t border-border/50 animate-in fade-in slide-in-from-top-1">
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                        <div className="space-y-1">
-                                                            <div className="flex items-center gap-2">
-                                                                <Label htmlFor="incoming-limit" className="text-[10px] font-bold uppercase text-muted-foreground">{t("preferences.incomingTimeout")}</Label>
-                                                                {systemSettings.incomingHangupLimit === 0 && (
-                                                                    <Badge variant="destructive" className="text-[8px] h-3 px-1.5 uppercase">{t("preferences.immediate")}</Badge>
-                                                                )}
-                                                            </div>
-                                                            <div className="flex items-center gap-2">
-                                                                <Input
-                                                                    id="incoming-limit"
-                                                                    type="number"
-                                                                    min="0"
-                                                                    className="w-24 h-9"
-                                                                    value={systemSettings.incomingHangupLimit}
-                                                                    onChange={(e) => setSystemSettings({ ...systemSettings, incomingHangupLimit: parseInt(e.target.value) || 0 })}
-                                                                />
-                                                                <span className="text-sm text-muted-foreground">{t("preferences.minutesAbbrev")}</span>
-                                                            </div>
-                                                        </div>
-                                                        <div className="space-y-1">
-                                                            <div className="flex items-center gap-2">
-                                                                <Label htmlFor="outgoing-limit" className="text-[10px] font-bold uppercase text-muted-foreground">{t("preferences.outgoingTimeout")}</Label>
-                                                                {systemSettings.outgoingHangupLimit === 0 && (
-                                                                    <Badge variant="destructive" className="text-[8px] h-3 px-1.5 uppercase">{t("preferences.immediate")}</Badge>
-                                                                )}
-                                                            </div>
-                                                            <div className="flex items-center gap-2">
-                                                                <Input
-                                                                    id="outgoing-limit"
-                                                                    type="number"
-                                                                    min="0"
-                                                                    className="w-24 h-9"
-                                                                    value={systemSettings.outgoingHangupLimit}
-                                                                    onChange={(e) => setSystemSettings({ ...systemSettings, outgoingHangupLimit: parseInt(e.target.value) || 0 })}
-                                                                />
-                                                                <span className="text-sm text-muted-foreground">{t("preferences.minutesAbbrev")}</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <p className="text-[10px] text-muted-foreground italic">
-                                                        {t("preferences.hangupHint")}
-                                                    </p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="pt-2">
-                                    <Button onClick={() => handleSaveSettings()} disabled={saving}>
-                                        {saving && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
-                                        {t("preferences.apply")}
+                            <div>
+                                <Button variant="primary" onClick={() => handleSaveSettings()} loading={saving}>
+                                    {t("preferences.apply")}
+                                </Button>
+                            </div>
+                        </Section>
+
+                        {/* Password — Google-only accounts can set one here */}
+                        <Section
+                            icon={<Lock />}
+                            title={hasPassword ? t("password.changeTitle") : t("password.setTitle")}
+                            description={hasPassword ? t("password.changeDescription") : t("password.setDescription")}
+                        >
+                            <div className="flex max-w-md flex-col gap-4">
+                                {hasPassword && (
+                                    <Field label={t("password.current")} id="current-password">
+                                        <Input
+                                            type="password"
+                                            autoComplete="current-password"
+                                            value={passwordForm.current}
+                                            onChange={(e) => setPasswordForm({ ...passwordForm, current: e.target.value })}
+                                        />
+                                    </Field>
+                                )}
+                                <Field label={t("password.new")} id="new-password">
+                                    <Input
+                                        type="password"
+                                        autoComplete="new-password"
+                                        value={passwordForm.next}
+                                        onChange={(e) => setPasswordForm({ ...passwordForm, next: e.target.value })}
+                                    />
+                                </Field>
+                                <Field label={t("password.confirm")} id="confirm-password">
+                                    <Input
+                                        type="password"
+                                        autoComplete="new-password"
+                                        value={passwordForm.confirm}
+                                        onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
+                                    />
+                                </Field>
+                                <div>
+                                    <Button variant="primary" onClick={handleSavePassword} disabled={!passwordForm.next} loading={savingPassword}>
+                                        {hasPassword ? t("password.changeButton") : t("password.setButton")}
                                     </Button>
                                 </div>
                             </div>
-                        </CardContent>
-                    </Card>
+                        </Section>
 
-                    {/* Asterisk / SIP Status Card */}
-                    <Card className="mt-6 max-w-3xl">
-                        <CardHeader>
-                            <div className="flex items-center gap-2">
-                                <Server className="h-5 w-5 text-primary" />
-                                <CardTitle>{t("asterisk.title")}</CardTitle>
-                            </div>
-                            <CardDescription>
-                                {t("asterisk.description")}
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex items-center gap-6 p-4 rounded-xl border bg-muted/20 max-w-2xl">
-                                <div className="flex items-center gap-2">
-                                    {asteriskStatus?.asteriskConnected ? (
-                                        <>
-                                            <div className="h-3 w-3 rounded-full bg-green-500 animate-pulse" />
-                                            <span className="text-sm font-semibold text-green-700">{t("asterisk.connected")}</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <div className="h-3 w-3 rounded-full bg-red-400" />
-                                            <span className="text-sm font-semibold text-red-600">{t("asterisk.offline")}</span>
-                                        </>
-                                    )}
-                                </div>
-                                <div className="h-5 w-px bg-border" />
-                                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                                    <Activity className="h-4 w-4" />
-                                    <span>{t("asterisk.activeCalls", { count: asteriskStatus?.activeSipCalls ?? 0 })}</span>
-                                </div>
-                                <div className="ms-auto">
-                                    <Button variant="outline" size="sm" asChild>
-                                        <Link href="/sip-trunks">
-                                            <Server className="me-2 h-3.5 w-3.5" />
-                                            {t("asterisk.manageTrunks")}
-                                        </Link>
-                                    </Button>
+                        {/* Asterisk / SIP Status Card */}
+                        <Section
+                            icon={<HardDrives />}
+                            title={t("asterisk.title")}
+                            description={t("asterisk.description")}
+                            actions={
+                                <Button variant="secondary" size="sm" asChild iconStart={<HardDrives />}>
+                                    <Link href="/sip-trunks">
+                                        {t("asterisk.manageTrunks")}
+                                    </Link>
+                                </Button>
+                            }
+                        >
+                            <div className="flex flex-wrap items-center gap-4 rounded-md bg-surface p-4">
+                                {asteriskStatus?.asteriskConnected ? (
+                                    <Badge tone="success" dot>{t("asterisk.connected")}</Badge>
+                                ) : (
+                                    <Badge tone="danger" dot>{t("asterisk.offline")}</Badge>
+                                )}
+                                <Separator orientation="vertical" className="h-5" />
+                                <div className="flex items-center gap-1.5 text-body-sm text-fg-muted">
+                                    <Pulse className="size-4" />
+                                    <span className="tabular-nums">{t("asterisk.activeCalls", { count: asteriskStatus?.activeSipCalls ?? 0 })}</span>
                                 </div>
                             </div>
-                        </CardContent>
-                    </Card>
-
+                        </Section>
+                    </div>
                 </TabsContent>
             </Tabs>
 
             <Dialog open={isPaymentModalOpen} onOpenChange={setIsPaymentModalOpen}>
-                <DialogContent className="max-w-md rounded-2xl">
+                <DialogContent size="sm">
                     <DialogHeader>
-                        <DialogTitle className="text-xl font-bold text-center">{t("payment.selectGateway")}</DialogTitle>
-                        <DialogDescription className="text-center pt-2">
-                            {t("payment.choosePrompt")} <span className="font-bold text-slate-900">{selectedPlan?.name}</span>
+                        <DialogTitle>{t("payment.selectGateway")}</DialogTitle>
+                        <DialogDescription>
+                            {t("payment.choosePrompt")} <span className="font-semibold text-fg">{selectedPlan?.name}</span>
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="grid gap-3 py-6">
+                    <div className="grid gap-3 py-4">
                         {loadingGateways ? (
                             <>
-                                <Skeleton className="h-20 w-full rounded-xl" />
-                                <Skeleton className="h-20 w-full rounded-xl" />
+                                <Skeleton className="h-20 w-full" />
+                                <Skeleton className="h-20 w-full" />
                             </>
                         ) : (
                             <>
                                 {enabledGateways.stripe && (
-                                    <Button
-                                        variant="outline"
-                                        className="h-20 justify-start gap-6 px-6 rounded-xl hover:bg-muted/50 transition-all"
-                                        onClick={() => handleGatewaySelect("Stripe")}
-                                    >
-                                        <div className="relative h-10 w-32 flex items-center justify-center shrink-0">
-                                            <Image src="/images/gateways/stripe.png" alt="Stripe" fill className="object-contain dark:hidden" />
-                                            <Image src="/images/gateways/stripe_dark.png" alt="Stripe" fill className="object-contain hidden dark:block" />
-                                        </div>
-                                        <div className="text-start flex-1">
-                                            <div className="flex items-center gap-2">
-                                                <p className="font-bold text-base">Stripe</p>
-                                                {enabledGateways.stripeTestMode && (
-                                                    <Badge variant="secondary" className="text-[10px] h-4 px-1.5 uppercase bg-yellow-100 text-yellow-700 border-yellow-200">{t("payment.testMode")}</Badge>
-                                                )}
+                                    <Card interactive asChild>
+                                        <button
+                                            type="button"
+                                            className="flex-row items-center gap-5 p-4 text-start wx-focus"
+                                            onClick={() => handleGatewaySelect("Stripe")}
+                                        >
+                                            <div className="relative flex h-10 w-28 shrink-0 items-center justify-center">
+                                                <Image src="/images/gateways/stripe.png" alt="Stripe" fill className="object-contain dark:hidden" />
+                                                <Image src="/images/gateways/stripe_dark.png" alt="Stripe" fill className="hidden object-contain dark:block" />
                                             </div>
-                                            <p className="text-xs text-slate-500">{t("payment.stripeHint")}</p>
-                                        </div>
-                                    </Button>
+                                            <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                                                <div className="flex items-center gap-2">
+                                                    <p className="text-body-md font-semibold">Stripe</p>
+                                                    {enabledGateways.stripeTestMode && (
+                                                        <Badge tone="warning" size="sm">{t("payment.testMode")}</Badge>
+                                                    )}
+                                                </div>
+                                                <p className="text-caption text-fg-subtle">{t("payment.stripeHint")}</p>
+                                            </div>
+                                        </button>
+                                    </Card>
                                 )}
                                 {enabledGateways.paypal && (
                                     <div className="mt-2">
@@ -1718,49 +1604,53 @@ function SettingsPageContent() {
                                     </div>
                                 )}
                                 {enabledGateways.dodopayments && (
-                                    <Button
-                                        variant="outline"
-                                        className="h-20 justify-start gap-6 px-6 rounded-xl hover:bg-muted/50 transition-all"
-                                        onClick={() => handleGatewaySelect("Dodo Payments")}
-                                    >
-                                        <div className="relative h-10 w-32 flex items-center justify-center shrink-0">
-                                            <Image src="/images/gateways/dodopayments.png" alt="Dodo" fill className="object-contain dark:hidden" />
-                                            <Image src="/images/gateways/dodopayments_dark.png" alt="Dodo" fill className="object-contain hidden dark:block" />
-                                        </div>
-                                        <div className="text-start flex-1">
-                                            <div className="flex items-center gap-2">
-                                                <p className="font-bold text-base">Dodo Payments</p>
-                                                {enabledGateways.dodopaymentsTestMode && (
-                                                    <Badge variant="secondary" className="text-[10px] h-4 px-1.5 uppercase bg-yellow-100 text-yellow-700 border-yellow-200">{t("payment.testMode")}</Badge>
-                                                )}
+                                    <Card interactive asChild>
+                                        <button
+                                            type="button"
+                                            className="flex-row items-center gap-5 p-4 text-start wx-focus"
+                                            onClick={() => handleGatewaySelect("Dodo Payments")}
+                                        >
+                                            <div className="relative flex h-10 w-28 shrink-0 items-center justify-center">
+                                                <Image src="/images/gateways/dodopayments.png" alt="Dodo" fill className="object-contain dark:hidden" />
+                                                <Image src="/images/gateways/dodopayments_dark.png" alt="Dodo" fill className="hidden object-contain dark:block" />
                                             </div>
-                                            <p className="text-xs text-slate-500">{t("payment.dodoHint")}</p>
-                                        </div>
-                                    </Button>
+                                            <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                                                <div className="flex items-center gap-2">
+                                                    <p className="text-body-md font-semibold">Dodo Payments</p>
+                                                    {enabledGateways.dodopaymentsTestMode && (
+                                                        <Badge tone="warning" size="sm">{t("payment.testMode")}</Badge>
+                                                    )}
+                                                </div>
+                                                <p className="text-caption text-fg-subtle">{t("payment.dodoHint")}</p>
+                                            </div>
+                                        </button>
+                                    </Card>
                                 )}
                                 {enabledGateways.razorpay && (
-                                    <Button
-                                        variant="outline"
-                                        className="h-20 justify-start gap-6 px-6 rounded-xl hover:bg-muted/50 transition-all"
-                                        onClick={() => handleGatewaySelect("Razorpay")}
-                                    >
-                                        <div className="relative h-10 w-32 flex items-center justify-center shrink-0">
-                                            <Image src="/images/gateways/razorpay.png" alt="Razorpay" fill className="object-contain dark:hidden" />
-                                            <Image src="/images/gateways/razorpay_dark.png" alt="Razorpay" fill className="object-contain hidden dark:block" />
-                                        </div>
-                                        <div className="text-start flex-1">
-                                            <div className="flex items-center gap-2">
-                                                <p className="font-bold text-base">Razorpay</p>
-                                                {enabledGateways.razorpayTestMode && (
-                                                    <Badge variant="secondary" className="text-[10px] h-4 px-1.5 uppercase bg-yellow-100 text-yellow-700 border-yellow-200">{t("payment.testMode")}</Badge>
-                                                )}
+                                    <Card interactive asChild>
+                                        <button
+                                            type="button"
+                                            className="flex-row items-center gap-5 p-4 text-start wx-focus"
+                                            onClick={() => handleGatewaySelect("Razorpay")}
+                                        >
+                                            <div className="relative flex h-10 w-28 shrink-0 items-center justify-center">
+                                                <Image src="/images/gateways/razorpay.png" alt="Razorpay" fill className="object-contain dark:hidden" />
+                                                <Image src="/images/gateways/razorpay_dark.png" alt="Razorpay" fill className="hidden object-contain dark:block" />
                                             </div>
-                                            <p className="text-xs text-slate-500">{t("payment.razorpayHint")}</p>
-                                        </div>
-                                    </Button>
+                                            <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                                                <div className="flex items-center gap-2">
+                                                    <p className="text-body-md font-semibold">Razorpay</p>
+                                                    {enabledGateways.razorpayTestMode && (
+                                                        <Badge tone="warning" size="sm">{t("payment.testMode")}</Badge>
+                                                    )}
+                                                </div>
+                                                <p className="text-caption text-fg-subtle">{t("payment.razorpayHint")}</p>
+                                            </div>
+                                        </button>
+                                    </Card>
                                 )}
                                 {!enabledGateways.stripe && !enabledGateways.paypal && !enabledGateways.dodopayments && !enabledGateways.razorpay && (
-                                    <p className="text-center text-sm text-muted-foreground py-4">
+                                    <p className="py-4 text-center text-body-sm text-fg-muted">
                                         {t("payment.noMethods")}
                                     </p>
                                 )}
@@ -1768,13 +1658,13 @@ function SettingsPageContent() {
                         )}
                     </div>
                     <DialogFooter>
-                        <p className="text-[10px] text-center w-full text-slate-400">
+                        <p className="w-full text-center text-caption text-fg-subtle">
                             {t("payment.legal")}
                         </p>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </div >
+        </div>
     );
 }
 
@@ -1782,7 +1672,7 @@ export default function SettingsPage() {
     return (
         <Suspense fallback={
             <div className="flex h-[400px] items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <Spinner size="xl" className="text-fg-muted" />
             </div>
         }>
             <PayPalWrapper />
@@ -1814,7 +1704,7 @@ function PayPalWrapper() {
     if (loadingConfig) {
         return (
             <div className="flex h-[400px] items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <Spinner size="xl" className="text-fg-muted" />
             </div>
         );
     }

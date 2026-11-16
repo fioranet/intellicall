@@ -9,6 +9,7 @@ if (require.main === module) {
 
 const SipTrunk = require('../../models/SipTrunk');
 const { sipLog } = require('./sip-log');
+const { sipUsernameError } = require('../../utils/sip-username');
 
 // Helper to get constants dynamically (ensures .env is respected)
 const getConstants = () => ({
@@ -131,8 +132,17 @@ async function generatePjsipConfig() {
         config += `contact=sip:${trunk.host}:${trunk.port}\\;transport=${contactTransport}\n`;
         config += 'qualify_frequency=60\n\n';
 
-        // Registration (only when credentials are provided)
-        if (trunk.username && pw) {
+        // Registration (only when credentials are provided). Saving a trunk refuses a
+        // username that can't sit in a SIP address, but one saved before that rule can
+        // still be here: its client_uri would be invalid and Asterisk would drop it, so
+        // leave the registration out and say why. Outbound calls still work without it.
+        const badUsername = trunk.username && pw ? sipUsernameError(trunk.username) : null;
+        if (badUsername) {
+            sipLog('warn', `Trunk "${trunk.name}": registration left out. ${badUsername} Edit the trunk and save it again.`, {
+                userId: trunk.createdBy, trunkId: trunk._id
+            });
+        }
+        if (trunk.username && pw && !badUsername) {
             config += `[trunk-${id}-reg]\ntype=registration\n`;
             config += `transport=${transportName}\n`;
             config += `outbound_auth=trunk-${id}-auth\n`;
@@ -296,6 +306,24 @@ function ensureLinked(mainFileName, includeFileName) {
 /**
  * Write all config files and reload Asterisk
  */
+/**
+ * Active trunks whose endpoint Asterisk does not list after a reload. Empty when the CLI
+ * can't be reached at all: that is reported by the reload itself, not guessed at here.
+ */
+async function trunksNotLoaded() {
+    const out = await new Promise((resolve) => {
+        const cmd = 'asterisk -rx "pjsip show endpoints"';
+        exec(cmd, { timeout: 10000 }, (err, stdout) => {
+            if (!err) return resolve(stdout);
+            exec(`sudo -n ${cmd}`, { timeout: 10000 }, (err2, stdout2) => resolve(err2 ? null : stdout2));
+        });
+    });
+    if (!out) return [];
+    const listed = new Set([...out.matchAll(/^\s*Endpoint:\s+(trunk-[0-9a-f]{24})\b/gm)].map(m => m[1]));
+    const trunks = await SipTrunk.find({ status: 'active' });
+    return trunks.filter(t => !listed.has(`trunk-${t._id}`));
+}
+
 async function writeAndReload() {
     const { ASTERISK_CONFIG_DIR } = getConstants();
     const INTELLICALL_DIR = path.join(ASTERISK_CONFIG_DIR, 'intellicall');
@@ -360,10 +388,21 @@ async function writeAndReload() {
     await tryExec('asterisk -rx "module reload res_pjsip_outbound_registration.so"');
 
     if (pjsipOk) {
+        // A reload that succeeds can still leave a trunk out (a section Asterisk could not
+        // parse), and every call through it then fails with "Allocation failed". Check.
+        const notLoaded = await trunksNotLoaded();
         sipLog('success', `Asterisk configuration written and reloaded (dialplan: ${dialplanOk ? 'ok' : 'failed'}, pjsip: ok)`);
+        for (const t of notLoaded) {
+            sipLog('error', `Trunk "${t.name}" is not loaded in Asterisk after the reload, so calls through it will fail. Check the trunk's host, port and transport, then click "Reload Asterisk".`, {
+                userId: t.createdBy, trunkId: t._id
+            });
+        }
         return {
             success: true, reloaded: true, linked: allLinked,
-            message: 'Asterisk configuration successfully updated and reloaded.'
+            notLoaded: notLoaded.map(t => t._id.toString()),
+            message: notLoaded.length
+                ? `Asterisk reloaded, but ${notLoaded.length} trunk(s) did not load: ${notLoaded.map(t => `"${t.name}"`).join(', ')}.`
+                : 'Asterisk configuration successfully updated and reloaded.'
         };
     } else {
         const message = somePermissionDenied

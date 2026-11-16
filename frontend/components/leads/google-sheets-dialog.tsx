@@ -2,8 +2,11 @@
 
 import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import {
+    Alert,
+    Badge,
+    Button,
+    Checkbox,
     Dialog,
     DialogContent,
     DialogDescription,
@@ -11,20 +14,20 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import {
+    EmptyState,
+    Field,
+    Input,
+    Label,
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+    toast,
+    useConfirm,
+} from "@wixzel/react";
 import axios from "axios";
-import { toast } from "sonner";
-import { FileSpreadsheet, Loader2, ArrowRight, CheckCircle2, RefreshCw, Zap, LogOut } from "lucide-react";
+import { FileXls, ArrowRight, CheckCircle, ArrowsClockwise, Lightning } from "@phosphor-icons/react";
 import { useSettings } from "@/components/settings-provider";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
@@ -33,6 +36,7 @@ export function GoogleSheetsDialog({ onSuccess, syncing, trigger }: { onSuccess?
     const t = useTranslations("leads");
     const c = useTranslations("common");
     const { googleSheetsConnected, googleSheetsConfig, refreshSettings } = useSettings();
+    const confirm = useConfirm();
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [step, setStep] = useState(1); // 1: Connect/Select/Quick, 2: Select Sheet, 3: Map Columns
@@ -91,7 +95,10 @@ export function GoogleSheetsDialog({ onSuccess, syncing, trigger }: { onSuccess?
     };
 
     const handleDisconnect = async () => {
-        if (!confirm("Are you sure you want to disconnect Google Sheets? This will clear your saved sync configuration.")) return;
+        if (!(await confirm({
+            title: "Are you sure you want to disconnect Google Sheets? This will clear your saved sync configuration.",
+            tone: "danger",
+        }))) return;
 
         setLoading(true);
         try {
@@ -158,28 +165,20 @@ export function GoogleSheetsDialog({ onSuccess, syncing, trigger }: { onSuccess?
             <DialogTrigger asChild>
                 {trigger ?? (
                     <Button
-                        variant="outline"
-                        className={`gap-2 transition-all ${googleSheetsConnected ? 'border-green-200 hover:border-green-400 hover:bg-green-50' : ''} ${syncing ? 'bg-green-50 border-green-400' : ''}`}
-                        disabled={syncing}
+                        variant="secondary"
+                        iconStart={<FileXls />}
+                        loading={syncing}
                     >
-                        {syncing ? (
-                            <>
-                                <RefreshCw className="h-4 w-4 text-green-600 animate-spin" />
-                                {t("googleSheets.syncing")}
-                            </>
-                        ) : (
-                            <>
-                                <FileSpreadsheet className="h-4 w-4 text-green-600" />
-                                {googleSheetsConfig?.sheetName || t("googleSheets.defaultLabel")}
-                            </>
-                        )}
+                        {syncing
+                            ? t("googleSheets.syncing")
+                            : googleSheetsConfig?.sheetName || t("googleSheets.defaultLabel")}
                     </Button>
                 )}
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
+            <DialogContent size="md">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                        <FileSpreadsheet className="h-5 w-5 text-green-600" />
+                        <FileXls className="size-5 text-fg-muted" />
                         {t("googleSheets.title")}
                     </DialogTitle>
                     <DialogDescription>
@@ -188,67 +187,60 @@ export function GoogleSheetsDialog({ onSuccess, syncing, trigger }: { onSuccess?
                 </DialogHeader>
 
                 {!googleSheetsConnected ? (
-                    <div className="py-12 text-center space-y-6">
-                        <div className="bg-green-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto">
-                            <FileSpreadsheet className="h-10 w-10 text-green-600" />
-                        </div>
-                        <div className="space-y-2">
-                            <h3 className="text-xl font-bold">{t("googleSheets.connectTitle")}</h3>
-                            <p className="text-sm text-muted-foreground px-8">
-                                {t("googleSheets.connectDescription")}
-                            </p>
-                        </div>
-                        <Button
-                            className="bg-green-600 hover:bg-green-700 h-11 px-8 shadow-lg shadow-green-100"
-                            onClick={() => {
-                                const userStr = localStorage.getItem("user");
-                                if (userStr) {
-                                    const user = JSON.parse(userStr);
-                                    window.location.href = `${API_BASE_URL}/auth/google-sheets?userId=${user._id}`;
-                                } else {
-                                    toast.error(t("toast.userNotFound"));
-                                }
-                            }}
-                        >
-                            {t("googleSheets.connectNow")}
-                        </Button>
-                    </div>
+                    <EmptyState
+                        icon={<FileXls />}
+                        title={t("googleSheets.connectTitle")}
+                        description={t("googleSheets.connectDescription")}
+                        actions={
+                            <Button
+                                variant="primary"
+                                onClick={() => {
+                                    const userStr = localStorage.getItem("user");
+                                    if (userStr) {
+                                        const user = JSON.parse(userStr);
+                                        window.location.href = `${API_BASE_URL}/auth/google-sheets?userId=${user._id}`;
+                                    } else {
+                                        toast.error(t("toast.userNotFound"));
+                                    }
+                                }}
+                            >
+                                {t("googleSheets.connectNow")}
+                            </Button>
+                        }
+                    />
                 ) : (
-                    <div className="space-y-6 py-4">
+                    <div className="flex flex-col gap-5">
                         {step === 1 && (
-                            <div className="space-y-4">
+                            <div className="flex flex-col gap-4">
                                 {googleSheetsConfig?.spreadsheetId && (
-                                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-100 space-y-3">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2">
-                                                <Zap className="h-4 w-4 text-amber-500 fill-amber-500" />
-                                                <span className="text-sm font-semibold text-green-900">{t("googleSheets.quickSyncReady")}</span>
-                                            </div>
-                                            {googleSheetsConfig.lastSynced && (
-                                                <span className="text-[10px] text-green-600 font-medium bg-white px-2 py-0.5 rounded-full border border-green-100">
-                                                    {t("googleSheets.lastSynced", { date: new Date(googleSheetsConfig.lastSynced).toLocaleDateString() })}
-                                                </span>
-                                            )}
+                                    <Alert
+                                        tone="success"
+                                        icon={<Lightning />}
+                                        title={t("googleSheets.quickSyncReady")}
+                                        action={googleSheetsConfig.lastSynced && (
+                                            <Badge tone="success">
+                                                {t("googleSheets.lastSynced", { date: new Date(googleSheetsConfig.lastSynced).toLocaleDateString() })}
+                                            </Badge>
+                                        )}
+                                    >
+                                        <div className="flex flex-col gap-3">
+                                            <p>
+                                                {t.rich("googleSheets.previouslyConnected", { sheet: googleSheetsConfig.sheetName, b: (chunks) => <b>{chunks}</b> })}
+                                            </p>
+                                            <Button
+                                                variant="primary"
+                                                block
+                                                iconStart={<ArrowsClockwise />}
+                                                loading={loading}
+                                                onClick={handleQuickSync}
+                                            >
+                                                {t("googleSheets.syncNow")}
+                                            </Button>
                                         </div>
-                                        <p className="text-xs text-green-700">
-                                            {t.rich("googleSheets.previouslyConnected", { sheet: googleSheetsConfig.sheetName, b: (chunks) => <b>{chunks}</b> })}
-                                        </p>
-                                        <Button
-                                            onClick={handleQuickSync}
-                                            disabled={loading}
-                                            className="w-full bg-green-600 hover:bg-green-700 shadow-md shadow-green-100"
-                                        >
-                                            {loading ? <Loader2 className="animate-spin h-4 w-4 me-2" /> : <RefreshCw className="h-4 w-4 me-2" />}
-                                            {t("googleSheets.syncNow")}
-                                        </Button>
-                                    </div>
+                                    </Alert>
                                 )}
 
-
-                                <div className="space-y-3">
-                                    <Label className="text-xs uppercase tracking-wider text-muted-foreground font-bold">
-                                        {googleSheetsConfig?.spreadsheetId ? t("googleSheets.orStartFresh") : t("googleSheets.selectSpreadsheet")}
-                                    </Label>
+                                <Field label={googleSheetsConfig?.spreadsheetId ? t("googleSheets.orStartFresh") : t("googleSheets.selectSpreadsheet")}>
                                     <Select
                                         value={selectedSpreadsheet}
                                         onValueChange={(val) => {
@@ -256,7 +248,7 @@ export function GoogleSheetsDialog({ onSuccess, syncing, trigger }: { onSuccess?
                                             fetchSheets(val);
                                         }}
                                     >
-                                        <SelectTrigger className="h-11">
+                                        <SelectTrigger>
                                             <SelectValue placeholder={loading ? "Searching files..." : "Choose a spreadsheet"} />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -265,16 +257,15 @@ export function GoogleSheetsDialog({ onSuccess, syncing, trigger }: { onSuccess?
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                </div>
+                                </Field>
                             </div>
                         )}
 
                         {step === 2 && (
-                            <div className="space-y-4">
-                                <div className="grid gap-2">
-                                    <Label>{t("googleSheets.selectSheet")}</Label>
+                            <div className="flex flex-col gap-4">
+                                <Field label={t("googleSheets.selectSheet")}>
                                     <Select value={selectedSheet} onValueChange={setSelectedSheet}>
-                                        <SelectTrigger className="h-11">
+                                        <SelectTrigger>
                                             <SelectValue placeholder={t("googleSheets.chooseSheet")} />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -283,44 +274,48 @@ export function GoogleSheetsDialog({ onSuccess, syncing, trigger }: { onSuccess?
                                             ))}
                                         </SelectContent>
                                     </Select>
+                                </Field>
+                                <div className="flex flex-col gap-2">
+                                    <Button variant="primary" block disabled={!selectedSheet} iconEnd={<ArrowRight />} onClick={() => setStep(3)}>
+                                        {t("googleSheets.configureMapping")}
+                                    </Button>
+                                    <Button variant="ghost" block onClick={() => setStep(1)}>{t("googleSheets.back")}</Button>
                                 </div>
-                                <Button className="w-full h-11" disabled={!selectedSheet} onClick={() => setStep(3)}>
-                                    {t("googleSheets.configureMapping")} <ArrowRight className="ms-2 h-4 w-4 rtl:rotate-180" />
-                                </Button>
-                                <Button variant="ghost" className="w-full text-xs" onClick={() => setStep(1)}>{t("googleSheets.back")}</Button>
                             </div>
                         )}
 
                         {step === 3 && (
-                            <div className="space-y-4">
-                                <div className="bg-blue-50/50 p-3 rounded-lg text-xs text-blue-700 flex gap-2 border border-blue-100">
-                                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                            <div className="flex flex-col gap-4">
+                                <Alert tone="info" icon={<CheckCircle />}>
                                     {t("googleSheets.mappingHint")}
-                                </div>
-                                <div className="grid gap-3">
-                                    <div className="grid gap-1.5">
-                                        <Label className="text-xs font-bold">{t("googleSheets.nameColumn")}</Label>
+                                </Alert>
+                                <div className="flex flex-col gap-3">
+                                    <Field label={t("googleSheets.nameColumn")}>
                                         <Input placeholder={t("googleSheets.namePlaceholder")} value={mapping.name} onChange={(e: any) => setMapping({ ...mapping, name: e.target.value })} />
-                                    </div>
-                                    <div className="grid gap-1.5">
-                                        <Label className="text-xs font-bold">{t("googleSheets.phoneColumn")}</Label>
+                                    </Field>
+                                    <Field label={t("googleSheets.phoneColumn")}>
                                         <Input placeholder={t("googleSheets.phonePlaceholder")} value={mapping.phone} onChange={(e: any) => setMapping({ ...mapping, phone: e.target.value })} />
-                                    </div>
-                                    <div className="grid gap-1.5">
-                                        <Label className="text-xs font-bold">{t("googleSheets.companyColumn")}</Label>
+                                    </Field>
+                                    <Field label={t("googleSheets.companyColumn")}>
                                         <Input placeholder={t("googleSheets.companyPlaceholder")} onChange={(e: any) => setMapping({ ...mapping, fields: { ...mapping.fields, company: e.target.value } })} />
-                                    </div>
+                                    </Field>
                                 </div>
 
-                                <div className="flex items-center space-x-2 bg-slate-50 p-2.5 rounded-lg border border-dashed">
-                                    <Checkbox id="save-config" checked={saveConfig} onCheckedChange={(val: boolean) => setSaveConfig(val)} />
-                                    <label htmlFor="save-config" className="text-xs font-medium leading-none cursor-pointer">
+                                <div className="flex items-center gap-2 rounded-md bg-bg-subtle px-3 py-2.5">
+                                    <Checkbox id="save-config" checked={saveConfig} onCheckedChange={(val) => setSaveConfig(val === true)} />
+                                    <Label htmlFor="save-config" className="cursor-pointer">
                                         {t("googleSheets.saveForQuickSync")}
-                                    </label>
+                                    </Label>
                                 </div>
 
-                                <Button className="w-full h-11" disabled={loading || !mapping.name || !mapping.phone} onClick={handleSync}>
-                                    {loading ? <Loader2 className="animate-spin h-4 w-4 me-2" /> : <RefreshCw className="h-4 w-4 me-2" />}
+                                <Button
+                                    variant="primary"
+                                    block
+                                    iconStart={<ArrowsClockwise />}
+                                    loading={loading}
+                                    disabled={!mapping.name || !mapping.phone}
+                                    onClick={handleSync}
+                                >
                                     {t("googleSheets.initialSync")}
                                 </Button>
                             </div>
@@ -329,23 +324,19 @@ export function GoogleSheetsDialog({ onSuccess, syncing, trigger }: { onSuccess?
                 )}
 
                 {googleSheetsConnected && (
-                    <DialogFooter className="sm:justify-between border-t pt-4">
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground uppercase font-bold tracking-tight">
-                                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                    <DialogFooter className="sm:justify-between">
+                        <div className="flex items-center gap-3">
+                            <Badge tone="success" dot>
                                 {t("googleSheets.connectedToGoogle")}
-                            </div>
-                            <button
-                                onClick={handleDisconnect}
-                                className="text-[10px] text-red-600 hover:underline font-bold uppercase tracking-tight"
-                            >
+                            </Badge>
+                            <Button variant="ghost" size="xs" onClick={handleDisconnect}>
                                 {t("googleSheets.disconnect")}
-                            </button>
+                            </Button>
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => setOpen(false)}>{c("actions.close")}</Button>
+                        <Button variant="secondary" size="sm" onClick={() => setOpen(false)}>{c("actions.close")}</Button>
                     </DialogFooter>
                 )}
             </DialogContent>
-        </Dialog >
+        </Dialog>
     );
 }

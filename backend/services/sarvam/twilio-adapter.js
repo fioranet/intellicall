@@ -23,10 +23,11 @@ const END_CALL_DRAIN_GRACE_MS = 600;
  * of calling the Twilio REST API and writes nothing to CallLog.
  */
 class TwilioSarvamSession {
-    constructor({ ws, streamSid, callSid, userId, agentId, leadId, campaignId, direction, settings, agent, lead, transport = 'twilio' }) {
+    constructor({ ws, streamSid, callSid, userId, agentId, leadId, campaignId, direction, settings, agent, lead, transport = 'twilio', idleTimeoutMs = undefined }) {
         this.ws = ws;
         this.transport = transport;
-        this.isBrowser = transport === 'browser';
+        // A meeting bot is a browser-like leg: no phone to hang up, and the meeting session writes the CallLog.
+        this.isBrowser = transport === 'browser' || transport === 'meeting';
         this.streamSid = streamSid;
         this.callSid = callSid;
         this.userId = userId;
@@ -37,13 +38,15 @@ class TwilioSarvamSession {
         this.settings = settings;
         this.agent = agent;
         this.lead = lead;
+        /** The call's tool session, attached by voice-stream before start(). */
+        this.toolSession = null;
         this.callErrors = [];
         this.cleaned = false;
         /** Twilio opens the media stream only after the callee answers — so this is answered time. */
         this.startedAt = 0;
         this._endCallTimer = null;
 
-        this.bridge = new SarvamBridge({ callId: callSid, settings, agent, lead });
+        this.bridge = new SarvamBridge({ callId: callSid, settings, agent, lead, ...(idleTimeoutMs ? { idleTimeoutMs } : {}) });
 
         // Twilio buffers and paces the audio on its side, so there is no local queue to measure.
         // Estimate instead: µ-law 8k is 8 bytes per millisecond of speech. The bridge uses this
@@ -175,6 +178,7 @@ class TwilioSarvamSession {
         const transcript = this.bridge.transcript;
         console.log(`🧹 [Sarvam] [${this.callSid}] cleanup | transcriptLen=${transcript.length}`);
         this.bridge.close();
+        if (this.toolSession) { require('../tools/attach').finishToolSession(this.toolSession, this.isBrowser ? null : this.callSid); this.toolSession = null; }
         if (this._endCallTimer) { clearTimeout(this._endCallTimer); this._endCallTimer = null; }
 
         // A browser test is not a call: nothing is logged, analyzed, or billed.

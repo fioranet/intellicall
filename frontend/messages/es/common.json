@@ -34,5 +34,29 @@
     "title": "¿Estás seguro?", "deleteTitle": "¿Eliminar este elemento?",
     "deleteDescription": "Esta acción no se puede deshacer."
   },
-  "selfHost": { "badge": "Autoalojado", "buyOn": "Comprar en {marketplace}" }
+  "selfHost": { "badge": "Autoalojado", "buyOn": "Comprar en {marketplace}" },
+  "formChecks": {
+    "e164NoPlus": "{label}: empieza con + y el código de país, por ejemplo +1 415 555 2671.",
+    "e164NotNumber": "{label}: {number} no es un número de teléfono. Revisa el código de país y la cantidad de dígitos.",
+    "e164Unusual": "{label}: {number} no parece un número real para su código de país. Revísalo antes de guardar.",
+    "leadNoCountryCode": "Sin código de país. Las llamadas supondrán que el cliente potencial está en el mismo país que el número desde el que llamas. Si está en otro país, la llamada falla: añade el código de país, por ejemplo +1 415 555 2671.",
+    "leadNotNumber": "{number} no es un número de teléfono: revisa el código de país y la cantidad de dígitos.",
+    "leadUnusual": "{number} no parece un número real para su código de país. El operador podría rechazarlo.",
+    "summaryNoCountryCode": "{count, plural, one {# número no tiene} other {# números no tienen}} código de país ({examples}). Se marcarán en el país del número desde el que llamas; añade el código de país a los clientes potenciales que estén en otro país.",
+    "summaryNotNumber": "{count, plural, one {# número no es un número de teléfono} other {# números no son números de teléfono}} ({examples}). Las llamadas a ellos fallarán: corrígelos primero en el archivo.",
+    "summaryUnusual": "{count, plural, one {# número no parece real} other {# números no parecen reales}} para su código de país ({examples}). El operador podría rechazarlos."
+  },
+  "ui": {
+    "moreInformation": "Más información",
+    "reveal": "Mostrar",
+    "hide": "Ocultar",
+    "breadcrumb": "Ruta de navegación",
+    "steps": "Pasos",
+    "stepError": "Requiere atención",
+    "typeToConfirm": "Escribe {text} para confirmar",
+    "navigation": "Navegación",
+    "collapseSidebar": "Contraer barra lateral",
+    "expandSidebar": "Expandir barra lateral",
+    "notifications": "Notificaciones"
+  }
 }

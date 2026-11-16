@@ -63,7 +63,16 @@
     "inboundAgentHint": "Eingehende Anrufe an diese Nummer werden vom ausgewählten Agenten bearbeitet.",
     "fallbackLabel": "Ersatznummer",
     "optional": "(optional)",
-    "fallbackHint": "Wenn kein Agent zugewiesen ist, werden eingehende Anrufe an diese Nummer weitergeleitet, statt aufzulegen."
+    "fallbackHint": "Wenn kein Agent zugewiesen ist, werden eingehende Anrufe an diese Nummer weitergeleitet, statt aufzulegen.",
+    "issues": {
+      "noTrunk": "Wählen Sie den SIP-Trunk, zu dem diese Nummer gehört. SIP-Nummern können ohne Trunk weder anrufen noch Anrufe annehmen.",
+      "trunkInactive": "Der SIP-Trunk „{name}“ ist inaktiv, daher schlagen Anrufe über diese Nummer fehl, bis er wieder aktiviert wird.",
+      "trunkCallerId": "Der SIP-Trunk „{name}“ hat die Standard-Rufnummernanzeige {callerId}, daher zeigen ausgehende Anrufe von dieser Nummer stattdessen diese Nummer an. Leeren Sie die Rufnummernanzeige des Trunks, wenn das nicht gewollt ist.",
+      "fallbackIsSelf": "Die Ersatznummer darf nicht dieselbe Nummer sein: Der Anruf würde an sich selbst weitergeleitet.",
+      "noAgentHangsUp": "Es ist kein Agent für eingehende Anrufe gewählt, daher werden eingehende Anrufe an diese Nummer aufgelegt.",
+      "fallbackUnused": "Die Ersatznummer wird nur verwendet, wenn kein Agent gewählt ist. Solange ein Agent eingestellt ist, wird sie nicht genutzt.",
+      "noAgents": "Sie haben noch keine Agenten. Erstellen Sie unter Agenten einen, um Anrufe auf dieser Nummer anzunehmen."
+    }
   },
   "toast": {
     "loadFailed": "Telefonnummern konnten nicht geladen werden",

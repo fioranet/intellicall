@@ -5,17 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import {
-    Field,
-    FieldDescription,
-    FieldGroup,
-    FieldLabel,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
-import { FcGoogle } from "react-icons/fc";
+import { Button, Field, Input, toast } from "@wixzel/react";
+import { GoogleMark } from "@/components/auth/google-mark";
 import { useTranslations } from "next-intl";
 
 export function LoginForm({
@@ -58,15 +49,14 @@ export function LoginForm({
             onSubmit={handleSubmit}
             {...props}
         >
-            <FieldGroup>
-                <div className="flex flex-col items-center gap-1 text-center">
-                    <h1 className="text-2xl font-bold">{t("login.title")}</h1>
-                    <p className="text-muted-foreground text-xs text-balance">
-                        {t("login.subtitle")}
-                    </p>
-                </div>
-                <Field>
-                    <FieldLabel htmlFor="email">{t("login.emailLabel")}</FieldLabel>
+            <div className="flex flex-col gap-1 text-center">
+                <h1 className="text-heading-xl">{t("login.title")}</h1>
+                <p className="text-body-sm text-balance text-fg-muted">
+                    {t("login.subtitle")}
+                </p>
+            </div>
+            <div className="flex flex-col gap-4">
+                <Field label={t("login.emailLabel")}>
                     <Input
                         id="email"
                         type="email"
@@ -77,16 +67,7 @@ export function LoginForm({
                         disabled={isLoading}
                     />
                 </Field>
-                <Field>
-                    <div className="flex items-center">
-                        <FieldLabel htmlFor="password">{t("login.passwordLabel")}</FieldLabel>
-                        {/* <a
-                            href="#"
-                            className="ms-auto text-sm underline-offset-4 hover:underline"
-                        >
-                            Forgot your password?
-                        </a> */}
-                    </div>
+                <Field label={t("login.passwordLabel")}>
                     <Input
                         id="password"
                         type="password"
@@ -96,35 +77,23 @@ export function LoginForm({
                         disabled={isLoading}
                     />
                 </Field>
-                <div>
-                    <Field>
-                        <Button type="submit" className="w-full" disabled={isLoading}>
-                            {isLoading ? (
-                                <>
-                                    <Loader2 className="me-2 h-4 w-4 animate-spin" />
-                                    {t("login.submitting")}
-                                </>
-                            ) : (
-                                t("login.submit")
-                            )}
-                        </Button>
-                    </Field>
-                    <Field>
-                        <Button variant="outline" type="button" className="w-full mt-2" disabled={isLoading} asChild>
-                            <a href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api"}/auth/google`}>
-                                <FcGoogle className="me-2 h-4 w-4" />
-                                {t("login.google")}
-                            </a>
-                        </Button>
-                        <FieldDescription className="text-center mt-2">
-                            {t("login.noAccount")}{" "}
-                            <Link href="/signup" className="underline underline-offset-4 font-medium">
-                                {t("login.signupLink")}
-                            </Link>
-                        </FieldDescription>
-                    </Field>
-                </div>
-            </FieldGroup>
+            </div>
+            <div className="flex flex-col gap-2">
+                <Button type="submit" variant="primary" size="lg" block loading={isLoading}>
+                    {isLoading ? t("login.submitting") : t("login.submit")}
+                </Button>
+                <Button size="lg" block disabled={isLoading} iconStart={<GoogleMark className="size-4" />} asChild>
+                    <a href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api"}/auth/google`}>
+                        {t("login.google")}
+                    </a>
+                </Button>
+            </div>
+            <p className="text-center text-body-sm text-fg-muted">
+                {t("login.noAccount")}{" "}
+                <Link href="/signup" className="font-medium text-accent-ink underline underline-offset-4">
+                    {t("login.signupLink")}
+                </Link>
+            </p>
         </form>
     );
 }

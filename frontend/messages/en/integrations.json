@@ -1,0 +1,634 @@
+{
+  "title": "Integrations",
+  "description": "The apps your account works with, and the apps your agents can work in during a call.",
+  "info": "Your account's apps send alerts and sync data. App directory servers give agents tools: during a call an agent can look things up and make changes in them, using only the tools you switch on.",
+  "addCustom": "Add custom MCP server",
+  "loadFailed": "Could not load your integrations.",
+  "signInIncomplete": "Sign-in did not complete.",
+  "connected": "Connected",
+  "notReady": "Not ready",
+  "native": {
+    "heading": "Your account's apps",
+    "info": "Alerts, exports and syncs for your account. These work on their own; agents do not call them during a call.",
+    "active": "Active",
+    "items": {
+      "n8n": { "name": "n8n", "description": "Workflow automation" },
+      "api-access": { "name": "API Access", "description": "Personal API key" },
+      "whatsapp": { "name": "WhatsApp alerts", "description": "Alerts & client reminders" },
+      "slack": { "name": "Slack", "description": "Channel notifications" },
+      "hubspot": { "name": "HubSpot CRM", "description": "Lead contact sync" },
+      "google-calendar": { "name": "Google Calendar", "description": "Appointment sync" },
+      "google-sheets": { "name": "Google Sheets", "description": "Lead import & sync" }
+    }
+  },
+  "servers": {
+    "heading": "Connected MCP servers",
+    "toolsOn": "<n>{enabled}</n> of {total} tools on",
+    "noAgents": "No agents",
+    "toolsRead": "Tools read {when}"
+  },
+  "status": {
+    "pending": "Pending",
+    "ready": "Ready",
+    "needs_auth": "Sign in",
+    "error": "Error"
+  },
+  "risk": {
+    "readOnly": "Read-only",
+    "writes": "Writes",
+    "destructive": "Destructive"
+  },
+  "meetings": {
+    "heading": "Meetings",
+    "info": "Agents join Zoom, Google Meet and Teams meetings through your own Attendee account, which bills you for bot hours.",
+    "name": "Meetings",
+    "line": "Attendee · Zoom, Google Meet, Teams",
+    "tagline": "Join Zoom, Google Meet and Teams meetings"
+  },
+  "directory": {
+    "heading": "App directory",
+    "info": "Apps with an official MCP server, ready to connect. For anything else, add a custom MCP server.",
+    "searchApps": "Search apps",
+    "customTitle": "Any other MCP server",
+    "customHint": "Paste the remote MCP URL of any app or your own backend. Headers and OAuth sign-in both work.",
+    "customLine": "Any app or backend, by its MCP URL",
+    "noMatch": "No app matches. Add it as a custom MCP server if it has one."
+  },
+  "catalog": {
+    "category": {
+      "all": "All",
+      "crm": "CRM",
+      "booking": "Booking",
+      "support": "Support",
+      "payments": "Payments",
+      "marketing": "Marketing",
+      "team": "Team",
+      "automation": "Automation",
+      "smartHome": "Smart home",
+      "search": "Search"
+    },
+    "auth": {
+      "none": "No sign-in",
+      "oauth": "Sign in",
+      "ownApp": "Needs your own app",
+      "apiKey": "API key"
+    },
+    "status": {
+      "beta": "Beta",
+      "preview": "Preview"
+    }
+  },
+  "connect": {
+    "notInDirectoryTitle": "That app is not in the directory",
+    "notInDirectory": "Pick one from Integrations.",
+    "back": "Integrations",
+    "unreachable": "Could not reach the server.",
+    "connectFailed": "Could not connect.",
+    "docsLink": "{app} MCP docs",
+    "stepConnect": "Connect {app}",
+    "stepChooseTools": "Choose tools",
+    "stepAddToAgent": "Add to an agent",
+    "connectHeading": "Connect {app}",
+    "server": "Server",
+    "oauthLine": "You will sign in to {app} and approve access. {appName} registers itself with {app} automatically, so there is nothing to set up first.",
+    "noKeyNeeded": "No account or key is needed.",
+    "keysEncrypted": "Keys are encrypted and never shown again.",
+    "ownClientLine": "{app} does not let apps register themselves, so connect it through an app of your own. It takes a few minutes, once.",
+    "redirectUrl": "Redirect URL",
+    "redirectUrlLoading": "Loading…",
+    "scopesAskedFor": "Scopes asked for: <code>{scope}</code>",
+    "clientId": "Client id",
+    "clientSecret": "Client secret",
+    "setupGuide": "{app}’s setup guide",
+    "signInTo": "Sign in to {app}",
+    "connectApp": "Connect {app}",
+    "whatAgentsCanDo": "What agents can do with it",
+    "recommendedInfo": "The tools a phone agent needs most are switched on when you connect. You can change them afterwards.",
+    "readOnlyInfo": "Tools the app marks read-only are switched on when you connect. Choose the rest afterwards.",
+    "confirmInfo": "Before using a tool that changes data, the agent asks the caller to confirm.",
+    "readFrom": "Read from {server} just now",
+    "toolCount": "{count, plural, one {# tool} other {# tools}}",
+    "readingAgain": "{tools} · reading again…",
+    "examplesNote": "Examples from {app}’s documentation. Not the live list.",
+    "examplesNoteCount": "Examples from {app}’s documentation, of about {count}. Not the live list.",
+    "oauthToolsLine": "{app} lists its tools only after you sign in. The full list is read from {app} the moment the sign-in comes back, and you choose from it on the next screen.",
+    "fillFormLine": "Fill in the form and the tool list is read from {app} before you connect.",
+    "readingTools": "Reading tools from {app}…",
+    "readToolsFailed": "Could not read tools from {app}.",
+    "tryingAgain": "{message} Trying again…",
+    "liveUnavailable": "The live tool list is not available. These are examples from the app's documentation."
+  },
+  "server": {
+    "authNone": "None",
+    "authNoneHint": "A public server, or one whose URL carries its key.",
+    "authHeaders": "API key / headers",
+    "authHeadersHint": "A token the server expects on every request.",
+    "authOauth": "OAuth sign-in",
+    "authOauthHint": "You sign in to the app and approve access.",
+    "loadFailed": "Could not load this server.",
+    "oauthConnected": "Connected. The server’s tools have been read.",
+    "signInIncomplete": "Sign-in did not complete.",
+    "saved": "Saved.",
+    "savedConnectNext": "Saved. Now connect it: sign in so {appName} can use this server.",
+    "saveFailed": "Could not save this server.",
+    "readTools": "{count, plural, one {Read # tool.} other {Read # tools.}}",
+    "refreshFailed": "Could not refresh.",
+    "signInStartFailed": "Could not start the sign-in.",
+    "toolAccessSaved": "Tool access saved. Calls that start from now on use it.",
+    "toolAccessFailed": "Could not save tool access.",
+    "deleteTitle": "Delete {name}?",
+    "deleteDescription": "Agents can no longer use its tools. This cannot be undone.",
+    "deleteDescriptionUsed": "{count, plural, one {# agent uses it and will lose its tools.} other {# agents use it and will lose its tools.}} This cannot be undone.",
+    "deleteConfirmLabel": "Delete server",
+    "deleteFailed": "Could not delete this server.",
+    "deleted": "{name} deleted.",
+    "back": "Integrations",
+    "newTitle": "Add a custom MCP server",
+    "description": "Which of its tools agents may use during a call.",
+    "docsLink": "{app} MCP docs",
+    "newDescription": "Paste the app’s remote MCP endpoint.",
+    "newInfo": "Its tools are read as soon as you save. Popular apps are set up for you on the Integrations page.",
+    "stepConnect": "Connect",
+    "stepChooseTools": "Choose tools",
+    "stepAddToAgent": "Add to an agent",
+    "signInToConnect": "Sign in to connect",
+    "notConnected": "Not connected",
+    "needsAuthLine": "This server asks you to sign in before {appName} can use it.",
+    "notReachedLine": "The server has not been reached yet.",
+    "connect": "Connect",
+    "retry": "Retry",
+    "readyOnly": "Agents only use servers that are Ready.",
+    "name": "Name",
+    "nameHint": "The agent is told this name, so use the one a caller would say.",
+    "url": "MCP server URL",
+    "urlHint": "The app's remote MCP endpoint (Streamable HTTP or SSE).",
+    "authentication": "Authentication",
+    "header": "Header",
+    "value": "Value",
+    "savedKeepBlank": "Saved. Leave blank to keep it.",
+    "removeHeader": "Remove header",
+    "addHeader": "Add header",
+    "encrypted": "Values are encrypted and never shown again.",
+    "oauthHelp": "Save, then press Connect and sign in to the app. Most servers register {appName} automatically; for one that does not, add your own app's client id below.",
+    "showAdvanced": "Show advanced",
+    "hideAdvanced": "Hide advanced",
+    "clientId": "Client id",
+    "clientSecret": "Client secret",
+    "scopes": "Scopes",
+    "scopesPlaceholder": "Server default",
+    "redirectUrl": "Redirect URL",
+    "transport": "Transport",
+    "transportHint": "Auto tries Streamable HTTP, then SSE. Change it only if the server needs one.",
+    "transportAuto": "Auto",
+    "save": "Save",
+    "saveAndConnect": "Save and connect",
+    "reconnect": "Reconnect",
+    "tools": "Tools",
+    "toolsInfo": "Only switched-on tools are offered to agents. Before using a tool that changes data, the agent asks the caller to confirm.",
+    "switchedOn": "<n>{enabled}</n> of {total} switched on",
+    "readAt": "Read {when}",
+    "refreshTools": "Refresh tools",
+    "noTools": "No tools yet. Connect the server, then refresh.",
+    "noReadOnly": "This server does not mark any tool as read-only, so none were switched on for you. Choose the ones agents may use.",
+    "readOnlyOnly": "Read-only only",
+    "all": "All",
+    "none": "None",
+    "saveToolAccess": "Save tool access",
+    "onCount": "{enabled} of {total} on",
+    "agentsUsing": "Agents using it",
+    "agentsUsingNone": "None yet. Open an agent and pick this server under Connected apps.",
+    "deleteServer": "Delete server"
+  },
+  "apps": {
+    "hubspot": {
+      "tagline": "Marketing, sales and service platform",
+      "blurb": "Find the caller in your CRM, log the call, and create or update contacts, deals and tasks.",
+      "note": "Accounts with Sensitive Data turned on cannot write calls, notes, tasks or meetings over MCP.",
+      "steps": {
+        "1": "In HubSpot, open Development, then MCP Auth Apps, and create an app.",
+        "2": "Add the redirect URL below to the app.",
+        "3": "Copy the app’s client id and client secret into the fields below."
+      },
+      "tools": {
+        "search_crm_objects": "Search contacts, companies and deals, for example by phone number.",
+        "get_crm_objects": "Read records by id.",
+        "manage_crm_objects": "Create or update contacts, deals, calls, notes, tasks and meetings.",
+        "search_owners": "Find the owner a record belongs to.",
+        "search_properties": "List the fields a record type has.",
+        "query_crm_data": "Answer questions about CRM data.",
+        "search_conversations": "Search inbox conversations.",
+        "get_user_details": "Who is connected, and which account."
+      }
+    },
+    "salesforce": {
+      "tagline": "CRM for sales and service teams",
+      "blurb": "Look up and update any Salesforce record during a call, with SOQL and SOSL search.",
+      "steps": {
+        "1": "In Salesforce Setup, create an External Client App with OAuth turned on.",
+        "2": "Give it the scopes mcp_api and refresh_token, and add the redirect URL below as its callback URL.",
+        "3": "Copy its consumer key (client id) and consumer secret into the fields below."
+      },
+      "tools": {
+        "find": "Search across records, for example by phone number.",
+        "soqlQuery": "Run a SOQL query.",
+        "getObjectSchema": "Read an object’s fields.",
+        "createSobjectRecord": "Create a record, such as a lead, task or case.",
+        "updateSobjectRecord": "Update a record."
+      }
+    },
+    "gohighlevel": {
+      "tagline": "CRM and marketing for agencies",
+      "blurb": "Find and update contacts, read calendar events, move opportunities and send messages in a sub-account.",
+      "note": "This server has no tool to book an appointment yet.",
+      "help": "Create a Private Integration Token in the sub-account with the contacts, calendars, opportunities and conversations scopes.",
+      "fields": {
+        "token": { "label": "Private Integration Token", "hint": "Settings, then Private Integrations, in the sub-account." },
+        "locationId": { "label": "Location id", "hint": "The sub-account id, from Settings, then Business Profile." }
+      },
+      "tools": {
+        "contacts_get-contacts": "Search contacts.",
+        "contacts_get-contact": "Read a contact.",
+        "contacts_upsert-contact": "Create or update a contact.",
+        "contacts_add-tags": "Tag a contact.",
+        "calendars_get-calendar-events": "Read calendar events.",
+        "opportunities_search-opportunity": "Search opportunities.",
+        "opportunities_update-opportunity": "Move or update an opportunity.",
+        "conversations_send-a-new-message": "Send an SMS or email to a contact."
+      }
+    },
+    "pipedrive": {
+      "tagline": "Sales pipeline CRM",
+      "blurb": "Find people by phone, add leads and deals, and log calls and notes.",
+      "tools": {
+        "searchPersons": "Find a person, for example by phone number.",
+        "getPerson": "Read a person.",
+        "addPerson": "Add a person.",
+        "addLead": "Add a lead.",
+        "addDeal": "Add a deal.",
+        "addActivity": "Log a call or schedule a meeting.",
+        "addNote": "Add a note.",
+        "searchDeals": "Search deals."
+      }
+    },
+    "close": {
+      "tagline": "CRM for inside sales teams",
+      "blurb": "Search leads, read contacts, and create leads, notes, tasks and opportunities.",
+      "note": "Signed in with read and safe-write access. Updating existing records needs Close’s destructive scope, which is not asked for.",
+      "tools": {
+        "lead_search": "Search leads.",
+        "fetch_lead": "Read a lead.",
+        "fetch_contact": "Read a contact.",
+        "create_lead": "Create a lead.",
+        "create_note": "Add a note.",
+        "create_task": "Create a follow-up task.",
+        "create_opportunity": "Create an opportunity."
+      }
+    },
+    "attio": {
+      "tagline": "Flexible CRM for modern teams",
+      "blurb": "Read and update records, lists, notes and tasks in Attio.",
+      "tools": {
+        "Records": "Search, read, create and update people, companies and deals.",
+        "Notes": "Add notes to a record.",
+        "Tasks": "Create and read tasks.",
+        "Lists": "Read and add to lists."
+      }
+    },
+    "monday": {
+      "tagline": "Work management boards",
+      "blurb": "Find items on a board, create items and update their columns.",
+      "note": "The account needs the “monday MCP” app installed from the monday marketplace.",
+      "tools": {
+        "get_board_items_by_name": "Find items on a board.",
+        "get_board_schema": "Read a board’s columns and groups.",
+        "create_item": "Create an item.",
+        "change_item_column_values": "Update an item’s columns.",
+        "create_update": "Post an update on an item."
+      }
+    },
+    "apollo": {
+      "tagline": "Sales prospecting and contact data",
+      "blurb": "Look up and enrich contacts, log calls and create tasks and deals in Apollo.",
+      "tools": {
+        "apollo_contacts_search": "Search your contacts.",
+        "apollo_people_match": "Enrich a person. Spends Apollo credits.",
+        "apollo_contacts_create": "Create a contact.",
+        "apollo_contacts_update": "Update a contact.",
+        "apollo_phone_calls_create": "Log a call.",
+        "apollo_tasks_create": "Create a task.",
+        "apollo_deals_create": "Create a deal."
+      }
+    },
+    "zoho": {
+      "tagline": "CRM from the Zoho suite",
+      "blurb": "Read and write Zoho CRM records through a server you set up in Zoho MCP.",
+      "note": "Tool calls use your Zoho API credits.",
+      "fields": {
+        "url": { "label": "Zoho MCP server URL", "hint": "Create a server at mcp.zoho.com with the Zoho CRM tools, then copy its URL. The URL contains its key, so keep it private." }
+      },
+      "tools": {
+        "Data Operations": "Create, read, update and search records in any module.",
+        "Data Insights": "Read-only questions about your CRM data."
+      }
+    },
+    "calcom": {
+      "tagline": "Open-source scheduling",
+      "blurb": "Check free slots and book, reschedule or cancel meetings while the caller is on the line.",
+      "tools": {
+        "get_event_types": "List the meeting types you offer.",
+        "get_availability": "Find free slots.",
+        "create_booking": "Book a meeting.",
+        "reschedule_booking": "Move a booking.",
+        "cancel_booking": "Cancel a booking.",
+        "get_bookings": "Find the caller’s bookings."
+      }
+    },
+    "calendly": {
+      "tagline": "Meeting scheduling links",
+      "blurb": "Read open times, book an invitee into a slot, or send a single-use booking link.",
+      "note": "There is no reschedule tool; the agent cancels and books again.",
+      "tools": {
+        "event_types-list_event_types": "List your event types.",
+        "event_types-list_event_type_available_times": "Find open times.",
+        "meetings-create_invitee": "Book a slot. Paid Calendly plans only.",
+        "meetings-list_events": "List scheduled events.",
+        "meetings-cancel_event": "Cancel an event.",
+        "scheduling_links-create_single_use_scheduling_link": "Make a one-time booking link."
+      }
+    },
+    "google-calendar": {
+      "tagline": "Calendar from Google Workspace",
+      "blurb": "Read free time, suggest a slot and create or change events in Google Calendar.",
+      "steps": {
+        "1": "Join the Google Workspace Developer Preview Program. The Calendar MCP server is in preview.",
+        "2": "In a Google Cloud project, enable the Google Calendar API and the Calendar MCP API.",
+        "3": "Create an OAuth client of type Web application and add the redirect URL below.",
+        "4": "Copy its client id and client secret into the fields below."
+      },
+      "tools": {
+        "list_calendars": "List calendars.",
+        "list_events": "List events.",
+        "suggest_time": "Suggest a free time.",
+        "create_event": "Create an event.",
+        "update_event": "Change an event.",
+        "delete_event": "Delete an event."
+      }
+    },
+    "intercom": {
+      "tagline": "Customer messaging and help desk",
+      "blurb": "Find the customer, read their conversations and help articles, and leave an internal note.",
+      "note": "Australian workspaces are not supported by Intercom’s server.",
+      "regions": { "us": "US", "eu": "EU" },
+      "tools": {
+        "search_contacts": "Find a customer.",
+        "get_contact": "Read a customer.",
+        "search_conversations": "Search conversations.",
+        "get_conversation": "Read a conversation.",
+        "search_articles": "Search help articles.",
+        "add_internal_note": "Leave a note for your team."
+      }
+    },
+    "freshdesk": {
+      "tagline": "Customer support ticketing",
+      "blurb": "Find the contact, read their tickets, and open, update or reply to a ticket.",
+      "note": "Freshdesk caps MCP actions per plan.",
+      "help": "Use the API key of an agent who can see the tickets the phone agent should work with.",
+      "fields": {
+        "subdomain": { "label": "Freshdesk subdomain", "hint": "The part before .freshdesk.com." },
+        "key": { "label": "API key", "hint": "Profile settings, then View API key." }
+      },
+      "tools": {
+        "fetchContactAutocomplete": "Find a contact.",
+        "fetchContact": "Read a contact.",
+        "fetchSearchTickets": "Search tickets.",
+        "fetchTicket": "Read a ticket.",
+        "createTicket": "Open a ticket.",
+        "updateTicket": "Update a ticket.",
+        "createTicketNote": "Add a note."
+      }
+    },
+    "helpscout": {
+      "tagline": "Shared inbox and help center",
+      "blurb": "Read the customer’s conversations and your Docs articles. Read-only.",
+      "note": "Needs a Standard, Plus or Pro plan. The server cannot create tickets or notes.",
+      "tools": {
+        "Conversations": "Search and read conversations.",
+        "Customers": "Find and read customers.",
+        "Docs": "Search help articles."
+      }
+    },
+    "gorgias": {
+      "tagline": "Help desk for online stores",
+      "blurb": "Read tickets and customers, reply, and add internal notes in Gorgias.",
+      "tools": {
+        "Tickets": "Read tickets, reply, set status and priority.",
+        "Customers": "Find and read customers.",
+        "Help center": "Search articles."
+      }
+    },
+    "stripe": {
+      "tagline": "Online payments and billing",
+      "blurb": "Look up customers, invoices and subscriptions, and create a payment link to text the caller.",
+      "note": "Live or test mode is chosen on Stripe’s sign-in screen. Refunds wait for someone to approve them in Stripe.",
+      "tools": {
+        "stripe_api_search": "Find the API call for a task.",
+        "stripe_api_read": "Read customers, charges, invoices and subscriptions.",
+        "stripe_api_write": "Create a payment link, invoice or refund.",
+        "get_stripe_account_info": "Which account is connected.",
+        "search_stripe_documentation": "Search Stripe’s docs."
+      }
+    },
+    "paypal": {
+      "tagline": "Payments, invoices and checkout",
+      "blurb": "Create and send invoices, look up transactions and orders, and check disputes.",
+      "regions": { "live": "Live", "sandbox": "Sandbox" },
+      "tools": {
+        "create_invoice": "Create an invoice.",
+        "list_invoices": "List invoices.",
+        "create_order": "Create an order.",
+        "list_transactions": "List transactions.",
+        "list_disputes": "List disputes."
+      }
+    },
+    "razorpay": {
+      "tagline": "Payments for India, with UPI",
+      "blurb": "Create and send payment links, including UPI, and look up payments, orders and refunds.",
+      "note": "Refunds cannot be made over Razorpay’s hosted server.",
+      "help": "Generate an API key in the Razorpay Dashboard under Account & Settings, then API keys. Test keys work too.",
+      "fields": {
+        "keyId": { "label": "Key id" },
+        "keySecret": { "label": "Key secret" }
+      },
+      "tools": {
+        "create_payment_link": "Create a payment link.",
+        "create_payment_link_upi": "Create a UPI payment link.",
+        "send_payment_link": "Send a link by SMS or email.",
+        "fetch_payment": "Read a payment.",
+        "fetch_order": "Read an order.",
+        "fetch_refund": "Read a refund."
+      }
+    },
+    "dodopayments": {
+      "tagline": "Payments and billing for software",
+      "blurb": "Create checkouts and payment links, and look up customers and payments in Dodo Payments.",
+      "note": "Dodo’s sign-in screen asks for your API key and test or live mode. The execute tool can do anything your key can, including refunds, so switch it on only if you mean to.",
+      "tools": {
+        "search_docs": "Find the Dodo SDK call for a task.",
+        "execute": "Run code against the Dodo SDK: checkouts, payment links, customers, refunds."
+      }
+    },
+    "klaviyo": {
+      "tagline": "Email and SMS marketing",
+      "blurb": "Find or update a profile, subscribe the caller, and add them to a list.",
+      "note": "The person who connects must be an Owner, Admin or Manager in Klaviyo.",
+      "tools": {
+        "get_profiles": "Find a profile.",
+        "create_or_update_profile": "Create or update a profile.",
+        "subscribe_profile_to_marketing": "Subscribe a profile.",
+        "add_profiles_to_list": "Add a profile to a list.",
+        "get_coupon_codes": "Read coupon codes."
+      }
+    },
+    "slack": {
+      "tagline": "Team chat and channels",
+      "blurb": "Post a message to a channel or person when a call needs a human, and search your workspace.",
+      "steps": {
+        "1": "At api.slack.com/apps, create an app in your workspace. Slack only lets internal or directory apps use MCP.",
+        "2": "Under OAuth & Permissions, add the redirect URL below and the user token scopes the agent needs, such as chat:write and search:read.public.",
+        "3": "Copy the app’s client id and client secret into the fields below. A workspace admin may need to approve it."
+      },
+      "tools": {
+        "slack_send_message": "Post a message.",
+        "slack_search_public": "Search public channels.",
+        "slack_search_users": "Find a person.",
+        "slack_search_channels": "Find a channel.",
+        "slack_read_channel": "Read a channel."
+      }
+    },
+    "notion": {
+      "tagline": "Docs, wikis and databases",
+      "blurb": "Search your pages and databases for answers, and add pages or database rows.",
+      "tools": {
+        "notion-search": "Search the workspace.",
+        "notion-fetch": "Read a page or database.",
+        "notion-query-data-sources": "Query a database.",
+        "notion-create-pages": "Add pages or database rows.",
+        "notion-update-page": "Update a page."
+      }
+    },
+    "linear": {
+      "tagline": "Issue tracking for product teams",
+      "blurb": "Open an issue from a call, or check the status of one.",
+      "tools": {
+        "list_issues": "Find issues.",
+        "get_issue": "Read an issue.",
+        "save_issue": "Create or update an issue.",
+        "create_comment": "Comment on an issue."
+      }
+    },
+    "clickup": {
+      "tagline": "Tasks, docs and projects",
+      "blurb": "Create and update tasks, and search your workspace.",
+      "tools": {
+        "Search Workspace": "Search tasks and docs.",
+        "Create Task": "Create a task.",
+        "Update Task": "Update a task.",
+        "Create Task Comment": "Comment on a task."
+      }
+    },
+    "airtable": {
+      "tagline": "Spreadsheet-style databases",
+      "blurb": "Look up and add records in your bases: orders, bookings, inventory, anything you keep there.",
+      "tools": {
+        "list_bases": "List bases.",
+        "search_records": "Search records.",
+        "list_records_for_table": "Read records in a table.",
+        "create_records_for_table": "Add records."
+      }
+    },
+    "asana": {
+      "tagline": "Team tasks and projects",
+      "blurb": "Create follow-up tasks from a call and check on existing ones.",
+      "steps": {
+        "1": "In the Asana developer console, create an MCP app.",
+        "2": "Add the redirect URL below, and set distribution to the workspaces that will use it.",
+        "3": "Copy its client id and client secret into the fields below."
+      },
+      "tools": {
+        "search_tasks": "Search tasks.",
+        "get_tasks": "Read tasks.",
+        "create_tasks": "Create tasks.",
+        "update_tasks": "Update tasks.",
+        "add_comment": "Comment on a task."
+      }
+    },
+    "todoist": {
+      "tagline": "To-do lists",
+      "blurb": "Add a to-do from a call, or read what is due.",
+      "tools": {
+        "add-tasks": "Add tasks.",
+        "find-tasks": "Find tasks.",
+        "find-tasks-by-date": "What is due on a day.",
+        "complete-tasks": "Complete tasks."
+      }
+    },
+    "zapier": {
+      "tagline": "Connects thousands of apps",
+      "blurb": "Reach the apps you use through Zapier: the actions you switch on in Zapier become tools.",
+      "note": "Each tool call costs 2 Zapier tasks. Choose actions in Zapier, then refresh the tools here.",
+      "tools": {
+        "Your Zapier actions": "Each action you enable in Zapier MCP, such as “Create Google Sheets row”."
+      }
+    },
+    "make": {
+      "tagline": "Visual workflow automation",
+      "blurb": "Run your Make scenarios as tools: each active, on-demand scenario is one tool.",
+      "note": "A scenario must answer within 25 seconds to be useful on a call; Make keeps longer ones running in the background.",
+      "tools": {
+        "Your scenarios": "Each active scenario set to run on demand."
+      }
+    },
+    "n8n": {
+      "tagline": "Open-source workflow automation",
+      "blurb": "Run your n8n workflows and read its data tables, on n8n Cloud or your own instance.",
+      "help": "Turn on Instance-level MCP in n8n settings, create an access token there, and expose the workflows the agent may run.",
+      "fields": {
+        "instance": { "label": "n8n address", "hint": "Settings, then Instance-level MCP, shows the full URL." },
+        "token": { "label": "MCP access token" }
+      },
+      "tools": {
+        "search_workflows": "Find workflows.",
+        "execute_workflow": "Run a workflow.",
+        "get_workflow_execution": "Read a run’s result.",
+        "query_data_table": "Read a data table.",
+        "insert_data_table_records": "Add rows to a data table."
+      }
+    },
+    "home-assistant": {
+      "tagline": "Smart home control",
+      "blurb": "Check sensors and the thermostat, and switch lights and devices, in a home or property run on Home Assistant.",
+      "note": "Caller id can be faked and a caller can try to talk the agent into things. Do not expose locks, alarms or garage doors to voice assistants, and only switch on the tools that change devices for an agent that checks who it is talking to. Only the read tool is on to start with.",
+      "help": "Add the Model Context Protocol Server integration in Home Assistant first. The agent only sees the devices you expose to voice assistants (Settings, then Voice assistants, then Expose).",
+      "fields": {
+        "instance": { "label": "Home Assistant address", "hint": "Its public https address. Home Assistant Cloud gives every instance one; a local address such as homeassistant.local cannot be reached." },
+        "token": { "label": "Long-lived access token", "hint": "Your Home Assistant profile, then Security, then Long-lived access tokens." }
+      },
+      "tools": {
+        "GetLiveContext": "Read the current state of exposed devices and sensors.",
+        "HassTurnOn": "Turn a device or area on.",
+        "HassTurnOff": "Turn a device or area off.",
+        "HassLightSet": "Set a light’s brightness or colour.",
+        "HassClimateSetTemperature": "Set the thermostat."
+      }
+    },
+    "exa": {
+      "tagline": "Web search for AI",
+      "blurb": "Search the web and read a page when a caller asks something your prompt does not cover.",
+      "note": "Uses Exa’s free tier, which is rate-limited. No account needed.",
+      "tools": {
+        "web_search_exa": "Search the web.",
+        "web_fetch_exa": "Read a web page."
+      }
+    }
+  }
+}

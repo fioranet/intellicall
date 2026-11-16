@@ -1,32 +1,28 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Search, Users, Loader2, RefreshCw } from "lucide-react";
-import { useSettings } from "@/components/settings-provider";
-import { AddLeadDialog } from "@/components/leads/add-lead-dialog";
-import { ImportCsvDialog } from "@/components/leads/import-csv-dialog";
-import { LeadsTable } from "@/components/leads/leads-table";
-import axios from "axios";
+import { MagnifyingGlass, Users, X, GearSix } from "@phosphor-icons/react";
 import {
+    Button,
+    Chip,
+    Chips,
     DropdownMenu,
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { toast } from "sonner";
-import {
-    Empty,
-    EmptyDescription,
-    EmptyHeader,
-    EmptyMedia,
-    EmptyTitle,
-} from "@/components/ui/empty";
-import { Badge } from "@/components/ui/badge";
-import { X, Filter, Settings2 } from "lucide-react";
+    EmptyState,
+    Input,
+    PageHeader,
+    Spinner,
+    toast,
+} from "@wixzel/react";
+import { useSettings } from "@/components/settings-provider";
+import { AddLeadDialog } from "@/components/leads/add-lead-dialog";
+import { ImportCsvDialog } from "@/components/leads/import-csv-dialog";
+import { LeadsTable } from "@/components/leads/leads-table";
+import axios from "axios";
 
 import { useTranslations } from "next-intl";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
@@ -136,13 +132,14 @@ export default function LeadsPage() {
         return matchesSearch && matchesTag;
     });
 
-    const toggleTag = (tag: string) => {
-        setSelectedTags((prev) =>
-            prev.includes(tag)
-                ? prev.filter((t) => t !== tag)
-                : [...prev, tag]
-        );
-    };
+    // Chosen tags stay listed even when no lead carries them any more, so a saved filter can be cleared.
+    const filterTags = Array.from(new Set([...(allTags as string[]), ...selectedTags])).sort();
+    const tagCounts = leads.reduce<Record<string, number>>((counts, lead) => {
+        (lead.tags || []).forEach((tag) => {
+            counts[tag] = (counts[tag] ?? 0) + 1;
+        });
+        return counts;
+    }, {});
 
     const toggleFieldVisibility = (fieldName: string) => {
         const current = visibleFields ?? allCustomFieldNames;
@@ -191,116 +188,88 @@ export default function LeadsPage() {
     }, [hasHydrated, googleSheetsConnected, googleSheetsConfig, fetchLeads]);
 
     return (
-        <div className="space-y-6 pb-20">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b pb-6">
-                <div>
-                    <div className="flex items-center gap-2">
-                        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
-                    </div>
-                    <p className="text-muted-foreground mt-1">
-                        {t("subtitle", { count: leads.length })}
-                    </p>
-                </div>
-                <div className="flex items-center gap-3">
-                    <ImportCsvDialog onSuccess={fetchLeads} />
-                    <AddLeadDialog onSuccess={fetchLeads} />
-                </div>
-            </div>
+        <div className="flex flex-col gap-6 pb-20">
+            <PageHeader
+                title={t("title")}
+                description={t("subtitle", { count: leads.length })}
+                actions={
+                    <>
+                        <ImportCsvDialog onSuccess={fetchLeads} />
+                        <AddLeadDialog onSuccess={fetchLeads} />
+                    </>
+                }
+            />
 
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center bg-card p-4 rounded-xl border shadow-sm">
-                <div className="relative flex-1 group">
-                    <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
+            <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                     <Input
+                        leading={<MagnifyingGlass />}
                         placeholder={t("searchPlaceholder")}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="ps-10 bg-muted/30 border-none h-11 focus-visible:ring-1 focus-visible:ring-primary/20"
+                        className="flex-1"
                     />
-                </div>
-                <div className="flex items-center gap-2">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="h-11 px-4 border-dashed hover:border-primary/50 transition-all">
-                                <Filter className="me-2 h-4 w-4 text-muted-foreground" />
-                                {selectedTags.length > 0
-                                    ? t("filter.withCount", { count: selectedTags.length })
-                                    : t("filter.button")}
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-56 rounded-xl border-primary/10 shadow-xl">
-                            <DropdownMenuLabel className="text-xs uppercase text-muted-foreground font-bold px-3 py-2">{t("filter.byTags")}</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <div className="max-h-[300px] overflow-y-auto p-1">
-                                {allTags.length > 0 ? (
-                                    allTags.map((tag) => (
+                    <div className="flex items-center gap-2">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="secondary" iconStart={<GearSix />}>
+                                    {t("filter.columns")}
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-56">
+                                <DropdownMenuLabel>{t("filter.visibleFields")}</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <div className="max-h-[300px] overflow-y-auto">
+                                    {allCustomFieldNames.map((fieldName) => (
                                         <DropdownMenuCheckboxItem
-                                            key={tag as string}
-                                            checked={selectedTags.includes(tag as string)}
-                                            onCheckedChange={() => toggleTag(tag as string)}
+                                            key={fieldName}
+                                            checked={activeVisibleFields.includes(fieldName)}
+                                            onCheckedChange={() => toggleFieldVisibility(fieldName)}
+                                            className="capitalize"
                                             onSelect={(e) => e.preventDefault()}
-                                            className="rounded-lg"
                                         >
-                                            <span className="flex items-center gap-2">
-                                                <div className="h-1.5 w-1.5 rounded-full bg-primary/40" />
-                                                {tag as string}
-                                            </span>
+                                            {fieldName}
                                         </DropdownMenuCheckboxItem>
-                                    ))
-                                ) : (
-                                    <div className="px-2 py-4 text-xs text-muted-foreground text-center italic">
-                                        {t("filter.noTags")}
-                                    </div>
-                                )}
-                            </div>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                                    ))}
+                                </div>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
 
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="h-11 px-4 border-dashed hover:border-primary/50 transition-all">
-                                <Settings2 className="me-2 h-4 w-4 text-muted-foreground" />
-                                {t("filter.columns")}
+                        {(selectedTags.length > 0 || visibleFields !== null) && (
+                            <Button
+                                variant="ghost"
+                                iconStart={<X />}
+                                onClick={() => {
+                                    setSelectedTags([]);
+                                    setVisibleFields(null);
+                                }}
+                            >
+                                {t("filter.clear")}
                             </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-56 rounded-xl border-primary/10 shadow-xl">
-                            <DropdownMenuLabel className="text-xs uppercase text-muted-foreground font-bold px-3 py-2">{t("filter.visibleFields")}</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <div className="max-h-[300px] overflow-y-auto p-1">
-                                {allCustomFieldNames.map((fieldName) => (
-                                    <DropdownMenuCheckboxItem
-                                        key={fieldName}
-                                        checked={activeVisibleFields.includes(fieldName)}
-                                        onCheckedChange={() => toggleFieldVisibility(fieldName)}
-                                        className="capitalize rounded-lg"
-                                        onSelect={(e) => e.preventDefault()}
-                                    >
-                                        {fieldName}
-                                    </DropdownMenuCheckboxItem>
-                                ))}
-                            </div>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-
-                    {(selectedTags.length > 0 || visibleFields !== null) && (
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                                setSelectedTags([]);
-                                setVisibleFields(null);
-                            }}
-                            className="h-11 px-3 text-muted-foreground hover:text-destructive hover:bg-destructive/5"
-                        >
-                            <X className="me-1.5 h-4 w-4" />
-                            {t("filter.clear")}
-                        </Button>
-                    )}
+                        )}
+                    </div>
                 </div>
+
+                {/* Tags as filter chips: a lead must carry every chosen tag. */}
+                {filterTags.length > 0 && (
+                    <Chips
+                        type="multiple"
+                        value={selectedTags}
+                        onValueChange={setSelectedTags}
+                        aria-label={t("filter.byTags")}
+                    >
+                        {filterTags.map((tag) => (
+                            <Chip key={tag} value={tag} count={tagCounts[tag] ?? 0}>
+                                {tag}
+                            </Chip>
+                        ))}
+                    </Chips>
+                )}
             </div>
 
             {loading ? (
                 <div className="flex h-64 items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                    <Spinner size="xl" className="text-fg-muted" />
                 </div>
             ) : leads.length > 0 ? (
                 filteredLeads.length > 0 ? (
@@ -310,19 +279,13 @@ export default function LeadsPage() {
                         visibleFields={activeVisibleFields}
                     />
                 ) : (
-                    <Empty className="border border-dashed py-12">
-                        <EmptyHeader>
-                            <EmptyMedia variant="icon">
-                                <Search className="h-8 w-8 text-muted-foreground" />
-                            </EmptyMedia>
-                            <EmptyTitle>{t("empty.noMatchTitle")}</EmptyTitle>
-                            <EmptyDescription>
-                                {t("empty.noMatchDescription")}
-                            </EmptyDescription>
-                        </EmptyHeader>
-                        <div className="flex justify-center pt-4">
+                    <EmptyState
+                        icon={<MagnifyingGlass />}
+                        title={t("empty.noMatchTitle")}
+                        description={t("empty.noMatchDescription")}
+                        actions={
                             <Button
-                                variant="outline"
+                                variant="secondary"
                                 onClick={() => {
                                     setSearchQuery("");
                                     setSelectedTags([]);
@@ -330,25 +293,21 @@ export default function LeadsPage() {
                             >
                                 {t("empty.clearFilters")}
                             </Button>
-                        </div>
-                    </Empty>
+                        }
+                    />
                 )
             ) : (
-                <Empty className="border border-dashed">
-                    <EmptyHeader>
-                        <EmptyMedia variant="icon">
-                            <Users />
-                        </EmptyMedia>
-                        <EmptyTitle>{t("empty.noLeadsTitle")}</EmptyTitle>
-                        <EmptyDescription>
-                            {t("empty.noLeadsDescription")}
-                        </EmptyDescription>
-                    </EmptyHeader>
-                    <div className="flex justify-center gap-2 pb-8">
-                        <ImportCsvDialog onSuccess={fetchLeads} />
-                        <AddLeadDialog onSuccess={fetchLeads} />
-                    </div>
-                </Empty>
+                <EmptyState
+                    icon={<Users />}
+                    title={t("empty.noLeadsTitle")}
+                    description={t("empty.noLeadsDescription")}
+                    actions={
+                        <>
+                            <ImportCsvDialog onSuccess={fetchLeads} />
+                            <AddLeadDialog onSuccess={fetchLeads} />
+                        </>
+                    }
+                />
             )}
         </div>
     );

@@ -6,6 +6,7 @@ const Lead = require('../models/Lead');
 const { auth, requireActivePlan } = require('../middleware/auth');
 const checkLimit = require('../middleware/limit-checker');
 const { runCampaign } = require('../services/campaign-runner');
+const { webhookOrigin } = require('../utils/public-url');
 const WebhookService = require('../services/webhook-service');
 
 const router = express.Router();
@@ -60,7 +61,7 @@ router.post('/start', auth, requireActivePlan, checkLimit('calls'), async (req, 
         if (!campaign) {
             return res.status(404).json({ status: 'error', message: 'Campaign not found' });
         }
-        await runCampaign(id, { userId: req.user._id });
+        await runCampaign(id, { userId: req.user._id, origin: webhookOrigin(req) });
         res.status(200).json({
             status: 'success',
             started: true,

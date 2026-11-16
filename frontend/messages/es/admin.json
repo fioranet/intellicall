@@ -121,7 +121,22 @@
       "saved": "Credenciales de {provider} guardadas",
       "saveFailed": "No se pudo guardar"
     },
-    "hubspotLegacyNotice": "HubSpot cerró el registro de nuevas aplicaciones públicas el 23 de junio de 2026, así que estos campos solo se aplican si registraste una aplicación antes de esa fecha. Las conexiones nuevas usan una clave de servicio: cada usuario pega la suya desde su propia cuenta de HubSpot en Configuración → Integraciones."
+    "hubspotLegacyNotice": "HubSpot cerró el registro de nuevas aplicaciones públicas el 23 de junio de 2026, así que estos campos solo se aplican si registraste una aplicación antes de esa fecha. Las conexiones nuevas usan una clave de servicio: cada usuario pega la suya desde su propia cuenta de HubSpot en Configuración → Integraciones.",
+    "metaTitle": "Meta (WhatsApp)",
+    "metaDescription": "Tu app de Meta para WhatsApp. Con una configuración de Embedded Signup, los usuarios conectan su número de negocio desde la página de WhatsApp en una ventana de Meta; su webhook recibe los mensajes de todos los números conectados.",
+    "metaEnvNotice": "Estos valores están definidos en el entorno del servidor (META_APP_ID y los demás). Lo que guardes aquí se conserva, pero el entorno tiene prioridad mientras esté definido.",
+    "metaAppId": "ID de la app",
+    "metaAppSecret": "Clave secreta de la app",
+    "metaEsConfigId": "ID de configuración de Embedded Signup",
+    "metaEsConfigIdHint": "En la página WhatsApp > Embedded Signup de la app. Sin él, los usuarios solo pueden conectarse con su propia app de Meta.",
+    "metaVerifyToken": "Verify token del webhook",
+    "metaVerifyTokenHint": "Cualquier cadena secreta. Pega la misma en WhatsApp > Configuration > Webhook de la app.",
+    "metaSystemUserToken": "Token de usuario del sistema",
+    "metaSystemUserTokenHint": "Un token permanente de un usuario del sistema del negocio, con whatsapp_business_messaging y whatsapp_business_management.",
+    "metaSystemUserId": "ID del usuario del sistema",
+    "metaSystemUserIdHint": "El usuario del sistema que se añade a cada cuenta de WhatsApp Business conectada tras el Embedded Signup.",
+    "metaWebhookUrl": "Callback URL del webhook",
+    "metaWebhookHint": "En la app de Meta, abre WhatsApp > Configuration, elige Edit junto a Webhook, pega esta URL y el verify token de arriba, y suscríbete al campo messages."
   },
   "loading": "Cargando…",
   "support": {
@@ -250,6 +265,29 @@
       "trialFailed": "No se pudieron actualizar los límites de prueba",
       "deleted": "Plan eliminado",
       "deleteFailed": "No se pudo eliminar el plan"
+    },
+    "tools": "{count} Herramientas",
+    "unlimitedTools": "Herramientas ilimitadas",
+    "mcpServers": "{count} Apps conectadas",
+    "unlimitedMcpServers": "Apps conectadas ilimitadas",
+    "whatsappAccounts": "{count} Números de WhatsApp",
+    "unlimitedWhatsappAccounts": "Números de WhatsApp ilimitados",
+    "whatsappMessages": "{count} Mensajes de WhatsApp/mes",
+    "unlimitedWhatsappMessages": "Mensajes de WhatsApp ilimitados",
+    "noWhatsapp": "Sin WhatsApp",
+    "noMeetings": "Sin reuniones",
+    "meetingsIncluded": "Reuniones incluidas",
+    "zeroUnlimited": "0 significa ilimitado.",
+    "featuresTitle": "Funciones",
+    "featureMeetings": "Reuniones",
+    "featureMeetingsHint": "Los agentes pueden unirse a reuniones de Zoom, Google Meet y Teams. Las reuniones cuentan como llamadas.",
+    "featureWhatsapp": "WhatsApp",
+    "featureWhatsappHint": "Los agentes pueden responder chats de WhatsApp y enviar mensajes durante las llamadas.",
+    "limitFields": {
+      "tools": "Herramientas",
+      "mcpServers": "Apps conectadas",
+      "whatsappAccounts": "Números de WhatsApp",
+      "whatsappMessagesPerMonth": "Mensajes de WhatsApp/mes"
     }
   },
   "settings": {

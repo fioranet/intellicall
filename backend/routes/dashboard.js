@@ -61,9 +61,8 @@ router.get('/stats', auth, async (req, res) => {
                 log.createdAt >= startOfDay && log.createdAt <= endOfDay
             ).length;
 
-            const dayName = startOfDay.toLocaleDateString('pt-BR', { weekday: 'short' });
             chartData.push({
-                name: dayName.charAt(0).toUpperCase() + dayName.slice(1).replace('.', ''),
+                name: startOfDay.toLocaleDateString('en-US', { weekday: 'short' }),
                 calls: dailyCalls
             });
         }

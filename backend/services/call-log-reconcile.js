@@ -124,6 +124,50 @@ async function reconcileStaleSipCallLogs() {
     }
 }
 
+// ─── Stale meeting reconciliation ────────────────────────────────────────────
+// A meeting bot's CallLog is queued while the bot joins, in-progress while it is
+// in the room (meetings/session.js), and closed by the session or a state webhook.
+// A process restart, or an Attendee whose webhooks never arrive, leaves it open.
+// Pending bots (still joining, before their deadline) and live sessions are spared.
+const STALE_MEETING_MS = 15 * 60 * 1000;
+
+async function reconcileStaleMeetingCallLogs() {
+    try {
+        const cutoff = new Date(Date.now() - STALE_MEETING_MS);
+        const stale = await CallLog.find({
+            provider: 'meeting',
+            status: { $in: NON_TERMINAL },
+            createdAt: { $lt: cutoff }
+        }).select('_id callSid startTime createdAt transcript userId meeting').lean();
+        if (stale.length === 0) return;
+
+        const active = new Set();
+        try {
+            const sessions = require('../voice/active-sessions');
+            for (const id of sessions.webSessionIds()) active.add(id);
+            for (const id of sessions.pendingMeetingIds()) active.add(id);
+        } catch (_) { /* registry unavailable — treat all as inactive */ }
+
+        const toClose = stale.filter((l) => !active.has(l.callSid));
+        if (toClose.length === 0) return;
+        const endTime = new Date();
+        for (const log of toClose) {
+            await CallLog.updateOne(
+                { _id: log._id },
+                { $set: { status: 'failed', endTime, duration: estimateDurationFromTranscript(log), 'meeting.endReason': 'stale' } }
+            );
+            // The bot may still be sitting in the room; best effort.
+            try {
+                const { tellBotToLeave } = require('../meetings/session');
+                tellBotToLeave(String(log.userId), log.meeting && log.meeting.botId, 'stale call log').catch(() => { });
+            } catch (_) { /* meetings unavailable */ }
+        }
+        console.log(`[Meeting Reconcile] Marked ${toClose.length} stale meeting call log(s) as failed`);
+    } catch (err) {
+        console.error('[Meeting Reconcile] sweep err:', err.message);
+    }
+}
+
 // ─── Stale Twilio call reconciliation ────────────────────────────────────────
 // The media-stream cleanup and POST /api/twilio/status normally close these rows, but a
 // process crash or an unreachable BASE_URL (so the status callback never lands) leaves
@@ -184,17 +228,19 @@ function startCallLogReconcileSchedulers() {
     const sweep = () => {
         reconcileStaleSipCallLogs();
         reconcileStaleTwilioCallLogs();
+        reconcileStaleMeetingCallLogs();
     };
     sweep(); // run once shortly after boot
     sipSweepTimer = setInterval(sweep, SIP_SWEEP_INTERVAL_MS);
     if (typeof sipSweepTimer.unref === 'function') sipSweepTimer.unref();
-    console.log('[Reconcile] stale-call sweep scheduler started (SIP + Twilio)');
+    console.log('[Reconcile] stale-call sweep scheduler started (SIP + Twilio + meetings)');
 }
 
 module.exports = {
     reconcileCampaignCallLogs,
     reconcileStaleSipCallLogs,
     reconcileStaleTwilioCallLogs,
+    reconcileStaleMeetingCallLogs,
     startCallLogReconcileSchedulers,
     /** @deprecated renamed to startCallLogReconcileSchedulers — kept so older callers keep working. */
     startSipReconcileScheduler: startCallLogReconcileSchedulers,

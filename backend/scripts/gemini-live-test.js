@@ -13,7 +13,7 @@
  */
 
 const B = require('path').join(__dirname, '..');
-const { GeminiLiveBridge } = require(B + '/services/gemini-live/gemini-bridge');
+const { GeminiLiveBridge, GEMINI_LIVE_MODEL, thinkingConfigFor, wantsBlockingTools, ENGINE_UNAVAILABLE } = require(B + '/services/gemini-live/gemini-bridge');
 const { mulawToPcm16 } = require(B + '/utils/audio-codec');
 
 let fail = 0;
@@ -136,6 +136,72 @@ function pcm24Base64(ms, freq = 440) {
     check('resumption handle is stored', g._resumptionHandle === 'h9');
     g._handleMessage(JSON.stringify({ goAway: { timeLeft: '10s' } }));
     check('goAway marks the rotation', g._goingAway === true);
+}
+
+// setup: 3.8 refuses the whole session over a thinking setting (close 1007)
+{
+    check('3.8 gets no thinkingConfig', thinkingConfigFor('gemini-3.8-live') === null);
+    check('3.8 extended-thinking gets no thinkingConfig', thinkingConfigFor('gemini-3.8-live-extended-thinking') === null);
+    check('3.8 tools are pinned BLOCKING', wantsBlockingTools('gemini-3.8-live') === true);
+    const setup = makeBridge()._buildSetupMessage().setup;
+    if (GEMINI_LIVE_MODEL.startsWith('gemini-3.8')) {
+        check('default 3.8 setup carries no thinking field', !JSON.stringify(setup).includes('thinking'));
+    }
+}
+
+// a refused setup: Google's reason reaches the CallLog, no retries, and the call ends
+{
+    const b = makeBridge();
+    const errors = [];
+    let endReason = null;
+    b.onError = (service, code, message) => errors.push({ service, code, message });
+    b.onEndCall = (r) => { endReason = r; };
+    b._openSocket = () => { throw new Error('must not retry a refused setup'); };
+    b._handleClose(1007, 'Thinking level is not supported for this model.');
+    check('refused setup is recorded once', errors.length === 1 && errors[0].code === 'live_setup_rejected', errors[0]?.code);
+    check("refusal carries Google's reason", /Thinking level is not supported/.test(errors[0]?.message || ''), errors[0]?.message);
+    check('refused setup ends the call', endReason === ENGINE_UNAVAILABLE, endReason);
+
+    // an exhausted key arrives as 1011, like an internal error, but is not retried
+    const q = makeBridge();
+    const qerrs = [];
+    q.onError = (s, code, message) => qerrs.push({ code, message });
+    q._openSocket = () => { throw new Error('must not retry an exhausted key'); };
+    q._handleClose(1011, 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: h');
+    check('quota refusal is not retried', qerrs.length === 1 && qerrs[0].code === 'live_setup_rejected', qerrs[0]?.code);
+    check('quota refusal tells the user what to do', /used up its quota/.test(qerrs[0]?.message || ''));
+
+    // a transient drop before setup is still retried, and the last close is reported
+    const t = makeBridge();
+    const terrs = [];
+    let opens = 0;
+    t.onError = (s, code, message) => terrs.push({ code, message });
+    t._openSocket = () => { opens++; };
+    const realTimeout = global.setTimeout;
+    global.setTimeout = (fn) => { fn(); return 0; };
+    for (let i = 0; i <= 3; i++) t._handleClose(1011, 'Internal error encountered.');
+    global.setTimeout = realTimeout;
+    check('internal error is retried three times', opens === 3, `${opens} reconnects`);
+    check('then reported with its close code', terrs.length === 1 && /code 1011/.test(terrs[0].message), terrs[0]?.message);
+
+    // a deliberate close() is never reported
+    const c = makeBridge();
+    let cerr = 0;
+    c.onError = () => cerr++;
+    c.close();
+    c._handleClose(1000, '');
+    check('own close() is not an error', cerr === 0);
+}
+
+// SIP: the engine going away hangs up at once instead of leaving the caller in silence
+{
+    const SipGeminiLiveStream = require(B + '/services/sip/sip-gemini-live-stream');
+    const s = new SipGeminiLiveStream({ userId: 'u', agentId: 'a', leadId: 'l', direction: 'outbound', callId: 'c2', rtpPort: 1 });
+    let hungUp = 0;
+    s.onEndCall = () => hungUp++;
+    s._scheduleEndCall(ENGINE_UNAVAILABLE);
+    check('SIP hangs up when the engine is gone', hungUp === 1);
+    if (s._endCallSafetyTimer) clearTimeout(s._endCallSafetyTimer);
 }
 
 // RTP framing: only whole 20ms frames are queued, and no bytes are lost

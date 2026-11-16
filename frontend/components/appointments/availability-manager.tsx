@@ -1,16 +1,9 @@
 "use client";
 
-import { useState, useEffect, Fragment } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { X, Plus, Loader2, Save, Calendar, Clock, Bot } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
+import { useState, useEffect } from "react";
+import { Badge, Button, Input, Section, Spinner, toast } from "@wixzel/react";
+import { X, Plus, FloppyDisk, Calendar, Clock } from "@phosphor-icons/react";
 import axios from "axios";
-import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
 import { useTranslations } from "next-intl";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
@@ -98,92 +91,81 @@ export function AvailabilityManager() {
 
     if (loading) {
         return (
-            <div className="flex h-[400px] items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <div className="flex h-[400px] items-center justify-center text-fg-muted">
+                <Spinner size="xl" />
             </div>
         );
     }
 
     return (
-        <div className="space-y-4">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h3 className="text-lg font-semibold">{t("availability.title")}</h3>
-                    <p className="text-sm text-muted-foreground">{t("availability.description")}</p>
-                </div>
-                <Button onClick={handleSave} disabled={saving} className="gap-2">
-                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+        <Section
+            icon={<Clock />}
+            title={t("availability.title")}
+            description={t("availability.description")}
+            actions={
+                <Button variant="primary" onClick={handleSave} loading={saving} iconStart={<FloppyDisk />}>
                     {t("availability.save")}
                 </Button>
-            </div>
-
-            <div className="space-y-0">
-                {DAYS.map((day, index) => {
+            }
+        >
+            <div className="divide-y divide-border">
+                {DAYS.map((day) => {
                     const daySlots = slots.map((s, idx) => ({ ...s, originalIndex: idx })).filter(s => s.dayOfWeek === day.value);
 
                     return (
-                        <Fragment key={day.value}>
-                            <div className="grid grid-cols-1 md:grid-cols-[180px,1fr] gap-4 py-3 transition-colors">
-                                <div className="flex items-center gap-2">
-                                    <Calendar className="h-4 w-4 text-primary" />
-                                    <span className="font-bold text-sm">{day.label}</span>
-                                    {daySlots.length > 0 && <Badge variant="secondary" className="text-[10px] px-1 h-4">{daySlots.length}</Badge>}
-                                </div>
-
-                                <div className="space-y-3">
-                                    {daySlots.length > 0 ? (
-                                        <div className="flex flex-wrap gap-3">
-                                            {daySlots.map((slot) => (
-                                                <div key={slot.originalIndex} className="flex items-center gap-2 animate-in fade-in zoom-in-95 duration-200">
-                                                    <div className="grid grid-cols-2 gap-3 max-w-[420px]">
-                                                        <div className="relative">
-                                                            <Clock className="absolute start-3 top-3 h-4 w-4 text-muted-foreground" />
-                                                            <Input
-                                                                type="time"
-                                                                className="ps-9 h-10 text-sm w-40"
-                                                                value={slot.startTime}
-                                                                onChange={(e) => updateSlot(slot.originalIndex, "startTime", e.target.value)}
-                                                            />
-                                                        </div>
-                                                        <div className="relative">
-                                                            <Clock className="absolute start-3 top-3 h-4 w-4 text-muted-foreground" />
-                                                            <Input
-                                                                type="time"
-                                                                className="ps-9 h-10 text-sm w-40"
-                                                                value={slot.endTime}
-                                                                onChange={(e) => updateSlot(slot.originalIndex, "endTime", e.target.value)}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-7 w-7 text-muted-foreground hover:text-destructive transition-colors shrink-0"
-                                                        onClick={() => removeSlot(slot.originalIndex)}
-                                                    >
-                                                        <X className="h-3.5 w-3.5" />
-                                                    </Button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <p className="text-[11px] text-muted-foreground italic py-1">{t("availability.noSlots")}</p>
-                                    )}
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="h-7 text-[11px] gap-1 border-dashed hover:border-primary hover:text-primary transition-all px-2"
-                                        onClick={() => addSlot(day.value)}
-                                    >
-                                        <Plus className="h-3 w-3" /> {t("availability.addSlot")}
-                                    </Button>
-                                </div>
+                        <div key={day.value} className="grid grid-cols-1 gap-4 py-3 first:pt-0 last:pb-0 md:grid-cols-[180px_1fr]">
+                            <div className="flex items-center gap-2">
+                                <Calendar className="size-4 text-fg-subtle" />
+                                <span className="text-body-sm font-medium">{day.label}</span>
+                                {daySlots.length > 0 && <Badge size="sm">{daySlots.length}</Badge>}
                             </div>
-                            {index < DAYS.length - 1 && <Separator />}
-                        </Fragment>
+
+                            <div className="flex flex-col items-start gap-3">
+                                {daySlots.length > 0 ? (
+                                    <div className="flex flex-wrap gap-3">
+                                        {daySlots.map((slot) => (
+                                            <div key={slot.originalIndex} className="flex animate-wx-fade-in items-center gap-2">
+                                                <div className="grid max-w-[420px] grid-cols-2 gap-3">
+                                                    <Input
+                                                        type="time"
+                                                        className="w-40"
+                                                        leading={<Clock />}
+                                                        value={slot.startTime}
+                                                        onChange={(e) => updateSlot(slot.originalIndex, "startTime", e.target.value)}
+                                                    />
+                                                    <Input
+                                                        type="time"
+                                                        className="w-40"
+                                                        leading={<Clock />}
+                                                        value={slot.endTime}
+                                                        onChange={(e) => updateSlot(slot.originalIndex, "endTime", e.target.value)}
+                                                    />
+                                                </div>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon-xs"
+                                                    onClick={() => removeSlot(slot.originalIndex)}
+                                                >
+                                                    <X />
+                                                </Button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="py-1 text-caption italic text-fg-subtle">{t("availability.noSlots")}</p>
+                                )}
+                                <Button
+                                    size="xs"
+                                    iconStart={<Plus />}
+                                    onClick={() => addSlot(day.value)}
+                                >
+                                    {t("availability.addSlot")}
+                                </Button>
+                            </div>
+                        </div>
                     );
                 })}
             </div>
-        </div>
+        </Section>
     );
 }

@@ -8,6 +8,8 @@ const Lead = require('../models/Lead');
 const CallLog = require('../models/CallLog');
 const { deepgramModel, openRouterModel } = require('../utils/models');
 const { buildVoiceSystemPrompt } = require('../utils/agent-prompt');
+const { attachToolSession, finishToolSession } = require('./tools/attach');
+const { MAX_TOOL_ROUNDS, toolFiller } = require('./tools/tool-rounds');
 const { applyMergeFields } = require('../utils/merge-fields');
 const { analyzeCallLog } = require('../utils/analyzer');
 const { computeDuration, persistDurationIfUnset } = require('../utils/call-duration');
@@ -188,8 +190,13 @@ const activeTwilioCallSids = new Set();
  * @param {string} [opts.agentId] browser only — authoritative, from the ticket
  */
 const handleVoiceStream = async (ws, req, opts = {}) => {
-    const isBrowserTest = opts.transport === 'browser';
+    // A meeting bot (meetings/session.js) is a browser-like leg: the same frames over an
+    // AttendeeLink, no phone to hang up, and the meeting session owns the CallLog.
+    const isMeeting = opts.transport === 'meeting';
+    const isBrowserTest = opts.transport === 'browser' || isMeeting;
     let browserCapTimer = null;
+    /** Caller silence this long ends the conversation; a meeting passes MEETING_IDLE_SECONDS. */
+    const idleTimeoutMs = opts.idleTimeoutMs || IDLE_TIMEOUT_MS;
 
     /**
      * Control frames for the in-browser test UI. A phone call has no use for these
@@ -207,6 +214,29 @@ const handleVoiceStream = async (ws, req, opts = {}) => {
     let settings = null;
     let agent = null;
     let lead = null;
+    /** The call's tools (services/tools/agent-tool-session.js), or null. */
+    let toolSession = null;
+    /** Lets attachToolSession treat this inlined pipeline like a bridge. */
+    const classicToolHost = { setToolSession: (s) => { toolSession = s || null; } };
+
+    /**
+     * ElevenLabs closes its input stream once a flushed utterance is spoken, so a
+     * second utterance in the same turn (a tool filler, then the answer) needs a
+     * fresh socket. Same dance as the appointment narration below.
+     */
+    async function freshTtsStream() {
+        if (elConnection) {
+            try { elConnection.terminate(); } catch (_) { }
+            elConnection = null;
+        }
+        elReady = false;
+        await initializeElevenLabs();
+        let elAttempts = 0;
+        while (!elReady && elAttempts < 15) {
+            await new Promise(r => setTimeout(r, 100));
+            elAttempts++;
+        }
+    }
 
     let transcript = [];
     let isProcessing = false;
@@ -339,8 +369,12 @@ const handleVoiceStream = async (ws, req, opts = {}) => {
                         // Browser tests reuse a single per-user test lead minted by the
                         // session route, so merge fields and appointment booking behave
                         // exactly as they do on a real call.
-                        lead = await Lead.findOne({ _id: leadId, createdBy: userId });
+                        lead = leadId ? await Lead.findOne({ _id: leadId, createdBy: userId }) : null;
+                        // A meeting has no lead: merge fields and appointment lookups see an empty one.
+                        if (!lead && isMeeting) lead = { _id: null, name: '', phone: '', fields: [] };
                         if (agent) voiceQuality = resolveVoiceQuality(agent);
+                        // Meeting mode appends who the agent is in the room (voice/meeting-mode.js).
+                        if (agent && opts.systemPromptSuffix) agent.systemPrompt = `${agent.systemPrompt || ''}\n\n${opts.systemPromptSuffix}`;
 
                         // Per-engine key requirements (deepgram_agent skips OpenRouter; sarvam
                         // is self-contained and needs only a Sarvam key).
@@ -381,13 +415,13 @@ const handleVoiceStream = async (ws, req, opts = {}) => {
                         // hard wall-clock cap, because a forgotten tab would otherwise keep
                         // burning provider API spend.
                         if (isBrowserTest) {
-                            const capMs = parseInt(process.env.AGENT_TEST_MAX_MS || String(5 * 60 * 1000), 10);
-                            console.log(`⏳ [AgentTest] Session capped at ${Math.round(capMs / 1000)}s`);
+                            const capMs = opts.maxDurationMs || parseInt(process.env.AGENT_TEST_MAX_MS || String(5 * 60 * 1000), 10);
+                            console.log(`⏳ [${isMeeting ? 'Meeting' : 'AgentTest'}] Session capped at ${Math.round(capMs / 1000)}s`);
                             browserCapTimer = setTimeout(() => {
                                 ctl('end', { reason: 'cap' });
                                 if (ws.readyState === WebSocket.OPEN) ws.close();
                             }, capMs);
-                        } else if (settings.autoHangupEnabled) {
+                        } else if (settings?.autoHangupEnabled) {
                             const limit = direction === 'inbound' ? (settings.incomingHangupLimit ?? 10) : (settings.outgoingHangupLimit ?? 10);
                             const hangupMs = limit * 60 * 1000;
                             console.log(`⏳ [VoiceStream] Auto-hangup (${direction}) scheduled in ${limit} minutes`);
@@ -434,14 +468,20 @@ const handleVoiceStream = async (ws, req, opts = {}) => {
                             EmailService.trigger(userId, 'inboundCall', inboundPayload);
                         }
 
+                        // The agent's tools (webhook tools, connected apps, WhatsApp): the
+                        // adapters attach them to their bridge before connecting; the classic
+                        // pipeline holds them in toolSession. Never blocks the call.
+                        const toolOpts = { callId: callSid, lead, logPrefix: `[tools] [${callSid}]` };
+
                         // Deepgram Voice Agent engine: one websocket does STT + LLM + TTS with
                         // server-side turn-taking — delegate and skip the classic pipeline entirely.
                         if (isDgAgentEngine) {
                             const { TwilioDeepgramAgentSession } = require('./deepgram-agent/twilio-adapter');
                             dgAgentSession = new TwilioDeepgramAgentSession({
                                 ws, streamSid, callSid, userId, agentId, leadId, campaignId, direction,
-                                settings, agent, lead, transport: opts.transport || 'twilio'
+                                settings, agent, lead, transport: opts.transport || 'twilio', idleTimeoutMs: opts.idleTimeoutMs
                             });
+                            dgAgentSession.toolSession = await attachToolSession(dgAgentSession.bridge, agent, userId, toolOpts);
                             await dgAgentSession.start();
                         } else if (isSarvamEngine) {
                             // Sarvam AI engine: self-contained Saaras STT → Sarvam-105B LLM → Bulbul TTS.
@@ -450,8 +490,9 @@ const handleVoiceStream = async (ws, req, opts = {}) => {
                             const { TwilioSarvamSession } = require('./sarvam/twilio-adapter');
                             dgAgentSession = new TwilioSarvamSession({
                                 ws, streamSid, callSid, userId, agentId, leadId, campaignId, direction,
-                                settings, agent, lead, transport: opts.transport || 'twilio'
+                                settings, agent, lead, transport: opts.transport || 'twilio', idleTimeoutMs: opts.idleTimeoutMs
                             });
+                            dgAgentSession.toolSession = await attachToolSession(dgAgentSession.bridge, agent, userId, toolOpts);
                             await dgAgentSession.start();
                         } else if (isGeminiEngine) {
                             // Gemini Live: one Google model hears, thinks and speaks. Same adapter
@@ -460,10 +501,12 @@ const handleVoiceStream = async (ws, req, opts = {}) => {
                             const { TwilioGeminiLiveSession } = require('./gemini-live/twilio-adapter');
                             dgAgentSession = new TwilioGeminiLiveSession({
                                 ws, streamSid, callSid, userId, agentId, leadId, campaignId, direction,
-                                settings, agent, lead, transport: opts.transport || 'twilio'
+                                settings, agent, lead, transport: opts.transport || 'twilio', idleTimeoutMs: opts.idleTimeoutMs
                             });
+                            dgAgentSession.toolSession = await attachToolSession(dgAgentSession.bridge, agent, userId, toolOpts);
                             await dgAgentSession.start();
                         } else if (engineApplies) {
+                            await attachToolSession(classicToolHost, agent, userId, toolOpts);
                             // Idle detection is specific to this classic pipeline — the delegated
                             // engines (dgAgentSession) run their own, inside their own bridge.
                             touchActivity();
@@ -488,7 +531,9 @@ const handleVoiceStream = async (ws, req, opts = {}) => {
                             // Use specialized phonecall models for English, fallback to nova-3 for ALL other languages.
                             // Nova-2-phonecall is optimized for telephony but lacks support for many global languages correctly in streaming.
                             // Nova-3 is superior for multilingual/global language support and real-time performance.
-                            const phoneSupported = ['en', 'en-US', 'en-GB', 'en-AU', 'en-IN'];
+                            // Deepgram lists nova-2-phonecall for en / en-US only; other English accents go to nova-3,
+                            // which covers en-GB, en-AU, en-IN and en-NZ.
+                            const phoneSupported = ['en', 'en-US'];
                             const selectedModel = phoneSupported.includes(dgLanguage) ? 'nova-2-phonecall' : 'nova-3';
 
                             // Log the selected model for debugging
@@ -1052,7 +1097,11 @@ const handleVoiceStream = async (ws, req, opts = {}) => {
         }
 
         try {
-            const systemPrompt = buildVoiceSystemPrompt({ agent, settings, kbContent: kbSystemContent, commandTags: true, lead });
+            const systemPrompt = buildVoiceSystemPrompt({
+                agent, settings, kbContent: kbSystemContent, commandTags: true, lead,
+                connectedApps: toolSession ? toolSession.appNames() : [],
+                toolNames: toolSession ? toolSession.tools.filter(t => t.type !== 'integration').map(t => t.name) : [],
+            });
 
             const MAX_HISTORY = 20;
             const recentTranscript = transcript.length > MAX_HISTORY
@@ -1060,20 +1109,34 @@ const handleVoiceStream = async (ws, req, opts = {}) => {
                 : transcript;
 
             if (turnTimings) turnTimings.llmRequestAt = Date.now();
+
+            // The agent's tools as OpenAI functions, or null, in which case the request
+            // body is exactly what it always was (the Voice Quality compat contract).
+            const nativeTools = toolSession ? toolSession.openAiTools() : null;
+            // This turn's tool exchange, in OpenAI's shape. Kept out of `transcript`,
+            // which is persisted as plain {role, content} lines and sliced to the last
+            // 20: a slice that began on an orphaned `tool` message would be refused.
+            const toolMessages = [];
+            let toolRounds = 0;
+            let fullReply = "";
+
+            for (;;) {
             const response = await axios({
                 method: 'post',
                 url: 'https://openrouter.ai/api/v1/chat/completions',
                 data: {
                     model: openRouterModel,
-                    messages: [{ role: 'system', content: systemPrompt }, ...recentTranscript],
-                    stream: true
+                    messages: [{ role: 'system', content: systemPrompt }, ...recentTranscript, ...toolMessages],
+                    stream: true,
+                    ...(nativeTools ? { tools: nativeTools, tool_choice: toolRounds >= MAX_TOOL_ROUNDS ? 'none' : 'auto' } : {})
                 },
                 headers: { 'Authorization': `Bearer ${settings.openRouterKey}`, 'Content-Type': 'application/json' },
                 responseType: 'stream',
                 signal: abortController.signal
             });
 
-            let fullReply = "";
+            let roundReply = "";
+            const toolCalls = [];
             let firstContentReceived = false;
             // Prosody-aware (or legacy, per the agent's preset) TTS text chunking —
             // sends linguistically complete clauses instead of flushing on every comma.
@@ -1092,6 +1155,15 @@ const handleVoiceStream = async (ws, req, opts = {}) => {
 
                     try {
                         const json = JSON.parse(line.slice(6));
+                        // A tool call streams as fragments keyed by index: the id and name
+                        // arrive once, the arguments a few characters at a time.
+                        for (const tc of json.choices?.[0]?.delta?.tool_calls || []) {
+                            const i = Number.isInteger(tc.index) ? tc.index : toolCalls.length;
+                            const slot = toolCalls[i] || (toolCalls[i] = { id: '', name: '', arguments: '' });
+                            if (tc.id) slot.id = tc.id;
+                            if (tc.function?.name) slot.name += tc.function.name;
+                            if (tc.function?.arguments) slot.arguments += tc.function.arguments;
+                        }
                         const content = json.choices?.[0]?.delta?.content || "";
                         if (content) {
                             if (!firstContentReceived) {
@@ -1099,7 +1171,7 @@ const handleVoiceStream = async (ws, req, opts = {}) => {
                                 isAISpeaking = true;
                                 if (turnTimings && !turnTimings.llmFirstTokenAt) turnTimings.llmFirstTokenAt = Date.now();
                             }
-                            fullReply += content;
+                            roundReply += content;
                             for (const piece of chunker.push(content)) {
                                 const toSend = stripAppointmentCommands(piece);
                                 if (toSend) sendToTTS(toSend, false);
@@ -1109,14 +1181,54 @@ const handleVoiceStream = async (ws, req, opts = {}) => {
                 }
             }
 
-            // Final flush (strip appointment commands so [[SLOTS]] etc. are never spoken)
-            const remainder = chunker.drain();
-            if (remainder && !interrupted) {
-                const toSend = stripAppointmentCommands(remainder);
-                if (toSend) sendToTTS(toSend, true);
-                else sendToTTS("", true);
-            } else if (!interrupted) {
-                sendToTTS("", true); // Ensure generation trigger
+                const pendingTools = toolCalls.filter(tc => tc && tc.name && toolSession?.has(tc.name));
+
+                // Final flush (strip appointment commands so [[SLOTS]] etc. are never spoken)
+                const remainder = chunker.drain();
+                if (remainder && !interrupted) {
+                    const toSend = stripAppointmentCommands(remainder);
+                    if (toSend) sendToTTS(toSend, true);
+                    else sendToTTS("", true);
+                } else if (!interrupted && (roundReply || pendingTools.length === 0)) {
+                    sendToTTS("", true); // Ensure generation trigger
+                }
+                fullReply += (fullReply && roundReply ? ' ' : '') + roundReply;
+
+                if (pendingTools.length === 0 || interrupted || toolRounds >= MAX_TOOL_ROUNDS) break;
+                toolRounds++;
+
+                // Models often go straight to the tool without a word. The caller would
+                // hear dead air for as long as the endpoint takes, so say something.
+                if (!roundReply.trim()) {
+                    const filler = toolFiller(agent?.language);
+                    sendToTTS(filler, true);
+                    fullReply += (fullReply ? ' ' : '') + filler;
+                }
+
+                toolMessages.push({
+                    role: 'assistant',
+                    content: roundReply || null,
+                    tool_calls: pendingTools.map((tc, i) => ({
+                        id: tc.id || `call_${toolRounds}_${i}`,
+                        type: 'function',
+                        function: { name: tc.name, arguments: tc.arguments || '{}' },
+                    })),
+                });
+                for (const [i, tc] of pendingTools.entries()) {
+                    let args = {};
+                    try { args = tc.arguments ? JSON.parse(tc.arguments) : {}; } catch (_) { args = {}; }
+                    console.log(`🛠️ [LLM] [${callSid}] tool: ${tc.name}(${(tc.arguments || '').substring(0, 120)})`);
+                    const result = await toolSession.call(tc.name, args, { signal: abortController?.signal });
+                    toolMessages.push({ role: 'tool', tool_call_id: tc.id || `call_${toolRounds}_${i}`, content: result });
+                    transcript.push({ role: 'system', content: `TOOL RESULT (${tc.name}): ${result}` });
+                }
+                if (interrupted || !(ws.readyState === WebSocket.OPEN)) break;
+
+                // The filler ended its TTS stream, and ElevenLabs closes a stream once it
+                // has spoken it. Start a fresh one for the answer, as the appointment
+                // narration does.
+                await freshTtsStream();
+                if (interrupted) break;
             }
 
             if (fullReply && !interrupted) {
@@ -1349,9 +1461,9 @@ const handleVoiceStream = async (ws, req, opts = {}) => {
         if (idleWatchdog) return;
         idleWatchdog = setInterval(() => {
             if (!callSid || idleHangupTriggered || endCallPending) return;
-            if (Date.now() - lastActivityAt < IDLE_TIMEOUT_MS) return;
+            if (Date.now() - lastActivityAt < idleTimeoutMs) return;
             idleHangupTriggered = true;
-            console.log(`💤 [VoiceStream] [${callSid}] No activity for ${IDLE_TIMEOUT_MS}ms — ending call`);
+            console.log(`💤 [VoiceStream] [${callSid}] No activity for ${idleTimeoutMs}ms — ending call`);
             transcript.push({ role: 'assistant', content: IDLE_HANGUP_MESSAGE });
             sendToTTS(IDLE_HANGUP_MESSAGE);
             armEndCall('idle timeout');
@@ -1373,6 +1485,7 @@ const handleVoiceStream = async (ws, req, opts = {}) => {
             return;
         }
         console.log(`🧹 [VoiceStream] [${callSid}] cleanup | transcriptLen=${transcript.length} queueLen=${transcriptQueue.length}`);
+        if (toolSession) { finishToolSession(toolSession, isBrowserTest ? null : callSid); toolSession = null; }
         if (pendingPostInterruptTimer) { clearTimeout(pendingPostInterruptTimer); pendingPostInterruptTimer = null; }
         if (pendingVadInterruptTimer) { clearTimeout(pendingVadInterruptTimer); pendingVadInterruptTimer = null; }
         if (pendingIncompleteTimer) { clearTimeout(pendingIncompleteTimer); pendingIncompleteTimer = null; }

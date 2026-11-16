@@ -27,7 +27,11 @@
     "noLogs": "Aucun journal trouvé.",
     "pending": "En attente",
     "notAvailable": "Non disponible",
-    "details": "Détails"
+    "details": "Détails",
+    "analyzing": "Analyse en cours…",
+    "notAnalyzed": "Non analysé",
+    "nothingToAnalyze": "Personne n'a parlé pendant cet appel, il n'y a donc rien à analyser.",
+    "notAutoAnalyzed": "Cet appel n'a pas été analysé automatiquement. Ouvrez les détails et cliquez sur « Analyser maintenant »."
   },
   "detail": {
     "title": "Détails de l'appel",
@@ -50,6 +54,9 @@
     "roleAgent": "AGENT IA",
     "roleLead": "PROSPECT",
     "roleSystem": "SYSTÈME",
+    "failedNoConversation": "L'appel s'est terminé avant que l'agent et l'appelant ne se parlent.",
+    "noConversation": "Aucune conversation n'a été enregistrée",
+    "noConversationHint": "Consultez l'onglet {tab} pour savoir ce qui s'est mal passé.",
     "voiceQuality": {
       "title": "Qualité vocale",
       "turns": "Tours",
@@ -80,6 +87,16 @@
         "unavailable": "Indisponible",
         "failed": "Échec"
       }
+    },
+    "analyzeNow": "Analyser maintenant",
+    "analyzingNow": "Analyse en cours...",
+    "tools": {
+      "title": "Outils utilisés",
+      "ok": "OK",
+      "failed": "Échec",
+      "viaApp": "via {app}",
+      "viaWhatsApp": "via WhatsApp",
+      "noArguments": "Appelé sans arguments."
     }
   },
   "toast": {
@@ -89,5 +106,17 @@
     "fetchFailed": "Échec de la récupération des journaux d'appels",
     "noExportData": "Aucune donnée à exporter",
     "exported": "Exportation réussie"
+  },
+  "meeting": {
+    "label": "Réunion",
+    "title": "Réunion",
+    "platform": "Plateforme",
+    "botName": "Nom dans la réunion",
+    "link": "Lien de la réunion",
+    "speaks": "Parle",
+    "speaksAlways": "Toujours",
+    "speaksAddressed": "Quand on l'appelle par son nom",
+    "mutedReplies": "Réponses retenues par le filtre de nom",
+    "endReason": "Terminée pour"
   }
 }

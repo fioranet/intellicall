@@ -149,7 +149,6 @@
       "apiKeys": "Claves de API",
       "webhooks": "Webhooks",
       "email": "Correo",
-      "integrations": "Integraciones",
       "billing": "Plan y facturación",
       "transactions": "Historial de transacciones"
     }
@@ -166,7 +165,7 @@
     "keyErrorSuffix": "Comprueba tu clave.",
     "validKey": "Clave de API válida",
     "deepgram": "Clave de API de Deepgram",
-    "deepgramHint": "Impulsa el reconocimiento de voz y el motor de baja latencia «Deepgram Voice Agent», seleccionable por agente (que también usa tu voz de ElevenLabs pero no necesita clave de OpenRouter).",
+    "deepgramHint": "Impulsa el reconocimiento de voz y el motor de baja latencia \"Deepgram Voice Agent\" seleccionable por agente, que no necesita clave de OpenRouter y puede hablar con las voces Aura de Deepgram o con tu voz de ElevenLabs.",
     "sarvam": "Clave de API de Sarvam AI",
     "sarvamHint": "Impulsa el motor autónomo «Sarvam AI» para idiomas indios (voz, razonamiento y síntesis, todo en Sarvam). Seleccionable por agente; no necesita otras claves.",
     "gemini": "Clave de API de Gemini",
@@ -448,5 +447,21 @@
       "720": "12 horas antes",
       "1440": "24 horas antes"
     }
+  },
+  "password": {
+    "changeTitle": "Contraseña",
+    "setTitle": "Establecer una contraseña",
+    "changeDescription": "Cambia la contraseña que usas para iniciar sesión con tu correo.",
+    "setDescription": "Tu cuenta se creó con el inicio de sesión de Google. Establece una contraseña para poder iniciar sesión también con tu correo.",
+    "current": "Contraseña actual",
+    "new": "Nueva contraseña",
+    "confirm": "Confirmar nueva contraseña",
+    "changeButton": "Actualizar contraseña",
+    "setButton": "Establecer contraseña",
+    "tooShort": "La contraseña debe tener al menos 8 caracteres",
+    "mismatch": "Las contraseñas no coinciden",
+    "updated": "Contraseña actualizada",
+    "set": "Contraseña establecida. Ya puedes iniciar sesión con tu correo y contraseña.",
+    "failed": "No se pudo actualizar la contraseña"
   }
 }

@@ -4,21 +4,24 @@ import { useTranslations } from "next-intl";
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import axios from "axios";
-import { toast } from "sonner";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import {
+    Alert,
+    Badge,
+    Button,
+    Field,
+    Input,
+    Section,
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select";
-import { CalendarClock, CheckCircle2, ExternalLink, Loader2, LogOut, Pencil, Send } from "lucide-react";
+    Switch,
+    toast,
+    useConfirm,
+} from "@wixzel/react";
+import { CalendarCheck, CheckCircle, ArrowSquareOut, SignOut, PencilSimple, PaperPlaneTilt } from "@phosphor-icons/react";
+import { SectionLoading, SettingRow, SettingRows } from "@/components/settings/setting-row";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
 
@@ -75,6 +78,7 @@ export function WhatsAppIntegration() {
     const [togglingReminders, setTogglingReminders] = useState(false);
     const [savingReminders, setSavingReminders] = useState(false);
     const [sendingReminderTest, setSendingReminderTest] = useState(false);
+    const confirm = useConfirm();
 
     const fetchStatus = useCallback(async () => {
         try {
@@ -138,7 +142,13 @@ export function WhatsAppIntegration() {
     };
 
     const handleDisconnect = async () => {
-        if (!confirm("Disconnect WhatsApp? Notifications will stop arriving on your number. You can reconnect any time.")) return;
+        const ok = await confirm({
+            title: "Disconnect WhatsApp?",
+            description: "Notifications will stop arriving on your number. You can reconnect any time.",
+            confirmLabel: t("disconnect"),
+            tone: "danger",
+        });
+        if (!ok) return;
         setDisconnecting(true);
         try {
             const token = localStorage.getItem("token");
@@ -274,269 +284,252 @@ export function WhatsAppIntegration() {
     };
 
     if (loading) {
-        return (
-            <Card>
-                <CardContent className="py-10 flex items-center justify-center text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin me-2" /> {t("loading")}
-                </CardContent>
-            </Card>
-        );
+        return <SectionLoading>{t("loading")}</SectionLoading>;
     }
 
     return (
-        <Card>
-            <CardHeader>
-                <div className="flex items-start justify-between gap-4">
-                    <div>
-                        <CardTitle className="flex items-center gap-2">
-                            <Image src="/images/integrations/whatsapp.png" alt="WhatsApp" width={24} height={24} className="shrink-0" />
-                            WhatsApp
-                            {status.connected && (
-                                <Badge variant="outline" className="text-green-700 border-green-200 bg-green-50 ms-2">
-                                    <CheckCircle2 className="h-3 w-3 me-1" /> {t("connected")}
-                                </Badge>
-                            )}
-                        </CardTitle>
-                        <CardDescription className="mt-1">
-                            {t("whatsapp.description")}
-                        </CardDescription>
+        <Section
+            icon={<Image src="/images/integrations/whatsapp.png" alt="WhatsApp" width={16} height={16} className="size-4 object-contain" />}
+            title={
+                <span className="flex flex-wrap items-center gap-2">
+                    WhatsApp
+                    {status.connected && <Badge tone="success" dot>{t("connected")}</Badge>}
+                </span>
+            }
+            description={t("whatsapp.description")}
+            actions={
+                status.connected && (
+                    <Button
+                        variant="secondary"
+                        onClick={handleDisconnect}
+                        loading={disconnecting}
+                        iconStart={<SignOut />}
+                    >
+                        {t("disconnect")}
+                    </Button>
+                )
+            }
+        >
+            {!status.connected && (
+                <>
+                    <div className="flex flex-col gap-1 rounded-md bg-surface p-4 text-caption text-fg-muted">
+                        <p className="text-body-sm font-medium text-fg">{t("whatsapp.howToTitle")}</p>
+                        <p>
+                            {t.rich("whatsapp.step1", { b: (chunks) => <span className="font-medium text-fg">{chunks}</span> })}{" "}
+                            <a href="https://developers.facebook.com/apps" target="_blank" rel="noreferrer" className="inline-flex items-center gap-0.5 text-accent-ink underline">
+                                developers.facebook.com <ArrowSquareOut className="size-3" />
+                            </a>
+                        </p>
+                        <p>{t.rich("whatsapp.step2", { b: (chunks) => <span className="font-medium text-fg">{chunks}</span> })}</p>
+                        <p>{t("whatsapp.step3")}</p>
                     </div>
-                    {status.connected && (
-                        <Button
-                            variant="outline"
-                            className="text-red-600 border-red-200 hover:bg-red-50 gap-2 shrink-0"
-                            onClick={handleDisconnect}
-                            disabled={disconnecting}
-                        >
-                            {disconnecting ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
-                            {t("disconnect")}
-                        </Button>
-                    )}
-                </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                {!status.connected && (
-                    <>
-                        <div className="rounded-xl border p-4 bg-muted/20 text-xs text-muted-foreground space-y-1">
-                            <p className="text-sm font-bold text-foreground">{t("whatsapp.howToTitle")}</p>
-                            <p>
-                                {t.rich("whatsapp.step1", { b: (chunks) => <span className="font-medium text-foreground">{chunks}</span> })}{" "}
-                                <a href="https://developers.facebook.com/apps" target="_blank" rel="noreferrer" className="underline inline-flex items-center gap-0.5">
-                                    developers.facebook.com <ExternalLink className="h-3 w-3" />
-                                </a>
-                            </p>
-                            <p>{t.rich("whatsapp.step2", { b: (chunks) => <span className="font-medium text-foreground">{chunks}</span> })}</p>
-                            <p>{t("whatsapp.step3")}</p>
-                        </div>
 
-                        <div className="grid gap-4 md:grid-cols-2">
-                            <div className="space-y-2 md:col-span-2">
-                                <Label htmlFor="wa-token" className="text-xs font-bold uppercase text-muted-foreground/80">{t("whatsapp.tokenLabel")}</Label>
-                                <Input
-                                    id="wa-token"
-                                    type="password"
-                                    placeholder={t("whatsapp.tokenPlaceholder")}
-                                    value={form.accessToken}
-                                    onChange={(e) => setForm({ ...form, accessToken: e.target.value })}
-                                    className="font-mono text-sm"
-                                />
-                                <p className="text-[11px] text-muted-foreground">{t("whatsapp.tokenHint")}</p>
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="wa-phone-id" className="text-xs font-bold uppercase text-muted-foreground/80">{t("whatsapp.phoneIdLabel")}</Label>
-                                <Input
-                                    id="wa-phone-id"
-                                    placeholder="123456789012345"
-                                    value={form.phoneNumberId}
-                                    onChange={(e) => setForm({ ...form, phoneNumberId: e.target.value })}
-                                    className="font-mono text-sm"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="wa-recipient" className="text-xs font-bold uppercase text-muted-foreground/80">{t("whatsapp.recipientLabel")}</Label>
-                                <Input
-                                    id="wa-recipient"
-                                    placeholder="+15551234567"
-                                    value={form.recipientNumber}
-                                    onChange={(e) => setForm({ ...form, recipientNumber: e.target.value })}
-                                    className="font-mono text-sm"
-                                />
-                            </div>
-                        </div>
+                    <div className="grid gap-4 md:grid-cols-2">
+                        <Field label={t("whatsapp.tokenLabel")} hint={t("whatsapp.tokenHint")} id="wa-token" className="md:col-span-2">
+                            <Input
+                                type="password"
+                                placeholder={t("whatsapp.tokenPlaceholder")}
+                                value={form.accessToken}
+                                onChange={(e) => setForm({ ...form, accessToken: e.target.value })}
+                                className="font-mono"
+                            />
+                        </Field>
+                        <Field label={t("whatsapp.phoneIdLabel")} id="wa-phone-id">
+                            <Input
+                                placeholder="123456789012345"
+                                value={form.phoneNumberId}
+                                onChange={(e) => setForm({ ...form, phoneNumberId: e.target.value })}
+                                className="font-mono"
+                            />
+                        </Field>
+                        <Field label={t("whatsapp.recipientLabel")} id="wa-recipient">
+                            <Input
+                                placeholder="+15551234567"
+                                value={form.recipientNumber}
+                                onChange={(e) => setForm({ ...form, recipientNumber: e.target.value })}
+                                className="font-mono"
+                            />
+                        </Field>
+                    </div>
 
+                    <div>
                         <Button
-                            className="bg-[#25D366] hover:bg-[#1ebe5b] text-white gap-2"
+                            variant="primary"
                             onClick={handleConnect}
-                            disabled={connecting}
+                            loading={connecting}
+                            iconStart={<CheckCircle />}
                         >
-                            {connecting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
                             {t("whatsapp.connect")}
                         </Button>
-                    </>
-                )}
+                    </div>
+                </>
+            )}
 
-                {status.connected && (
-                    <>
-                        <div className="rounded-xl border p-4 bg-muted/20 text-sm flex items-center justify-between gap-4 flex-wrap">
-                            <div className="space-y-1">
-                                <div className="text-xs font-bold uppercase text-muted-foreground">{t("whatsapp.sendingTo")}</div>
-                                {editingRecipient ? (
-                                    <div className="flex items-center gap-2">
-                                        <Input
-                                            value={newRecipient}
-                                            onChange={(e) => setNewRecipient(e.target.value)}
-                                            placeholder="+15551234567"
-                                            className="h-8 w-44 font-mono text-sm"
-                                        />
-                                        <Button size="sm" className="h-8" onClick={handleSaveRecipient} disabled={savingRecipient}>
-                                            {savingRecipient ? <Loader2 className="h-3 w-3 animate-spin" /> : c("actions.save")}
-                                        </Button>
-                                        <Button size="sm" variant="ghost" className="h-8" onClick={() => setEditingRecipient(false)}>
-                                            {c("actions.cancel")}
-                                        </Button>
-                                    </div>
-                                ) : (
-                                    <div className="font-medium flex items-center gap-2">
-                                        +{status.recipientNumber}
-                                        <button
-                                            type="button"
-                                            className="text-muted-foreground hover:text-foreground"
-                                            onClick={() => { setNewRecipient(`+${status.recipientNumber}`); setEditingRecipient(true); }}
-                                            aria-label={t("whatsapp.changeRecipient")}
-                                        >
-                                            <Pencil className="h-3 w-3" />
-                                        </button>
-                                    </div>
-                                )}
-                                <div className="text-xs text-muted-foreground">
-                                    {t("whatsapp.from")} {status.businessName ? `${status.businessName} ` : ""}{status.businessNumber}
+            {status.connected && (
+                <>
+                    <div className="flex flex-wrap items-center justify-between gap-4 rounded-md bg-surface p-4 text-body-sm">
+                        <div className="flex flex-col gap-1">
+                            <div className="text-caption font-medium text-fg-muted">{t("whatsapp.sendingTo")}</div>
+                            {editingRecipient ? (
+                                <div className="flex items-center gap-2">
+                                    <Input
+                                        size="sm"
+                                        value={newRecipient}
+                                        onChange={(e) => setNewRecipient(e.target.value)}
+                                        placeholder="+15551234567"
+                                        className="w-44 font-mono"
+                                    />
+                                    <Button variant="primary" size="sm" onClick={handleSaveRecipient} loading={savingRecipient}>
+                                        {c("actions.save")}
+                                    </Button>
+                                    <Button size="sm" variant="ghost" onClick={() => setEditingRecipient(false)}>
+                                        {c("actions.cancel")}
+                                    </Button>
                                 </div>
+                            ) : (
+                                <div className="flex items-center gap-1 font-medium">
+                                    +{status.recipientNumber}
+                                    <Button
+                                        variant="ghost"
+                                        size="icon-xs"
+                                        onClick={() => { setNewRecipient(`+${status.recipientNumber}`); setEditingRecipient(true); }}
+                                        aria-label={t("whatsapp.changeRecipient")}
+                                    >
+                                        <PencilSimple />
+                                    </Button>
+                                </div>
+                            )}
+                            <div className="text-caption text-fg-muted">
+                                {t("whatsapp.from")} {status.businessName ? `${status.businessName} ` : ""}{status.businessNumber}
                             </div>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="gap-2"
-                                onClick={handleSendTest}
-                                disabled={sendingTest}
-                            >
-                                {sendingTest ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                                {t("whatsapp.sendTest")}
-                            </Button>
                         </div>
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={handleSendTest}
+                            loading={sendingTest}
+                            iconStart={<PaperPlaneTilt />}
+                        >
+                            {t("whatsapp.sendTest")}
+                        </Button>
+                    </div>
 
-                        <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
-                            {t.rich("whatsapp.sessionWarning", { number: status.businessNumber || t("whatsapp.yourBusinessNumber"), b: (chunks) => <span className="font-medium">{chunks}</span> })}
-                        </div>
+                    <Alert tone="warning">
+                        {t.rich("whatsapp.sessionWarning", { number: status.businessNumber || t("whatsapp.yourBusinessNumber"), b: (chunks) => <span className="font-medium">{chunks}</span> })}
+                    </Alert>
 
-                        <div className="rounded-xl border bg-muted/20">
-                            <div className="flex items-start justify-between gap-4 p-4">
-                                <div className="space-y-0.5">
-                                    <Label className="text-sm font-bold flex items-center gap-2">
-                                        <CalendarClock className="h-4 w-4" /> {t("whatsapp.remindersTitle")}
-                                    </Label>
-                                    <p className="text-xs text-muted-foreground">
-                                        {t("whatsapp.remindersHint")}
-                                    </p>
-                                </div>
+                    <div className="flex flex-col gap-4 rounded-md bg-surface p-4">
+                        <SettingRow
+                            className="py-0"
+                            htmlFor="wa-reminders"
+                            label={
+                                <span className="flex items-center gap-2">
+                                    <CalendarCheck className="size-4 text-fg-muted" /> {t("whatsapp.remindersTitle")}
+                                </span>
+                            }
+                            description={t("whatsapp.remindersHint")}
+                            control={
                                 <Switch
+                                    id="wa-reminders"
                                     checked={reminders.enabled}
                                     disabled={togglingReminders}
                                     onCheckedChange={toggleReminders}
                                 />
+                            }
+                        />
+
+                        <div className="flex flex-col gap-4 border-t border-border pt-4">
+                            <div className="flex flex-col gap-1 rounded-md bg-bg-muted p-3 text-caption text-fg-muted">
+                                <p className="font-medium text-fg">{t("whatsapp.templateSetupTitle")}</p>
+                                <p>
+                                    {t("whatsapp.templateSetupIntro")}{" "}
+                                    <a href="https://business.facebook.com/wa/manage/message-templates/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-0.5 text-accent-ink underline">
+                                        {t("whatsapp.metaBusinessManager")} <ArrowSquareOut className="size-3" />
+                                    </a>{" "}
+                                    {t.rich("whatsapp.templateSetupOutro", { b: (chunks) => <span className="font-medium text-fg">{chunks}</span>, code: (chunks) => <code className="rounded-xs bg-surface px-1 py-0.5 font-mono">{chunks}</code> })}
+                                </p>
+                                <p className="rounded-sm bg-surface p-2 font-mono text-fg">
+                                    {t("whatsapp.templateBody", { v1: "{{1}}", v2: "{{2}}", v3: "{{3}}" })}
+                                </p>
+                                <p>
+                                    {t.rich("whatsapp.templateVars", { v1: "{{1}}", v2: "{{2}}", v3: "{{3}}", b: (chunks) => <span className="font-medium">{chunks}</span> })}
+                                </p>
                             </div>
 
-                            <div className="border-t p-4 space-y-4">
-                                <div className="rounded-lg border bg-background/60 p-3 text-xs text-muted-foreground space-y-1">
-                                    <p className="font-bold text-foreground">{t("whatsapp.templateSetupTitle")}</p>
-                                    <p>
-                                        {t("whatsapp.templateSetupIntro")}{" "}
-                                        <a href="https://business.facebook.com/wa/manage/message-templates/" target="_blank" rel="noreferrer" className="underline inline-flex items-center gap-0.5">
-                                            {t("whatsapp.metaBusinessManager")} <ExternalLink className="h-3 w-3" />
-                                        </a>{" "}
-                                        {t.rich("whatsapp.templateSetupOutro", { b: (chunks) => <span className="font-medium text-foreground">{chunks}</span>, code: (chunks) => <code className="px-1 py-0.5 bg-muted rounded">{chunks}</code> })}
-                                    </p>
-                                    <p className="font-mono text-[11px] bg-muted rounded p-2 text-foreground">
-                                        {t("whatsapp.templateBody", { v1: "{{1}}", v2: "{{2}}", v3: "{{3}}" })}
-                                    </p>
-                                    <p>
-                                        {t.rich("whatsapp.templateVars", { v1: "{{1}}", v2: "{{2}}", v3: "{{3}}", b: (chunks) => <span className="font-medium">{chunks}</span> })}
-                                    </p>
-                                </div>
+                            <div className="grid gap-4 md:grid-cols-3">
+                                <Field label={t("whatsapp.templateNameLabel")} id="wa-template">
+                                    <Input
+                                        placeholder="appointment_reminder"
+                                        value={reminders.templateName}
+                                        onChange={(e) => setReminders({ ...reminders, templateName: e.target.value })}
+                                        className="font-mono"
+                                    />
+                                </Field>
+                                <Field label={t("whatsapp.templateLanguageLabel")} hint={t("whatsapp.templateLanguageHint")} id="wa-template-lang">
+                                    <Input
+                                        placeholder="en"
+                                        value={reminders.templateLanguage}
+                                        onChange={(e) => setReminders({ ...reminders, templateLanguage: e.target.value })}
+                                        className="font-mono"
+                                    />
+                                </Field>
+                                <Field label={t("whatsapp.sendReminderLabel")} id="wa-lead-minutes">
+                                    <Select
+                                        value={String(reminders.leadMinutes)}
+                                        onValueChange={(v) => setReminders({ ...reminders, leadMinutes: parseInt(v, 10) })}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {LEAD_OPTIONS.map((minutes) => (
+                                                <SelectItem key={minutes} value={String(minutes)}>{t(`whatsapp.leadOptions.${minutes}`)}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </Field>
+                            </div>
 
-                                <div className="grid gap-4 md:grid-cols-3">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="wa-template" className="text-xs font-bold uppercase text-muted-foreground/80">{t("whatsapp.templateNameLabel")}</Label>
-                                        <Input
-                                            id="wa-template"
-                                            placeholder="appointment_reminder"
-                                            value={reminders.templateName}
-                                            onChange={(e) => setReminders({ ...reminders, templateName: e.target.value })}
-                                            className="font-mono text-sm"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="wa-template-lang" className="text-xs font-bold uppercase text-muted-foreground/80">{t("whatsapp.templateLanguageLabel")}</Label>
-                                        <Input
-                                            id="wa-template-lang"
-                                            placeholder="en"
-                                            value={reminders.templateLanguage}
-                                            onChange={(e) => setReminders({ ...reminders, templateLanguage: e.target.value })}
-                                            className="font-mono text-sm"
-                                        />
-                                        <p className="text-[11px] text-muted-foreground">{t("whatsapp.templateLanguageHint")}</p>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label className="text-xs font-bold uppercase text-muted-foreground/80">{t("whatsapp.sendReminderLabel")}</Label>
-                                        <Select
-                                            value={String(reminders.leadMinutes)}
-                                            onValueChange={(v) => setReminders({ ...reminders, leadMinutes: parseInt(v, 10) })}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {LEAD_OPTIONS.map((minutes) => (
-                                                    <SelectItem key={minutes} value={String(minutes)}>{t(`whatsapp.leadOptions.${minutes}`)}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                </div>
-
-                                <div className="flex flex-wrap gap-2">
-                                    <Button size="sm" onClick={saveReminderConfig} disabled={savingReminders}>
-                                        {savingReminders && <Loader2 className="h-4 w-4 animate-spin me-1" />}
-                                        {t("whatsapp.saveReminders")}
-                                    </Button>
-                                    <Button size="sm" variant="outline" className="gap-2" onClick={handleSendReminderTest} disabled={sendingReminderTest}>
-                                        {sendingReminderTest ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                                        {t("whatsapp.sendReminderTest")}
-                                    </Button>
-                                </div>
+                            <div className="flex flex-wrap gap-2">
+                                <Button variant="primary" size="sm" onClick={saveReminderConfig} loading={savingReminders}>
+                                    {t("whatsapp.saveReminders")}
+                                </Button>
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={handleSendReminderTest}
+                                    loading={sendingReminderTest}
+                                    iconStart={<PaperPlaneTilt />}
+                                >
+                                    {t("whatsapp.sendReminderTest")}
+                                </Button>
                             </div>
                         </div>
+                    </div>
 
-                        <div className="rounded-xl border bg-muted/20 divide-y">
-                            {EVENT_KEYS.map((key) => {
-                                const enabled = status.events[key] !== false;
-                                return (
-                                    <div key={key} className="flex items-start justify-between gap-4 p-4">
-                                        <div className="space-y-0.5">
-                                            <Label className="text-sm font-bold">{t(`n8n.events.${key}.label`)}</Label>
-                                            <p className="text-xs text-muted-foreground">{t(`n8n.events.${key}.description`)}</p>
-                                        </div>
+                    <SettingRows inset>
+                        {EVENT_KEYS.map((key) => {
+                            const enabled = status.events[key] !== false;
+                            return (
+                                <SettingRow
+                                    key={key}
+                                    htmlFor={`wa-event-${key}`}
+                                    label={t(`n8n.events.${key}.label`)}
+                                    description={t(`n8n.events.${key}.description`)}
+                                    control={
                                         <Switch
+                                            id={`wa-event-${key}`}
                                             checked={enabled}
                                             disabled={savingEvent === key}
                                             onCheckedChange={(v) => toggleEvent(key, v)}
                                         />
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </>
-                )}
-            </CardContent>
-        </Card>
+                                    }
+                                />
+                            );
+                        })}
+                    </SettingRows>
+                </>
+            )}
+        </Section>
     );
 }

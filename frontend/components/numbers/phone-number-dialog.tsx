@@ -2,28 +2,30 @@
 
 import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import {
+    Badge,
+    Button,
     Dialog,
     DialogContent,
     DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog";
-import {
+    Field,
+    Input,
+    RadioCard,
+    RadioCards,
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
+    toast,
+} from "@wixzel/react";
 import axios from "axios";
-import { Plus, Hash, UserCircle, Server, Phone } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { UserCircle, HardDrives, Phone } from "@phosphor-icons/react";
+import { e164Issue } from "@/lib/phone-checks";
+import { FormIssues, hasErrors, type FormIssue } from "@/components/ui/form-issues";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
 
@@ -37,6 +39,8 @@ interface SipTrunk {
     name: string;
     providerName: string;
     host: string;
+    defaultCallerId?: string;
+    status?: string;
 }
 
 interface PhoneNumber {
@@ -61,7 +65,7 @@ export function PhoneNumberDialog({ phoneNumber, open, onOpenChange, onSuccess }
     const t = useTranslations("numbers");
     const c = useTranslations("common");
     const [loading, setLoading] = useState(false);
-    const [agents, setAgents] = useState<Agent[]>([]);
+    const [agents, setAgents] = useState<Agent[] | null>(null);
     const [sipTrunks, setSipTrunks] = useState<SipTrunk[]>([]);
     const [formData, setFormData] = useState({
         phoneNumber: "",
@@ -74,6 +78,7 @@ export function PhoneNumberDialog({ phoneNumber, open, onOpenChange, onSuccess }
 
     useEffect(() => {
         if (open) {
+            setAgents(null);
             fetchAgents();
             fetchSipTrunks();
             setFormData({
@@ -90,7 +95,8 @@ export function PhoneNumberDialog({ phoneNumber, open, onOpenChange, onSuccess }
     const fetchAgents = async () => {
         try {
             const token = localStorage.getItem("token");
-            const response = await axios.get(`${API_BASE_URL}/agents`, {
+            // Only your own agents: a number can't be given another account's agent.
+            const response = await axios.get(`${API_BASE_URL}/agents?mine=1`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.data?.status === "success") {
@@ -119,8 +125,49 @@ export function PhoneNumberDialog({ phoneNumber, open, onOpenChange, onSuccess }
     const isEditing = !!phoneNumber;
     const isSip = formData.provider === "sip";
 
+    // Everything this form can tell is wrong before Save.
+    const selectedTrunk = sipTrunks.find((tr) => tr._id === formData.sipTrunkId);
+    const ownNumber = formData.phoneNumber.replace(/\s+/g, "");
+    const fallback = formData.fallbackNumber.replace(/\s+/g, "");
+    const issues: FormIssue[] = [];
+    const numberIssue = isEditing ? null : e164Issue(ownNumber, t("dialog.phoneLabel"), c);
+    if (numberIssue) issues.push(numberIssue);
+    if (isSip && formData.sipTrunkId === "none") {
+        issues.push({ level: "error", message: t("dialog.issues.noTrunk") });
+    }
+    if (selectedTrunk?.status === "inactive") {
+        issues.push({ level: "warning", message: t("dialog.issues.trunkInactive", { name: selectedTrunk.name }) });
+    }
+    const trunkCallerId = selectedTrunk?.defaultCallerId?.replace(/\s+/g, "");
+    if (selectedTrunk && trunkCallerId && ownNumber && trunkCallerId.replace(/\D/g, "") !== ownNumber.replace(/\D/g, "")) {
+        issues.push({
+            level: "warning",
+            message: t("dialog.issues.trunkCallerId", { name: selectedTrunk.name, callerId: trunkCallerId }),
+        });
+    }
+    if (isSip) {
+        const fallbackIssue = e164Issue(fallback, t("dialog.fallbackLabel"), c);
+        if (fallbackIssue) issues.push(fallbackIssue);
+        if (fallback && ownNumber && fallback.replace(/\D/g, "") === ownNumber.replace(/\D/g, "")) {
+            issues.push({ level: "error", message: t("dialog.issues.fallbackIsSelf") });
+        }
+    }
+    if (formData.inboundAgentId === "none" && !(isSip && fallback)) {
+        issues.push({ level: "warning", message: t("dialog.issues.noAgentHangsUp") });
+    } else if (formData.inboundAgentId !== "none" && isSip && fallback) {
+        issues.push({ level: "warning", message: t("dialog.issues.fallbackUnused") });
+    }
+    if (agents?.length === 0) {
+        issues.push({ level: "warning", message: t("dialog.issues.noAgents") });
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        const firstError = issues.find((i) => i.level === "error");
+        if (firstError) {
+            toast.error(firstError.message);
+            return;
+        }
         setLoading(true);
         try {
             const token = localStorage.getItem("token");
@@ -152,49 +199,38 @@ export function PhoneNumberDialog({ phoneNumber, open, onOpenChange, onSuccess }
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[540px]">
+            <DialogContent size="md">
                 <DialogHeader>
                     <DialogTitle>{isEditing ? t("dialog.editTitle") : t("dialog.createTitle")}</DialogTitle>
                     <DialogDescription>
                         {t("dialog.description")}
                     </DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleSubmit}>
-                    <div className="grid gap-4 py-4">
+                <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                    <div className="grid gap-4">
                         {/* Provider Toggle */}
-                        <div className="grid gap-2">
-                            <Label className="text-xs font-bold uppercase text-muted-foreground">{t("dialog.providerLabel")}</Label>
-                            <div className="flex gap-2">
-                                <Button
-                                    type="button"
-                                    variant={formData.provider === "twilio" ? "default" : "outline"}
-                                    size="sm"
-                                    className="flex-1 h-10"
-                                    onClick={() => setFormData({ ...formData, provider: "twilio", sipTrunkId: "none" })}
-                                    disabled={loading}
-                                >
-                                    <Phone className="me-2 h-4 w-4" />
-                                    Twilio
-                                </Button>
-                                <Button
-                                    type="button"
-                                    variant={formData.provider === "sip" ? "default" : "outline"}
-                                    size="sm"
-                                    className="flex-1 h-10"
-                                    onClick={() => setFormData({ ...formData, provider: "sip" })}
-                                    disabled={loading}
-                                >
-                                    <Server className="me-2 h-4 w-4" />
-                                    {t("dialog.sipTrunk")}
-                                </Button>
-                            </div>
-                        </div>
+                        <Field label={t("dialog.providerLabel")}>
+                            <RadioCards
+                                columns={2}
+                                value={formData.provider}
+                                onValueChange={(value) =>
+                                    setFormData(
+                                        value === "twilio"
+                                            ? { ...formData, provider: "twilio", sipTrunkId: "none" }
+                                            : { ...formData, provider: "sip" }
+                                    )
+                                }
+                                disabled={loading}
+                                aria-label={t("dialog.providerLabel")}
+                            >
+                                <RadioCard value="twilio" icon={<Phone />} title="Twilio" />
+                                <RadioCard value="sip" icon={<HardDrives />} title={t("dialog.sipTrunk")} />
+                            </RadioCards>
+                        </Field>
 
                         {/* Phone Number */}
-                        <div className="grid gap-2">
-                            <Label htmlFor="phone-number" className="text-xs font-bold uppercase text-muted-foreground">{t("dialog.phoneLabel")}</Label>
+                        <Field id="phone-number" label={t("dialog.phoneLabel")}>
                             <Input
-                                id="phone-number"
                                 value={formData.phoneNumber}
                                 onChange={(e) =>
                                     setFormData({ ...formData, phoneNumber: e.target.value })
@@ -204,13 +240,11 @@ export function PhoneNumberDialog({ phoneNumber, open, onOpenChange, onSuccess }
                                 disabled={loading || isEditing}
                                 className="font-mono"
                             />
-                        </div>
+                        </Field>
 
                         {/* Friendly Name */}
-                        <div className="grid gap-2">
-                            <Label htmlFor="name" className="text-xs font-bold uppercase text-muted-foreground">{t("dialog.friendlyNameLabel")}</Label>
+                        <Field id="name" label={t("dialog.friendlyNameLabel")}>
                             <Input
-                                id="name"
                                 value={formData.name}
                                 onChange={(e) =>
                                     setFormData({ ...formData, name: e.target.value })
@@ -219,12 +253,11 @@ export function PhoneNumberDialog({ phoneNumber, open, onOpenChange, onSuccess }
                                 required
                                 disabled={loading}
                             />
-                        </div>
+                        </Field>
 
                         {/* SIP Trunk Selector (only when SIP) */}
                         {isSip && (
-                            <div className="grid gap-2">
-                                <Label className="text-xs font-bold uppercase text-muted-foreground">{t("dialog.sipTrunkLabel")}</Label>
+                            <Field label={t("dialog.sipTrunkLabel")}>
                                 <Select
                                     value={formData.sipTrunkId}
                                     onValueChange={(value) => setFormData({ ...formData, sipTrunkId: value })}
@@ -237,30 +270,27 @@ export function PhoneNumberDialog({ phoneNumber, open, onOpenChange, onSuccess }
                                         <SelectItem value="none">{t("dialog.noTrunkSelected")}</SelectItem>
                                         {sipTrunks.map((trunk) => (
                                             <SelectItem key={trunk._id} value={trunk._id}>
-                                                <div className="flex items-center gap-2">
-                                                    <Server className="h-3.5 w-3.5 text-muted-foreground" />
+                                                <span className="flex items-center gap-2">
+                                                    <HardDrives className="size-3.5 text-fg-muted" />
                                                     <span>{trunk.name}</span>
                                                     {trunk.providerName && (
-                                                        <Badge variant="outline" className="text-[8px] h-4 px-1">
-                                                            {trunk.providerName}
-                                                        </Badge>
+                                                        <Badge size="sm">{trunk.providerName}</Badge>
                                                     )}
-                                                </div>
+                                                </span>
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
                                 {sipTrunks.length === 0 && (
-                                    <p className="text-[10px] text-amber-600 font-medium">
+                                    <p className="text-caption font-medium text-warning-ink">
                                         {t("dialog.noTrunks")}
                                     </p>
                                 )}
-                            </div>
+                            </Field>
                         )}
 
                         {/* Inbound Agent */}
-                        <div className="grid gap-2">
-                            <Label htmlFor="inbound-agent" className="text-xs font-bold uppercase text-muted-foreground">{t("dialog.inboundAgentLabel")}</Label>
+                        <Field id="inbound-agent" label={t("dialog.inboundAgentLabel")} hint={t("dialog.inboundAgentHint")}>
                             <Select
                                 value={formData.inboundAgentId}
                                 onValueChange={(value) => setFormData({ ...formData, inboundAgentId: value })}
@@ -271,47 +301,42 @@ export function PhoneNumberDialog({ phoneNumber, open, onOpenChange, onSuccess }
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="none">{t("dialog.noAgentHangUp")}</SelectItem>
-                                    {agents.map((agent) => (
+                                    {(agents || []).map((agent) => (
                                         <SelectItem key={agent._id} value={agent._id}>
-                                            <div className="flex items-center gap-2">
-                                                <UserCircle className="h-4 w-4 text-muted-foreground" />
+                                            <span className="flex items-center gap-2">
+                                                <UserCircle className="size-4 text-fg-muted" />
                                                 <span>{agent.name}</span>
-                                            </div>
+                                            </span>
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
-                            <p className="text-[10px] text-muted-foreground italic">
-                                {t("dialog.inboundAgentHint")}
-                            </p>
-                        </div>
+                        </Field>
 
                         {/* Fallback Number (only when SIP) */}
                         {isSip && (
-                            <div className="grid gap-2">
-                                <Label htmlFor="fallback-number" className="text-xs font-bold uppercase text-muted-foreground">
-                                    {t("dialog.fallbackLabel")}
-                                    <span className="normal-case font-normal text-muted-foreground ms-1">{t("dialog.optional")}</span>
-                                </Label>
+                            <Field
+                                id="fallback-number"
+                                label={t("dialog.fallbackLabel")}
+                                labelAside={t("dialog.optional")}
+                                hint={t("dialog.fallbackHint")}
+                            >
                                 <Input
-                                    id="fallback-number"
                                     value={formData.fallbackNumber}
                                     onChange={(e) => setFormData({ ...formData, fallbackNumber: e.target.value })}
                                     placeholder="+966501234567"
                                     disabled={loading}
-                                    className="font-mono"
+                                        className="font-mono"
                                 />
-                                <p className="text-[10px] text-muted-foreground italic">
-                                    {t("dialog.fallbackHint")}
-                                </p>
-                            </div>
+                            </Field>
                         )}
                     </div>
+                    <FormIssues issues={issues} />
                     <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
+                        <Button type="button" variant="secondary" onClick={() => onOpenChange(false)} disabled={loading}>
                             {c("actions.cancel")}
                         </Button>
-                        <Button type="submit" disabled={loading}>
+                        <Button type="submit" variant="primary" loading={loading} disabled={hasErrors(issues)}>
                             {loading ? (isEditing ? "Updating..." : "Adding...") : (isEditing ? "Update" : "Add Number")}
                         </Button>
                     </DialogFooter>

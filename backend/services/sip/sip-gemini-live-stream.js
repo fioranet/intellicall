@@ -3,10 +3,11 @@ const Settings = require('../../models/Settings');
 const Agent = require('../../models/Agent');
 const Lead = require('../../models/Lead');
 const CallLog = require('../../models/CallLog');
+const { attachToolSession, finishToolSession } = require('../tools/attach');
 const { analyzeCallLog } = require('../../utils/analyzer');
 const WebhookService = require('../webhook-service');
 const EmailService = require('../email-service');
-const { GeminiLiveBridge } = require('../gemini-live/gemini-bridge');
+const { GeminiLiveBridge, ENGINE_UNAVAILABLE } = require('../gemini-live/gemini-bridge');
 const { computeDuration } = require('../../utils/call-duration');
 
 const RTP_HEADER_SIZE = 12;
@@ -135,6 +136,8 @@ class SipGeminiLiveStream {
                 callId: this.callId, settings: this.settings, agent: this.agent, lead: this.lead
             });
             if (this.transferHandler) this.bridge.setTransferHandler(this.transferHandler);
+            // The agent's tools (webhook tools, connected apps, WhatsApp). Never blocks the call.
+            this.toolSession = await attachToolSession(this.bridge, this.agent, this.userId, { testCall: !!this.testCall, callId: this.callId, lead: this.lead, logPrefix: `[SIP Gemini] [${this.callId}]` });
             this.bridge.onAudio = (buf) => this._sendRtp(buf);
             this.bridge.onBargeIn = () => this._clearPlayback();
             this.bridge.onError = (service, code, message) => this._pushError(service, code, message);
@@ -262,6 +265,8 @@ class SipGeminiLiveStream {
         this._endCallPending = true;
         console.log(`📴 [SIP Gemini] [${this.callId}] end_call requested (${reason || 'no reason'}) — waiting for playback to finish`);
         this._endCallSafetyTimer = setTimeout(() => this._fireEndCall('safety timeout'), END_CALL_SAFETY_MS);
+        // The engine is gone and nothing is queued to play: there is no goodbye to wait for.
+        if (reason === ENGINE_UNAVAILABLE && this._rtpQueue.length === 0) this._fireEndCall(reason);
     }
 
     /** Caller spoke over the goodbye — they are not done, so stay on the line. */
@@ -298,6 +303,7 @@ class SipGeminiLiveStream {
         if (this._endCallSafetyTimer) { clearTimeout(this._endCallSafetyTimer); this._endCallSafetyTimer = null; }
         this._rtpQueue = [];
         this._rtpNextSendAt = 0;
+        if (this.toolSession) { finishToolSession(this.toolSession, this.callId); this.toolSession = null; }
         if (this.bridge) this.bridge.close();
         try { if (this.udpSocket) this.udpSocket.close(); } catch (_) { }
         this.udpSocket = null;

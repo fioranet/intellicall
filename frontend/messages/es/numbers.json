@@ -63,7 +63,16 @@
     "inboundAgentHint": "Las llamadas entrantes a este número serán atendidas por el agente seleccionado.",
     "fallbackLabel": "Número alternativo",
     "optional": "(opcional)",
-    "fallbackHint": "Si no se asigna ningún agente, las llamadas entrantes se desviarán a este número en lugar de colgarse."
+    "fallbackHint": "Si no se asigna ningún agente, las llamadas entrantes se desviarán a este número en lugar de colgarse.",
+    "issues": {
+      "noTrunk": "Elige el troncal SIP al que pertenece este número. Los números SIP no pueden llamar ni contestar sin uno.",
+      "trunkInactive": "El troncal SIP \"{name}\" está inactivo, así que las llamadas de este número fallarán hasta que se vuelva a activar.",
+      "trunkCallerId": "El troncal SIP \"{name}\" tiene el identificador de llamada por defecto {callerId}, así que las llamadas salientes de este número mostrarán ese número. Borra el identificador del troncal si no es lo que quieres.",
+      "fallbackIsSelf": "El número alternativo no puede ser este mismo número: la llamada se desviaría a sí misma.",
+      "noAgentHangsUp": "No hay ningún agente de entrada elegido, así que las llamadas entrantes a este número se colgarán.",
+      "fallbackUnused": "El número alternativo solo se usa cuando no hay agente elegido, así que no se usará mientras haya un agente asignado.",
+      "noAgents": "Todavía no tienes agentes. Crea uno en Agentes para contestar las llamadas de este número."
+    }
   },
   "toast": {
     "loadFailed": "No se pudieron cargar los números de teléfono",

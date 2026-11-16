@@ -2,52 +2,39 @@
 
 import { useEffect, useState, useCallback, useRef, type ReactNode } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { CaretLeft, Play, CheckCircle, Clock, StopCircle, Robot, Users, Phone, Calendar, CalendarCheck, Pulse, ChatText, Brain, Microphone, Timer, Lightning, ClockCounterClockwise } from "@phosphor-icons/react";
 import {
-    ChevronLeft,
-    Play,
-    Loader2,
-    CheckCircle2,
-    Clock,
-    StopCircle,
-    Bot,
-    Users,
-    Phone,
-    Calendar,
-    CalendarClock,
-    Activity,
-    MessageSquare,
-    Brain,
-    Mic2,
-    Timer,
-    Zap,
-    History,
-    LayoutDashboard,
-    FileText
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
+    Avatar,
+    Badge,
+    Button,
     Card,
     CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card";
-import {
+    DescriptionList,
+    EmptyState,
+    PageHeader,
+    Progress,
+    Separator,
+    Spinner,
+    StatCard,
     Table,
     TableBody,
     TableCell,
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Progress } from "@/components/ui/progress";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+    toast,
+    useConfirm,
+} from "@wixzel/react";
 import axios from "axios";
-import { toast } from "sonner";
 import { useSettings, formatTime } from "@/components/settings-provider";
+import { agentVoiceLabel, agentVoiceProvider } from "@/components/agents/voice-engines";
 import { useTranslations } from "next-intl";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
@@ -61,6 +48,10 @@ interface Agent {
     voiceId?: string;
     voiceName?: string;
     useCustomVoice?: boolean;
+    voiceEngine?: string;
+    sarvamSpeaker?: string;
+    geminiVoice?: string;
+    deepgramVoice?: string;
     outboundPhoneNumber?: { _id: string; phoneNumber: string };
 }
 
@@ -105,6 +96,7 @@ export default function CampaignDetailsPage() {
     const pollInterval = useRef<NodeJS.Timeout | null>(null);
     const [activeLeadIndex, setActiveLeadIndex] = useState<number>(-1);
     const { timeFormat } = useSettings();
+    const confirm = useConfirm();
 
     const fetchCampaign = useCallback(async (showLoading = true) => {
         try {
@@ -170,7 +162,7 @@ export default function CampaignDetailsPage() {
 
     const stopCampaign = async () => {
         if (!campaign) return;
-        if (!window.confirm("Are you sure you want to stop this campaign? This will terminate all active calls.")) return;
+        if (!(await confirm({ title: "Are you sure you want to stop this campaign? This will terminate all active calls.", tone: "danger" }))) return;
 
         try {
             toast.loading(t("toast.stopping"), { id: "stop-campaign" });
@@ -217,7 +209,7 @@ export default function CampaignDetailsPage() {
     if (loading && !campaign) {
         return (
             <div className="flex h-64 items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <Spinner size="xl" className="text-fg-muted" />
             </div>
         );
     }
@@ -238,162 +230,136 @@ export default function CampaignDetailsPage() {
         ? ((completedCount + failedCount) / campaign.leadIds.length) * 100
         : 0;
 
+    const activeLead = activeLeadIndex >= 0 ? campaign.leadIds[activeLeadIndex] : null;
+
     return (
-        <div className="space-y-6 max-w-7xl mx-auto">
+        <div className="flex flex-col gap-6 max-w-7xl mx-auto">
             {/* Header stays Global */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between px-2">
-                <div className="flex items-center gap-4">
-                    <Button variant="outline" size="icon" onClick={() => router.push("/campaigns")}>
-                        <ChevronLeft className="h-4 w-4 rtl:rotate-180" />
-                    </Button>
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <h1 className="text-3xl font-bold">{campaign.name}</h1>
+            <div className="flex items-start gap-3 px-2">
+                <Button variant="secondary" size="icon" className="mt-1 shrink-0" onClick={() => router.push("/campaigns")}>
+                    <CaretLeft className="rtl:rotate-180" />
+                </Button>
+                <PageHeader
+                    className="min-w-0 flex-1"
+                    title={
+                        <>
+                            {campaign.name}
                             <StatusBadge status={campaign.status} />
-                        </div>
-                        <p className="text-muted-foreground text-sm flex items-center gap-1 mt-0.5">
-                            <Calendar className="h-3.5 w-3.5" />
+                        </>
+                    }
+                    description={
+                        <span className="flex items-center gap-1.5">
+                            <Calendar className="size-3.5" />
                             {t("detail.createdOn", { date: new Date(campaign.createdAt).toLocaleDateString() })}
-                        </p>
-                    </div>
-                </div>
-                <div className="flex items-center gap-2">
-                    {campaign.status === "running" ? (
-                        <Button variant="destructive" onClick={stopCampaign}>
-                            <StopCircle className="me-2 h-4 w-4" />
-                            {t("detail.stop")}
-                        </Button>
-                    ) : campaign.status === "scheduled" ? (
-                        <span className="text-sm text-muted-foreground flex items-center gap-2">
-                            <CalendarClock className="h-4 w-4" />
-                            {t("detail.scheduledFor", { date: campaign.scheduledAt
-                                ? new Date(campaign.scheduledAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })
-                                : "—" })}
                         </span>
-                    ) : (
-                        <Button
-                            disabled={campaign.status === "completed"}
-                            onClick={startCampaign}
-                        >
-                            <Play className="me-2 h-4 w-4 fill-current" />
-                            {t("detail.start")}
-                        </Button>
-                    )}
-                </div>
+                    }
+                    actions={
+                        campaign.status === "running" ? (
+                            <Button variant="danger" iconStart={<StopCircle />} onClick={stopCampaign}>
+                                {t("detail.stop")}
+                            </Button>
+                        ) : campaign.status === "scheduled" ? (
+                            <span className="flex items-center gap-2 text-body-sm text-fg-muted">
+                                <CalendarCheck className="size-4" />
+                                {t("detail.scheduledFor", { date: campaign.scheduledAt
+                                    ? new Date(campaign.scheduledAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })
+                                    : "—" })}
+                            </span>
+                        ) : (
+                            <Button
+                                variant="primary"
+                                iconStart={<Play />}
+                                disabled={campaign.status === "completed"}
+                                onClick={startCampaign}
+                            >
+                                {t("detail.start")}
+                            </Button>
+                        )
+                    }
+                />
             </div>
 
             {/* Performance Stats stays Global */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 px-2">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                        <CardTitle className="text-sm font-medium text-muted-foreground uppercase">{t("detail.totalLeads")}</CardTitle>
-                        <Users className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{campaign.leadIds.length}</div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                        <CardTitle className="text-sm font-medium text-muted-foreground uppercase">{t("detail.completed")}</CardTitle>
-                        <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-green-600">{completedCount}</div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                        <CardTitle className="text-sm font-medium text-muted-foreground uppercase">{t("detail.avgDuration")}</CardTitle>
-                        <Timer className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{avgDuration}</div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                        <CardTitle className="text-sm font-medium text-muted-foreground uppercase">{t("detail.successRate")}</CardTitle>
-                        <Zap className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-blue-600">{successRate}%</div>
-                    </CardContent>
-                </Card>
+                <StatCard label={t("detail.totalLeads")} icon={<Users />} value={campaign.leadIds.length} />
+                <StatCard label={t("detail.completed")} icon={<CheckCircle />} value={completedCount} />
+                <StatCard label={t("detail.avgDuration")} icon={<Timer />} value={avgDuration} />
+                <StatCard label={t("detail.successRate")} icon={<Lightning />} value={`${successRate}%`} />
             </div>
 
             {/* Main Content Reorganized into Tabs */}
             <Tabs defaultValue="activity" className="w-full">
-                <TabsList className="bg-muted/50 p-1">
-                    <TabsTrigger value="activity" className="gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider">
-                        <Activity className="h-3.5 w-3.5" />
+                <TabsList className="px-2">
+                    <TabsTrigger value="activity">
+                        <Pulse />
                         {t("detail.tabs.activity")}
                     </TabsTrigger>
-                    <TabsTrigger value="roster" className="gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider">
-                        <Users className="h-3.5 w-3.5" />
+                    <TabsTrigger value="roster">
+                        <Users />
                         {t("detail.tabs.leads")}
                     </TabsTrigger>
-                    <TabsTrigger value="protocol" className="gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider">
-                        <Bot className="h-3.5 w-3.5" />
+                    <TabsTrigger value="protocol">
+                        <Robot />
                         {t("detail.tabs.agent")}
                     </TabsTrigger>
                 </TabsList>
 
-                {/* Tab: Live Activity */}
+                {/* Tab: Live Pulse */}
                 <TabsContent value="activity">
                     <div className="grid gap-6 lg:grid-cols-2 px-2">
-                        <Card className={campaign.status === "running" ? "border-primary/50 ring-1 ring-primary/20" : ""}>
+                        <Card>
                             <CardHeader>
-                                <CardTitle className="text-lg flex items-center gap-2">
-                                    <Activity className={`h-4 w-4 ${campaign.status === "running" ? "text-primary animate-pulse" : "text-muted-foreground"}`} />
+                                <CardTitle className="flex items-center gap-2">
+                                    <Pulse className={`size-4 ${campaign.status === "running" ? "text-accent-ink" : "text-fg-muted"}`} />
                                     {t("detail.activity.title")}
                                 </CardTitle>
                                 <CardDescription>{t("detail.activity.description")}</CardDescription>
                             </CardHeader>
-                            <CardContent className="space-y-6 py-6">
-                                {activeLeadIndex >= 0 ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="flex items-center gap-4 p-4 rounded-xl bg-muted/40 border-2">
-                                            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg uppercase">
-                                                {campaign.leadIds[activeLeadIndex].name.charAt(0)}
-                                            </div>
-                                            <div>
-                                                <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">{t("detail.activity.activeCall")}</p>
-                                                <p className="text-lg font-bold">{campaign.leadIds[activeLeadIndex].name}</p>
+                            <CardContent className="flex flex-col gap-6">
+                                {activeLead ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="flex items-center gap-3 rounded-md bg-surface p-4">
+                                            <Avatar name={activeLead.name} size="lg" />
+                                            <div className="min-w-0">
+                                                <p className="text-caption font-medium text-fg-subtle">{t("detail.activity.activeCall")}</p>
+                                                <p className="truncate text-heading-sm">{activeLead.name}</p>
                                             </div>
                                         </div>
                                         <div className="grid grid-cols-2 gap-3">
-                                            <div className="p-3 border rounded-xl bg-muted/20 text-center">
-                                                <span className="text-[10px] text-muted-foreground block uppercase font-black mb-1">{t("detail.activity.status")}</span>
-                                                <span className="text-sm font-bold flex items-center justify-center gap-1.5 capitalize">
-                                                    <Mic2 className={`h-4 w-4 ${campaign.leadIds[activeLeadIndex].callStatus === "in-progress" ? "text-red-500 animate-pulse" : "text-muted-foreground"}`} />
-                                                    {campaign.leadIds[activeLeadIndex].callStatus === "in-progress" ? t("detail.activity.talking") :
-                                                        campaign.leadIds[activeLeadIndex].callStatus === "ringing" ? t("detail.activity.ringing") : t("detail.activity.queued")}
-                                                </span>
+                                            <div className="flex flex-col items-center justify-center gap-1.5 rounded-md bg-surface p-3 text-center">
+                                                <span className="text-caption font-medium text-fg-subtle">{t("detail.activity.status")}</span>
+                                                <Badge
+                                                    tone={activeLead.callStatus === "in-progress" ? "accent" : activeLead.callStatus === "ringing" ? "warning" : "neutral"}
+                                                    pulse={activeLead.callStatus === "in-progress" || activeLead.callStatus === "ringing"}
+                                                >
+                                                    <Microphone />
+                                                    {activeLead.callStatus === "in-progress" ? t("detail.activity.talking") :
+                                                        activeLead.callStatus === "ringing" ? t("detail.activity.ringing") : t("detail.activity.queued")}
+                                                </Badge>
                                             </div>
-                                            <div className="p-3 border rounded-xl bg-muted/20 text-center">
-                                                <span className="text-[10px] text-muted-foreground block uppercase font-black mb-1">{t("detail.activity.queue")}</span>
-                                                <span className="text-sm font-bold">{t("detail.activity.live")}</span>
+                                            <div className="flex flex-col items-center justify-center gap-1.5 rounded-md bg-surface p-3 text-center">
+                                                <span className="text-caption font-medium text-fg-subtle">{t("detail.activity.queue")}</span>
+                                                <span className="text-body-sm font-semibold">{t("detail.activity.live")}</span>
                                             </div>
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="flex flex-col items-center justify-center py-20 text-center text-muted-foreground opacity-40 border-2 border-dashed rounded-xl">
-                                        <Zap className="h-12 w-12 mb-4" />
-                                        <p className="text-lg font-bold uppercase tracking-wider">{t("detail.activity.emptyTitle")}</p>
-                                        <p className="text-sm">{t("detail.activity.emptyDescription")}</p>
-                                    </div>
+                                    <EmptyState
+                                        icon={<Lightning />}
+                                        title={t("detail.activity.emptyTitle")}
+                                        description={t("detail.activity.emptyDescription")}
+                                    />
                                 )}
 
                                 <Separator />
 
-                                <div className="space-y-3">
-                                    <div className="flex items-center justify-between text-xs font-black uppercase text-muted-foreground tracking-widest">
-                                        <span>{t("detail.activity.completion")}</span>
-                                        <span className="text-primary">{Math.round(progress)}%</span>
-                                    </div>
-                                    <Progress value={progress} className="h-3" />
-                                    <div className="flex justify-between text-[11px] font-bold text-muted-foreground">
+                                <div className="flex flex-col gap-2">
+                                    <Progress
+                                        value={progress}
+                                        label={t("detail.activity.completion")}
+                                        showValue
+                                    />
+                                    <div className="flex justify-between text-caption tabular-nums text-fg-muted">
                                         <span>{t("detail.activity.processed", { count: completedCount + failedCount })}</span>
                                         <span>{t("detail.activity.remaining", { count: campaign.leadIds.length - (completedCount + failedCount) })}</span>
                                     </div>
@@ -404,54 +370,43 @@ export default function CampaignDetailsPage() {
                         {/* Recent Alerts or Mini Logs could go here in future */}
                         <Card>
                             <CardHeader>
-                                <CardTitle className="text-lg flex items-center gap-2">
-                                    <History className="h-4 w-4 text-muted-foreground" />
+                                <CardTitle className="flex items-center gap-2">
+                                    <ClockCounterClockwise className="size-4 text-fg-muted" />
                                     {t("detail.summary.title")}
                                 </CardTitle>
                                 <CardDescription>{t("detail.summary.description")}</CardDescription>
                             </CardHeader>
-                            <CardContent className="py-6">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-1">
-                                        <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">{t("detail.summary.handledBy")}</p>
-                                        <p className="text-sm font-bold">{campaign.agentId?.name}</p>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">{t("detail.summary.voiceEngine")}</p>
-                                        <div className="flex items-center gap-1.5">
-                                            {campaign.agentId?.useCustomVoice ? (
-                                                <>
-                                                    <Zap className="h-3 w-3 text-primary" />
-                                                    <p className="text-sm font-bold">{t("detail.summary.elevenLabs")}</p>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Activity className="h-3 w-3 text-muted-foreground" />
-                                                    <p className="text-sm font-bold">{t("detail.summary.standard")}</p>
-                                                </>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">{t("detail.summary.personaVoice")}</p>
-                                        <div className="flex items-center gap-1.5">
-                                            <Mic2 className="h-3 w-3 text-muted-foreground" />
-                                            <p className="text-sm font-bold truncate max-w-[120px]">
-                                                {campaign.agentId?.useCustomVoice
-                                                    ? (campaign.agentId?.voiceName || campaign.agentId?.voiceId || "Rachel")
-                                                    : (campaign.agentId?.voice?.replace("Polly.", "") || "Amy")}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">{t("detail.summary.totalCalls")}</p>
-                                        <p className="text-sm font-bold">{callLogs.length}</p>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">{t("detail.summary.avgPulse")}</p>
-                                        <p className="text-sm font-bold">{avgDuration}</p>
-                                    </div>
-                                </div>
+                            <CardContent>
+                                <DescriptionList
+                                    items={[
+                                        { term: t("detail.summary.handledBy"), value: campaign.agentId?.name },
+                                        {
+                                            term: t("detail.summary.voiceEngine"),
+                                            value: (
+                                                <span className="inline-flex items-center gap-1.5">
+                                                    {campaign.agentId?.useCustomVoice ? (
+                                                        <>
+                                                            <Lightning className="size-3.5 text-accent-ink" />
+                                                            {agentVoiceProvider(campaign.agentId)}
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Pulse className="size-3.5 text-fg-subtle" />
+                                                            {t("detail.summary.standard")}
+                                                        </>
+                                                    )}
+                                                </span>
+                                            ),
+                                        },
+                                        {
+                                            term: t("detail.summary.personaVoice"),
+                                            icon: <Microphone />,
+                                            value: agentVoiceLabel(campaign.agentId),
+                                        },
+                                        { term: t("detail.summary.totalCalls"), value: callLogs.length },
+                                        { term: t("detail.summary.avgPulse"), value: avgDuration },
+                                    ]}
+                                />
                             </CardContent>
                         </Card>
                     </div>
@@ -460,42 +415,37 @@ export default function CampaignDetailsPage() {
                 {/* Tab: Campaign Roster */}
                 <TabsContent value="roster">
                     <div className="px-2">
-                        <Card className="min-h-[500px]">
-                            <CardHeader className="border-b bg-muted/10 py-5">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <CardTitle className="text-lg">{t("detail.contacts.title")}</CardTitle>
+                        <Card>
+                            <CardHeader>
+                                <div className="flex items-start justify-between gap-4">
+                                    <div className="flex flex-col gap-1">
+                                        <CardTitle>{t("detail.contacts.title")}</CardTitle>
                                         <CardDescription>{t("detail.contacts.description")}</CardDescription>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <Badge variant="secondary" className="font-bold">
-                                            {t("detail.contacts.totalTargets", { count: campaign.leadIds.length })}
-                                        </Badge>
-                                    </div>
+                                    <Badge>
+                                        {t("detail.contacts.totalTargets", { count: campaign.leadIds.length })}
+                                    </Badge>
                                 </div>
                             </CardHeader>
-                            <CardContent className="p-0">
+                            <CardContent className="px-0 pb-2">
                                 <Table>
                                     <TableHeader>
-                                        <TableRow className="hover:bg-transparent">
-                                            <TableHead className="ps-6 uppercase text-[10px] font-black tracking-wider py-4">{t("detail.contacts.leadProfile")}</TableHead>
-                                            <TableHead className="uppercase text-[10px] font-black tracking-wider py-4">{t("detail.contacts.executionStatus")}</TableHead>
-                                            <TableHead className="uppercase text-[10px] font-black tracking-wider py-4">{t("detail.contacts.callMetrics")}</TableHead>
-
+                                        <TableRow>
+                                            <TableHead className="first:ps-5">{t("detail.contacts.leadProfile")}</TableHead>
+                                            <TableHead>{t("detail.contacts.executionStatus")}</TableHead>
+                                            <TableHead className="last:pe-5">{t("detail.contacts.callMetrics")}</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {campaign.leadIds.map((lead) => (
-                                            <TableRow key={lead._id} className="group h-16">
-                                                <TableCell className="ps-6">
+                                            <TableRow key={lead._id}>
+                                                <TableCell className="py-2.5 first:ps-5">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center text-muted-foreground font-bold text-xs uppercase border">
-                                                            {lead.name.charAt(0)}
-                                                        </div>
-                                                        <div>
-                                                            <p className="font-bold text-sm tracking-tight">{lead.name}</p>
-                                                            <p className="text-[11px] text-muted-foreground flex items-center gap-1 font-medium">
-                                                                <Phone className="h-3 w-3 opacity-50" />
+                                                        <Avatar name={lead.name} size="md" />
+                                                        <div className="min-w-0">
+                                                            <p className="truncate font-medium">{lead.name}</p>
+                                                            <p className="flex items-center gap-1 text-caption text-fg-muted">
+                                                                <Phone className="size-3 text-fg-subtle" />
                                                                 <span className="ltr-data">{lead.phone}</span>
                                                             </p>
                                                         </div>
@@ -504,27 +454,24 @@ export default function CampaignDetailsPage() {
                                                 <TableCell>
                                                     <LeadStatusBadge status={lead.callStatus || "pending"} />
                                                 </TableCell>
-                                                <TableCell>
-                                                    <div
-                                                        className="space-y-0.5 select-none"
-                                                    >
+                                                <TableCell className="last:pe-5">
+                                                    <div className="flex flex-col gap-0.5 select-none">
                                                         {lead.lastCallTimestamp ? (
                                                             <>
-                                                                <div className="flex items-center gap-1.5 text-xs font-bold">
-                                                                    <Clock className="h-3.5 w-3.5 opacity-40" />
+                                                                <div className="flex items-center gap-1.5 text-body-sm font-medium">
+                                                                    <Clock className="size-3.5 text-fg-subtle" />
                                                                     {formatTime(lead.lastCallTimestamp, timeFormat)}
                                                                 </div>
-                                                                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-medium">
-                                                                    <Timer className="h-3 w-3 opacity-40" />
+                                                                <div className="flex items-center gap-1.5 text-caption text-fg-muted">
+                                                                    <Timer className="size-3 text-fg-subtle" />
                                                                     {lead.duration}
                                                                 </div>
                                                             </>
                                                         ) : (
-                                                            <span className="text-[10px] text-muted-foreground/30 font-black italic tracking-wider">{t("detail.contacts.waiting")}</span>
+                                                            <span className="text-caption italic text-fg-subtle">{t("detail.contacts.waiting")}</span>
                                                         )}
                                                     </div>
                                                 </TableCell>
-
                                             </TableRow>
                                         ))}
                                     </TableBody>
@@ -537,79 +484,69 @@ export default function CampaignDetailsPage() {
                 {/* Tab: Agent Details */}
                 <TabsContent value="protocol">
                     <div className="grid gap-6 lg:grid-cols-2 px-2">
-                        <div className="space-y-6">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="text-lg flex items-center gap-2">
-                                        <Bot className="h-5 w-5 text-primary" />
-                                        {t("detail.agent.title")}
-                                    </CardTitle>
-                                    <CardDescription>{t("detail.agent.description")}</CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-6 pb-8">
-                                    <div className="space-y-2">
-                                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{t("detail.agent.selected")}</p>
-                                        <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border">
-                                            <div className="flex items-center gap-3">
-                                                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                                                    <Bot className="h-6 w-6" />
-                                                </div>
-                                                <div>
-                                                    <p className="font-bold text-base">{campaign.agentId?.name || "N/A"}</p>
-                                                    <p className="text-xs text-muted-foreground flex items-center gap-1">
-                                                        <Phone className="h-3 w-3" />
-                                                        {campaign.agentId?.outboundPhoneNumber?.phoneNumber || "No outbound number set"}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div className="flex flex-col items-end gap-1">
-                                                <Badge variant="secondary" className="font-medium">
-                                                    {campaign.agentId?.useCustomVoice ? 'Premium Voice' : 'Standard Voice'}
-                                                </Badge>
-                                                <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground bg-white px-2 py-1 rounded-md border shadow-sm">
-                                                    <Mic2 className="h-3 w-3 text-primary" />
-                                                    {campaign.agentId?.useCustomVoice ? (campaign.agentId?.voiceName || campaign.agentId?.voiceId || 'Rachel') : (campaign.agentId?.voice || 'Polly.Amy')}
-                                                </div>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <Robot className="size-5 text-fg-muted" />
+                                    {t("detail.agent.title")}
+                                </CardTitle>
+                                <CardDescription>{t("detail.agent.description")}</CardDescription>
+                            </CardHeader>
+                            <CardContent className="flex flex-col gap-6">
+                                <div className="flex flex-col gap-2">
+                                    <p className="text-caption font-medium text-fg-subtle">{t("detail.agent.selected")}</p>
+                                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-md bg-surface p-4">
+                                        <div className="flex min-w-0 items-center gap-3">
+                                            <span className="grid size-10 shrink-0 place-items-center rounded-md bg-accent-subtle text-accent-ink">
+                                                <Robot className="size-5" />
+                                            </span>
+                                            <div className="min-w-0">
+                                                <p className="truncate text-body-md font-semibold">{campaign.agentId?.name || "N/A"}</p>
+                                                <p className="flex items-center gap-1 text-caption text-fg-muted">
+                                                    <Phone className="size-3" />
+                                                    {campaign.agentId?.outboundPhoneNumber?.phoneNumber || "No outbound number set"}
+                                                </p>
                                             </div>
                                         </div>
+                                        <div className="flex flex-col items-end gap-1.5">
+                                            <Badge tone={campaign.agentId?.useCustomVoice ? "accent" : "neutral"}>
+                                                {campaign.agentId?.useCustomVoice ? 'Premium Voice' : 'Standard Voice'}
+                                            </Badge>
+                                            <Badge appearance="outline">
+                                                <Microphone />
+                                                {agentVoiceLabel(campaign.agentId)}
+                                            </Badge>
+                                        </div>
                                     </div>
+                                </div>
 
-                                    <div className="space-y-2">
-                                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                                            <MessageSquare className="h-3.5 w-3.5" /> {t("detail.agent.openingMessage")}
-                                        </p>
-                                        <div className="relative group">
-                                            <div className="p-5 text-base rounded-xl bg-primary/5 border italic text-foreground/80 leading-relaxed shadow-sm">
-                                                &quot;{renderVariableHighlight(campaign.agentId?.openingMessage)}&quot;
-                                            </div>
-                                        </div>
+                                <div className="flex flex-col gap-2">
+                                    <p className="flex items-center gap-1.5 text-caption font-medium text-fg-subtle">
+                                        <ChatText className="size-3.5" /> {t("detail.agent.openingMessage")}
+                                    </p>
+                                    <div className="rounded-md bg-surface p-5 text-body-md italic leading-relaxed text-fg">
+                                        &quot;{renderVariableHighlight(campaign.agentId?.openingMessage)}&quot;
                                     </div>
-                                </CardContent>
-                            </Card>
-                        </div>
+                                </div>
+                            </CardContent>
+                        </Card>
 
-                        <div className="space-y-6">
-                            <Card className="h-full flex flex-col">
-                                <CardHeader>
-                                    <div className="flex items-center justify-between">
-                                        <CardTitle className="text-lg flex items-center gap-2">
-                                            <Brain className="h-5 w-5 text-primary" />
-                                            {t("detail.agent.instructions")}
-                                        </CardTitle>
-                                    </div>
-                                    <CardDescription>{t("detail.agent.instructionsHint")}</CardDescription>
-                                </CardHeader>
-                                <CardContent className="flex-1 pb-6">
-                                    <ScrollArea className="h-[400px] w-full rounded-xl border bg-muted/10 p-6">
-                                        <div className="prose prose-sm max-w-none text-muted-foreground">
-                                            <p className="whitespace-pre-wrap leading-relaxed">
-                                                {campaign.agentId?.systemPrompt}
-                                            </p>
-                                        </div>
-                                    </ScrollArea>
-                                </CardContent>
-                            </Card>
-                        </div>
+                        <Card className="h-full">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <Brain className="size-5 text-fg-muted" />
+                                    {t("detail.agent.instructions")}
+                                </CardTitle>
+                                <CardDescription>{t("detail.agent.instructionsHint")}</CardDescription>
+                            </CardHeader>
+                            <CardContent className="flex-1">
+                                <div className="h-[400px] w-full overflow-y-auto rounded-md bg-surface p-5">
+                                    <p className="whitespace-pre-wrap text-body-sm leading-relaxed text-fg-muted">
+                                        {campaign.agentId?.systemPrompt}
+                                    </p>
+                                </div>
+                            </CardContent>
+                        </Card>
                     </div>
                 </TabsContent>
             </Tabs>
@@ -626,7 +563,7 @@ function renderVariableHighlight(text: string | undefined): ReactNode {
     return parts.map((part, i) => {
         if (part.startsWith("{{") && part.endsWith("}}")) {
             return (
-                <span key={i} className="text-primary font-black decoration-primary/40 decoration-2 underline underline-offset-4 bg-primary/5 px-0.5 rounded">
+                <span key={i} className="rounded-xs bg-accent-subtle px-1 font-mono text-[0.9em] font-medium not-italic text-accent-ink">
                     {part}
                 </span>
             );
@@ -636,24 +573,25 @@ function renderVariableHighlight(text: string | undefined): ReactNode {
 }
 
 function StatusBadge({ status }: { status: Campaign["status"] }) {
-    const variants = {
-        idle: "secondary",
-        scheduled: "outline",
-        running: "default",
-        completed: "outline",
-        stopped: "destructive",
+    const tones = {
+        idle: "neutral",
+        scheduled: "warning",
+        running: "info",
+        completed: "success",
+        stopped: "danger",
     } as const;
 
+    // A running campaign pulses instead of showing an icon: it is live.
     const icons = {
-        idle: <Clock className="me-1.5 h-3.5 w-3.5" />,
-        scheduled: <CalendarClock className="me-1.5 h-3.5 w-3.5" />,
-        running: <Loader2 className="me-1.5 h-3.5 w-3.5 animate-spin" />,
-        completed: <CheckCircle2 className="me-1.5 h-3.5 w-3.5" />,
-        stopped: <StopCircle className="me-1.5 h-3.5 w-3.5" />,
+        idle: <Clock />,
+        scheduled: <CalendarCheck />,
+        running: null,
+        completed: <CheckCircle />,
+        stopped: <StopCircle />,
     };
 
     return (
-        <Badge variant={variants[status]} className="capitalize flex items-center h-7 px-3 font-bold">
+        <Badge tone={tones[status]} pulse={status === "running"} className="capitalize">
             {icons[status]}
             {status}
         </Badge>
@@ -661,26 +599,24 @@ function StatusBadge({ status }: { status: Campaign["status"] }) {
 }
 
 function LeadStatusBadge({ status }: { status: Lead["callStatus"] }) {
-    const config = {
-        pending: { label: "Pending Execution", variant: "secondary" as const },
-        queued: { label: "Queued", variant: "secondary" as const, className: "bg-blue-50 text-blue-700 border-blue-200" },
-        ringing: { label: "Ringing...", variant: "default" as const, className: "bg-amber-50 text-amber-700 border-amber-200 animate-pulse" },
-        "in-progress": { label: "In Conversation", variant: "default" as const, className: "bg-primary/10 text-primary border-primary/20" },
-        completed: { label: "Contact Successful", variant: "outline" as const, className: "bg-green-50 text-green-700 border-green-200" },
-        failed: { label: "Call Failed", variant: "destructive" as const, className: "bg-red-50 text-red-700 border-red-200" },
-        busy: { label: "Line Busy", variant: "destructive" as const, className: "bg-orange-50 text-orange-700 border-orange-200" },
-        "no-answer": { label: "No Answer", variant: "destructive" as const, className: "bg-gray-100 text-gray-700 border-gray-300" },
-        canceled: { label: "Canceled", variant: "secondary" as const, className: "bg-gray-50 text-gray-500 border-gray-200" },
-        initiated: { label: "Initiating...", variant: "secondary" as const, className: "bg-blue-50 text-blue-600 border-blue-100" },
+    type Tone = "neutral" | "accent" | "success" | "warning" | "danger" | "info";
+    const config: Record<string, { label: string; tone: Tone; pulse?: boolean }> = {
+        pending: { label: "Pending Execution", tone: "neutral" },
+        queued: { label: "Queued", tone: "info" },
+        ringing: { label: "Ringing...", tone: "warning", pulse: true },
+        "in-progress": { label: "In Conversation", tone: "accent", pulse: true },
+        completed: { label: "Contact Successful", tone: "success" },
+        failed: { label: "Call Failed", tone: "danger" },
+        busy: { label: "Line Busy", tone: "warning" },
+        "no-answer": { label: "No Answer", tone: "neutral" },
+        canceled: { label: "Canceled", tone: "neutral" },
+        initiated: { label: "Initiating...", tone: "info" },
     };
 
-    const style = config[status as keyof typeof config] || config.pending;
+    const style = config[status as string] || config.pending;
 
     return (
-        <Badge
-            variant={style.variant}
-            className={`text-[9px] font-black px-2 h-5 uppercase tracking-tighter ${"className" in style ? style.className : ""}`}
-        >
+        <Badge tone={style.tone} pulse={style.pulse} dot={!style.pulse}>
             {style.label}
         </Badge>
     );

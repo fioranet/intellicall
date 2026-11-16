@@ -167,6 +167,73 @@ function shouldInterruptWhileSpeaking(text, { minWords = BARGE_IN_MIN_WORDS } = 
 }
 
 /**
+ * Closing words a caller says back to the agent's goodbye. Saying any of these over the
+ * goodbye means "yes, we're done" — never "keep talking".
+ */
+const FAREWELLS = [
+    // English / romanised
+    'bye', 'bye bye', 'goodbye', 'good bye', 'thanks', 'thank you', 'thank you so much',
+    'thanks a lot', 'ok bye', 'okay bye', 'see you', 'take care', 'have a nice day',
+    'have a good day', 'you too', 'same to you', 'cheers',
+    'dhanyavaad', 'dhanyavad', 'shukriya', 'nandi', 'nanri', 'alvida',
+    // Hindi / Marathi
+    'धन्यवाद', 'शुक्रिया', 'अलविदा', 'बाय', 'नमस्ते', 'आभारी आहे',
+    // Malayalam / Tamil / Telugu / Kannada / Bengali / Gujarati / Punjabi
+    'നന്ദി', 'நன்றி', 'ధన్యవాదాలు', 'ಧನ್ಯವಾದ', 'ಧನ್ಯವಾದಗಳು', 'ধন্যবাদ', 'આભાર', 'ਧੰਨਵਾਦ',
+];
+
+/** Utterances that never count as the caller re-opening the conversation. */
+// Longest phrases first, so "thank you so much" is removed whole before "thank you" splits it.
+// Lookahead rather than a consumed trailing space, so a repeat like "bye bye" matches twice.
+const CLOSING_PATTERNS = [...new Set([...FAREWELLS, ...BACKCHANNELS].map(normalize))]
+    .filter(Boolean)
+    .sort((a, b) => b.length - a.length)
+    .map(p => new RegExp(`(^| )${p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?= |$)`, 'gu'));
+
+/**
+ * Words left once every farewell and acknowledgement phrase is removed. "ok thank you bye"
+ * leaves nothing; "thanks but I have one more question" leaves six words.
+ */
+function substantiveWordCount(text) {
+    let t = normalize(text);
+    for (const re of CLOSING_PATTERNS) t = t.replace(re, ' ');
+    return countWords(t);
+}
+
+/** Substantive words a caller needs to keep the line open once the agent has said goodbye. */
+const GOODBYE_CANCEL_MIN_WORDS = 3;
+
+/**
+ * Should this transcript cancel a hang-up that is already under way?
+ *
+ * After the AGENT decided the conversation is over, the bar is far stricter than ordinary
+ * barge-in. Line noise, a TV, or the caller's own "ok thanks bye" all produce short
+ * transcripts, and treating any of them as "the caller is still talking" is what left calls
+ * stuck on the line after the goodbye. Only a real sentence, or an explicit "wait", keeps it.
+ *
+ * After an IDLE timeout (`{ idle: true }`) the opposite mistake is the costly one: a caller
+ * who comes back with "hello?" or "yes" must not be hung up on. Anything but a farewell keeps
+ * the line. Noise that slips through only postpones the hang-up — it does not reset the idle
+ * clock, so the watchdog tries again on its next check.
+ */
+function shouldCancelGoodbye(text, { idle = false } = {}) {
+    if (!text) return false;
+    if (isStopCommand(text)) return true;
+    if (idle) return isBackchannel(text) || substantiveWordCount(text) >= 1;
+    return substantiveWordCount(text) >= GOODBYE_CANCEL_MIN_WORDS;
+}
+
+/**
+ * Does this caller utterance count as the caller engaging, for idle (silent-call) detection?
+ * A single stray word is what background noise transcribes to, so it does not reset the idle
+ * clock; a real reply — two words, a yes/ok, or a stop command — does.
+ */
+function isCallerActivity(text) {
+    if (!text) return false;
+    return countWords(text) >= 2 || isBackchannel(text) || isStopCommand(text);
+}
+
+/**
  * True if `text` looks like the agent's own voice echoing back off the caller's handset.
  *
  * This is the failure the old 3-word interrupt threshold was really guarding against, and
@@ -200,4 +267,9 @@ module.exports = {
     isBackchannel,
     shouldInterruptWhileSpeaking,
     isAgentEcho,
+    FAREWELLS,
+    GOODBYE_CANCEL_MIN_WORDS,
+    substantiveWordCount,
+    shouldCancelGoodbye,
+    isCallerActivity,
 };

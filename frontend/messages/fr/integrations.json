@@ -1,0 +1,634 @@
+{
+  "title": "Intégrations",
+  "description": "Les applications avec lesquelles votre compte travaille, et celles dans lesquelles vos agents peuvent agir pendant un appel.",
+  "info": "Les applications de votre compte envoient des alertes et synchronisent des données. Les serveurs de l'annuaire donnent des outils aux agents : pendant un appel, un agent peut y consulter et modifier des choses, avec les seuls outils que vous activez.",
+  "addCustom": "Ajouter un serveur MCP personnalisé",
+  "loadFailed": "Impossible de charger vos intégrations.",
+  "signInIncomplete": "La connexion n'a pas abouti.",
+  "connected": "Connecté",
+  "notReady": "Pas prêt",
+  "native": {
+    "heading": "Les applications de votre compte",
+    "info": "Alertes, exports et synchronisations de votre compte. Elles fonctionnent seules ; les agents ne les appellent pas pendant un appel.",
+    "active": "Active",
+    "items": {
+      "n8n": { "name": "n8n", "description": "Automatisation de workflows" },
+      "api-access": { "name": "Accès API", "description": "Clé API personnelle" },
+      "whatsapp": { "name": "Alertes WhatsApp", "description": "Alertes et rappels aux clients" },
+      "slack": { "name": "Slack", "description": "Notifications dans un canal" },
+      "hubspot": { "name": "HubSpot CRM", "description": "Synchronisation des contacts" },
+      "google-calendar": { "name": "Google Calendar", "description": "Synchronisation des rendez-vous" },
+      "google-sheets": { "name": "Google Sheets", "description": "Import et synchronisation des leads" }
+    }
+  },
+  "servers": {
+    "heading": "Serveurs MCP connectés",
+    "toolsOn": "<n>{enabled}</n> outils sur {total} activés",
+    "noAgents": "Aucun agent",
+    "toolsRead": "Outils lus {when}"
+  },
+  "status": {
+    "pending": "En attente",
+    "ready": "Prêt",
+    "needs_auth": "Se connecter",
+    "error": "Erreur"
+  },
+  "risk": {
+    "readOnly": "Lecture seule",
+    "writes": "Écrit",
+    "destructive": "Destructif"
+  },
+  "meetings": {
+    "heading": "Réunions",
+    "info": "Les agents rejoignent des réunions Zoom, Google Meet et Teams via votre propre compte Attendee, qui vous facture les heures de bot.",
+    "name": "Réunions",
+    "line": "Attendee · Zoom, Google Meet, Teams",
+    "tagline": "Rejoindre des réunions Zoom, Google Meet et Teams"
+  },
+  "directory": {
+    "heading": "Annuaire des applications",
+    "info": "Des applications avec un serveur MCP officiel, prêtes à connecter. Pour tout le reste, ajoutez un serveur MCP personnalisé.",
+    "searchApps": "Rechercher des applications",
+    "customTitle": "Tout autre serveur MCP",
+    "customHint": "Collez l'URL MCP distante de n'importe quelle application ou de votre propre backend. Les en-têtes comme la connexion OAuth fonctionnent.",
+    "customLine": "Toute application ou backend, par son URL MCP",
+    "noMatch": "Aucune application ne correspond. Ajoutez-la comme serveur MCP personnalisé si elle en a un."
+  },
+  "catalog": {
+    "category": {
+      "all": "Toutes",
+      "crm": "CRM",
+      "booking": "Réservation",
+      "support": "Support",
+      "payments": "Paiements",
+      "marketing": "Marketing",
+      "team": "Équipe",
+      "automation": "Automatisation",
+      "smartHome": "Maison connectée",
+      "search": "Recherche"
+    },
+    "auth": {
+      "none": "Sans connexion",
+      "oauth": "Se connecter",
+      "ownApp": "Nécessite votre propre app",
+      "apiKey": "Clé API"
+    },
+    "status": {
+      "beta": "Bêta",
+      "preview": "Aperçu"
+    }
+  },
+  "connect": {
+    "notInDirectoryTitle": "Cette application n'est pas dans l'annuaire",
+    "notInDirectory": "Choisissez-en une dans Intégrations.",
+    "back": "Intégrations",
+    "unreachable": "Impossible de joindre le serveur.",
+    "connectFailed": "Impossible de se connecter.",
+    "docsLink": "Documentation MCP de {app}",
+    "stepConnect": "Connecter {app}",
+    "stepChooseTools": "Choisir les outils",
+    "stepAddToAgent": "Ajouter à un agent",
+    "connectHeading": "Connecter {app}",
+    "server": "Serveur",
+    "oauthLine": "Vous vous connecterez à {app} et approuverez l'accès. {appName} s'enregistre automatiquement auprès de {app}, il n'y a donc rien à configurer avant.",
+    "noKeyNeeded": "Aucun compte ni clé n'est nécessaire.",
+    "keysEncrypted": "Les clés sont chiffrées et ne sont plus jamais affichées.",
+    "ownClientLine": "{app} ne laisse pas les applications s'enregistrer elles-mêmes : connectez-la via une app à vous. Cela prend quelques minutes, une seule fois.",
+    "redirectUrl": "URL de redirection",
+    "redirectUrlLoading": "Chargement…",
+    "scopesAskedFor": "Portées demandées : <code>{scope}</code>",
+    "clientId": "Id client",
+    "clientSecret": "Secret client",
+    "setupGuide": "Guide de configuration de {app}",
+    "signInTo": "Se connecter à {app}",
+    "connectApp": "Connecter {app}",
+    "whatAgentsCanDo": "Ce que les agents peuvent en faire",
+    "recommendedInfo": "Les outils dont un agent téléphonique a le plus besoin sont activés à la connexion. Vous pourrez les changer ensuite.",
+    "readOnlyInfo": "Les outils que l'application marque en lecture seule sont activés à la connexion. Choisissez les autres ensuite.",
+    "confirmInfo": "Avant d'utiliser un outil qui modifie des données, l'agent demande confirmation à l'appelant.",
+    "readFrom": "Lu depuis {server} à l'instant",
+    "toolCount": "{count, plural, one {# outil} other {# outils}}",
+    "readingAgain": "{tools} · nouvelle lecture…",
+    "examplesNote": "Exemples tirés de la documentation de {app}. Pas la liste réelle.",
+    "examplesNoteCount": "Exemples tirés de la documentation de {app}, sur environ {count}. Pas la liste réelle.",
+    "oauthToolsLine": "{app} ne liste ses outils qu'après connexion. La liste complète est lue depuis {app} dès le retour de la connexion, et vous y choisissez sur l'écran suivant.",
+    "fillFormLine": "Remplissez le formulaire et la liste des outils sera lue depuis {app} avant la connexion.",
+    "readingTools": "Lecture des outils de {app}…",
+    "readToolsFailed": "Impossible de lire les outils de {app}.",
+    "tryingAgain": "{message} Nouvel essai…",
+    "liveUnavailable": "La liste réelle des outils n'est pas disponible. Voici des exemples tirés de la documentation de l'application."
+  },
+  "server": {
+    "authNone": "Aucune",
+    "authNoneHint": "Un serveur public, ou dont l'URL contient sa clé.",
+    "authHeaders": "Clé API / en-têtes",
+    "authHeadersHint": "Un jeton que le serveur attend à chaque requête.",
+    "authOauth": "Connexion OAuth",
+    "authOauthHint": "Vous vous connectez à l'application et approuvez l'accès.",
+    "loadFailed": "Impossible de charger ce serveur.",
+    "oauthConnected": "Connecté. Les outils du serveur ont été lus.",
+    "signInIncomplete": "La connexion n'a pas abouti.",
+    "saved": "Enregistré.",
+    "savedConnectNext": "Enregistré. Connectez-le maintenant : connectez-vous pour que {appName} puisse utiliser ce serveur.",
+    "saveFailed": "Impossible d'enregistrer ce serveur.",
+    "readTools": "{count, plural, one {# outil lu.} other {# outils lus.}}",
+    "refreshFailed": "Impossible d'actualiser.",
+    "signInStartFailed": "Impossible de démarrer la connexion.",
+    "toolAccessSaved": "Accès aux outils enregistré. Les appels qui démarrent à partir de maintenant l'utilisent.",
+    "toolAccessFailed": "Impossible d'enregistrer l'accès aux outils.",
+    "deleteTitle": "Supprimer {name} ?",
+    "deleteDescription": "Les agents ne pourront plus utiliser ses outils. Cette action est irréversible.",
+    "deleteDescriptionUsed": "{count, plural, one {# agent l'utilise et perdra ses outils.} other {# agents l'utilisent et perdront ses outils.}} Cette action est irréversible.",
+    "deleteConfirmLabel": "Supprimer le serveur",
+    "deleteFailed": "Impossible de supprimer ce serveur.",
+    "deleted": "{name} supprimé.",
+    "back": "Intégrations",
+    "newTitle": "Ajouter un serveur MCP personnalisé",
+    "description": "Lesquels de ses outils les agents peuvent utiliser pendant un appel.",
+    "docsLink": "Documentation MCP de {app}",
+    "newDescription": "Collez le point de terminaison MCP distant de l'application.",
+    "newInfo": "Ses outils sont lus dès l'enregistrement. Les applications populaires sont déjà préparées sur la page Intégrations.",
+    "stepConnect": "Connecter",
+    "stepChooseTools": "Choisir les outils",
+    "stepAddToAgent": "Ajouter à un agent",
+    "signInToConnect": "Connectez-vous pour connecter",
+    "notConnected": "Non connecté",
+    "needsAuthLine": "Ce serveur demande une connexion avant que {appName} puisse l'utiliser.",
+    "notReachedLine": "Le serveur n'a pas encore été joint.",
+    "connect": "Connecter",
+    "retry": "Réessayer",
+    "readyOnly": "Les agents n'utilisent que les serveurs à l'état Prêt.",
+    "name": "Nom",
+    "nameHint": "L'agent connaît ce nom : utilisez celui qu'un appelant dirait.",
+    "url": "URL du serveur MCP",
+    "urlHint": "Le point de terminaison MCP distant de l'application (Streamable HTTP ou SSE).",
+    "authentication": "Authentification",
+    "header": "En-tête",
+    "value": "Valeur",
+    "savedKeepBlank": "Enregistré. Laissez vide pour le conserver.",
+    "removeHeader": "Retirer l'en-tête",
+    "addHeader": "Ajouter un en-tête",
+    "encrypted": "Les valeurs sont chiffrées et ne sont plus jamais affichées.",
+    "oauthHelp": "Enregistrez, puis appuyez sur Connecter et connectez-vous à l'application. La plupart des serveurs enregistrent {appName} automatiquement ; pour un qui ne le fait pas, ajoutez ci-dessous l'id client de votre propre app.",
+    "showAdvanced": "Afficher les options avancées",
+    "hideAdvanced": "Masquer les options avancées",
+    "clientId": "Id client",
+    "clientSecret": "Secret client",
+    "scopes": "Portées",
+    "scopesPlaceholder": "Valeur par défaut du serveur",
+    "redirectUrl": "URL de redirection",
+    "transport": "Transport",
+    "transportHint": "Auto essaie Streamable HTTP, puis SSE. Ne le changez que si le serveur en exige un.",
+    "transportAuto": "Auto",
+    "save": "Enregistrer",
+    "saveAndConnect": "Enregistrer et connecter",
+    "reconnect": "Reconnecter",
+    "tools": "Outils",
+    "toolsInfo": "Seuls les outils activés sont proposés aux agents. Avant d'utiliser un outil qui modifie des données, l'agent demande confirmation à l'appelant.",
+    "switchedOn": "<n>{enabled}</n> sur {total} activés",
+    "readAt": "Lus {when}",
+    "refreshTools": "Actualiser les outils",
+    "noTools": "Aucun outil pour l'instant. Connectez le serveur, puis actualisez.",
+    "noReadOnly": "Ce serveur ne marque aucun outil en lecture seule, donc aucun n'a été activé pour vous. Choisissez ceux que les agents peuvent utiliser.",
+    "readOnlyOnly": "Lecture seule uniquement",
+    "all": "Tous",
+    "none": "Aucun",
+    "saveToolAccess": "Enregistrer l'accès aux outils",
+    "onCount": "{enabled} sur {total} activés",
+    "agentsUsing": "Agents qui l'utilisent",
+    "agentsUsingNone": "Aucun pour l'instant. Ouvrez un agent et choisissez ce serveur sous Applications connectées.",
+    "deleteServer": "Supprimer le serveur"
+  },
+  "apps": {
+    "hubspot": {
+      "tagline": "Plateforme marketing, ventes et service",
+      "blurb": "Retrouvez l'appelant dans votre CRM, consignez l'appel, et créez ou mettez à jour contacts, transactions et tâches.",
+      "note": "Les comptes avec les Données sensibles activées ne peuvent pas écrire d'appels, notes, tâches ou réunions via MCP.",
+      "steps": {
+        "1": "Dans HubSpot, ouvrez Développement, puis MCP Auth Apps, et créez une app.",
+        "2": "Ajoutez l'URL de redirection ci-dessous à l'app.",
+        "3": "Copiez l'id client et le secret client de l'app dans les champs ci-dessous."
+      },
+      "tools": {
+        "search_crm_objects": "Rechercher contacts, entreprises et transactions, par exemple par numéro de téléphone.",
+        "get_crm_objects": "Lire des fiches par id.",
+        "manage_crm_objects": "Créer ou mettre à jour contacts, transactions, appels, notes, tâches et réunions.",
+        "search_owners": "Trouver le propriétaire d'une fiche.",
+        "search_properties": "Lister les champs d'un type de fiche.",
+        "query_crm_data": "Répondre à des questions sur les données du CRM.",
+        "search_conversations": "Rechercher dans les conversations de la boîte de réception.",
+        "get_user_details": "Qui est connecté, et avec quel compte."
+      }
+    },
+    "salesforce": {
+      "tagline": "CRM pour les équipes ventes et service",
+      "blurb": "Consultez et mettez à jour n'importe quel enregistrement Salesforce pendant un appel, avec la recherche SOQL et SOSL.",
+      "steps": {
+        "1": "Dans la Configuration Salesforce, créez une External Client App avec OAuth activé.",
+        "2": "Donnez-lui les portées mcp_api et refresh_token, et ajoutez l'URL de redirection ci-dessous comme URL de rappel.",
+        "3": "Copiez sa consumer key (id client) et son consumer secret dans les champs ci-dessous."
+      },
+      "tools": {
+        "find": "Rechercher dans les enregistrements, par exemple par numéro de téléphone.",
+        "soqlQuery": "Exécuter une requête SOQL.",
+        "getObjectSchema": "Lire les champs d'un objet.",
+        "createSobjectRecord": "Créer un enregistrement, comme un lead, une tâche ou une requête.",
+        "updateSobjectRecord": "Mettre à jour un enregistrement."
+      }
+    },
+    "gohighlevel": {
+      "tagline": "CRM et marketing pour agences",
+      "blurb": "Retrouvez et mettez à jour des contacts, lisez les événements du calendrier, déplacez des opportunités et envoyez des messages dans un sous-compte.",
+      "note": "Ce serveur n'a pas encore d'outil pour réserver un rendez-vous.",
+      "help": "Créez un Private Integration Token dans le sous-compte avec les portées contacts, calendriers, opportunités et conversations.",
+      "fields": {
+        "token": { "label": "Private Integration Token", "hint": "Paramètres, puis Private Integrations, dans le sous-compte." },
+        "locationId": { "label": "Id d'emplacement", "hint": "L'id du sous-compte, dans Paramètres, puis Profil d'entreprise." }
+      },
+      "tools": {
+        "contacts_get-contacts": "Rechercher des contacts.",
+        "contacts_get-contact": "Lire un contact.",
+        "contacts_upsert-contact": "Créer ou mettre à jour un contact.",
+        "contacts_add-tags": "Étiqueter un contact.",
+        "calendars_get-calendar-events": "Lire les événements du calendrier.",
+        "opportunities_search-opportunity": "Rechercher des opportunités.",
+        "opportunities_update-opportunity": "Déplacer ou mettre à jour une opportunité.",
+        "conversations_send-a-new-message": "Envoyer un SMS ou un e-mail à un contact."
+      }
+    },
+    "pipedrive": {
+      "tagline": "CRM de pipeline commercial",
+      "blurb": "Retrouvez des personnes par téléphone, ajoutez des leads et des affaires, et consignez appels et notes.",
+      "tools": {
+        "searchPersons": "Trouver une personne, par exemple par numéro de téléphone.",
+        "getPerson": "Lire une personne.",
+        "addPerson": "Ajouter une personne.",
+        "addLead": "Ajouter un lead.",
+        "addDeal": "Ajouter une affaire.",
+        "addActivity": "Consigner un appel ou planifier une réunion.",
+        "addNote": "Ajouter une note.",
+        "searchDeals": "Rechercher des affaires."
+      }
+    },
+    "close": {
+      "tagline": "CRM pour les équipes de vente interne",
+      "blurb": "Recherchez des leads, lisez des contacts, et créez leads, notes, tâches et opportunités.",
+      "note": "Connexion avec accès en lecture et écriture sûre. Mettre à jour des fiches existantes exige la portée destructive de Close, qui n'est pas demandée.",
+      "tools": {
+        "lead_search": "Rechercher des leads.",
+        "fetch_lead": "Lire un lead.",
+        "fetch_contact": "Lire un contact.",
+        "create_lead": "Créer un lead.",
+        "create_note": "Ajouter une note.",
+        "create_task": "Créer une tâche de suivi.",
+        "create_opportunity": "Créer une opportunité."
+      }
+    },
+    "attio": {
+      "tagline": "CRM flexible pour équipes modernes",
+      "blurb": "Lisez et mettez à jour fiches, listes, notes et tâches dans Attio.",
+      "tools": {
+        "Records": "Rechercher, lire, créer et mettre à jour personnes, entreprises et affaires.",
+        "Notes": "Ajouter des notes à une fiche.",
+        "Tasks": "Créer et lire des tâches.",
+        "Lists": "Lire des listes et y ajouter."
+      }
+    },
+    "monday": {
+      "tagline": "Tableaux de gestion du travail",
+      "blurb": "Trouvez des éléments sur un tableau, créez des éléments et mettez à jour leurs colonnes.",
+      "note": "Le compte doit avoir l'app « monday MCP » installée depuis la marketplace monday.",
+      "tools": {
+        "get_board_items_by_name": "Trouver des éléments sur un tableau.",
+        "get_board_schema": "Lire les colonnes et groupes d'un tableau.",
+        "create_item": "Créer un élément.",
+        "change_item_column_values": "Mettre à jour les colonnes d'un élément.",
+        "create_update": "Publier une mise à jour sur un élément."
+      }
+    },
+    "apollo": {
+      "tagline": "Prospection commerciale et données de contact",
+      "blurb": "Consultez et enrichissez des contacts, consignez des appels et créez tâches et affaires dans Apollo.",
+      "tools": {
+        "apollo_contacts_search": "Rechercher vos contacts.",
+        "apollo_people_match": "Enrichir une personne. Consomme des crédits Apollo.",
+        "apollo_contacts_create": "Créer un contact.",
+        "apollo_contacts_update": "Mettre à jour un contact.",
+        "apollo_phone_calls_create": "Consigner un appel.",
+        "apollo_tasks_create": "Créer une tâche.",
+        "apollo_deals_create": "Créer une affaire."
+      }
+    },
+    "zoho": {
+      "tagline": "CRM de la suite Zoho",
+      "blurb": "Lisez et écrivez des enregistrements Zoho CRM via un serveur que vous configurez dans Zoho MCP.",
+      "note": "Les appels d'outils consomment vos crédits d'API Zoho.",
+      "fields": {
+        "url": { "label": "URL du serveur Zoho MCP", "hint": "Créez un serveur sur mcp.zoho.com avec les outils Zoho CRM, puis copiez son URL. L'URL contient sa clé : gardez-la privée." }
+      },
+      "tools": {
+        "Data Operations": "Créer, lire, mettre à jour et rechercher des enregistrements dans n'importe quel module.",
+        "Data Insights": "Questions en lecture seule sur les données de votre CRM."
+      }
+    },
+    "calcom": {
+      "tagline": "Planification open source",
+      "blurb": "Vérifiez les créneaux libres et réservez, déplacez ou annulez des réunions pendant que l'appelant est en ligne.",
+      "tools": {
+        "get_event_types": "Lister les types de réunion que vous proposez.",
+        "get_availability": "Trouver des créneaux libres.",
+        "create_booking": "Réserver une réunion.",
+        "reschedule_booking": "Déplacer une réservation.",
+        "cancel_booking": "Annuler une réservation.",
+        "get_bookings": "Trouver les réservations de l'appelant."
+      }
+    },
+    "calendly": {
+      "tagline": "Liens de prise de rendez-vous",
+      "blurb": "Lisez les créneaux ouverts, réservez un invité sur un créneau ou envoyez un lien de réservation à usage unique.",
+      "note": "Il n'y a pas d'outil de report ; l'agent annule et réserve de nouveau.",
+      "tools": {
+        "event_types-list_event_types": "Lister vos types d'événement.",
+        "event_types-list_event_type_available_times": "Trouver des créneaux ouverts.",
+        "meetings-create_invitee": "Réserver un créneau. Forfaits Calendly payants uniquement.",
+        "meetings-list_events": "Lister les événements planifiés.",
+        "meetings-cancel_event": "Annuler un événement.",
+        "scheduling_links-create_single_use_scheduling_link": "Créer un lien de réservation à usage unique."
+      }
+    },
+    "google-calendar": {
+      "tagline": "Agenda de Google Workspace",
+      "blurb": "Lisez les disponibilités, suggérez un créneau et créez ou modifiez des événements dans Google Calendar.",
+      "steps": {
+        "1": "Rejoignez le Google Workspace Developer Preview Program. Le serveur MCP de Calendar est en aperçu.",
+        "2": "Dans un projet Google Cloud, activez l'API Google Calendar et l'API Calendar MCP.",
+        "3": "Créez un client OAuth de type Application Web et ajoutez l'URL de redirection ci-dessous.",
+        "4": "Copiez son id client et son secret client dans les champs ci-dessous."
+      },
+      "tools": {
+        "list_calendars": "Lister les agendas.",
+        "list_events": "Lister les événements.",
+        "suggest_time": "Suggérer un horaire libre.",
+        "create_event": "Créer un événement.",
+        "update_event": "Modifier un événement.",
+        "delete_event": "Supprimer un événement."
+      }
+    },
+    "intercom": {
+      "tagline": "Messagerie client et support",
+      "blurb": "Retrouvez le client, lisez ses conversations et les articles d'aide, et laissez une note interne.",
+      "note": "Les espaces de travail australiens ne sont pas pris en charge par le serveur d'Intercom.",
+      "regions": { "us": "États-Unis", "eu": "UE" },
+      "tools": {
+        "search_contacts": "Trouver un client.",
+        "get_contact": "Lire un client.",
+        "search_conversations": "Rechercher des conversations.",
+        "get_conversation": "Lire une conversation.",
+        "search_articles": "Rechercher des articles d'aide.",
+        "add_internal_note": "Laisser une note à votre équipe."
+      }
+    },
+    "freshdesk": {
+      "tagline": "Tickets de support client",
+      "blurb": "Retrouvez le contact, lisez ses tickets, et ouvrez, mettez à jour ou répondez à un ticket.",
+      "note": "Freshdesk plafonne les actions MCP selon le forfait.",
+      "help": "Utilisez la clé API d'un agent qui voit les tickets avec lesquels l'agent téléphonique doit travailler.",
+      "fields": {
+        "subdomain": { "label": "Sous-domaine Freshdesk", "hint": "La partie avant .freshdesk.com." },
+        "key": { "label": "Clé API", "hint": "Paramètres du profil, puis Voir la clé API." }
+      },
+      "tools": {
+        "fetchContactAutocomplete": "Trouver un contact.",
+        "fetchContact": "Lire un contact.",
+        "fetchSearchTickets": "Rechercher des tickets.",
+        "fetchTicket": "Lire un ticket.",
+        "createTicket": "Ouvrir un ticket.",
+        "updateTicket": "Mettre à jour un ticket.",
+        "createTicketNote": "Ajouter une note."
+      }
+    },
+    "helpscout": {
+      "tagline": "Boîte partagée et centre d'aide",
+      "blurb": "Lisez les conversations du client et vos articles Docs. Lecture seule.",
+      "note": "Nécessite un forfait Standard, Plus ou Pro. Le serveur ne peut pas créer de tickets ni de notes.",
+      "tools": {
+        "Conversations": "Rechercher et lire des conversations.",
+        "Customers": "Trouver et lire des clients.",
+        "Docs": "Rechercher des articles d'aide."
+      }
+    },
+    "gorgias": {
+      "tagline": "Support client pour boutiques en ligne",
+      "blurb": "Lisez tickets et clients, répondez, et ajoutez des notes internes dans Gorgias.",
+      "tools": {
+        "Tickets": "Lire des tickets, répondre, définir statut et priorité.",
+        "Customers": "Trouver et lire des clients.",
+        "Help center": "Rechercher des articles."
+      }
+    },
+    "stripe": {
+      "tagline": "Paiements et facturation en ligne",
+      "blurb": "Consultez clients, factures et abonnements, et créez un lien de paiement à envoyer par SMS à l'appelant.",
+      "note": "Le mode réel ou test se choisit sur l'écran de connexion de Stripe. Les remboursements attendent qu'une personne les approuve dans Stripe.",
+      "tools": {
+        "stripe_api_search": "Trouver l'appel d'API pour une tâche.",
+        "stripe_api_read": "Lire clients, paiements, factures et abonnements.",
+        "stripe_api_write": "Créer un lien de paiement, une facture ou un remboursement.",
+        "get_stripe_account_info": "Quel compte est connecté.",
+        "search_stripe_documentation": "Rechercher dans la documentation Stripe."
+      }
+    },
+    "paypal": {
+      "tagline": "Paiements, factures et checkout",
+      "blurb": "Créez et envoyez des factures, consultez transactions et commandes, et vérifiez les litiges.",
+      "regions": { "live": "Réel", "sandbox": "Sandbox" },
+      "tools": {
+        "create_invoice": "Créer une facture.",
+        "list_invoices": "Lister les factures.",
+        "create_order": "Créer une commande.",
+        "list_transactions": "Lister les transactions.",
+        "list_disputes": "Lister les litiges."
+      }
+    },
+    "razorpay": {
+      "tagline": "Paiements pour l'Inde, avec UPI",
+      "blurb": "Créez et envoyez des liens de paiement, UPI compris, et consultez paiements, commandes et remboursements.",
+      "note": "Les remboursements ne peuvent pas être faits via le serveur hébergé de Razorpay.",
+      "help": "Générez une clé API dans le tableau de bord Razorpay sous Account & Settings, puis API keys. Les clés de test fonctionnent aussi.",
+      "fields": {
+        "keyId": { "label": "Id de clé" },
+        "keySecret": { "label": "Secret de clé" }
+      },
+      "tools": {
+        "create_payment_link": "Créer un lien de paiement.",
+        "create_payment_link_upi": "Créer un lien de paiement UPI.",
+        "send_payment_link": "Envoyer un lien par SMS ou e-mail.",
+        "fetch_payment": "Lire un paiement.",
+        "fetch_order": "Lire une commande.",
+        "fetch_refund": "Lire un remboursement."
+      }
+    },
+    "dodopayments": {
+      "tagline": "Paiements et facturation pour logiciels",
+      "blurb": "Créez des checkouts et des liens de paiement, et consultez clients et paiements dans Dodo Payments.",
+      "note": "L'écran de connexion de Dodo demande votre clé API et le mode test ou réel. L'outil execute peut faire tout ce que votre clé permet, remboursements compris : n'activez-le que si c'est voulu.",
+      "tools": {
+        "search_docs": "Trouver l'appel du SDK Dodo pour une tâche.",
+        "execute": "Exécuter du code sur le SDK Dodo : checkouts, liens de paiement, clients, remboursements."
+      }
+    },
+    "klaviyo": {
+      "tagline": "Marketing par e-mail et SMS",
+      "blurb": "Trouvez ou mettez à jour un profil, abonnez l'appelant et ajoutez-le à une liste.",
+      "note": "La personne qui connecte doit être Owner, Admin ou Manager dans Klaviyo.",
+      "tools": {
+        "get_profiles": "Trouver un profil.",
+        "create_or_update_profile": "Créer ou mettre à jour un profil.",
+        "subscribe_profile_to_marketing": "Abonner un profil.",
+        "add_profiles_to_list": "Ajouter un profil à une liste.",
+        "get_coupon_codes": "Lire des codes promo."
+      }
+    },
+    "slack": {
+      "tagline": "Messagerie d'équipe et canaux",
+      "blurb": "Publiez un message dans un canal ou à une personne quand un appel a besoin d'un humain, et recherchez dans votre espace de travail.",
+      "steps": {
+        "1": "Sur api.slack.com/apps, créez une app dans votre espace de travail. Slack ne laisse utiliser MCP qu'aux apps internes ou de l'annuaire.",
+        "2": "Sous OAuth & Permissions, ajoutez l'URL de redirection ci-dessous et les portées de jeton utilisateur dont l'agent a besoin, comme chat:write et search:read.public.",
+        "3": "Copiez l'id client et le secret client de l'app dans les champs ci-dessous. Un administrateur de l'espace peut devoir l'approuver."
+      },
+      "tools": {
+        "slack_send_message": "Publier un message.",
+        "slack_search_public": "Rechercher dans les canaux publics.",
+        "slack_search_users": "Trouver une personne.",
+        "slack_search_channels": "Trouver un canal.",
+        "slack_read_channel": "Lire un canal."
+      }
+    },
+    "notion": {
+      "tagline": "Documents, wikis et bases de données",
+      "blurb": "Cherchez des réponses dans vos pages et bases de données, et ajoutez des pages ou des lignes.",
+      "tools": {
+        "notion-search": "Rechercher dans l'espace de travail.",
+        "notion-fetch": "Lire une page ou une base de données.",
+        "notion-query-data-sources": "Interroger une base de données.",
+        "notion-create-pages": "Ajouter des pages ou des lignes de base de données.",
+        "notion-update-page": "Mettre à jour une page."
+      }
+    },
+    "linear": {
+      "tagline": "Suivi des tickets pour équipes produit",
+      "blurb": "Ouvrez un ticket depuis un appel, ou vérifiez l'état d'un ticket.",
+      "tools": {
+        "list_issues": "Trouver des tickets.",
+        "get_issue": "Lire un ticket.",
+        "save_issue": "Créer ou mettre à jour un ticket.",
+        "create_comment": "Commenter un ticket."
+      }
+    },
+    "clickup": {
+      "tagline": "Tâches, documents et projets",
+      "blurb": "Créez et mettez à jour des tâches, et recherchez dans votre espace de travail.",
+      "tools": {
+        "Search Workspace": "Rechercher tâches et documents.",
+        "Create Task": "Créer une tâche.",
+        "Update Task": "Mettre à jour une tâche.",
+        "Create Task Comment": "Commenter une tâche."
+      }
+    },
+    "airtable": {
+      "tagline": "Bases de données façon tableur",
+      "blurb": "Consultez et ajoutez des enregistrements dans vos bases : commandes, réservations, stock, tout ce que vous y gardez.",
+      "tools": {
+        "list_bases": "Lister les bases.",
+        "search_records": "Rechercher des enregistrements.",
+        "list_records_for_table": "Lire les enregistrements d'une table.",
+        "create_records_for_table": "Ajouter des enregistrements."
+      }
+    },
+    "asana": {
+      "tagline": "Tâches et projets d'équipe",
+      "blurb": "Créez des tâches de suivi depuis un appel et vérifiez celles qui existent.",
+      "steps": {
+        "1": "Dans la console développeur d'Asana, créez une app MCP.",
+        "2": "Ajoutez l'URL de redirection ci-dessous, et réglez la distribution sur les espaces de travail qui l'utiliseront.",
+        "3": "Copiez son id client et son secret client dans les champs ci-dessous."
+      },
+      "tools": {
+        "search_tasks": "Rechercher des tâches.",
+        "get_tasks": "Lire des tâches.",
+        "create_tasks": "Créer des tâches.",
+        "update_tasks": "Mettre à jour des tâches.",
+        "add_comment": "Commenter une tâche."
+      }
+    },
+    "todoist": {
+      "tagline": "Listes de choses à faire",
+      "blurb": "Ajoutez une tâche depuis un appel, ou lisez ce qui est dû.",
+      "tools": {
+        "add-tasks": "Ajouter des tâches.",
+        "find-tasks": "Trouver des tâches.",
+        "find-tasks-by-date": "Ce qui est dû un jour donné.",
+        "complete-tasks": "Terminer des tâches."
+      }
+    },
+    "zapier": {
+      "tagline": "Connecte des milliers d'applications",
+      "blurb": "Atteignez les applications que vous utilisez via Zapier : les actions que vous activez dans Zapier deviennent des outils.",
+      "note": "Chaque appel d'outil coûte 2 tâches Zapier. Choisissez des actions dans Zapier, puis actualisez les outils ici.",
+      "tools": {
+        "Your Zapier actions": "Chaque action que vous activez dans Zapier MCP, comme « Créer une ligne Google Sheets »."
+      }
+    },
+    "make": {
+      "tagline": "Automatisation visuelle de workflows",
+      "blurb": "Exécutez vos scénarios Make comme des outils : chaque scénario actif, à la demande, est un outil.",
+      "note": "Un scénario doit répondre en 25 secondes pour être utile en appel ; Make laisse tourner les plus longs en arrière-plan.",
+      "tools": {
+        "Your scenarios": "Chaque scénario actif réglé pour s'exécuter à la demande."
+      }
+    },
+    "n8n": {
+      "tagline": "Automatisation de workflows open source",
+      "blurb": "Exécutez vos workflows n8n et lisez ses tables de données, sur n8n Cloud ou votre propre instance.",
+      "help": "Activez Instance-level MCP dans les paramètres n8n, créez-y un jeton d'accès, et exposez les workflows que l'agent peut exécuter.",
+      "fields": {
+        "instance": { "label": "Adresse n8n", "hint": "Paramètres, puis Instance-level MCP, affiche l'URL complète." },
+        "token": { "label": "Jeton d'accès MCP" }
+      },
+      "tools": {
+        "search_workflows": "Trouver des workflows.",
+        "execute_workflow": "Exécuter un workflow.",
+        "get_workflow_execution": "Lire le résultat d'une exécution.",
+        "query_data_table": "Lire une table de données.",
+        "insert_data_table_records": "Ajouter des lignes à une table de données."
+      }
+    },
+    "home-assistant": {
+      "tagline": "Contrôle de la maison connectée",
+      "blurb": "Consultez capteurs et thermostat, et commandez lumières et appareils, dans une maison ou un bien géré par Home Assistant.",
+      "note": "L'identifiant de l'appelant peut être falsifié et un appelant peut tenter de manipuler l'agent. N'exposez pas serrures, alarmes ni portes de garage aux assistants vocaux, et n'activez les outils qui modifient des appareils que pour un agent qui vérifie à qui il parle. Seul l'outil de lecture est activé au départ.",
+      "help": "Ajoutez d'abord l'intégration Model Context Protocol Server dans Home Assistant. L'agent ne voit que les appareils que vous exposez aux assistants vocaux (Paramètres, puis Assistants vocaux, puis Exposer).",
+      "fields": {
+        "instance": { "label": "Adresse Home Assistant", "hint": "Son adresse https publique. Home Assistant Cloud en donne une à chaque instance ; une adresse locale comme homeassistant.local n'est pas joignable." },
+        "token": { "label": "Jeton d'accès longue durée", "hint": "Votre profil Home Assistant, puis Sécurité, puis Jetons d'accès longue durée." }
+      },
+      "tools": {
+        "GetLiveContext": "Lire l'état actuel des appareils et capteurs exposés.",
+        "HassTurnOn": "Allumer un appareil ou une zone.",
+        "HassTurnOff": "Éteindre un appareil ou une zone.",
+        "HassLightSet": "Régler la luminosité ou la couleur d'une lumière.",
+        "HassClimateSetTemperature": "Régler le thermostat."
+      }
+    },
+    "exa": {
+      "tagline": "Recherche web pour l'IA",
+      "blurb": "Cherchez sur le web et lisez une page quand un appelant pose une question que votre prompt ne couvre pas.",
+      "note": "Utilise le niveau gratuit d'Exa, limité en débit. Aucun compte requis.",
+      "tools": {
+        "web_search_exa": "Rechercher sur le web.",
+        "web_fetch_exa": "Lire une page web."
+      }
+    }
+  }
+}

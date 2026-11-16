@@ -2,19 +2,19 @@
 
 import { useState } from "react";
 import {
+    Button,
     Dialog,
     DialogContent,
     DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
+    Field,
+    Input,
+    toast,
+} from "@wixzel/react";
 import axios from "axios";
-import { Globe, Loader2 } from "lucide-react";
+import { Globe } from "@phosphor-icons/react";
 import { useTranslations } from "next-intl";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
@@ -95,21 +95,19 @@ export function KbFromWebsiteDialog({ open, onOpenChange, onGenerated }: KbFromW
 
     return (
         <Dialog open={open} onOpenChange={(v) => !loading && onOpenChange(v)}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent size="sm">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                        <Globe className="h-5 w-5 text-primary" />
+                        <Globe className="size-5 text-accent-ink" />
                         {t("fromWebsite.title")}
                     </DialogTitle>
                     <DialogDescription>
                         {t("fromWebsite.description")}
                     </DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4 py-2">
-                    <div className="grid gap-2">
-                        <Label htmlFor="kb-import-url">{t("fromWebsite.urlLabel")}</Label>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                    <Field id="kb-import-url" label={t("fromWebsite.urlLabel")}>
                         <Input
-                            id="kb-import-url"
                             type="url"
                             inputMode="url"
                             placeholder="https://www.yourbusiness.com"
@@ -118,20 +116,13 @@ export function KbFromWebsiteDialog({ open, onOpenChange, onGenerated }: KbFromW
                             disabled={loading}
                             autoComplete="url"
                         />
-                    </div>
-                    <DialogFooter className="gap-2 sm:gap-0">
-                        <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
+                    </Field>
+                    <DialogFooter>
+                        <Button type="button" variant="secondary" onClick={() => onOpenChange(false)} disabled={loading}>
                             {c("actions.cancel")}
                         </Button>
-                        <Button type="submit" disabled={loading}>
-                            {loading ? (
-                                <>
-                                    <Loader2 className="me-2 h-4 w-4 animate-spin" />
-                                    {t("fromWebsite.generating")}
-                                </>
-                            ) : (
-                                t("fromWebsite.generate")
-                            )}
+                        <Button type="submit" variant="primary" loading={loading}>
+                            {loading ? t("fromWebsite.generating") : t("fromWebsite.generate")}
                         </Button>
                     </DialogFooter>
                 </form>

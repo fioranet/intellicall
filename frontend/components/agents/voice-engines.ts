@@ -30,8 +30,12 @@ export const SIP_ONLY_ENGINES: EngineId[] = ["gemini_live"];
  * Human-readable names of the keys still missing for an engine ([] means usable).
  * A null configStatus means "not loaded yet" — treat everything as usable so the
  * form doesn't flicker into a disabled state during the fetch.
+ *
+ * `deepgramVoice` is the Deepgram Voice Agent's Aura voice: a non-empty string means it
+ * speaks with Deepgram TTS (no ElevenLabs key), "" or null means it speaks with ElevenLabs.
+ * Left undefined — the engine picker — the engine counts as usable with either voice.
  */
-export function missingKeysForEngine(engine: EngineId, cs: EngineConfigStatus | null): string[] {
+export function missingKeysForEngine(engine: EngineId, cs: EngineConfigStatus | null, deepgramVoice?: string | null): string[] {
     if (!cs) return [];
     const missing: string[] = [];
     switch (engine) {
@@ -44,9 +48,9 @@ export function missingKeysForEngine(engine: EngineId, cs: EngineConfigStatus | 
             if (!cs.isGeminiConfigured) missing.push("Gemini");
             return missing;
         case "deepgram_agent":
-            // LLM is Deepgram-managed, so no OpenRouter key needed.
+            // LLM is Deepgram-managed, so no OpenRouter key needed; an Aura voice needs no ElevenLabs.
             if (!cs.isDeepgramConfigured) missing.push("Deepgram");
-            if (!cs.isElevenLabsConfigured) missing.push("ElevenLabs");
+            if (deepgramVoice !== undefined && !deepgramVoice && !cs.isElevenLabsConfigured) missing.push("ElevenLabs");
             return missing;
         case "classic":
             if (!cs.isDeepgramConfigured) missing.push("Deepgram");
@@ -81,4 +85,48 @@ export function usableEngines(
         if (SIP_ONLY_ENGINES.includes(e) && nonSipNumberSelected) return false;
         return isEngineUsable(e, cs);
     });
+}
+
+/** The agent fields that decide which engine and voice a call actually uses. */
+export interface AgentVoiceFields {
+    voiceEngine?: string;
+    useCustomVoice?: boolean;
+    voice?: string;
+    voiceName?: string;
+    sarvamSpeaker?: string;
+    geminiVoice?: string;
+    deepgramVoice?: string;
+}
+
+/** "aura-2-livia-it" → "Livia": the voice name is the second-to-last segment of an Aura id. */
+export function deepgramVoiceName(model: string): string {
+    const parts = model.split("-");
+    const name = parts.length >= 3 ? parts[parts.length - 2] : model;
+    return name.charAt(0).toUpperCase() + name.slice(1);
+}
+
+/**
+ * Display name of the engine a call will run on. The Sarvam and Gemini engines also set
+ * useCustomVoice, so reading that flag alone labels every streaming agent "ElevenLabs".
+ */
+export function agentVoiceProvider(a?: AgentVoiceFields | null): string {
+    if (!a) return "";
+    if (a.voiceEngine === "sarvam") return "Sarvam AI";
+    if (a.voiceEngine === "gemini_live") return "Gemini Live";
+    if (a.voiceEngine === "deepgram_agent") return "Deepgram Voice Agent";
+    return a.useCustomVoice ? "ElevenLabs" : "Twilio";
+}
+
+/**
+ * The voice that will actually speak. Sarvam, Gemini and Deepgram Aura store it on their own
+ * fields (sarvamSpeaker, geminiVoice, deepgramVoice), never on voiceName.
+ */
+export function agentVoiceLabel(a?: AgentVoiceFields | null): string {
+    if (!a) return "";
+    if (a.voiceEngine === "sarvam") {
+        return a.sarvamSpeaker ? a.sarvamSpeaker.charAt(0).toUpperCase() + a.sarvamSpeaker.slice(1) : "Sarvam Voice";
+    }
+    if (a.voiceEngine === "gemini_live") return a.geminiVoice || "Gemini Voice";
+    if (a.voiceEngine === "deepgram_agent" && a.deepgramVoice) return deepgramVoiceName(a.deepgramVoice);
+    return a.useCustomVoice ? (a.voiceName || "Premium Voice") : (a.voice || "Standard Voice");
 }

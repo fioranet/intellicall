@@ -50,6 +50,12 @@ app.use('/api/sip-trunks', require('./routes/sip-trunks'));
 app.use('/api/support', require('./routes/support'));
 app.use('/api/appointments', require('./routes/appointments'));
 app.use('/api/availability', require('./routes/availability'));
+app.use('/api/tools', require('./routes/tools'));
+app.use('/api/mcp-servers', require('./routes/mcp-servers'));
+app.use('/api/mcp-oauth', require('./routes/mcp-oauth'));
+app.use('/api/meetings', require('./routes/meetings'));
+app.use('/api/webhooks', require('./routes/webhooks'));
+app.use('/api/whatsapp', require('./routes/whatsapp'));
 const passport = require('passport');
 require('./config/passport');
 app.use(passport.initialize());
@@ -94,6 +100,11 @@ const server = http.createServer(app);
 // already exist for the REST API, on both the split-subdomain and same-origin
 // deployments. A top-level path would be proxied to the frontend on same-origin installs.
 const AGENT_TEST_PATH = '/api/agent-test';
+//   /api/meetings/stream — a meeting bot's audio socket (meetings/session.js), authenticated
+//                      with the per-meeting token in its URL, which survives the bot's reconnects.
+const { MEETING_STREAM_PATH } = require('./routes/meetings');
+const { readMeetingToken } = require('./meetings/token');
+const { acceptMeetingSocket } = require('./meetings/session');
 
 const wss = new WebSocket.Server({ noServer: true });
 const { handleVoiceStream } = require('./services/voice-stream');
@@ -123,6 +134,24 @@ server.on('upgrade', (req, socket, head) => {
                 userId: ticket.userId,
                 agentId: ticket.agentId,
                 leadId: ticket.leadId,
+            });
+        });
+        return;
+    }
+
+    if (pathname === MEETING_STREAM_PATH) {
+        const grant = readMeetingToken(query?.get('token'));
+        if (!grant) {
+            socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+            socket.destroy();
+            return;
+        }
+        wss.handleUpgrade(req, socket, head, (ws) => {
+            ws.isAgentTest = true; // keep SIP event broadcasts out of an audio socket
+            console.log(`🎥 [Meeting] Bot socket for ${grant.callId}`);
+            acceptMeetingSocket(ws, grant).catch((err) => {
+                console.error(`[Meeting] accept failed for ${grant.callId}:`, err.message);
+                try { ws.close(4503, 'unavailable'); } catch (_) { /* gone */ }
             });
         });
         return;
@@ -164,7 +193,14 @@ async function startServer() {
         process.exit(1);
     }
 
-    console.log('✅ Connected to MongoDB successfully');
+    const dbName = mongoose.connection.name;
+    console.log(`✅ Connected to MongoDB successfully (database: ${dbName})`);
+    // A URI without a database path silently falls back to "test". If the
+    // process env and backend/.env ever disagree (dotenv never overrides an
+    // existing env var), a restart can land on an empty database.
+    if (dbName === 'test') {
+        console.warn('⚠️ MONGODB_URI has no database name, so MongoDB is using "test". If your data seems missing, add the database name (e.g. mongodb://127.0.0.1:27017/intellicall-ai) to backend/.env and restart.');
+    }
 
     try {
         const { writeAndReload } = require('./services/sip/asterisk-config');
@@ -184,6 +220,11 @@ async function startServer() {
     // ended calls don't show "In Conversation" forever (and crash-orphaned rows recover).
     const { startCallLogReconcileSchedulers } = require('./services/call-log-reconcile');
     startCallLogReconcileSchedulers();
+
+    // WhatsApp: scheduled sends, idle chats, number health, and webhook events left over from a restart.
+    require('./services/whatsapp/scheduler').start();
+    require('./services/whatsapp/migrate-legacy').migrateLegacyWhatsApp()
+        .catch((err) => console.error('[WhatsApp] legacy import failed:', err.message));
 
     server.listen(PORT, () => {
         console.log(`🚀 Server is running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);

@@ -3,30 +3,24 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import {
+    Alert,
+    Badge,
+    Button,
     Drawer,
+    DrawerBody,
     DrawerContent,
     DrawerDescription,
+    DrawerFooter,
     DrawerHeader,
     DrawerTitle,
     DrawerTrigger,
-} from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-    AlertCircle,
-    Bot,
-    Headphones,
-    Loader2,
-    Mic,
-    MicOff,
-    PhoneOff,
-    User,
-} from "lucide-react";
+    Message,
+    Spinner,
+    Transcript,
+} from "@wixzel/react";
+import { Robot, Headphones, Microphone, MicrophoneSlash, PhoneSlash } from "@phosphor-icons/react";
 import {
     AgentTestSession,
     type EndReason,
@@ -106,9 +100,7 @@ export function AgentTestDrawer({
     // scrollIntoView() would walk up and scroll every scrollable ancestor with it,
     // including the page, which drags the drawer's header off the top of the screen.
     useEffect(() => {
-        const viewport = transcriptRef.current?.querySelector<HTMLElement>(
-            "[data-slot=scroll-area-viewport]"
-        );
+        const viewport = transcriptRef.current;
         if (viewport) viewport.scrollTop = viewport.scrollHeight;
     }, [transcript.length]);
 
@@ -226,139 +218,128 @@ export function AgentTestDrawer({
     };
 
     return (
-        <Drawer open={open} onOpenChange={setOpen} direction="bottom" shouldScaleBackground={false}>
+        <Drawer open={open} onOpenChange={setOpen}>
             {!isControlled && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
-            <DrawerContent fullScreen className="flex flex-col overflow-hidden px-4 pb-4 sm:px-6 sm:pb-6 md:px-8">
-                <DrawerHeader className="flex-shrink-0 border-b border-border/80 py-3 sm:py-4 text-start space-y-1 px-0">
-                    <DrawerTitle className="text-lg font-semibold sm:text-xl tracking-tight">
+            <DrawerContent side="right" style={{ "--wx-drawer-size": "960px" } as React.CSSProperties}>
+                <DrawerHeader>
+                    <DrawerTitle>
                         {t("test.title", { name: agent.name })}
                     </DrawerTitle>
-                    <DrawerDescription className="text-xs sm:text-sm text-muted-foreground">
+                    <DrawerDescription>
                         {t("test.description")}
                     </DrawerDescription>
                     <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                        {engineLabel && <Badge variant="outline" className="text-[10px] font-medium">{engineLabel}</Badge>}
-                        {voiceLabel && <Badge variant="outline" className="text-[10px] font-medium">{voiceLabel}</Badge>}
-                        {languageLabel && <Badge variant="outline" className="text-[10px] font-medium">{languageLabel}</Badge>}
+                        {engineLabel && <Badge>{engineLabel}</Badge>}
+                        {voiceLabel && <Badge>{voiceLabel}</Badge>}
+                        {languageLabel && <Badge>{languageLabel}</Badge>}
                     </div>
                 </DrawerHeader>
 
-                <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto py-4 sm:flex-row sm:gap-6 sm:overflow-hidden">
+                <DrawerBody className="flex flex-col gap-4 sm:flex-row sm:gap-6 sm:overflow-hidden">
                     {/* Controls */}
                     <div className="flex min-h-0 shrink-0 flex-col items-center justify-center gap-4 sm:w-64 sm:overflow-y-auto">
                         <div
-                            className={`flex h-28 w-28 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${isLive
-                                ? "border-primary/50 bg-primary/5 ring-1 ring-primary/20"
-                                : "border-border bg-muted/40"
+                            className={`flex size-28 shrink-0 items-center justify-center rounded-full transition-colors ${isLive
+                                ? "bg-accent-subtle text-accent-ink"
+                                : "bg-bg-muted text-fg-muted"
                                 }`}
                         >
                             {isBusy ? (
-                                <Loader2 className="h-9 w-9 animate-spin text-muted-foreground" />
+                                <Spinner size="xl" />
                             ) : isLive ? (
-                                <Mic
-                                    className={`h-9 w-9 text-primary ${agentSpeaking ? "animate-pulse" : ""}`}
+                                <Microphone
+                                    className="size-9"
                                     style={!agentSpeaking && !muted ? { transform: `scale(${1 + Math.min(level, 1) * 0.35})` } : undefined}
                                 />
                             ) : (
-                                <Mic className="h-9 w-9 text-muted-foreground" />
+                                <Microphone className="size-9" />
                             )}
                         </div>
 
-                        <div className="text-center">
-                            <p className="text-sm font-medium">{statusLabel()}</p>
+                        <div className="flex flex-col items-center gap-1 text-center">
+                            {isLive ? (
+                                <Badge tone="accent" dot pulse={agentSpeaking}>{statusLabel()}</Badge>
+                            ) : (
+                                <p className="text-body-sm font-medium">{statusLabel()}</p>
+                            )}
                             {isLive && remainingMs !== null && (
-                                <p className="text-[11px] text-muted-foreground ltr-data">
+                                <p className="text-caption tabular-nums text-fg-muted ltr-data">
                                     {t("test.remaining", { time: mmss(remainingMs) })}
                                 </p>
                             )}
                         </div>
 
                         {!isLive ? (
-                            <Button onClick={startSession} disabled={starting || isBusy} className="w-full">
-                                {starting || isBusy ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Mic className="me-2 h-4 w-4" />}
+                            <Button
+                                variant="primary"
+                                block
+                                onClick={startSession}
+                                disabled={starting || isBusy}
+                                loading={starting || isBusy}
+                                iconStart={<Microphone />}
+                            >
                                 {status === "ended" ? t("test.restart") : t("test.start")}
                             </Button>
                         ) : (
                             <div className="flex w-full flex-col gap-2">
-                                <Button variant="outline" onClick={toggleMute} className="w-full">
-                                    {muted ? <MicOff className="me-2 h-4 w-4" /> : <Mic className="me-2 h-4 w-4" />}
+                                <Button variant="secondary" block onClick={toggleMute} iconStart={muted ? <MicrophoneSlash /> : <Microphone />}>
                                     {muted ? t("test.unmute") : t("test.mute")}
                                 </Button>
-                                <Button variant="destructive" onClick={() => endSession("user")} className="w-full">
-                                    <PhoneOff className="me-2 h-4 w-4" />
+                                <Button variant="danger" block onClick={() => endSession("user")} iconStart={<PhoneSlash />}>
                                     {t("test.stop")}
                                 </Button>
                             </div>
                         )}
 
-                        <p className="flex items-center gap-1.5 text-center text-[11px] leading-snug text-muted-foreground">
-                            <Headphones className="h-3.5 w-3.5 shrink-0" />
+                        <p className="flex items-center gap-1.5 text-center text-caption text-fg-muted">
+                            <Headphones className="size-3.5 shrink-0" />
                             {t("test.headphonesHint")}
                         </p>
                     </div>
 
                     {/* Transcript */}
-                    <div className="flex min-h-0 flex-1 flex-col rounded-xl border border-border/80 bg-muted/20">
+                    <div className="flex min-h-[260px] flex-1 flex-col rounded-lg bg-card sm:min-h-0">
                         {(error || missingKeys) && (
                             <div className="p-3">
-                                <Alert variant="destructive" className="rounded-lg py-2">
-                                    <AlertCircle className="h-4 w-4 shrink-0" />
-                                    <AlertDescription className="text-sm flex flex-wrap items-center justify-between gap-2 w-full">
-                                        <span>{error}</span>
-                                        {missingKeys && (
-                                            <Link href="/settings" className="shrink-0 font-bold underline">
-                                                {t("drawer.configure")}
-                                            </Link>
-                                        )}
-                                    </AlertDescription>
+                                <Alert
+                                    tone="danger"
+                                    action={missingKeys ? (
+                                        <Button asChild variant="link" size="sm">
+                                            <Link href="/settings">{t("drawer.configure")}</Link>
+                                        </Button>
+                                    ) : undefined}
+                                >
+                                    {error}
                                 </Alert>
                             </div>
                         )}
 
-                        <ScrollArea ref={transcriptRef} className="min-h-0 flex-1 p-4">
+                        <div ref={transcriptRef} className="min-h-0 flex-1 overflow-y-auto p-4">
                             {transcript.length === 0 ? (
-                                <div className="flex h-full min-h-[180px] flex-col items-center justify-center gap-2 text-center text-muted-foreground opacity-60">
-                                    <Bot className="h-10 w-10" />
-                                    <p className="text-sm">{t("test.transcriptEmpty")}</p>
+                                <div className="flex h-full min-h-[180px] flex-col items-center justify-center gap-2 text-center text-fg-subtle">
+                                    <Robot className="size-10" />
+                                    <p className="text-body-sm">{t("test.transcriptEmpty")}</p>
                                 </div>
                             ) : (
-                                <div className="space-y-4 pb-2">
+                                <Transcript className="pb-2">
                                     {transcript.map((item, i) => (
-                                        <div key={i} className={`flex ${item.role === "user" ? "justify-end" : "justify-start"}`}>
-                                            <div className={`flex max-w-[85%] flex-col ${item.role === "user" ? "items-end" : "items-start"}`}>
-                                                <div className="flex items-center gap-1.5 px-1 opacity-70">
-                                                    {item.role === "user" ? (
-                                                        <>
-                                                            <span className="text-[10px] font-bold uppercase tracking-wider">{t("test.roleYou")}</span>
-                                                            <User className="h-3 w-3" />
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <Bot className="h-3 w-3" />
-                                                            <span className="text-[10px] font-bold uppercase tracking-wider">{t("test.roleAgent")}</span>
-                                                        </>
-                                                    )}
-                                                </div>
-                                                <div
-                                                    className={`rounded-xl p-3 text-sm ${item.role === "user"
-                                                        ? "bg-primary text-primary-foreground rounded-se-none"
-                                                        : "bg-background border border-border text-foreground rounded-ss-none"
-                                                        }`}
-                                                >
-                                                    {item.content}
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <Message
+                                            key={i}
+                                            from={item.role === "user" ? "person" : "agent"}
+                                            name={item.role === "user" ? t("test.roleYou") : t("test.roleAgent")}
+                                        >
+                                            {item.content}
+                                        </Message>
                                     ))}
-                                </div>
+                                </Transcript>
                             )}
-                        </ScrollArea>
+                        </div>
                     </div>
-                </div>
+                </DrawerBody>
 
-                <div className="flex flex-shrink-0 justify-end border-t border-border/80 pt-3">
-                    <Button variant="outline" onClick={() => setOpen(false)}>{c("actions.close")}</Button>
-                </div>
+                <DrawerFooter>
+                    <Button variant="secondary" onClick={() => setOpen(false)}>{c("actions.close")}</Button>
+                </DrawerFooter>
             </DrawerContent>
         </Drawer>
     );

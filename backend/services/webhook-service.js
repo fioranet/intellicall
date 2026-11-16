@@ -31,6 +31,11 @@ class WebhookService {
             require('./n8n-service').trigger(userId, event, data);
         } catch (_) { /* never let n8n break webhook delivery */ }
 
+        // Booking confirmations and reminders on WhatsApp, per the agent's settings.
+        try {
+            require('./whatsapp/events').trigger(userId, event, data);
+        } catch (_) { /* never let WhatsApp break webhook delivery */ }
+
         try {
             // 1. Fetch user webhook settings
             const settings = await Settings.findOne({ userId });
@@ -55,7 +60,8 @@ class WebhookService {
 
             // 5. Generate HMAC-SHA256 signature
             const payloadString = JSON.stringify(payload);
-            const secret = settings.webhooks.secret || '';
+            // Never sign with an empty key (anyone could forge it): make one on first need.
+            const secret = settings.webhooks.secret || await require('./webhook-secret').ensureWebhookSecret(userId);
             const signature = crypto
                 .createHmac('sha256', secret)
                 .update(payloadString)

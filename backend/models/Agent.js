@@ -56,6 +56,16 @@ const agentSchema = new mongoose.Schema({
         type: String,
         default: 'hi-IN'
     },
+    /**
+     * Deepgram Aura voice (e.g. 'aura-2-livia-it'), used when voiceEngine === 'deepgram_agent'.
+     * Empty keeps the original behaviour: the agent speaks with its ElevenLabs voice (voiceId).
+     * Set, the Voice Agent speaks with Deepgram's own TTS and no ElevenLabs key is needed.
+     */
+    deepgramVoice: {
+        type: String,
+        trim: true,
+        default: ''
+    },
     /** Gemini Live prebuilt voice name, used when voiceEngine === 'gemini_live'. */
     geminiVoice: {
         type: String,
@@ -184,6 +194,59 @@ const agentSchema = new mongoose.Schema({
     appointmentDescription: {
         type: String,
         default: ''
+    },
+    /**
+     * Connected apps (MCP servers, models/McpServer.js) whose tools this agent
+     * may use on a call. At most 5, enforced in routes/agents.js.
+     */
+    mcpServerIds: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'McpServer'
+    }],
+    /**
+     * The account's own webhook tools (models/Tool.js) this agent may call. At
+     * most 20, in the order the owner listed them: the first survive a cap.
+     */
+    toolIds: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Tool'
+    }],
+    /**
+     * WhatsApp: which number this agent sends from during calls, and which of
+     * the built-in WhatsApp tools it gets. See services/whatsapp/agent-tools.js.
+     * When the agent answers a WhatsApp number's chats, the number's own
+     * `inboundAgentId` points here; this block is about SENDING.
+     */
+    whatsapp: {
+        accountId: { type: mongoose.Schema.Types.ObjectId, ref: 'WhatsAppAccount', default: null },
+        tools: {
+            /** Free text to the caller, only inside their 24-hour window. */
+            messages: { type: Boolean, default: false },
+            /** Approved templates from allowedTemplates. */
+            templates: { type: Boolean, default: false },
+            /** Reminders and follow-ups at a later time. */
+            schedule: { type: Boolean, default: false },
+            /** Reply buttons and lists, in a WhatsApp chat only. */
+            interactive: { type: Boolean, default: false },
+        },
+        /** The template used for each purpose, by name and language. */
+        templates: {
+            follow_up: { name: { type: String, default: null }, language: { type: String, default: null } },
+            reminder: { name: { type: String, default: null }, language: { type: String, default: null } },
+            booking_confirmation: { name: { type: String, default: null }, language: { type: String, default: null } },
+        },
+        /** Template names the agent may send by choice. Empty means only the purpose templates above. */
+        allowedTemplates: { type: [String], default: [] },
+        /** Send booking_confirmation as soon as the agent books an appointment. */
+        autoBookingConfirmation: { type: Boolean, default: false },
+        /** Send the reminder template this many minutes before a booked appointment. 0 is off. */
+        autoReminderMinutes: { type: Number, min: 0, max: 10080, default: 0 },
+        /** OpenRouter model for WhatsApp chats. Null uses the account's default text model. */
+        chatModel: { type: String, default: null },
+        /** WhatsApp messages one call or one chat turn may send through tools. */
+        maxSendsPerCall: { type: Number, min: 1, max: 10, default: 3 },
+        /** Marketing-category templates are refused unless this is on. */
+        allowMarketing: { type: Boolean, default: false },
     },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,

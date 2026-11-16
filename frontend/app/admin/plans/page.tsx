@@ -2,64 +2,97 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { Plus, Lightning, Gear, ShieldCheck } from "@phosphor-icons/react";
 import {
-    Layers,
-    Plus,
-    MoreHorizontal,
-    Check,
-    X,
-    Loader2,
-    DollarSign,
-    Zap,
-    Info,
-    Settings,
-    ShieldCheck,
-    CreditCard,
-    Target,
-    Users,
-    PhoneCall
-} from "lucide-react";
-import {
+    Spinner,
     Card,
     CardContent,
     CardDescription,
     CardFooter,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import axios from "axios";
-import { toast } from "sonner";
-import { AdminNav } from "@/components/admin/nav";
-import { getCurrencySymbol } from "@/lib/currency-symbols";
-
-import {
+    Button,
+    Badge,
+    PageHeader,
     Dialog,
     DialogContent,
     DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
+    Input,
+    Label,
+    Field,
+    Textarea,
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+    Switch,
+    Separator,
+    useConfirm,
+} from "@wixzel/react";
+import axios from "axios";
+import { toast } from "@wixzel/react";
+import { AdminNav } from "@/components/admin/nav";
+import { getCurrencySymbol } from "@/lib/currency-symbols";
+
+// A switch with its label and a line of help, on a quiet inset row.
+function SwitchRow({ id, label, hint, checked, onCheckedChange }: {
+    id: string;
+    label: string;
+    hint: string;
+    checked: boolean;
+    onCheckedChange: (checked: boolean) => void;
+}) {
+    return (
+        <div className="flex items-center justify-between gap-4 rounded-md bg-bg-subtle px-3.5 py-2.5">
+            <div className="flex flex-col gap-0.5">
+                <Label htmlFor={id}>{label}</Label>
+                <p className="text-caption text-fg-muted">{hint}</p>
+            </div>
+            <Switch id={id} checked={checked} onCheckedChange={onCheckedChange} />
+        </div>
+    );
+}
+
+// The four limits of a plan as a two-column list of dotted items.
+function LimitList({ items }: { items: string[] }) {
+    return (
+        <ul className="grid grid-cols-2 gap-2">
+            {items.map((item) => (
+                <li key={item} className="flex items-center gap-2 text-body-sm text-fg-muted">
+                    <span className="size-1.5 shrink-0 rounded-full bg-accent" />
+                    {item}
+                </li>
+            ))}
+        </ul>
+    );
+}
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
+
+type FeatureLimits = { tools?: number; mcpServers?: number; whatsappAccounts?: number; whatsappMessagesPerMonth?: number };
+type Features = { meetings?: boolean; whatsapp?: boolean } | undefined;
 
 export default function AdminPlansPage() {
     const t = useTranslations("admin");
     const c = useTranslations("common");
+    const confirm = useConfirm();
+
+    /** The feature limits of a plan or the trial, as list items. 0 or less means unlimited. */
+    const featureItems = (limits: FeatureLimits, features: Features) => {
+        const num = (n: number | undefined, key: string, unlimitedKey: string) =>
+            typeof n === "number" && n > 0 ? t(`plans.${key}`, { count: n }) : t(`plans.${unlimitedKey}`);
+        return [
+            num(limits.tools, "tools", "unlimitedTools"),
+            num(limits.mcpServers, "mcpServers", "unlimitedMcpServers"),
+            features?.whatsapp === false ? t("plans.noWhatsapp") : num(limits.whatsappAccounts, "whatsappAccounts", "unlimitedWhatsappAccounts"),
+            features?.whatsapp === false ? null : num(limits.whatsappMessagesPerMonth, "whatsappMessages", "unlimitedWhatsappMessages"),
+            features?.meetings === false ? t("plans.noMeetings") : t("plans.meetingsIncluded"),
+        ].filter((x): x is string => Boolean(x));
+    };
     const [plans, setPlans] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -76,16 +109,26 @@ export default function AdminPlansPage() {
             agents: 1,
             campaigns: 1,
             leads: 100,
-            callsPerMonth: 100
-        }
+            callsPerMonth: 100,
+            tools: 10,
+            mcpServers: 5,
+            whatsappAccounts: 1,
+            whatsappMessagesPerMonth: 1000
+        },
+        features: { meetings: true, whatsapp: true }
     });
     const [currency, setCurrency] = useState("$");
     const [trialLimits, setTrialLimits] = useState({
         agents: 1,
         campaigns: 1,
         leads: 10,
-        callsPerMonth: 5
+        callsPerMonth: 5,
+        tools: 2,
+        mcpServers: 1,
+        whatsappAccounts: 1,
+        whatsappMessagesPerMonth: 50
     });
+    const [trialFeatures, setTrialFeatures] = useState({ meetings: true, whatsapp: true });
     const [isTrialModalOpen, setIsTrialModalOpen] = useState(false);
     const [isSavingTrial, setIsSavingTrial] = useState(false);
 
@@ -109,8 +152,11 @@ export default function AdminPlansPage() {
             if (settingsRes.data?.status === "success" && settingsRes.data.data.settings) {
                 const settings = settingsRes.data.data.settings;
                 setCurrency(getCurrencySymbol(settings.currency));
+                if (settings.trialFeatures) {
+                    setTrialFeatures({ meetings: settings.trialFeatures.meetings !== false, whatsapp: settings.trialFeatures.whatsapp !== false });
+                }
                 if (settings.trialLimits) {
-                    setTrialLimits(settings.trialLimits);
+                    setTrialLimits((prev) => ({ ...prev, ...settings.trialLimits }));
                 }
             }
         } catch (err: any) {
@@ -136,8 +182,13 @@ export default function AdminPlansPage() {
                 agents: 1,
                 campaigns: 1,
                 leads: 100,
-                callsPerMonth: 100
-            }
+                callsPerMonth: 100,
+                tools: 10,
+                mcpServers: 5,
+                whatsappAccounts: 1,
+                whatsappMessagesPerMonth: 1000
+            },
+            features: { meetings: true, whatsapp: true }
         });
         setEditingPlan(null);
     };
@@ -158,7 +209,15 @@ export default function AdminPlansPage() {
                     leads: plan.limits?.leads ?? 100,
                     callsPerMonth: typeof plan.limits?.callsPerMonth === "number"
                         ? plan.limits.callsPerMonth
-                        : 100
+                        : 100,
+                    tools: plan.limits?.tools ?? 10,
+                    mcpServers: plan.limits?.mcpServers ?? 5,
+                    whatsappAccounts: plan.limits?.whatsappAccounts ?? 1,
+                    whatsappMessagesPerMonth: plan.limits?.whatsappMessagesPerMonth ?? 1000
+                },
+                features: {
+                    meetings: plan.features?.meetings !== false,
+                    whatsapp: plan.features?.whatsapp !== false
                 }
             });
         } else {
@@ -199,7 +258,8 @@ export default function AdminPlansPage() {
             setIsSavingTrial(true);
             const token = localStorage.getItem("token");
             const response = await axios.post(`${API_BASE_URL}/admin/settings`, {
-                trialLimits
+                trialLimits,
+                trialFeatures
             }, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -217,7 +277,11 @@ export default function AdminPlansPage() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm("Are you sure you want to delete this plan?")) return;
+        if (!(await confirm({
+            title: "Are you sure you want to delete this plan?",
+            confirmLabel: t("plans.delete"),
+            tone: "danger",
+        }))) return;
         try {
             const token = localStorage.getItem("token");
             await axios.delete(`${API_BASE_URL}/admin/plans/${id}`, {
@@ -231,167 +295,139 @@ export default function AdminPlansPage() {
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground font-sora">{t("plans.title")}</h1>
-                    <p className="text-muted-foreground">{t("plans.subtitle")}</p>
-                </div>
-                <Button
-                    onClick={() => handleOpenModal()}
-                    className="shadow-lg"
-                >
-                    <Plus className="me-2 h-4 w-4" />
-                    {t("plans.createNew")}
-                </Button>
-            </div>
+        <div className="flex flex-col gap-6">
+            <PageHeader
+                title={t("plans.title")}
+                description={t("plans.subtitle")}
+                actions={
+                    <Button variant="primary" iconStart={<Plus />} onClick={() => handleOpenModal()}>
+                        {t("plans.createNew")}
+                    </Button>
+                }
+            />
 
             <AdminNav currentPath="/admin/plans" />
 
             {loading ? (
                 <div className="flex h-64 items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <Spinner size="xl" />
                 </div>
             ) : (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {/* Trial / No Plan Card */}
-                    <Card className="rounded-2xl border-primary/20 bg-primary/5 shadow-sm hover:shadow-md transition-shadow">
+                    <Card className="bg-accent-subtle">
                         <CardHeader>
                             <div className="flex items-center justify-between">
-                                <div className="p-2 bg-primary/10 rounded-xl">
-                                    <ShieldCheck className="h-5 w-5 text-primary" />
-                                </div>
-                                <Badge className="bg-primary/20 text-primary border-primary/20">{t("plans.systemDefault")}</Badge>
+                                <span className="grid size-9 place-items-center rounded-md bg-card text-accent-ink [&_svg]:size-5">
+                                    <ShieldCheck />
+                                </span>
+                                <Badge tone="accent">{t("plans.systemDefault")}</Badge>
                             </div>
-                            <div className="pt-4">
-                                <CardTitle className="text-xl font-bold text-primary">{t("plans.trialTitle")}</CardTitle>
+                            <div className="pt-3">
+                                <CardTitle className="text-accent-ink">{t("plans.trialTitle")}</CardTitle>
                                 <CardDescription className="line-clamp-2 mt-1">{t("plans.trialDescription")}</CardDescription>
                             </div>
                         </CardHeader>
-                        <CardContent className="space-y-4">
+                        <CardContent className="flex flex-col gap-4">
                             <div className="flex items-baseline gap-1">
-                                <span className="text-3xl font-bold">{currency}0</span>
-                                <span className="text-muted-foreground text-sm">{t("plans.perTrial")}</span>
+                                <span className="text-heading-xl tabular-nums">{currency}0</span>
+                                <span className="text-body-sm text-fg-muted">{t("plans.perTrial")}</span>
                             </div>
 
-                            <div className="space-y-2 pt-2">
-                                <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground/60">{t("plans.globalLimits")}</div>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
-                                        <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                        {t("plans.agents", { count: trialLimits.agents })}
-                                    </div>
-                                    <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
-                                        <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                        {t("plans.campaigns", { count: trialLimits.campaigns })}
-                                    </div>
-                                    <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
-                                        <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                        {t("plans.leads", { count: trialLimits.leads })}
-                                    </div>
-                                    <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
-                                        <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                        {trialLimits.callsPerMonth > 0 ? t("plans.callsPerMonth", { count: trialLimits.callsPerMonth }) : t("plans.unlimitedCalls")}
-                                    </div>
-                                </div>
+                            <div className="flex flex-col gap-2">
+                                <div className="text-overline text-fg-subtle">{t("plans.globalLimits")}</div>
+                                <LimitList
+                                    items={[
+                                        t("plans.agents", { count: trialLimits.agents }),
+                                        t("plans.campaigns", { count: trialLimits.campaigns }),
+                                        t("plans.leads", { count: trialLimits.leads }),
+                                        trialLimits.callsPerMonth > 0 ? t("plans.callsPerMonth", { count: trialLimits.callsPerMonth }) : t("plans.unlimitedCalls"),
+                                        ...featureItems(trialLimits, trialFeatures),
+                                    ]}
+                                />
                             </div>
                         </CardContent>
-                        <CardFooter className="border-t border-primary/10 pt-6">
+                        <CardFooter>
                             <Button
                                 onClick={() => setIsTrialModalOpen(true)}
                                 variant="ghost"
-                                className="w-full text-primary hover:text-primary hover:bg-primary/10 font-bold"
+                                block
+                                iconStart={<Gear />}
                             >
-                                <Settings className="me-2 h-4 w-4" /> {t("plans.configureTrial")}
+                                {t("plans.configureTrial")}
                             </Button>
                         </CardFooter>
                     </Card>
 
                     {plans.map((plan) => (
-                        <Card key={plan._id} className="rounded-2xl border-border shadow-sm hover:shadow-md transition-shadow">
+                        <Card key={plan._id}>
                             <CardHeader>
                                 <div className="flex items-center justify-between">
-                                    <div className="p-2 bg-primary/5 rounded-xl">
-                                        <Zap className="h-5 w-5 text-primary" />
-                                    </div>
+                                    <span className="grid size-9 place-items-center rounded-md bg-accent-subtle text-accent-ink [&_svg]:size-5">
+                                        <Lightning />
+                                    </span>
                                     {plan.isActive ? (
-                                        <Badge className="bg-green-500/10 text-green-500 hover:bg-green-500/20 border-green-500/20">{t("plans.active")}</Badge>
+                                        <Badge tone="success" dot>{t("plans.active")}</Badge>
                                     ) : (
-                                        <Badge variant="secondary" className="bg-muted text-muted-foreground">{t("plans.inactive")}</Badge>
+                                        <Badge>{t("plans.inactive")}</Badge>
                                     )}
                                 </div>
-                                <div className="pt-4">
-                                    <CardTitle className="text-xl font-bold">{plan.name}</CardTitle>
+                                <div className="pt-3">
+                                    <CardTitle>{plan.name}</CardTitle>
                                     <CardDescription className="line-clamp-2 mt-1">{plan.description}</CardDescription>
                                 </div>
                             </CardHeader>
-                            <CardContent className="space-y-4">
+                            <CardContent className="flex flex-col gap-4">
                                 <div className="flex items-baseline gap-1">
-                                    <span className="text-3xl font-bold">{currency}{plan.price}</span>
-                                    <span className="text-muted-foreground text-sm">/{plan.interval}</span>
+                                    <span className="text-heading-xl tabular-nums">{currency}{plan.price}</span>
+                                    <span className="text-body-sm text-fg-muted">/{plan.interval}</span>
                                 </div>
 
-                                <div className="space-y-2 pt-2">
-                                    <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground/60">{t("plans.limits")}</div>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                            {t("plans.agents", { count: plan.limits.agents })}
-                                        </div>
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                            {t("plans.campaigns", { count: plan.limits.campaigns })}
-                                        </div>
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                            {t("plans.leads", { count: plan.limits.leads })}
-                                        </div>
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                            {plan.limits.callsPerMonth === -1
-                                                ? "Unlimited Calls"
-                                                : `${plan.limits.callsPerMonth} Calls/mo`}
-                                        </div>
-                                    </div>
+                                <div className="flex flex-col gap-2">
+                                    <div className="text-overline text-fg-subtle">{t("plans.limits")}</div>
+                                    <LimitList
+                                        items={[
+                                            t("plans.agents", { count: plan.limits.agents }),
+                                            t("plans.campaigns", { count: plan.limits.campaigns }),
+                                            t("plans.leads", { count: plan.limits.leads }),
+                                            plan.limits.callsPerMonth === -1 || !(plan.limits.callsPerMonth > 0)
+                                                ? t("plans.unlimitedCalls")
+                                                : t("plans.callsPerMonth", { count: plan.limits.callsPerMonth }),
+                                            ...featureItems(plan.limits, plan.features),
+                                        ]}
+                                    />
                                 </div>
                             </CardContent>
-                            <CardFooter className="border-t border-border pt-6">
-                                <div className="flex items-center justify-between w-full">
-                                    <Button
-                                        onClick={() => handleOpenModal(plan)}
-                                        variant="ghost"
-                                        className="text-primary hover:text-primary hover:bg-primary/5 font-bold"
-                                    >
-                                        {t("plans.editPlan")}
-                                    </Button>
-                                    <Button
-                                        onClick={() => handleDelete(plan._id)}
-                                        variant="ghost"
-                                        className="text-destructive hover:text-destructive hover:bg-destructive/10 font-medium"
-                                    >
-                                        {t("plans.delete")}
-                                    </Button>
-                                </div>
+                            <CardFooter className="justify-between">
+                                <Button onClick={() => handleOpenModal(plan)} variant="ghost">
+                                    {t("plans.editPlan")}
+                                </Button>
+                                <Button onClick={() => handleDelete(plan._id)} variant="ghost">
+                                    {t("plans.delete")}
+                                </Button>
                             </CardFooter>
                         </Card>
                     ))}
 
-                    <button
-                        onClick={() => handleOpenModal()}
-                        className="flex flex-col items-center justify-center gap-4 p-8 border-2 border-dashed border-border rounded-2xl hover:border-primary hover:bg-primary/5 transition-all text-muted-foreground hover:text-primary group bg-card"
-                    >
-                        <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center group-hover:bg-primary/10 transition-colors">
-                            <Plus className="h-6 w-6" />
-                        </div>
-                        <span className="font-bold">{t("plans.createPlan")}</span>
-                    </button>
+                    <Card interactive asChild>
+                        <button
+                            type="button"
+                            onClick={() => handleOpenModal()}
+                            className="items-center justify-center gap-3 p-8 text-fg-muted"
+                        >
+                            <span className="grid size-11 place-items-center rounded-md bg-surface [&_svg]:size-5">
+                                <Plus />
+                            </span>
+                            <span className="text-body-md font-medium text-fg">{t("plans.createPlan")}</span>
+                        </button>
+                    </Card>
                 </div>
             )}
 
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-                <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto rounded-3xl p-6 border-none shadow-2xl">
-                    <DialogHeader className="mb-4">
-                        <DialogTitle className="text-2xl font-bold font-sora">
+                <DialogContent size="md">
+                    <DialogHeader>
+                        <DialogTitle>
                             {editingPlan ? t("plans.updatePlan") : t("plans.createPlan")}
                         </DialogTitle>
                         <DialogDescription>
@@ -399,38 +435,30 @@ export default function AdminPlansPage() {
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between px-4 h-11 bg-slate-50/50 rounded-xl border">
-                            <div className="space-y-0.5">
-                                <Label htmlFor="plan-active" className="text-sm font-semibold">{t("plans.planStatus")}</Label>
-                                <p className="text-[10px] text-muted-foreground">{t("plans.planStatusHint")}</p>
-                            </div>
-                            <Switch
-                                id="plan-active"
-                                checked={formData.isActive}
-                                onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
-                            />
-                        </div>
+                    <div className="flex flex-col gap-4">
+                        <SwitchRow
+                            id="plan-active"
+                            label={t("plans.planStatus")}
+                            hint={t("plans.planStatusHint")}
+                            checked={formData.isActive}
+                            onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
+                        />
 
                         {/* Basic Info */}
                         <div className="grid grid-cols-2 gap-3">
-                            <div className="space-y-2">
-                                <Label htmlFor="name">{t("plans.nameLabel")}</Label>
+                            <Field label={t("plans.nameLabel")} id="name">
                                 <Input
-                                    id="name"
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     placeholder={t("plans.namePlaceholder")}
-                                    className="rounded-xl h-11"
                                 />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="interval">{t("plans.billingCycle")}</Label>
+                            </Field>
+                            <Field label={t("plans.billingCycle")} id="interval">
                                 <Select
                                     value={formData.interval}
                                     onValueChange={(val) => setFormData({ ...formData, interval: val })}
                                 >
-                                    <SelectTrigger className="rounded-xl h-11">
+                                    <SelectTrigger>
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -439,61 +467,52 @@ export default function AdminPlansPage() {
                                         <SelectItem value="one-time">{t("plans.oneTime")}</SelectItem>
                                     </SelectContent>
                                 </Select>
-                            </div>
+                            </Field>
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="description">{t("plans.descriptionLabel")}</Label>
+                        <Field label={t("plans.descriptionLabel")} id="description">
                             <Textarea
-                                id="description"
                                 value={formData.description}
                                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                 placeholder={t("plans.descriptionPlaceholder")}
-                                className="rounded-xl min-h-[80px]"
+                                className="min-h-[80px]"
                             />
-                        </div>
+                        </Field>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="price">{t("plans.priceLabel")}</Label>
+                        <Field label={t("plans.priceLabel")} id="price">
                             <Input
-                                id="price"
                                 type="number"
                                 value={formData.price}
                                 onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
-                                className="rounded-xl h-11"
                             />
-                        </div>
+                        </Field>
+
+                        <Separator />
 
                         {/* Limits */}
-                        <div className="pt-3 border-t space-y-3">
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("plans.resourceLimits")}</h3>
+                        <div className="flex flex-col gap-3">
+                            <h3 className="text-overline text-fg-muted">{t("plans.resourceLimits")}</h3>
 
-                            <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50/70 dark:bg-muted/40 border">
-                                <div className="space-y-0.5">
-                                    <Label className="text-xs font-semibold">{t("plans.unlimitedCallsLabel")}</Label>
-                                    <p className="text-[10px] text-muted-foreground">
-                                        {t("plans.unlimitedCallsHint")}
-                                    </p>
-                                </div>
-                                <Switch
-                                    checked={formData.limits.callsPerMonth === -1}
-                                    onCheckedChange={(checked) => {
-                                        setFormData((prev) => ({
-                                            ...prev,
-                                            limits: {
-                                                ...prev.limits,
-                                                callsPerMonth: checked
-                                                    ? -1
-                                                    : (prev.limits.callsPerMonth === -1 ? 100 : prev.limits.callsPerMonth || 100)
-                                            }
-                                        }));
-                                    }}
-                                />
-                            </div>
+                            <SwitchRow
+                                id="plan-unlimited-calls"
+                                label={t("plans.unlimitedCallsLabel")}
+                                hint={t("plans.unlimitedCallsHint")}
+                                checked={formData.limits.callsPerMonth === -1}
+                                onCheckedChange={(checked) => {
+                                    setFormData((prev) => ({
+                                        ...prev,
+                                        limits: {
+                                            ...prev.limits,
+                                            callsPerMonth: checked
+                                                ? -1
+                                                : (prev.limits.callsPerMonth === -1 ? 100 : prev.limits.callsPerMonth || 100)
+                                        }
+                                    }));
+                                }}
+                            />
 
                             <div className="grid grid-cols-2 gap-3">
-                                <div className="space-y-1.5">
-                                    <Label className="text-xs">{t("plans.agentsLabel")}</Label>
+                                <Field label={t("plans.agentsLabel")}>
                                     <Input
                                         type="number"
                                         value={formData.limits.agents}
@@ -501,11 +520,9 @@ export default function AdminPlansPage() {
                                             ...formData,
                                             limits: { ...formData.limits, agents: parseInt(e.target.value) }
                                         })}
-                                        className="rounded-xl h-10"
                                     />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label className="text-xs">{t("plans.campaignsLabel")}</Label>
+                                </Field>
+                                <Field label={t("plans.campaignsLabel")}>
                                     <Input
                                         type="number"
                                         value={formData.limits.campaigns}
@@ -513,11 +530,9 @@ export default function AdminPlansPage() {
                                             ...formData,
                                             limits: { ...formData.limits, campaigns: parseInt(e.target.value) }
                                         })}
-                                        className="rounded-xl h-10"
                                     />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label className="text-xs">{t("plans.leadsLabel")}</Label>
+                                </Field>
+                                <Field label={t("plans.leadsLabel")}>
                                     <Input
                                         type="number"
                                         value={formData.limits.leads}
@@ -525,12 +540,10 @@ export default function AdminPlansPage() {
                                             ...formData,
                                             limits: { ...formData.limits, leads: parseInt(e.target.value) }
                                         })}
-                                        className="rounded-xl h-10"
                                     />
-                                </div>
+                                </Field>
                                 {formData.limits.callsPerMonth !== -1 && (
-                                    <div className="space-y-1.5">
-                                        <Label className="text-xs">{t("plans.callsLabel")}</Label>
+                                    <Field label={t("plans.callsLabel")}>
                                         <Input
                                             type="number"
                                             value={formData.limits.callsPerMonth}
@@ -542,41 +555,61 @@ export default function AdminPlansPage() {
                                                     callsPerMonth: parseInt(e.target.value, 10) || 0
                                                 }
                                             })}
-                                            className="rounded-xl h-10"
                                         />
-                                    </div>
+                                    </Field>
                                 )}
+                                {(["tools", "mcpServers", "whatsappAccounts", "whatsappMessagesPerMonth"] as const).map((key) => (
+                                    <Field key={key} label={t(`plans.limitFields.${key}`)} hint={t("plans.zeroUnlimited")}>
+                                        <Input
+                                            type="number"
+                                            min={0}
+                                            value={formData.limits[key]}
+                                            onChange={(e) => setFormData({
+                                                ...formData,
+                                                limits: { ...formData.limits, [key]: parseInt(e.target.value, 10) || 0 }
+                                            })}
+                                        />
+                                    </Field>
+                                ))}
                             </div>
+
+                            <h3 className="pt-2 text-overline text-fg-muted">{t("plans.featuresTitle")}</h3>
+                            <SwitchRow
+                                id="plan-feature-meetings"
+                                label={t("plans.featureMeetings")}
+                                hint={t("plans.featureMeetingsHint")}
+                                checked={formData.features.meetings}
+                                onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, features: { ...prev.features, meetings: checked } }))}
+                            />
+                            <SwitchRow
+                                id="plan-feature-whatsapp"
+                                label={t("plans.featureWhatsapp")}
+                                hint={t("plans.featureWhatsappHint")}
+                                checked={formData.features.whatsapp}
+                                onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, features: { ...prev.features, whatsapp: checked } }))}
+                            />
                         </div>
 
+                        <Separator />
+
                         {/* Payment IDs */}
-                        <div className="pt-3 border-t space-y-3">
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("plans.paymentConfiguration")}</h3>
-                            <div className="space-y-3">
-                                <div className="space-y-1.5">
-                                    <Label htmlFor="dodoProductId" className="text-xs">{t("plans.dodoProductId")}</Label>
-                                    <Input
-                                        id="dodoProductId"
-                                        value={formData.dodoProductId}
-                                        onChange={(e) => setFormData({ ...formData, dodoProductId: e.target.value })}
-                                        placeholder="pdt_..."
-                                        className="rounded-xl h-10"
-                                    />
-                                </div>
-                            </div>
+                        <div className="flex flex-col gap-3">
+                            <h3 className="text-overline text-fg-muted">{t("plans.paymentConfiguration")}</h3>
+                            <Field label={t("plans.dodoProductId")} id="dodoProductId">
+                                <Input
+                                    value={formData.dodoProductId}
+                                    onChange={(e) => setFormData({ ...formData, dodoProductId: e.target.value })}
+                                    placeholder="pdt_..."
+                                />
+                            </Field>
                         </div>
                     </div>
 
-                    <DialogFooter className="mt-6 pt-4 border-t">
-                        <Button variant="ghost" onClick={() => setIsModalOpen(false)} className="rounded-xl px-6">
+                    <DialogFooter>
+                        <Button variant="secondary" onClick={() => setIsModalOpen(false)}>
                             {c("actions.cancel")}
                         </Button>
-                        <Button
-                            onClick={handleSave}
-                            disabled={isSaving}
-                            className="rounded-xl px-8 shadow-lg shadow-primary/20"
-                        >
-                            {isSaving && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
+                        <Button variant="primary" onClick={handleSave} loading={isSaving}>
                             {editingPlan ? "Save Changes" : "Create Plan"}
                         </Button>
                     </DialogFooter>
@@ -585,9 +618,9 @@ export default function AdminPlansPage() {
 
             {/* Trial Limits Modal */}
             <Dialog open={isTrialModalOpen} onOpenChange={setIsTrialModalOpen}>
-                <DialogContent className="max-w-md rounded-3xl p-6 border-none shadow-2xl">
-                    <DialogHeader className="mb-4">
-                        <DialogTitle className="text-2xl font-bold font-sora">
+                <DialogContent size="md">
+                    <DialogHeader>
+                        <DialogTitle>
                             {t("plans.trialModalTitle")}
                         </DialogTitle>
                         <DialogDescription>
@@ -595,68 +628,73 @@ export default function AdminPlansPage() {
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="grid grid-cols-1 gap-4 py-2">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="trial-agents">{t("plans.maxAgents")}</Label>
+                    <div className="grid grid-cols-2 gap-4">
+                        <Field label={t("plans.maxAgents")} id="trial-agents">
+                            <Input
+                                type="number"
+                                value={trialLimits.agents}
+                                onChange={(e) => setTrialLimits({ ...trialLimits, agents: parseInt(e.target.value) })}
+                            />
+                        </Field>
+                        <Field label={t("plans.maxCampaigns")} id="trial-campaigns">
+                            <Input
+                                type="number"
+                                value={trialLimits.campaigns}
+                                onChange={(e) => setTrialLimits({ ...trialLimits, campaigns: parseInt(e.target.value) })}
+                            />
+                        </Field>
+                        <Field label={t("plans.maxLeads")} id="trial-leads">
+                            <Input
+                                type="number"
+                                value={trialLimits.leads}
+                                onChange={(e) => setTrialLimits({ ...trialLimits, leads: parseInt(e.target.value) })}
+                            />
+                        </Field>
+                        <Field label={t("plans.maxCalls")} id="trial-calls">
+                            <Input
+                                type="number"
+                                value={trialLimits.callsPerMonth}
+                                onChange={(e) => setTrialLimits({ ...trialLimits, callsPerMonth: parseInt(e.target.value) })}
+                            />
+                        </Field>
+                        {(["tools", "mcpServers", "whatsappAccounts", "whatsappMessagesPerMonth"] as const).map((key) => (
+                            <Field key={key} label={t(`plans.limitFields.${key}`)} id={`trial-${key}`} hint={t("plans.zeroUnlimited")}>
                                 <Input
-                                    id="trial-agents"
                                     type="number"
-                                    value={trialLimits.agents}
-                                    onChange={(e) => setTrialLimits({ ...trialLimits, agents: parseInt(e.target.value) })}
-                                    className="rounded-xl h-11"
+                                    min={0}
+                                    value={trialLimits[key]}
+                                    onChange={(e) => setTrialLimits({ ...trialLimits, [key]: parseInt(e.target.value, 10) || 0 })}
                                 />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="trial-campaigns">{t("plans.maxCampaigns")}</Label>
-                                <Input
-                                    id="trial-campaigns"
-                                    type="number"
-                                    value={trialLimits.campaigns}
-                                    onChange={(e) => setTrialLimits({ ...trialLimits, campaigns: parseInt(e.target.value) })}
-                                    className="rounded-xl h-11"
-                                />
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="trial-leads">{t("plans.maxLeads")}</Label>
-                                <Input
-                                    id="trial-leads"
-                                    type="number"
-                                    value={trialLimits.leads}
-                                    onChange={(e) => setTrialLimits({ ...trialLimits, leads: parseInt(e.target.value) })}
-                                    className="rounded-xl h-11"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="trial-calls">{t("plans.maxCalls")}</Label>
-                                <Input
-                                    id="trial-calls"
-                                    type="number"
-                                    value={trialLimits.callsPerMonth}
-                                    onChange={(e) => setTrialLimits({ ...trialLimits, callsPerMonth: parseInt(e.target.value) })}
-                                    className="rounded-xl h-11"
-                                />
-                            </div>
-                        </div>
+                            </Field>
+                        ))}
+                    </div>
+                    <div className="flex flex-col gap-3">
+                        <SwitchRow
+                            id="trial-feature-meetings"
+                            label={t("plans.featureMeetings")}
+                            hint={t("plans.featureMeetingsHint")}
+                            checked={trialFeatures.meetings}
+                            onCheckedChange={(checked) => setTrialFeatures((prev) => ({ ...prev, meetings: checked }))}
+                        />
+                        <SwitchRow
+                            id="trial-feature-whatsapp"
+                            label={t("plans.featureWhatsapp")}
+                            hint={t("plans.featureWhatsappHint")}
+                            checked={trialFeatures.whatsapp}
+                            onCheckedChange={(checked) => setTrialFeatures((prev) => ({ ...prev, whatsapp: checked }))}
+                        />
                     </div>
 
-                    <DialogFooter className="mt-6 pt-4 border-t">
-                        <Button variant="ghost" onClick={() => setIsTrialModalOpen(false)} className="rounded-xl px-6">
+                    <DialogFooter>
+                        <Button variant="secondary" onClick={() => setIsTrialModalOpen(false)}>
                             {c("actions.cancel")}
                         </Button>
-                        <Button
-                            onClick={handleSaveTrial}
-                            disabled={isSavingTrial}
-                            className="rounded-xl px-8 shadow-lg shadow-primary/20"
-                        >
-                            {isSavingTrial && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
+                        <Button variant="primary" onClick={handleSaveTrial} loading={isSavingTrial}>
                             {t("plans.updateLimits")}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </div >
+        </div>
     );
 }

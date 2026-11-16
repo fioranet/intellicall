@@ -1,14 +1,17 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Play, Pause, Loader2 } from "lucide-react";
-import { Button } from "./button";
+import { Play, Pause } from "@phosphor-icons/react";
 import {
+    Button,
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuItem,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
     DropdownMenuTrigger,
-} from "./dropdown-menu";
+    Spinner,
+} from "@wixzel/react";
+import { cn } from "@/lib/utils";
 
 interface ModernAudioPlayerProps {
     src: string;
@@ -119,41 +122,30 @@ export function ModernAudioPlayer({ src, className }: ModernAudioPlayerProps) {
 
     return (
         <div
-            className={`flex items-center gap-3 w-[280px] shrink-0 py-1 ${className}`}
+            className={cn("flex w-[280px] shrink-0 items-center gap-3 py-1", className)}
             onClick={(e) => e.stopPropagation()}
         >
             <audio ref={audioRef} src={src} preload="auto" />
 
-            <Button
-                size="icon"
-                variant="outline"
-                className="h-9 w-9 shrink-0 rounded-lg border-muted-foreground/20 hover:bg-accent flex-none bg-background shadow-sm"
-                onClick={togglePlay}
-            >
-                {isLoading && isPlaying ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                ) : isPlaying ? (
-                    <Pause className="h-4 w-4 fill-foreground stroke-none" />
-                ) : (
-                    <Play className="h-4 w-4 fill-foreground stroke-none ms-0.5" />
-                )}
+            <Button size="icon" onClick={togglePlay}>
+                {isLoading && isPlaying ? <Spinner /> : isPlaying ? <Pause weight="fill" /> : <Play weight="fill" />}
             </Button>
 
-            <div className="flex flex-1 items-center gap-2 min-w-0">
-                <span className="text-[10px] font-mono font-medium text-muted-foreground tabular-nums w-8 text-end flex-none">
+            <div className="flex min-w-0 flex-1 items-center gap-2">
+                <span className="w-8 flex-none text-end font-mono text-caption tabular-nums text-fg-muted">
                     {formatTime(currentTime)}
                 </span>
 
-                <div className="flex-1 h-6 flex items-center relative group/progress min-w-[60px]">
-                    {/* The Rail */}
-                    <div className="w-full h-[3px] bg-muted rounded-full relative overflow-hidden">
+                <div className="group/progress relative flex h-6 min-w-[60px] flex-1 items-center">
+                    {/* The track and how far it has played. */}
+                    <div className="relative h-1 w-full overflow-hidden rounded-full bg-bg-muted">
                         <div
-                            className="h-full bg-foreground absolute left-0 top-0 transition-all duration-75 ease-linear"
+                            className="absolute inset-y-0 start-0 rounded-full bg-accent"
                             style={{ width: `${progressPercent}%` }}
                         />
                     </div>
 
-                    {/* The Actual Input - Ensure it always has a max if duration is unknown */}
+                    {/* The actual input - always has a max, even while the duration is unknown. */}
                     <input
                         type="range"
                         min="0"
@@ -162,40 +154,37 @@ export function ModernAudioPlayer({ src, className }: ModernAudioPlayerProps) {
                         step="0.1"
                         onChange={handleSeek}
                         disabled={duration <= 0}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20 disabled:cursor-not-allowed"
+                        className="absolute inset-0 z-20 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
                     />
 
-                    {/* Visual Thumb */}
+                    {/* Visual thumb. */}
                     <div
-                        className="absolute h-2.5 w-2.5 bg-foreground rounded-full shadow-md opacity-0 group-hover/progress:opacity-100 transition-opacity pointer-events-none z-10"
-                        style={{ left: `calc(${progressPercent}% - 5px)` }}
+                        className="pointer-events-none absolute z-10 size-3 rounded-full bg-accent opacity-0 shadow-[0_0_0_2px_var(--wx-color-bg)] transition-opacity group-hover/progress:opacity-100"
+                        style={{ insetInlineStart: `calc(${progressPercent}% - 6px)` }}
                     />
                 </div>
 
-                <span className="text-[10px] font-mono font-medium text-muted-foreground tabular-nums w-8 flex-none text-start">
+                <span className="w-8 flex-none text-start font-mono text-caption tabular-nums text-fg-muted">
                     {formatTime(duration)}
                 </span>
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 px-1 text-[10px] font-bold rounded-md hover:bg-muted text-muted-foreground hover:text-foreground shrink-0 flex-none"
-                        >
+                        <Button variant="ghost" size="xs" className="flex-none tabular-nums">
                             {playbackSpeed}x
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="min-w-[60px]">
-                        {[0.5, 0.75, 1, 1.25, 1.5, 2].map((speed) => (
-                            <DropdownMenuItem
-                                key={speed}
-                                onClick={() => handleSpeedChange(speed)}
-                                className={`text-[11px] px-2 py-1 ${playbackSpeed === speed ? 'bg-accent font-bold text-foreground' : 'text-muted-foreground'}`}
-                            >
-                                {speed}x
-                            </DropdownMenuItem>
-                        ))}
+                    <DropdownMenuContent align="end" className="min-w-[88px]">
+                        <DropdownMenuRadioGroup
+                            value={String(playbackSpeed)}
+                            onValueChange={(value) => handleSpeedChange(Number(value))}
+                        >
+                            {[0.5, 0.75, 1, 1.25, 1.5, 2].map((speed) => (
+                                <DropdownMenuRadioItem key={speed} value={String(speed)} className="tabular-nums">
+                                    {speed}x
+                                </DropdownMenuRadioItem>
+                            ))}
+                        </DropdownMenuRadioGroup>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>

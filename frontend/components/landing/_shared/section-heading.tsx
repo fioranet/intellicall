@@ -4,44 +4,25 @@ import { Reveal } from "./reveal";
 
 interface SectionHeadingProps {
     eyebrow?: string;
-    /** Two-digit section number shown before the eyebrow, e.g. "05". */
-    number?: string;
     title: React.ReactNode;
     subtitle?: React.ReactNode;
-    align?: "center" | "left";
-    onBrand?: boolean;
+    align?: "center" | "start";
     className?: string;
 }
 
-/** Editorial mono numbered eyebrow + bold h2 + subcopy, used across every section. */
-export function SectionHeading({
-    eyebrow,
-    number,
-    title,
-    subtitle,
-    align = "center",
-    onBrand = false,
-    className,
-}: SectionHeadingProps) {
+/** The short label above a section title, in the product colour. */
+export function Eyebrow({ children, className }: { children: React.ReactNode; className?: string }) {
+    return <p className={cn("text-body-sm font-semibold text-accent-ink", className)}>{children}</p>;
+}
+
+/** Eyebrow + bold h2 drawn in tight + subcopy, used across every section. */
+export function SectionHeading({ eyebrow, title, subtitle, align = "center", className }: SectionHeadingProps) {
     const centered = align === "center";
     return (
-        <Reveal
-            className={cn("space-y-5", centered ? "mx-auto max-w-3xl text-center" : "max-w-2xl text-left", className)}
-        >
-            {eyebrow && (
-                <p className={cn("font-mono text-xs font-medium uppercase tracking-[0.16em]", onBrand ? "text-white/75" : "text-brand")}>
-                    {number ? `${number} · ` : ""}
-                    {eyebrow}
-                </p>
-            )}
-            <h2 className={cn("text-3xl font-bold leading-[1.05] tracking-tight md:text-5xl", onBrand ? "text-white" : "text-foreground")}>
-                {title}
-            </h2>
-            {subtitle && (
-                <p className={cn("text-base leading-relaxed md:text-lg", onBrand ? "text-white/80" : "text-muted-foreground")}>
-                    {subtitle}
-                </p>
-            )}
+        <Reveal className={cn("flex flex-col gap-4", centered ? "mx-auto max-w-3xl items-center text-center" : "max-w-2xl text-start", className)}>
+            {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
+            <h2 className="text-balance text-display-md text-fg md:text-display-lg">{title}</h2>
+            {subtitle && <p className="text-pretty text-body-lg text-fg-muted">{subtitle}</p>}
         </Reveal>
     );
 }

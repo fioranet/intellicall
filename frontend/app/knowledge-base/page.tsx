@@ -1,36 +1,37 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Database, Loader2, MoreHorizontal, Pencil, Trash2, HelpCircle, Info, FileText, LayoutGrid, List, Calendar, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Database, DotsThreeVertical, PencilSimple, Trash, Question, Info, FileText, SquaresFour, List, Calendar } from "@phosphor-icons/react";
 import {
+    Badge,
+    Button,
     Card,
     CardContent,
     CardDescription,
     CardFooter,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card";
-import {
-    Empty,
-    EmptyContent,
-    EmptyDescription,
-    EmptyHeader,
-    EmptyMedia,
-    EmptyTitle,
-} from "@/components/ui/empty";
-import axios from "axios";
-import { toast } from "sonner";
-import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+    EmptyState,
+    PageHeader,
+    Spinner,
     Table,
     TableBody,
     TableCell,
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+    Tabs,
+    TabsList,
+    TabsTrigger,
+    toast,
+    useConfirm,
+} from "@wixzel/react";
+import axios from "axios";
 import { KBDialog } from "@/components/knowledge-base/kb-dialog";
 import { CreateKbMenu } from "@/components/knowledge-base/create-kb-menu";
 import { useTranslations } from "next-intl";
@@ -54,11 +55,16 @@ interface KnowledgeBase {
 
 export default function KnowledgeBasePage() {
     const t = useTranslations("knowledge");
+    const c = useTranslations("common");
+    const confirm = useConfirm();
     const [kbs, setKbs] = useState<KnowledgeBase[]>([]);
     const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState<"card" | "list">("card");
     const [isMobile, setIsMobile] = useState(false);
     const [hasHydrated, setHasHydrated] = useState(false);
+    // The list view edits from a row menu, so one dialog serves every row.
+    const [editingKb, setEditingKb] = useState<KnowledgeBase | null>(null);
+    const [editOpen, setEditOpen] = useState(false);
 
     useEffect(() => {
         const savedView = localStorage.getItem("kb_view_mode");
@@ -100,7 +106,7 @@ export default function KnowledgeBasePage() {
     }, []);
 
     const handleDelete = async (id: string) => {
-        if (!confirm("Are you sure you want to delete this knowledge base? This may affect agents using it.")) return;
+        if (!(await confirm({ title: "Are you sure you want to delete this knowledge base? This may affect agents using it.", tone: "danger" }))) return;
         try {
             const token = localStorage.getItem("token");
             await axios.delete(`${API_BASE_URL}/knowledge-base/${id}`, {
@@ -118,183 +124,185 @@ export default function KnowledgeBasePage() {
     }, [fetchKbs]);
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold">{t("title")}</h1>
-                    <p className="text-muted-foreground">{t("subtitle")}</p>
-                </div>
-                <div className="flex items-center gap-4">
-                    <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "card" | "list")} className="hidden md:block">
-                        <TabsList className="bg-muted">
-                            <TabsTrigger value="card" className="data-[state=active]:bg-background">
-                                <LayoutGrid className="h-4 w-4 me-2" />
-                                {t("view.cards")}
-                            </TabsTrigger>
-                            <TabsTrigger value="list" className="data-[state=active]:bg-background">
-                                <List className="h-4 w-4 me-2" />
-                                {t("view.list")}
-                            </TabsTrigger>
-                        </TabsList>
-                    </Tabs>
-                    <CreateKbMenu onSuccess={fetchKbs} />
-                </div>
-            </div>
+        <div className="flex flex-col gap-6">
+            <PageHeader
+                title={t("title")}
+                description={t("subtitle")}
+                actions={
+                    <>
+                        <Tabs
+                            variant="segment"
+                            value={viewMode}
+                            onValueChange={(v) => setViewMode(v as "card" | "list")}
+                            className="hidden md:flex"
+                        >
+                            <TabsList>
+                                <TabsTrigger value="card">
+                                    <SquaresFour />
+                                    {t("view.cards")}
+                                </TabsTrigger>
+                                <TabsTrigger value="list">
+                                    <List />
+                                    {t("view.list")}
+                                </TabsTrigger>
+                            </TabsList>
+                        </Tabs>
+                        <CreateKbMenu onSuccess={fetchKbs} />
+                    </>
+                }
+            />
 
             {loading ? (
                 <div className="flex h-64 items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                    <Spinner size="xl" className="text-fg-muted" />
                 </div>
             ) : kbs.length > 0 ? (
                 (viewMode === "card" || isMobile) ? (
                     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                         {kbs.map((kb) => (
-                            <Card key={kb._id} className="flex flex-col group transition-all duration-300 border-muted/60">
-                                <CardHeader className="space-y-4">
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/10">
-                                                <Database className="h-6 w-6" />
-                                            </div>
-                                            <div>
-                                                <CardTitle className="text-lg font-bold leading-none mb-1.5">{kb.name}</CardTitle>
-                                                <CardDescription className="line-clamp-1">{kb.description || "No description"}</CardDescription>
-                                            </div>
+                            <Card key={kb._id}>
+                                <CardHeader>
+                                    <div className="flex min-w-0 items-center gap-3">
+                                        <span className="grid size-10 shrink-0 place-items-center rounded-md bg-accent-subtle text-accent-ink">
+                                            <Database className="size-5" />
+                                        </span>
+                                        <div className="min-w-0">
+                                            <CardTitle className="truncate">{kb.name}</CardTitle>
+                                            <CardDescription className="line-clamp-1">{kb.description || "No description"}</CardDescription>
                                         </div>
                                     </div>
                                 </CardHeader>
-                                <CardContent className="flex-1 space-y-4 pt-2">
+                                <CardContent className="flex flex-1 flex-col gap-4">
                                     <div className="flex flex-wrap gap-2">
                                         {kb.basicInfo && (
-                                            <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 border-blue-500/20 text-[10px] font-bold">
-                                                <Info className="me-1 h-3 w-3" /> {t("badges.basicInfo")}
+                                            <Badge>
+                                                <Info /> {t("badges.basicInfo")}
                                             </Badge>
                                         )}
                                         {kb.faqs && kb.faqs.length > 0 && (
-                                            <Badge variant="secondary" className="bg-purple-500/10 text-purple-600 border-purple-500/20 text-[10px] font-bold">
-                                                <HelpCircle className="me-1 h-3 w-3" /> {t("badges.faqs", { count: kb.faqs.length })}
+                                            <Badge>
+                                                <Question /> {t("badges.faqs", { count: kb.faqs.length })}
                                             </Badge>
                                         )}
                                         {kb.otherInfo && (
-                                            <Badge variant="secondary" className="bg-amber-500/10 text-amber-600 border-amber-500/20 text-[10px] font-bold">
-                                                <FileText className="me-1 h-3 w-3" /> {t("badges.otherInfo")}
+                                            <Badge>
+                                                <FileText /> {t("badges.otherInfo")}
                                             </Badge>
                                         )}
                                     </div>
-                                    <div className="text-xs text-muted-foreground line-clamp-3 italic">
+                                    <div className="line-clamp-3 text-body-sm italic text-fg-muted">
                                         {kb.basicInfo || kb.otherInfo || t("card.fallbackDescription")}
                                     </div>
                                 </CardContent>
-                                <div className="px-4 py-3 border-t bg-muted/5 flex items-center justify-between mt-auto">
-                                    <div className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground">
-                                        <Calendar className="h-3 w-3 opacity-70" />
+                                <CardFooter className="justify-between">
+                                    <div className="flex items-center gap-1.5 text-caption text-fg-muted">
+                                        <Calendar className="size-3.5 text-fg-subtle" />
                                         {t("card.created", { date: new Date(kb.createdAt).toLocaleDateString() })}
                                     </div>
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-1">
                                         <KBDialog
                                             kb={kb}
                                             onSuccess={fetchKbs}
                                             trigger={
-                                                <Button variant="outline" size="sm" className="h-7 text-xs">
-                                                    <Pencil className="me-1.5 h-3 w-3" />
+                                                <Button size="xs" iconStart={<PencilSimple />}>
                                                     {t("card.edit")}
                                                 </Button>
                                             }
                                         />
                                         <Button
                                             variant="ghost"
-                                            size="sm"
-                                            className="h-7 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                            size="xs"
+                                            iconStart={<Trash />}
                                             onClick={() => handleDelete(kb._id)}
                                         >
-                                            <Trash2 className="me-1.5 h-3 w-3" />
                                             {t("card.delete")}
                                         </Button>
                                     </div>
-                                </div>
+                                </CardFooter>
                             </Card>
                         ))}
                     </div>
                 ) : (
-                    <Card className="overflow-hidden">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>{t("table.name")}</TableHead>
-                                    <TableHead>{t("table.sections")}</TableHead>
-                                    <TableHead>{t("table.faqs")}</TableHead>
-                                    <TableHead>{t("table.createdAt")}</TableHead>
-                                    <TableHead className="text-end">{t("table.actions")}</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {kbs.map((kb) => (
-                                    <TableRow key={kb._id}>
-                                        <TableCell className="font-medium">
-                                            <div className="flex items-center gap-2">
-                                                <div className="flex h-8 w-8 items-center justify-center rounded bg-primary/10 text-primary">
-                                                    <Database className="h-4 w-4" />
-                                                </div>
-                                                {kb.name}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex gap-1">
-                                                {kb.basicInfo && <div className="h-2 w-2 rounded-full bg-blue-500" title={t("badges.basicInfo")} />}
-                                                {kb.faqs && kb.faqs.length > 0 && <div className="h-2 w-2 rounded-full bg-purple-500" title={t("badges.faqsLabel")} />}
-                                                {kb.otherInfo && <div className="h-2 w-2 rounded-full bg-amber-500" title={t("badges.otherInfo")} />}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="text-xs text-muted-foreground">
-                                            {t("table.items", { count: kb.faqs?.length || 0 })}
-                                        </TableCell>
-                                        <TableCell className="text-muted-foreground text-xs">
-                                            {new Date(kb.createdAt).toLocaleDateString()}
-                                        </TableCell>
-                                        <TableCell className="text-end">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <KBDialog
-                                                    kb={kb}
-                                                    onSuccess={fetchKbs}
-                                                    trigger={
-                                                        <Button variant="outline" size="sm" className="h-7 text-xs">
-                                                            <Pencil className="me-1.5 h-3 w-3" />
-                                                            {t("card.edit")}
-                                                        </Button>
-                                                    }
-                                                />
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="h-7 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
-                                                    onClick={() => handleDelete(kb._id)}
-                                                >
-                                                    <Trash2 className="me-1.5 h-3 w-3" />
-                                                    {t("card.delete")}
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>{t("table.name")}</TableHead>
+                                <TableHead>{t("table.sections")}</TableHead>
+                                <TableHead>{t("table.faqs")}</TableHead>
+                                <TableHead>{t("table.createdAt")}</TableHead>
+                                <TableHead align="end">{t("table.actions")}</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {kbs.map((kb) => (
+                                <TableRow key={kb._id}>
+                                    <TableCell className="font-medium">
+                                        <div className="flex items-center gap-2">
+                                            <span className="grid size-7 shrink-0 place-items-center rounded-md bg-accent-subtle text-accent-ink">
+                                                <Database className="size-4" />
+                                            </span>
+                                            {kb.name}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex gap-1.5 text-fg-muted">
+                                            {kb.basicInfo && <span title={t("badges.basicInfo")}><Info className="size-4" /></span>}
+                                            {kb.faqs && kb.faqs.length > 0 && <span title={t("badges.faqsLabel")}><Question className="size-4" /></span>}
+                                            {kb.otherInfo && <span title={t("badges.otherInfo")}><FileText className="size-4" /></span>}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-fg-muted">
+                                        {t("table.items", { count: kb.faqs?.length || 0 })}
+                                    </TableCell>
+                                    <TableCell className="text-fg-muted">
+                                        {new Date(kb.createdAt).toLocaleDateString()}
+                                    </TableCell>
+                                    <TableCell align="end">
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="icon-sm" aria-label={c("actions.openMenu")}>
+                                                    <DotsThreeVertical />
                                                 </Button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </Card>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuItem
+                                                    onSelect={() => {
+                                                        setEditingKb(kb);
+                                                        setEditOpen(true);
+                                                    }}
+                                                >
+                                                    <PencilSimple />
+                                                    {t("card.edit")}
+                                                </DropdownMenuItem>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem tone="danger" onSelect={() => handleDelete(kb._id)}>
+                                                    <Trash />
+                                                    {t("card.delete")}
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
                 )
             ) : (
-                <Empty className="border border-dashed">
-                    <EmptyHeader>
-                        <EmptyMedia variant="icon">
-                            <Database />
-                        </EmptyMedia>
-                        <EmptyTitle>{t("empty.title")}</EmptyTitle>
-                        <EmptyDescription>
-                            {t("empty.description")}
-                        </EmptyDescription>
-                    </EmptyHeader>
-                    <EmptyContent>
-                        <CreateKbMenu onSuccess={fetchKbs} />
-                    </EmptyContent>
-                </Empty>
+                <EmptyState
+                    icon={<Database />}
+                    title={t("empty.title")}
+                    description={t("empty.description")}
+                    actions={<CreateKbMenu onSuccess={fetchKbs} />}
+                />
+            )}
+
+            {editingKb && (
+                <KBDialog
+                    kb={editingKb}
+                    open={editOpen}
+                    onOpenChange={setEditOpen}
+                    onSuccess={fetchKbs}
+                />
             )}
         </div>
     );

@@ -311,7 +311,7 @@ router.get('/', auth, async (req, res) => {
 // user's Twilio/OpenRouter/ElevenLabs keys.
 router.patch('/ui-language', auth, async (req, res) => {
     const schema = joi.object({
-        uiLanguage: joi.string().valid('en', 'es', 'fr', 'de', 'ar', 'pt').required()
+        uiLanguage: joi.string().valid('en', 'es', 'fr', 'de', 'ar').required()
     });
 
     try {
@@ -343,7 +343,7 @@ router.post('/', auth, async (req, res) => {
         // No .default() on purpose: every other field here defaults, and the handler
         // $sets whatever joi produced. A default would let a save from any settings
         // tab silently reset the user's language.
-        uiLanguage: joi.string().valid('en', 'es', 'fr', 'de', 'ar', 'pt'),
+        uiLanguage: joi.string().valid('en', 'es', 'fr', 'de', 'ar'),
         timeZone: joi.string().min(1).default('UTC'),
         webhooks: joi.object({
             url: joi.string().uri().allow('').default(''),
@@ -367,14 +367,9 @@ router.post('/', auth, async (req, res) => {
     try {
         const data = await schema.validateAsync(req.body);
 
-        // Normalize Brasilia aliases to official IANA America/Sao_Paulo
+        // To avoid overwriting the 'secret' or causing nested cast issues, 
+        // we use a flatter update structure for the webhooks object if it exists.
         const updateData = { ...data };
-        if (data.timeZone) {
-            const tzLower = data.timeZone.trim().toLowerCase();
-            if (tzLower.includes('brasilia') || tzLower.includes('brasília')) {
-                updateData.timeZone = 'America/Sao_Paulo';
-            }
-        }
         const webhookUpdate = {};
 
         if (data.webhooks) {
@@ -669,8 +664,11 @@ router.post('/elevenlabs/verify', auth, async (req, res) => {
 
     try {
         const axios = require('axios');
-        await axios.get('https://api.elevenlabs.io/v1/voices', {
-            headers: { 'xi-api-key': elevenLabsKey }
+        // /v2/voices: the legacy /v1/voices fails outright on workspaces with 500+ voices,
+        // which would reject a perfectly valid key.
+        await axios.get('https://api.elevenlabs.io/v2/voices', {
+            headers: { 'xi-api-key': elevenLabsKey },
+            params: { page_size: 1 }
         });
 
         res.status(200).json({

@@ -29,7 +29,8 @@
     "port": "{transport} · Port {port}",
     "never": "Never",
     "edit": "Edit",
-    "delete": "Delete"
+    "delete": "Delete",
+    "moreIssues": "(+{count} more; open Edit to see all)"
   },
   "info": {
     "title": "How SIP Trunks Work",
@@ -54,6 +55,8 @@
     "tls": "TLS (encrypted)",
     "transportHint": "Check your provider's docs. Most use UDP.",
     "usernameLabel": "Username",
+    "usernameInvalid": "The SIP username can't contain {chars}. Use only letters, numbers, and . _ - + (if your provider gave you an email address as the username, ask them for a plain username instead).",
+    "usernameSpaces": "spaces",
     "passwordLabel": "Password",
     "authRealmLabel": "Auth Realm",
     "authRealmPlaceholder": "sip.provider.com",
@@ -66,7 +69,8 @@
     "codecsHint": "Comma-separated audio codecs",
     "dialPrefixLabel": "Dial Prefix",
     "dialPrefixPlaceholder": "999",
-    "dialPrefixHint": "Optional tech prefix added before the number when dialling"
+    "dialPrefixHint": "Optional tech prefix added before the number when dialling",
+    "stripPlusLabel": "Send numbers without the + sign (some PBXs reject a leading +)"
   },
   "debug": {
     "registration": {
@@ -107,6 +111,20 @@
     "reloadFailed": "Reload failed",
     "updated": "SIP trunk updated",
     "created": "SIP trunk created",
-    "saveFailed": "Failed to save SIP trunk"
+    "saveFailed": "Failed to save SIP trunk",
+    "savedNotLoaded": "SIP trunk saved, but Asterisk did not load it"
+  },
+  "checks": {
+    "ownHost": "That's the address of this server's own Asterisk: the one you give your carrier so it can send calls to you. Enter your carrier's SIP host here instead. Calls through this trunk would be sent back to this server and fail.",
+    "hostPlaceholder": "SIP Host still has the preset's placeholder text. Replace it with the host your provider gave you.",
+    "hostFormat": "Enter only the host name or IP address in SIP Host (for example sip.telnyx.com). Leave out sip:, usernames and paths, and put the port in Port.",
+    "realmPlaceholder": "Auth Realm still has placeholder text. Replace it, or leave it blank.",
+    "portRange": "Port must be a number from 1 to 65535 (usually 5060).",
+    "tlsOn5060": "TLS normally uses port 5061; port 5060 is for UDP and TCP. Check your provider's settings.",
+    "port5061NotTls": "Port 5061 is normally for TLS. With UDP or TCP, use 5060 unless your provider says otherwise.",
+    "ipHostDomainRealm": "SIP Host is an IP address but Auth Realm is {realm}. For most carriers the SIP Host is that same domain. Make sure the IP is your carrier's and not the address you were given for inbound calls.",
+    "usernameNoPassword": "There's a username but no password. Most carriers refuse calls without both (error 401 or 407).",
+    "passwordNoUsername": "The password is ignored without a username.",
+    "stripPlusWithPrefix": "With a Dial Prefix set, numbers are always sent without the +, so the \"without the + sign\" option changes nothing."
   }
 }

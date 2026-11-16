@@ -47,9 +47,23 @@ function externalOrigin(req) {
     return `${protocol}://${host}`;
 }
 
+/**
+ * Origin Twilio should call back on (voice/status webhooks). BASE_URL wins, minus any
+ * trailing slash — "https://api.example.com/" would otherwise produce "//api/twilio/voice",
+ * which Express does not route, and Twilio answers that with its "application error" message.
+ * Without BASE_URL, fall back to the host this request came in on; a campaign started by the
+ * scheduler has no request, and localhost is then the only (unreachable) guess left.
+ */
+function webhookOrigin(req) {
+    const configured = (process.env.BASE_URL || '').trim().replace(/\/+$/, '');
+    if (configured) return configured;
+    const host = req && req.get('host');
+    return host ? `http://${host}` : 'http://localhost:5001';
+}
+
 /** Build a provider's OAuth callback URL for this request. */
 function callbackUrl(req, providerPath) {
     return `${externalOrigin(req)}/api/auth/${providerPath}/callback`;
 }
 
-module.exports = { externalOrigin, callbackUrl, isLocalHost };
+module.exports = { externalOrigin, callbackUrl, isLocalHost, webhookOrigin };

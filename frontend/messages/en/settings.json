@@ -266,7 +266,6 @@
       "apiKeys": "API Keys",
       "webhooks": "Webhooks",
       "email": "Email",
-      "integrations": "Integrations",
       "billing": "Plan & Billing",
       "transactions": "Transaction History"
     }
@@ -283,7 +282,7 @@
     "keyErrorSuffix": "Please check your key.",
     "validKey": "Valid API Key",
     "deepgram": "Deepgram API Key",
-    "deepgramHint": "Powers speech recognition — and the low-latency \"Deepgram Voice Agent\" engine selectable per agent (which also uses your ElevenLabs voice but needs no OpenRouter key).",
+    "deepgramHint": "Powers speech recognition — and the low-latency \"Deepgram Voice Agent\" engine selectable per agent, which needs no OpenRouter key and can speak with Deepgram's own Aura voices or your ElevenLabs voice.",
     "sarvam": "Sarvam AI API Key",
     "sarvamHint": "Powers the self-contained \"Sarvam AI\" engine for Indian languages (speech, reasoning and voice all on Sarvam). Selectable per agent — needs no other keys.",
     "gemini": "Gemini API Key",
@@ -448,5 +447,21 @@
     "razorpayHint": "India's most popular gateway",
     "noMethods": "No payment methods are currently available. Please contact support.",
     "legal": "By continuing, you agree to our Terms of Service and Privacy Policy. Securely processed, SSL encrypted."
+  },
+  "password": {
+    "changeTitle": "Password",
+    "setTitle": "Set a Password",
+    "changeDescription": "Change the password you use to sign in with your email.",
+    "setDescription": "Your account was created with Google sign-in. Set a password so you can also sign in with your email.",
+    "current": "Current Password",
+    "new": "New Password",
+    "confirm": "Confirm New Password",
+    "changeButton": "Update Password",
+    "setButton": "Set Password",
+    "tooShort": "Password must be at least 8 characters",
+    "mismatch": "Passwords do not match",
+    "updated": "Password updated",
+    "set": "Password set. You can now sign in with your email and password.",
+    "failed": "Failed to update password"
   }
 }

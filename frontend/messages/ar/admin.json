@@ -121,7 +121,22 @@
       "saved": "تم حفظ بيانات اعتماد {provider}",
       "saveFailed": "تعذّر الحفظ"
     },
-    "hubspotLegacyNotice": "أوقفت HubSpot تسجيل التطبيقات العامة الجديدة في 23 يونيو 2026، لذا لا تنطبق هذه الحقول إلا إذا كنت قد سجّلت تطبيقًا قبل ذلك التاريخ. أما الاتصالات الجديدة فتستخدم مفتاح خدمة يلصقه كل مستخدم من حساب HubSpot الخاص به من الإعدادات → عمليات التكامل."
+    "hubspotLegacyNotice": "أوقفت HubSpot تسجيل التطبيقات العامة الجديدة في 23 يونيو 2026، لذا لا تنطبق هذه الحقول إلا إذا كنت قد سجّلت تطبيقًا قبل ذلك التاريخ. أما الاتصالات الجديدة فتستخدم مفتاح خدمة يلصقه كل مستخدم من حساب HubSpot الخاص به من الإعدادات → عمليات التكامل.",
+    "metaTitle": "Meta (WhatsApp)",
+    "metaDescription": "تطبيق Meta الخاص بك لـ WhatsApp. مع إعداد Embedded Signup، يربط المستخدمون رقم عملهم من صفحة WhatsApp في نافذة Meta؛ ويستقبل webhook الخاص به رسائل كل الأرقام المرتبطة.",
+    "metaEnvNotice": "هذه القيم مضبوطة في بيئة الخادم (META_APP_ID وبقية المتغيرات). ما تحفظه هنا يُحتفظ به، لكن البيئة لها الأولوية ما دامت مضبوطة.",
+    "metaAppId": "معرّف التطبيق (App ID)",
+    "metaAppSecret": "App Secret",
+    "metaEsConfigId": "معرّف إعداد Embedded Signup",
+    "metaEsConfigIdHint": "من صفحة WhatsApp > Embedded Signup في التطبيق. بدونه لا يمكن للمستخدمين الربط إلا بتطبيق Meta الخاص بهم.",
+    "metaVerifyToken": "رمز التحقق (Verify token) للـ webhook",
+    "metaVerifyTokenHint": "أي سلسلة سرية. الصق نفسها في WhatsApp > Configuration > Webhook في التطبيق.",
+    "metaSystemUserToken": "رمز مستخدم النظام (System User Token)",
+    "metaSystemUserTokenHint": "رمز دائم لمستخدم نظام في النشاط التجاري، بالصلاحيتين whatsapp_business_messaging وwhatsapp_business_management.",
+    "metaSystemUserId": "معرّف مستخدم النظام (System User ID)",
+    "metaSystemUserIdHint": "مستخدم النظام الذي يُضاف إلى كل حساب WhatsApp Business مرتبط بعد Embedded Signup.",
+    "metaWebhookUrl": "عنوان callback URL للـ webhook",
+    "metaWebhookHint": "في تطبيق Meta، افتح WhatsApp > Configuration، واختر Edit بجانب Webhook، والصق هذا العنوان ورمز التحقق أعلاه، ثم اشترك في الحقل messages."
   },
   "loading": "جارٍ التحميل…",
   "support": {
@@ -250,6 +265,29 @@
       "trialFailed": "تعذّر تحديث حدود التجربة",
       "deleted": "تم حذف الباقة",
       "deleteFailed": "تعذّر حذف الباقة"
+    },
+    "tools": "{count} أدوات",
+    "unlimitedTools": "أدوات غير محدودة",
+    "mcpServers": "{count} تطبيقات متصلة",
+    "unlimitedMcpServers": "تطبيقات متصلة غير محدودة",
+    "whatsappAccounts": "{count} أرقام واتساب",
+    "unlimitedWhatsappAccounts": "أرقام واتساب غير محدودة",
+    "whatsappMessages": "{count} رسالة واتساب/شهر",
+    "unlimitedWhatsappMessages": "رسائل واتساب غير محدودة",
+    "noWhatsapp": "بدون واتساب",
+    "noMeetings": "بدون اجتماعات",
+    "meetingsIncluded": "الاجتماعات مشمولة",
+    "zeroUnlimited": "0 يعني غير محدود.",
+    "featuresTitle": "الميزات",
+    "featureMeetings": "الاجتماعات",
+    "featureMeetingsHint": "يمكن للوكلاء الانضمام إلى اجتماعات Zoom وGoogle Meet وTeams. تُحسب الاجتماعات كمكالمات.",
+    "featureWhatsapp": "واتساب",
+    "featureWhatsappHint": "يمكن للوكلاء الرد على محادثات واتساب وإرسال الرسائل أثناء المكالمات.",
+    "limitFields": {
+      "tools": "الأدوات",
+      "mcpServers": "التطبيقات المتصلة",
+      "whatsappAccounts": "أرقام واتساب",
+      "whatsappMessagesPerMonth": "رسائل واتساب/شهر"
     }
   },
   "settings": {

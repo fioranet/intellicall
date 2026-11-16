@@ -1,32 +1,24 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { ChartBar, TrendUp, Users, CreditCard } from "@phosphor-icons/react";
 import {
-    BarChart3,
-    TrendingUp,
-    Users,
-    CreditCard,
-    ArrowUpRight,
-    ArrowDownRight,
-    Loader2
-} from "lucide-react";
-import {
+    Spinner,
     Card,
     CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card";
+    PageHeader,
+    StatCard,
+} from "@wixzel/react";
 import {
     BarChart,
     Bar,
     XAxis,
     YAxis,
-    CartesianGrid,
     Tooltip,
     ResponsiveContainer,
-    LineChart,
-    Line,
     AreaChart,
     Area
 } from "recharts";
@@ -35,6 +27,30 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
+
+const AXIS = { stroke: "var(--wx-color-fg-subtle)", fontSize: 12, tickLine: false, axisLine: false } as const;
+
+// Recharts tooltip drawn as a small Wixzel overlay panel.
+interface ChartTooltipProps {
+    active?: boolean;
+    label?: string | number;
+    payload?: { dataKey?: string | number; name?: string; value?: number | string; color?: string }[];
+}
+
+function ChartTooltip({ active, payload, label }: ChartTooltipProps) {
+    if (!active || !payload?.length) return null;
+    return (
+        <div className="rounded-md bg-surface-overlay px-3 py-2 text-caption shadow-md">
+            <div className="font-medium text-fg">{label}</div>
+            {payload.map((p) => (
+                <div key={String(p.dataKey)} className="flex items-center gap-2 tabular-nums text-fg-muted">
+                    <span className="size-1.5 rounded-full" style={{ background: p.color }} />
+                    {p.name}: <span className="font-medium text-fg">{p.value}</span>
+                </div>
+            ))}
+        </div>
+    );
+}
 
 export default function AdminAnalyticsPage() {
     const t = useTranslations("admin");
@@ -60,113 +76,84 @@ export default function AdminAnalyticsPage() {
         fetchStats();
     }, []);
 
-    const renderGrowth = (value: number, label: string) => {
-        const isPositive = value >= 0;
-        const Icon = isPositive ? ArrowUpRight : ArrowDownRight;
-        const colorClass = isPositive ? "text-green-500" : "text-red-500";
-
-        return (
-            <p className={`text-xs ${colorClass} font-bold flex items-center gap-1 mt-1`}>
-                <Icon className="h-3 w-3" /> {isPositive ? '+' : ''}{value}% {label}
-            </p>
-        );
-    };
-
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground font-sora">{t("analytics.title")}</h1>
-                    <p className="text-muted-foreground">{t("analytics.subtitle")}</p>
-                </div>
-            </div>
+        <div className="flex flex-col gap-6">
+            <PageHeader title={t("analytics.title")} description={t("analytics.subtitle")} />
 
             <AdminNav currentPath="/admin/analytics" />
 
             {loading ? (
                 <div className="flex h-64 items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <Spinner size="xl" />
                 </div>
             ) : (
                 <>
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                        <Card className="rounded-2xl border-border shadow-sm">
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">{t("analytics.totalUsers")}</CardTitle>
-                                <Users className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{stats?.totalUsers || 0}</div>
-                                {renderGrowth(stats?.userGrowth || 0, "from last month")}
-                            </CardContent>
-                        </Card>
-                        <Card className="rounded-2xl border-border shadow-sm">
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">{t("analytics.activePlans")}</CardTitle>
-                                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{stats?.activePlans || 0}</div>
-                                {renderGrowth(stats?.activePlanGrowth || 0, "growth")}
-                            </CardContent>
-                        </Card>
-                        <Card className="rounded-2xl border-border shadow-sm">
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">{t("analytics.totalPurchases")}</CardTitle>
-                                <CreditCard className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold font-mono italic text-primary">{stats?.totalPurchases || 0}</div>
-                                {renderGrowth(stats?.purchaseGrowth || 0, "this week")}
-                            </CardContent>
-                        </Card>
-                        <Card className="rounded-2xl border-border shadow-sm">
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">{t("analytics.totalRevenue")}</CardTitle>
-                                <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold font-mono italic text-foreground">${stats?.revenue || 0}</div>
-                                {renderGrowth(stats?.revenueGrowth || 0, "increase")}
-                            </CardContent>
-                        </Card>
+                        <StatCard
+                            label={t("analytics.totalUsers")}
+                            icon={<Users />}
+                            value={stats?.totalUsers || 0}
+                            delta={stats?.userGrowth || 0}
+                            footer="from last month"
+                        />
+                        <StatCard
+                            label={t("analytics.activePlans")}
+                            icon={<TrendUp />}
+                            value={stats?.activePlans || 0}
+                            delta={stats?.activePlanGrowth || 0}
+                            footer="growth"
+                        />
+                        <StatCard
+                            label={t("analytics.totalPurchases")}
+                            icon={<CreditCard />}
+                            value={stats?.totalPurchases || 0}
+                            delta={stats?.purchaseGrowth || 0}
+                            footer="this week"
+                        />
+                        <StatCard
+                            label={t("analytics.totalRevenue")}
+                            icon={<ChartBar />}
+                            value={`$${stats?.revenue || 0}`}
+                            delta={stats?.revenueGrowth || 0}
+                            footer="increase"
+                        />
                     </div>
 
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                        <Card className="col-span-4 rounded-2xl border-border shadow-sm">
+                        <Card className="lg:col-span-4">
                             <CardHeader>
                                 <CardTitle>{t("analytics.revenueTitle")}</CardTitle>
                                 <CardDescription>{t("analytics.revenueDescription")}</CardDescription>
                             </CardHeader>
-                            <CardContent className="h-[300px] w-full pt-4">
+                            <CardContent className="h-[300px] w-full">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <AreaChart data={stats?.chartData || []}>
                                         <defs>
                                             <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.1} />
-                                                <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                                                <stop offset="5%" stopColor="var(--wx-color-accent)" stopOpacity={0.18} />
+                                                <stop offset="95%" stopColor="var(--wx-color-accent)" stopOpacity={0} />
                                             </linearGradient>
                                         </defs>
-                                        <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                                        <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
-                                        <Tooltip />
-                                        <Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorRev)" strokeWidth={2} />
+                                        <XAxis dataKey="name" {...AXIS} />
+                                        <YAxis {...AXIS} tickFormatter={(value) => `$${value}`} />
+                                        <Tooltip content={<ChartTooltip />} cursor={{ stroke: "var(--wx-color-border)" }} />
+                                        <Area type="monotone" dataKey="revenue" stroke="var(--wx-color-accent)" fillOpacity={1} fill="url(#colorRev)" strokeWidth={2} />
                                     </AreaChart>
                                 </ResponsiveContainer>
                             </CardContent>
                         </Card>
-                        <Card className="col-span-3 rounded-2xl border-border shadow-sm">
+                        <Card className="lg:col-span-3">
                             <CardHeader>
                                 <CardTitle>{t("analytics.growthTitle")}</CardTitle>
                                 <CardDescription>{t("analytics.growthDescription")}</CardDescription>
                             </CardHeader>
-                            <CardContent className="h-[300px] w-full pt-4">
+                            <CardContent className="h-[300px] w-full">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart data={stats?.chartData || []}>
-                                        <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                                        <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                                        <Tooltip cursor={{ fill: 'rgba(0,0,0,0.05)' }} />
-                                        <Bar dataKey="users" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                                        <XAxis dataKey="name" {...AXIS} />
+                                        <YAxis {...AXIS} />
+                                        <Tooltip content={<ChartTooltip />} cursor={{ fill: "var(--wx-color-bg-muted)" }} />
+                                        <Bar dataKey="users" fill="var(--wx-color-accent)" radius={[4, 4, 0, 0]} />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </CardContent>

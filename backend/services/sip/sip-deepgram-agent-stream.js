@@ -3,10 +3,12 @@ const Settings = require('../../models/Settings');
 const Agent = require('../../models/Agent');
 const Lead = require('../../models/Lead');
 const CallLog = require('../../models/CallLog');
+const { attachToolSession, finishToolSession } = require('../tools/attach');
 const { analyzeCallLog } = require('../../utils/analyzer');
 const WebhookService = require('../webhook-service');
 const EmailService = require('../email-service');
 const { DeepgramAgentBridge } = require('../deepgram-agent/agent-bridge');
+const { missingEngineKeys } = require('../../utils/engine-keys');
 const { computeDuration } = require('../../utils/call-duration');
 
 const RTP_HEADER_SIZE = 12;
@@ -117,11 +119,10 @@ class SipDeepgramAgentStream {
                 this._pushError('system', 'missing_config', msg);
                 return false;
             }
-            // Deepgram-managed LLM — OpenRouter key not required for this engine
-            if (!this.settings.deepgramKey || !this.settings.elevenLabsKey) {
-                const missing = [];
-                if (!this.settings.deepgramKey) missing.push('Deepgram');
-                if (!this.settings.elevenLabsKey) missing.push('ElevenLabs');
+            // Deepgram-managed LLM — OpenRouter key not required for this engine, and an
+            // Aura voice (agent.deepgramVoice) needs no ElevenLabs key either.
+            const missing = missingEngineKeys(this.settings, this.agent, 'sip');
+            if (missing.length > 0) {
                 const msg = `Missing API keys: ${missing.join(', ')}. Please configure them in Settings.`;
                 console.error(`❌ [SIP DG Agent] ${msg}`);
                 this._pushError('system', 'missing_keys', msg);
@@ -132,6 +133,8 @@ class SipDeepgramAgentStream {
                 callId: this.callId, settings: this.settings, agent: this.agent, lead: this.lead
             });
             if (this.transferHandler) this.bridge.setTransferHandler(this.transferHandler);
+            // The agent's tools (webhook tools, connected apps, WhatsApp). Never blocks the call.
+            this.toolSession = await attachToolSession(this.bridge, this.agent, this.userId, { testCall: !!this.testCall, callId: this.callId, lead: this.lead, logPrefix: `[SIP DG Agent] [${this.callId}]` });
             this.bridge.onAudio = (buf) => this._sendRtp(buf);
             this.bridge.onBargeIn = () => this._clearPlayback();
             this.bridge.onError = (service, code, message) => this._pushError(service, code, message);
@@ -294,6 +297,7 @@ class SipDeepgramAgentStream {
         if (this._endCallSafetyTimer) { clearTimeout(this._endCallSafetyTimer); this._endCallSafetyTimer = null; }
         this._rtpQueue = [];
         this._rtpNextSendAt = 0;
+        if (this.toolSession) { finishToolSession(this.toolSession, this.callId); this.toolSession = null; }
         if (this.bridge) this.bridge.close();
         try { if (this.udpSocket) this.udpSocket.close(); } catch (_) { }
         this.udpSocket = null;

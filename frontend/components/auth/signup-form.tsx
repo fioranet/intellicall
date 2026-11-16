@@ -5,17 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import {
-    Field,
-    FieldDescription,
-    FieldGroup,
-    FieldLabel,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
-import { FcGoogle } from "react-icons/fc";
+import { Button, Field, Input, toast } from "@wixzel/react";
+import { GoogleMark } from "@/components/auth/google-mark";
 import { useTranslations } from "next-intl";
 
 export function SignupForm({
@@ -65,15 +56,14 @@ export function SignupForm({
             onSubmit={handleSubmit}
             {...props}
         >
-            <FieldGroup>
-                <div className="flex flex-col items-center gap-1 text-center">
-                    <h1 className="text-2xl font-bold">{t("signup.title")}</h1>
-                    <p className="text-muted-foreground text-xs text-balance">
-                        {t("signup.subtitle")}
-                    </p>
-                </div>
-                <Field>
-                    <FieldLabel htmlFor="name">{t("signup.nameLabel")}</FieldLabel>
+            <div className="flex flex-col gap-1 text-center">
+                <h1 className="text-heading-xl">{t("signup.title")}</h1>
+                <p className="text-body-sm text-balance text-fg-muted">
+                    {t("signup.subtitle")}
+                </p>
+            </div>
+            <div className="flex flex-col gap-4">
+                <Field label={t("signup.nameLabel")}>
                     <Input
                         id="name"
                         type="text"
@@ -84,8 +74,7 @@ export function SignupForm({
                         disabled={isLoading}
                     />
                 </Field>
-                <Field>
-                    <FieldLabel htmlFor="email">{t("signup.emailLabel")}</FieldLabel>
+                <Field label={t("signup.emailLabel")}>
                     <Input
                         id="email"
                         type="email"
@@ -96,8 +85,7 @@ export function SignupForm({
                         disabled={isLoading}
                     />
                 </Field>
-                <Field>
-                    <FieldLabel htmlFor="password">{t("signup.passwordLabel")}</FieldLabel>
+                <Field label={t("signup.passwordLabel")} hint={t("signup.passwordHint")}>
                     <Input
                         id="password"
                         type="password"
@@ -106,39 +94,24 @@ export function SignupForm({
                         required
                         disabled={isLoading}
                     />
-                    <p className="text-[10px] text-muted-foreground mt-1">
-                        {t("signup.passwordHint")}
-                    </p>
                 </Field>
-                <div>
-                    <Field>
-                        <Button type="submit" className="w-full" disabled={isLoading}>
-                            {isLoading ? (
-                                <>
-                                    <Loader2 className="me-2 h-4 w-4 animate-spin" />
-                                    {t("signup.submitting")}
-                                </>
-                            ) : (
-                                t("signup.submit")
-                            )}
-                        </Button>
-                    </Field>
-                    <Field>
-                        <Button variant="outline" type="button" className="w-full mt-2" disabled={isLoading} asChild>
-                            <a href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api"}/auth/google`}>
-                                <FcGoogle className="me-2 h-4 w-4" />
-                                {t("signup.google")}
-                            </a>
-                        </Button>
-                        <FieldDescription className="text-center mt-2">
-                            {t("signup.hasAccount")}{" "}
-                            <Link href="/login" className="underline underline-offset-4 font-medium">
-                                {t("signup.loginLink")}
-                            </Link>
-                        </FieldDescription>
-                    </Field>
-                </div>
-            </FieldGroup>
+            </div>
+            <div className="flex flex-col gap-2">
+                <Button type="submit" variant="primary" size="lg" block loading={isLoading}>
+                    {isLoading ? t("signup.submitting") : t("signup.submit")}
+                </Button>
+                <Button size="lg" block disabled={isLoading} iconStart={<GoogleMark className="size-4" />} asChild>
+                    <a href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api"}/auth/google`}>
+                        {t("signup.google")}
+                    </a>
+                </Button>
+            </div>
+            <p className="text-center text-body-sm text-fg-muted">
+                {t("signup.hasAccount")}{" "}
+                <Link href="/login" className="font-medium text-accent-ink underline underline-offset-4">
+                    {t("signup.loginLink")}
+                </Link>
+            </p>
         </form>
     );
 }

@@ -2,8 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import {
+    Button,
     Dialog,
     DialogContent,
     DialogDescription,
@@ -11,21 +11,21 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
+    Input,
+    Label,
+    Field,
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select";
-import { toast } from "sonner";
+    Chips,
+    Chip,
+    CheckboxCard,
+} from "@wixzel/react";
+import { toast } from "@wixzel/react";
 import axios from "axios";
-import { Pencil, Check } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { PencilSimple } from "@phosphor-icons/react";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
 
@@ -148,30 +148,39 @@ export function EditUserDialog({ user, onUserUpdated }: EditUserDialogProps) {
         });
     };
 
+    const addManualTag = () => {
+        if (newTag && !formData.sharedTags.includes(newTag)) {
+            toggleArrayItem('sharedTags', newTag);
+            if (!availableTags.includes(newTag)) {
+                setAvailableTags([...availableTags, newTag]);
+            }
+            setNewTag("");
+        }
+    };
+
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
-                    <Pencil className="h-4 w-4" />
+                <Button variant="ghost" size="icon-sm" aria-label={t("edit.title", { name: user.name })}>
+                    <PencilSimple />
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto">
+            <DialogContent size="lg">
                 <DialogHeader>
                     <DialogTitle>{t("edit.title", { name: user.name })}</DialogTitle>
                     <DialogDescription>
                         {t("edit.description")}
                     </DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid gap-2">
-                        <Label htmlFor="edit-role">{t("edit.roleLabel")}</Label>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+                    <Field label={t("edit.roleLabel")} id="edit-role">
                         <Select
                             value={formData.role}
                             onValueChange={(value) =>
                                 setFormData({ ...formData, role: value })
                             }
                         >
-                            <SelectTrigger id="edit-role">
+                            <SelectTrigger>
                                 <SelectValue placeholder={t("roles.placeholder")} />
                             </SelectTrigger>
                             <SelectContent>
@@ -179,43 +188,38 @@ export function EditUserDialog({ user, onUserUpdated }: EditUserDialogProps) {
                                 <SelectItem value="member">{t("roles.member")}</SelectItem>
                             </SelectContent>
                         </Select>
-                    </div>
+                    </Field>
 
-                    <div className="space-y-3">
+                    <div className="flex flex-col gap-2">
                         <Label>{t("edit.sharedTags")}</Label>
-                        <div className="flex flex-wrap gap-2 p-3 border rounded-md min-h-[80px]">
+                        <div className="min-h-[80px] rounded-md bg-bg-muted p-3">
                             {availableTags.length === 0 ? (
-                                <p className="text-sm text-muted-foreground italic w-full text-center py-2">{t("edit.noTags")}</p>
+                                <p className="w-full py-2 text-center text-body-sm italic text-fg-muted">{t("edit.noTags")}</p>
                             ) : (
-                                availableTags.map(tag => (
-                                    <Badge
-                                        key={tag}
-                                        variant={formData.sharedTags.includes(tag) ? "default" : "outline"}
-                                        className="cursor-pointer hover:bg-primary/90"
-                                        onClick={() => toggleArrayItem('sharedTags', tag)}
-                                    >
-                                        {tag}
-                                        {formData.sharedTags.includes(tag) && <Check className="ms-1 h-3 w-3" />}
-                                    </Badge>
-                                ))
+                                <Chips
+                                    type="multiple"
+                                    value={formData.sharedTags}
+                                    onValueChange={(value: string[]) => setFormData((prev) => ({ ...prev, sharedTags: value }))}
+                                    aria-label={t("edit.sharedTags")}
+                                >
+                                    {availableTags.map(tag => (
+                                        <Chip key={tag} value={tag}>{tag}</Chip>
+                                    ))}
+                                </Chips>
                             )}
                         </div>
-                        <div className="flex gap-2 items-center text-xs text-muted-foreground">
+                        <div className="flex items-center gap-2 text-caption text-fg-muted">
                             <span>{t("edit.manualTag")}</span>
                             <Input
-                                className="h-7 w-[150px]"
+                                size="sm"
+                                className="w-[150px]"
                                 value={newTag}
+                                aria-label={t("edit.manualTag")}
                                 onChange={(e) => setNewTag(e.target.value)}
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
                                         e.preventDefault();
-                                        if (newTag && !formData.sharedTags.includes(newTag)) {
-                                            toggleArrayItem('sharedTags', newTag);
-                                            if (!availableTags.includes(newTag)) {
-                                                setAvailableTags([...availableTags, newTag]);
-                                            }
-                                            setNewTag("");
-                                        }
+                                        addManualTag();
                                     }
                                 }}
                             />
@@ -223,91 +227,58 @@ export function EditUserDialog({ user, onUserUpdated }: EditUserDialogProps) {
                                 type="button"
                                 size="sm"
                                 variant="secondary"
-                                className="h-7"
-                                onClick={() => {
-                                    if (newTag && !formData.sharedTags.includes(newTag)) {
-                                        toggleArrayItem('sharedTags', newTag);
-                                        if (!availableTags.includes(newTag)) {
-                                            setAvailableTags([...availableTags, newTag]);
-                                        }
-                                        setNewTag("");
-                                    }
-                                }}
+                                onClick={addManualTag}
                             >
                                 {t("edit.add")}
                             </Button>
                         </div>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="flex flex-col gap-2">
                         <Label>{t("edit.sharedAgents")}</Label>
-                        <div className="grid grid-cols-2 gap-2 p-3 border rounded-md max-h-[150px] overflow-y-auto">
+                        <div className="max-h-[180px] overflow-y-auto rounded-md bg-bg-muted p-2">
                             {availableAgents.length === 0 ? (
-                                <p className="col-span-2 text-sm text-muted-foreground italic text-center py-2">{t("edit.noAgents")}</p>
+                                <p className="py-2 text-center text-body-sm italic text-fg-muted">{t("edit.noAgents")}</p>
                             ) : (
-                                availableAgents.map(agent => (
-                                    <div
-                                        key={agent._id}
-                                        className={cn(
-                                            "flex items-center gap-2 p-2 rounded-md border text-sm cursor-pointer transition-colors",
-                                            formData.sharedAgents.includes(agent._id)
-                                                ? "bg-primary/10 border-primary/30"
-                                                : "hover:bg-muted"
-                                        )}
-                                        onClick={() => toggleArrayItem('sharedAgents', agent._id)}
-                                    >
-                                        <div className={cn(
-                                            "h-4 w-4 rounded-sm border flex items-center justify-center",
-                                            formData.sharedAgents.includes(agent._id)
-                                                ? "bg-primary border-primary text-primary-foreground"
-                                                : "border-muted-foreground"
-                                        )}>
-                                            {formData.sharedAgents.includes(agent._id) && <Check className="h-3 w-3" />}
-                                        </div>
-                                        <span className="truncate">{agent.name}</span>
-                                    </div>
-                                ))
+                                <div role="group" aria-label={t("edit.sharedAgents")} className="grid grid-cols-2 gap-2">
+                                    {availableAgents.map(agent => (
+                                        <CheckboxCard
+                                            key={agent._id}
+                                            title={agent.name}
+                                            checked={formData.sharedAgents.includes(agent._id)}
+                                            onCheckedChange={() => toggleArrayItem('sharedAgents', agent._id)}
+                                        />
+                                    ))}
+                                </div>
                             )}
                         </div>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="flex flex-col gap-2">
                         <Label>{t("edit.sharedCampaigns")}</Label>
-                        <div className="grid grid-cols-2 gap-2 p-3 border rounded-md max-h-[150px] overflow-y-auto">
+                        <div className="max-h-[180px] overflow-y-auto rounded-md bg-bg-muted p-2">
                             {availableCampaigns.length === 0 ? (
-                                <p className="col-span-2 text-sm text-muted-foreground italic text-center py-2">{t("edit.noCampaigns")}</p>
+                                <p className="py-2 text-center text-body-sm italic text-fg-muted">{t("edit.noCampaigns")}</p>
                             ) : (
-                                availableCampaigns.map(campaign => (
-                                    <div
-                                        key={campaign._id}
-                                        className={cn(
-                                            "flex items-center gap-2 p-2 rounded-md border text-sm cursor-pointer transition-colors",
-                                            formData.sharedCampaigns.includes(campaign._id)
-                                                ? "bg-primary/10 border-primary/30"
-                                                : "hover:bg-muted"
-                                        )}
-                                        onClick={() => toggleArrayItem('sharedCampaigns', campaign._id)}
-                                    >
-                                        <div className={cn(
-                                            "h-4 w-4 rounded-sm border flex items-center justify-center",
-                                            formData.sharedCampaigns.includes(campaign._id)
-                                                ? "bg-primary border-primary text-primary-foreground"
-                                                : "border-muted-foreground"
-                                        )}>
-                                            {formData.sharedCampaigns.includes(campaign._id) && <Check className="h-3 w-3" />}
-                                        </div>
-                                        <span className="truncate">{campaign.name}</span>
-                                    </div>
-                                ))
+                                <div role="group" aria-label={t("edit.sharedCampaigns")} className="grid grid-cols-2 gap-2">
+                                    {availableCampaigns.map(campaign => (
+                                        <CheckboxCard
+                                            key={campaign._id}
+                                            title={campaign.name}
+                                            checked={formData.sharedCampaigns.includes(campaign._id)}
+                                            onCheckedChange={() => toggleArrayItem('sharedCampaigns', campaign._id)}
+                                        />
+                                    ))}
+                                </div>
                             )}
                         </div>
                     </div>
 
                     <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={isLoading}>
+                        <Button type="button" variant="secondary" onClick={() => setOpen(false)} disabled={isLoading}>
                             {c("actions.cancel")}
                         </Button>
-                        <Button type="submit" disabled={isLoading}>
+                        <Button type="submit" variant="primary" loading={isLoading}>
                             {isLoading ? "Saving..." : "Save Changes"}
                         </Button>
                     </DialogFooter>

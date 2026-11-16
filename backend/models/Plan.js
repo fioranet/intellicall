@@ -24,7 +24,20 @@ const planSchema = new mongoose.Schema({
         agents: { type: Number, default: 1 },
         campaigns: { type: Number, default: 1 },
         leads: { type: Number, default: 100 },
-        callsPerMonth: { type: Number, default: 100 }
+        callsPerMonth: { type: Number, default: 100 },
+        /** Webhook tools the account may define. 0 or less is unlimited. */
+        tools: { type: Number, default: 10 },
+        /** Connected MCP servers (Integrations). 0 or less is unlimited. */
+        mcpServers: { type: Number, default: 5 },
+        /** WhatsApp numbers connected. 0 or less is unlimited. */
+        whatsappAccounts: { type: Number, default: 1 },
+        /** WhatsApp messages sent and received per calendar month. 0 or less is unlimited. */
+        whatsappMessagesPerMonth: { type: Number, default: 1000 }
+    },
+    /** Features the plan switches on. Meetings count as calls in callsPerMonth. */
+    features: {
+        meetings: { type: Boolean, default: true },
+        whatsapp: { type: Boolean, default: true }
     },
     isActive: {
         type: Boolean,

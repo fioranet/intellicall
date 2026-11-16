@@ -4,8 +4,35 @@ const PhoneNumber = require('../models/PhoneNumber');
 const { auth } = require('../middleware/auth');
 const joi = require('joi');
 const { writeAndReload } = require('../services/sip/asterisk-config');
+const { sipUsernameError } = require('../utils/sip-username');
+const { ownSipHostError } = require('../utils/own-sip-host');
 
 const router = express.Router();
+
+/** The username rule (utils/sip-username.js); the form checks the same thing as you type. */
+const sipUsernameSchema = joi.string().allow('').max(255).custom((value, helpers) => {
+    const message = sipUsernameError(value);
+    return message ? helpers.message(message) : value;
+});
+
+/**
+ * Rewrite the Asterisk config, reload it, and say whether this trunk actually loaded.
+ * This used to run in the background with its result thrown away, so a trunk could save
+ * "successfully" and then fail every call with no reason shown anywhere.
+ */
+async function loadIntoAsterisk(trunk) {
+    try {
+        const result = await writeAndReload();
+        if (!result.reloaded) return { loaded: false, message: result.message };
+        if ((result.notLoaded || []).includes(trunk._id.toString())) {
+            return { loaded: false, message: 'Asterisk reloaded but did not load this trunk, so calls through it will fail. Check the host, port and transport, then open Debug for details.' };
+        }
+        return { loaded: true };
+    } catch (err) {
+        console.error('[SIP] Auto-reload failed:', err.message);
+        return { loaded: false, message: `Asterisk config could not be updated: ${err.message}` };
+    }
+}
 
 /**
  * GET /api/sip-trunks
@@ -13,8 +40,13 @@ const router = express.Router();
  */
 router.get('/', auth, async (req, res) => {
     try {
-        const trunks = await SipTrunk.find({ createdBy: req.user._id })
+        const docs = await SipTrunk.find({ createdBy: req.user._id })
             .sort({ createdAt: -1 });
+        // Flags trunks saved before the host check existed, so the list says what's wrong.
+        const trunks = await Promise.all(docs.map(async (doc) => ({
+            ...doc.toJSON(),
+            hostProblem: await ownSipHostError(doc.host, doc.port)
+        })));
 
         res.status(200).json({
             status: 'success',
@@ -51,6 +83,16 @@ router.get('/:id', auth, async (req, res) => {
 });
 
 /**
+ * POST /api/sip-trunks/check-host
+ * The form asks while the host is typed, so pasting this server's own SIP address is
+ * flagged before Save.
+ */
+router.post('/check-host', auth, async (req, res) => {
+    const error = await ownSipHostError(String(req.body?.host || '').slice(0, 255), req.body?.port);
+    res.status(200).json({ status: 'success', data: { ok: !error, message: error } });
+});
+
+/**
  * POST /api/sip-trunks
  * Create a new SIP trunk
  */
@@ -60,11 +102,12 @@ router.post('/', auth, async (req, res) => {
         host: joi.string().required().max(255),
         port: joi.number().integer().min(1).max(65535).default(5060),
         transport: joi.string().valid('udp', 'tcp', 'tls').default('udp'),
-        username: joi.string().allow('').max(255),
+        username: sipUsernameSchema,
         password: joi.string().allow('').max(255),
         authRealm: joi.string().allow('').max(255),
         defaultCallerId: joi.string().allow('').max(50),
         dialPrefix: joi.string().allow('').max(20),
+        stripPlus: joi.boolean().default(false),
         codecs: joi.string().default('PCMU,PCMA'),
         providerName: joi.string().allow('').max(100),
         region: joi.string().allow('').max(100)
@@ -72,6 +115,8 @@ router.post('/', auth, async (req, res) => {
 
     try {
         const value = await schema.validateAsync(req.body);
+        const hostError = await ownSipHostError(value.host, value.port);
+        if (hostError) return res.status(400).json({ status: 'error', field: 'host', message: hostError });
 
         const trunk = new SipTrunk({
             name: value.name,
@@ -82,6 +127,7 @@ router.post('/', auth, async (req, res) => {
             authRealm: value.authRealm || '',
             defaultCallerId: value.defaultCallerId || '',
             dialPrefix: value.dialPrefix || '',
+            stripPlus: value.stripPlus || false,
             codecs: value.codecs,
             providerName: value.providerName || '',
             region: value.region || '',
@@ -95,12 +141,11 @@ router.post('/', auth, async (req, res) => {
 
         await trunk.save();
 
-        // Auto-Regenerate and Reload Asterisk
-        writeAndReload().catch(err => console.error('[SIP] Auto-reload failed:', err.message));
+        const asterisk = await loadIntoAsterisk(trunk);
 
         res.status(201).json({
             status: 'success',
-            data: { trunk }
+            data: { trunk, asterisk }
         });
     } catch (err) {
         res.status(400).json({ status: 'error', message: err.message });
@@ -117,11 +162,12 @@ router.patch('/:id', auth, async (req, res) => {
         host: joi.string().max(255),
         port: joi.number().integer().min(1).max(65535),
         transport: joi.string().valid('udp', 'tcp', 'tls'),
-        username: joi.string().allow('').max(255),
+        username: sipUsernameSchema,
         password: joi.string().allow('').max(255),
         authRealm: joi.string().allow('').max(255),
         defaultCallerId: joi.string().allow('').max(50),
         dialPrefix: joi.string().allow('').max(20),
+        stripPlus: joi.boolean(),
         codecs: joi.string(),
         providerName: joi.string().allow('').max(100),
         region: joi.string().allow('').max(100),
@@ -140,6 +186,11 @@ router.patch('/:id', auth, async (req, res) => {
             return res.status(404).json({ status: 'error', message: 'SIP trunk not found' });
         }
 
+        if (value.host || value.port) {
+            const hostError = await ownSipHostError(value.host || trunk.host, value.port || trunk.port);
+            if (hostError) return res.status(400).json({ status: 'error', field: 'host', message: hostError });
+        }
+
         // Handle password separately (virtual setter)
         // If password is explicitly set (even empty string), update it
         if ('password' in value) {
@@ -156,12 +207,17 @@ router.patch('/:id', auth, async (req, res) => {
         Object.assign(trunk, value);
         await trunk.save();
 
-        // Auto-Regenerate and Reload Asterisk
-        writeAndReload().catch(err => console.error('[SIP] Auto-reload failed:', err.message));
+        // An inactive trunk is left out of the config on purpose, so there is nothing to check.
+        let asterisk;
+        if (trunk.status === 'inactive') {
+            writeAndReload().catch(err => console.error('[SIP] Auto-reload failed:', err.message));
+        } else {
+            asterisk = await loadIntoAsterisk(trunk);
+        }
 
         res.status(200).json({
             status: 'success',
-            data: { trunk }
+            data: { trunk, asterisk }
         });
     } catch (err) {
         res.status(400).json({ status: 'error', message: err.message });
@@ -228,7 +284,10 @@ router.post('/:id/test', auth, async (req, res) => {
         const net = require('net');
         const dgram = require('dgram');
 
-        const testResult = await new Promise((resolve) => {
+        // Our own Asterisk answers the ping, so this test used to pass for a trunk that
+        // sends every call back to this server.
+        const hostError = await ownSipHostError(trunk.host, trunk.port);
+        const testResult = hostError ? { success: false, message: hostError } : await new Promise((resolve) => {
             const timeout = 5000;
 
             if (trunk.transport === 'tcp' || trunk.transport === 'tls') {

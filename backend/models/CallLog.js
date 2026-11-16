@@ -1,5 +1,31 @@
 const mongoose = require('mongoose');
 
+/** See `meeting` below. */
+const meetingSchema = new mongoose.Schema({
+    botProvider: { type: String, default: 'attendee' },
+    botId: { type: String, default: null },
+    meetingUrl: { type: String, default: null },
+    platform: { type: String, default: null },
+    botName: { type: String, default: null },
+    respondWhen: { type: String, default: null },
+    signedIn: { type: Boolean, default: false },
+    state: { type: String, default: null },
+    stateChangedAt: { type: Date, default: null },
+    joinedAt: { type: Date, default: null },
+    endReason: { type: String, default: null },
+    /** Replies the agent generated that the "speak only when named" gate dropped. */
+    mutedReplies: { type: Number, default: 0 },
+    error: { type: String, default: null },
+    webhookTokenHash: { type: String, default: null },
+    events: [{
+        _id: false,
+        state: String,
+        eventType: String,
+        eventSubType: String,
+        at: Date,
+    }],
+}, { _id: false });
+
 const callLogSchema = new mongoose.Schema({
     campaignId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -8,7 +34,8 @@ const callLogSchema = new mongoose.Schema({
     leadId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Lead',
-        required: true
+        // A meeting bot has no lead. Phone calls always write their Lead.
+        required: function () { return this.provider !== 'meeting'; }
     },
     agentId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -37,9 +64,17 @@ const callLogSchema = new mongoose.Schema({
     },
     provider: {
         type: String,
-        enum: ['twilio', 'sip'],
+        // 'meeting' is an agent in a Zoom, Meet or Teams meeting through the
+        // owner's own Attendee bot (meetings/*).
+        enum: ['twilio', 'sip', 'meeting'],
         default: 'twilio'
     },
+    /**
+     * The meeting bot behind a `provider: 'meeting'` call (meetings/*). Absent
+     * on every other call. Attendee's own state names are kept as they arrive;
+     * `webhookTokenHash` is how a state webhook finds its call, never returned.
+     */
+    meeting: { type: meetingSchema, default: undefined },
     voiceEngine: {
         type: String,
         enum: ['classic', 'deepgram_agent', 'sarvam', 'gemini_live'],
@@ -61,7 +96,8 @@ const callLogSchema = new mongoose.Schema({
         type: String
     },
     errors: [{
-        service: { type: String, enum: ['elevenlabs', 'deepgram', 'openrouter', 'twilio', 'sarvam', 'system'] },
+        // 'sip' is the trunk or Asterisk refusing to place a call.
+        service: { type: String, enum: ['elevenlabs', 'deepgram', 'openrouter', 'twilio', 'sarvam', 'gemini', 'sip', 'system'] },
         code: String,
         message: String,
         timestamp: { type: Date, default: Date.now }
@@ -96,6 +132,26 @@ const callLogSchema = new mongoose.Schema({
         sipCause: { type: Number, default: null }
     }],
     /**
+     * Tools the agent called, in order: the account's own webhook tools,
+     * connected MCP servers' (integration) and the built-in WhatsApp tools.
+     * Written once at cleanup from the call's tool session
+     * (services/tools/agent-tool-session.js). Arguments are truncated there;
+     * results are not kept, only whether it worked.
+     */
+    toolCalls: [{
+        _id: false,
+        type: { type: String, enum: ['integration', 'webhook', 'whatsapp'], default: 'integration' },
+        toolId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tool', default: null },
+        mcpServerId: { type: mongoose.Schema.Types.ObjectId, ref: 'McpServer', default: null },
+        serverName: String,
+        tool: String,
+        arguments: { type: mongoose.Schema.Types.Mixed, default: null },
+        ok: Boolean,
+        error: { type: String, default: null },
+        durationMs: Number,
+        at: Date
+    }],
+    /**
      * Voice Quality diagnostics, accumulated by the classic pipelines during the call
      * and written once at cleanup. Latencies are measured from turn dispatch.
      */
@@ -119,6 +175,14 @@ const callLogSchema = new mongoose.Schema({
         nextSteps: String,
         aiOpinion: String
     },
+    /**
+     * Why the last analysis attempt (automatic or Analyze Now) produced nothing, in
+     * words the call's owner can act on. Cleared when an analysis succeeds.
+     */
+    analysisError: {
+        message: String,
+        at: Date
+    },
     startTime: {
         type: Date
     },
@@ -128,6 +192,9 @@ const callLogSchema = new mongoose.Schema({
 }, {
     timestamps: true
 });
+
+// A meeting bot's state webhook finds its call by the token in its URL.
+callLogSchema.index({ 'meeting.webhookTokenHash': 1 }, { sparse: true });
 
 const CallLog = mongoose.model('CallLog', callLogSchema);
 

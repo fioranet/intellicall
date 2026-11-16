@@ -23,6 +23,10 @@ export const NAMESPACES = [
     "users",
     "admin",
     "errors",
+    "tools",
+    "integrations",
+    "meetings",
+    "whatsapp",
 ] as const;
 
 type Tree = Record<string, unknown>;

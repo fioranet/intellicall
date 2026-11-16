@@ -2,16 +2,12 @@
 
 import { useTranslations } from "next-intl";
 import { useState, useEffect, useCallback } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import axios from "axios";
-import { toast } from "sonner";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, ExternalLink, Loader2, LogOut, Send } from "lucide-react";
+import { Alert, Badge, Button, Section, Switch, toast, useConfirm } from "@wixzel/react";
+import { ArrowSquareOut, SignOut, PaperPlaneTilt } from "@phosphor-icons/react";
+import { SectionLoading, SettingRow, SettingRows } from "@/components/settings/setting-row";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
 
@@ -40,6 +36,8 @@ export function SlackIntegration() {
     const t = useTranslations("settings");
     const searchParams = useSearchParams();
     const router = useRouter();
+    // The card is mounted on /integrations now and used to live on /settings: clear the query where it is.
+    const pathname = usePathname();
     const [loading, setLoading] = useState(true);
     const [disconnecting, setDisconnecting] = useState(false);
     const [sendingTest, setSendingTest] = useState(false);
@@ -51,6 +49,7 @@ export function SlackIntegration() {
         events: {},
         available: true
     });
+    const confirm = useConfirm();
 
     const fetchStatus = useCallback(async () => {
         try {
@@ -85,12 +84,12 @@ export function SlackIntegration() {
         if (p === "connected") {
             toast.success(t("toast.slackConnected"));
             fetchStatus();
-            router.replace("/settings");
+            router.replace(pathname);
         } else if (p === "error") {
             toast.error(t("toast.slackConnectFailed"));
-            router.replace("/settings");
+            router.replace(pathname);
         }
-    }, [searchParams, fetchStatus, router]);
+    }, [searchParams, fetchStatus, router, pathname]);
 
     const handleConnect = () => {
         const userStr = localStorage.getItem("user");
@@ -108,7 +107,13 @@ export function SlackIntegration() {
     };
 
     const handleDisconnect = async () => {
-        if (!confirm("Disconnect Slack? Notifications will stop arriving in the channel. You can reconnect any time.")) return;
+        const ok = await confirm({
+            title: "Disconnect Slack?",
+            description: "Notifications will stop arriving in the channel. You can reconnect any time.",
+            confirmLabel: t("disconnect"),
+            tone: "danger",
+        });
+        if (!ok) return;
         setDisconnecting(true);
         try {
             const token = localStorage.getItem("token");
@@ -157,107 +162,93 @@ export function SlackIntegration() {
     };
 
     if (loading) {
-        return (
-            <Card>
-                <CardContent className="py-10 flex items-center justify-center text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin me-2" /> {t("loading")}
-                </CardContent>
-            </Card>
-        );
+        return <SectionLoading>{t("loading")}</SectionLoading>;
     }
 
     return (
-        <Card>
-            <CardHeader>
-                <div className="flex items-start justify-between gap-4">
-                    <div>
-                        <CardTitle className="flex items-center gap-2">
-                            <Image src="/images/integrations/slack.png" alt="Slack" width={24} height={24} className="shrink-0" />
-                            Slack
-                            {status.connected && (
-                                <Badge variant="outline" className="text-green-700 border-green-200 bg-green-50 ms-2">
-                                    <CheckCircle2 className="h-3 w-3 me-1" /> {t("connected")}
-                                </Badge>
-                            )}
-                        </CardTitle>
-                        <CardDescription className="mt-1">
-                            {t("slack.description")}
-                        </CardDescription>
-                    </div>
-                    {status.connected ? (
-                        <Button
-                            variant="outline"
-                            className="text-red-600 border-red-200 hover:bg-red-50 gap-2 shrink-0"
-                            onClick={handleDisconnect}
-                            disabled={disconnecting}
-                        >
-                            {disconnecting ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
-                            {t("disconnect")}
-                        </Button>
-                    ) : (
-                        <Button
-                            className="bg-[#4A154B] hover:bg-[#3a1039] text-white gap-2 shrink-0"
-                            onClick={handleConnect}
-                            disabled={!status.available}
-                        >
-                            <ExternalLink className="h-4 w-4" />
-                            {t("slack.addToSlack")}
-                        </Button>
-                    )}
-                </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                {!status.available && (
-                    <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-                        {t("slack.notConfigured")}
-                        <code className="mx-1 px-1 py-0.5 bg-amber-100 rounded">SLACK_CLIENT_ID</code> and
-                        <code className="mx-1 px-1 py-0.5 bg-amber-100 rounded">SLACK_CLIENT_SECRET</code> {t("slack.notConfiguredSuffix")}
-                    </div>
-                )}
+        <Section
+            icon={<Image src="/images/integrations/slack.png" alt="Slack" width={16} height={16} className="size-4 object-contain" />}
+            title={
+                <span className="flex flex-wrap items-center gap-2">
+                    Slack
+                    {status.connected && <Badge tone="success" dot>{t("connected")}</Badge>}
+                </span>
+            }
+            description={t("slack.description")}
+            actions={
+                status.connected ? (
+                    <Button
+                        variant="secondary"
+                        onClick={handleDisconnect}
+                        loading={disconnecting}
+                        iconStart={<SignOut />}
+                    >
+                        {t("disconnect")}
+                    </Button>
+                ) : (
+                    <Button
+                        variant="primary"
+                        onClick={handleConnect}
+                        disabled={!status.available}
+                        iconStart={<ArrowSquareOut />}
+                    >
+                        {t("slack.addToSlack")}
+                    </Button>
+                )
+            }
+        >
+            {!status.available && (
+                <Alert tone="warning">
+                    {t("slack.notConfigured")}
+                    <code className="mx-1 rounded-xs bg-bg-muted px-1 py-0.5 font-mono">SLACK_CLIENT_ID</code> and
+                    <code className="mx-1 rounded-xs bg-bg-muted px-1 py-0.5 font-mono">SLACK_CLIENT_SECRET</code> {t("slack.notConfiguredSuffix")}
+                </Alert>
+            )}
 
-                {status.connected && (
-                    <>
-                        <div className="rounded-xl border p-4 bg-muted/20 text-sm flex items-center justify-between gap-4">
-                            <div className="space-y-1">
-                                <div className="text-xs font-bold uppercase text-muted-foreground">{t("slack.postingTo")}</div>
-                                <div className="font-medium">
-                                    {status.teamName ? `${status.teamName} ` : ""}
-                                    <span className="text-muted-foreground">#{status.channelName || t("toast.slackDefaultChannel")}</span>
-                                </div>
+            {status.connected && (
+                <>
+                    <div className="flex items-center justify-between gap-4 rounded-md bg-surface p-4 text-body-sm">
+                        <div className="flex flex-col gap-1">
+                            <div className="text-caption font-medium text-fg-muted">{t("slack.postingTo")}</div>
+                            <div className="font-medium">
+                                {status.teamName ? `${status.teamName} ` : ""}
+                                <span className="text-fg-muted">#{status.channelName || t("toast.slackDefaultChannel")}</span>
                             </div>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="gap-2"
-                                onClick={handleSendTest}
-                                disabled={sendingTest}
-                            >
-                                {sendingTest ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                                {t("slack.sendTest")}
-                            </Button>
                         </div>
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={handleSendTest}
+                            loading={sendingTest}
+                            iconStart={<PaperPlaneTilt />}
+                        >
+                            {t("slack.sendTest")}
+                        </Button>
+                    </div>
 
-                        <div className="rounded-xl border bg-muted/20 divide-y">
-                            {EVENT_DEFS.map((ev) => {
-                                const enabled = status.events[ev.key] !== false;
-                                return (
-                                    <div key={ev.key} className="flex items-start justify-between gap-4 p-4">
-                                        <div className="space-y-0.5">
-                                            <Label className="text-sm font-bold">{ev.label}</Label>
-                                            <p className="text-xs text-muted-foreground">{ev.description}</p>
-                                        </div>
+                    <SettingRows inset>
+                        {EVENT_DEFS.map((ev) => {
+                            const enabled = status.events[ev.key] !== false;
+                            return (
+                                <SettingRow
+                                    key={ev.key}
+                                    htmlFor={`slack-event-${ev.key}`}
+                                    label={ev.label}
+                                    description={ev.description}
+                                    control={
                                         <Switch
+                                            id={`slack-event-${ev.key}`}
                                             checked={enabled}
                                             disabled={savingEvent === ev.key}
                                             onCheckedChange={(v) => toggleEvent(ev.key, v)}
                                         />
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </>
-                )}
-            </CardContent>
-        </Card>
+                                    }
+                                />
+                            );
+                        })}
+                    </SettingRows>
+                </>
+            )}
+        </Section>
     );
 }

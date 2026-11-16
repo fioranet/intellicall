@@ -51,6 +51,13 @@ const sipTrunkSchema = new mongoose.Schema({
         trim: true,
         default: ''
     },
+    // When true, the leading "+" is dropped from the dialled number so the
+    // trunk receives bare digits (e.g. 7005555 instead of +7005555). Some PBXs
+    // reject a destination that starts with "+". Caller ID is unaffected.
+    stripPlus: {
+        type: Boolean,
+        default: false
+    },
     // Codec preferences (comma-separated, e.g. "PCMU,PCMA,G729")
     codecs: {
         type: String,

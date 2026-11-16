@@ -1,11 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { ChevronLeft, Mail, MapPin } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/ui/logo";
-import { ModeToggle } from "@/components/mode-toggle";
+import { Envelope, MapPin } from "@phosphor-icons/react";
+import { Card } from "@wixzel/react";
 import { Footer } from "@/components/layout/footer";
+import { PublicPageHeader } from "@/components/landing/_shared/public-page-header";
 import { getContactDisplayEmail, useSettings } from "@/components/settings-provider";
 
 export default function ContactPage() {
@@ -13,57 +11,47 @@ export default function ContactPage() {
     const contactEmail = getContactDisplayEmail(publicSite);
 
     return (
-        <div className="flex flex-col min-h-screen bg-background text-foreground font-sora">
-            <header className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-border px-6 py-4">
-                <div className="max-w-7xl mx-auto flex items-center justify-between">
-                    <Link href="/">
-                        <Logo width={180} height={45} variant="auto" />
-                    </Link>
-                    <div className="flex items-center gap-4">
-                        <ModeToggle />
-                        <Button asChild variant="ghost" className="rounded-full">
-                            <Link href="/"><ChevronLeft className="mr-2 h-4 w-4" /> Back to Home</Link>
-                        </Button>
-                    </div>
-                </div>
-            </header>
+        <div className="flex min-h-screen flex-col bg-bg text-fg">
+            <PublicPageHeader />
 
-            <main className="pt-32 pb-20 px-6">
-                <div className="max-w-2xl mx-auto space-y-12">
-                    <div className="space-y-6">
-                        <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground">
-                            Get in <span style={{ color: branding.primaryColor }}>Touch</span>
+            <main className="flex-1 px-6 pb-24 pt-18">
+                <div className="mx-auto flex max-w-2xl flex-col gap-12">
+                    <div className="flex flex-col gap-6">
+                        <h1 className="text-balance text-display-lg text-fg md:text-display-xl">
+                            Get in <span className="text-accent-ink">Touch</span>
                         </h1>
-                        <p className="text-xl text-muted-foreground leading-relaxed">
+                        <p className="text-pretty text-body-lg text-fg-muted">
                             Have questions about how {branding.appName} can help your business? We're here to help.
                         </p>
                     </div>
 
-                    <div className="flex items-start gap-4">
-                        <div className="p-3 bg-muted rounded-2xl" style={{ color: branding.primaryColor }}>
-                            <Mail className="h-6 w-6" />
+                    <Card className="divide-y divide-border">
+                        <div className="flex items-start gap-4 p-5">
+                            <span className="grid size-11 shrink-0 place-items-center rounded-md bg-accent-subtle text-accent-ink">
+                                <Envelope className="size-6" />
+                            </span>
+                            <div className="flex min-w-0 flex-col gap-0.5">
+                                <h4 className="text-heading-sm text-fg">Email Us</h4>
+                                <p className="text-body-md text-fg-muted">
+                                    <a href={`mailto:${contactEmail}`} className="ltr-data break-all underline-offset-2 transition-colors hover:text-accent-ink hover:underline">
+                                        {contactEmail}
+                                    </a>
+                                </p>
+                            </div>
                         </div>
-                        <div>
-                            <h4 className="font-bold">Email Us</h4>
-                            <p className="text-muted-foreground">
-                                <a href={`mailto:${contactEmail}`} className="hover:underline" style={{ color: "inherit" }}>
-                                    {contactEmail}
-                                </a>
-                            </p>
-                        </div>
-                    </div>
 
-                    {publicSite.hqAddress && (
-                        <div className="flex items-start gap-4">
-                            <div className="p-3 bg-muted rounded-2xl" style={{ color: branding.primaryColor }}>
-                                <MapPin className="h-6 w-6" />
+                        {publicSite.hqAddress && (
+                            <div className="flex items-start gap-4 p-5">
+                                <span className="grid size-11 shrink-0 place-items-center rounded-md bg-accent-subtle text-accent-ink">
+                                    <MapPin className="size-6" />
+                                </span>
+                                <div className="flex min-w-0 flex-col gap-0.5">
+                                    <h4 className="text-heading-sm text-fg">Headquarters</h4>
+                                    <p className="text-body-md text-fg-muted">{publicSite.hqAddress}</p>
+                                </div>
                             </div>
-                            <div>
-                                <h4 className="font-bold">Headquarters</h4>
-                                <p className="text-muted-foreground">{publicSite.hqAddress}</p>
-                            </div>
-                        </div>
-                    )}
+                        )}
+                    </Card>
                 </div>
             </main>
             <Footer />

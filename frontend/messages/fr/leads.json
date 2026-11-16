@@ -48,10 +48,14 @@
   },
   "importCsv": {
     "trigger": "Importer un CSV", "title": "Importer des prospects depuis un CSV",
-    "description": "Téléversez un fichier CSV avec les colonnes : name, phone, company (facultatif)",
+    "description": "Téléversez un fichier CSV avec les colonnes : name, phone, company (facultatif). Écrivez les numéros avec l’indicatif du pays, par exemple +1 415 555 2671.",
     "fileLabel": "Fichier CSV", "selected": "Sélectionné :",
     "tagsLabel": "Ajouter des étiquettes à tous (séparées par des virgules)",
-    "tagsPlaceholder": "nouveaux-prospects, campagne-1"
+    "tagsPlaceholder": "nouveaux-prospects, campagne-1",
+    "issues": {
+      "noPhoneColumn": "Le fichier n’a pas de colonne « phone » : aucun prospect ne serait importé. Nommez la colonne phone (en minuscules).",
+      "rowsWithoutPhone": "{count, plural, one {# ligne n’a pas de numéro de téléphone et sera ignorée} other {# lignes n’ont pas de numéro de téléphone et seront ignorées}}."
+    }
   },
   "toast": {
     "fetchFailed": "Échec de la récupération des prospects",

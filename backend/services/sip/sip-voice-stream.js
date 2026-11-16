@@ -8,6 +8,8 @@ const Lead = require('../../models/Lead');
 const CallLog = require('../../models/CallLog');
 const { deepgramModel, openRouterModel } = require('../../utils/models');
 const { buildVoiceSystemPrompt } = require('../../utils/agent-prompt');
+const { attachToolSession, finishToolSession } = require('../tools/attach');
+const { MAX_TOOL_ROUNDS, toolFiller } = require('../tools/tool-rounds');
 const { applyMergeFields } = require('../../utils/merge-fields');
 const { analyzeCallLog } = require('../../utils/analyzer');
 const { shouldInterrupt } = require('../../utils/turn-taking');
@@ -278,6 +280,8 @@ class SipVoiceStream {
         this.onEndCall = null;
         /** Human Transfer — set by sip-manager once the call is tracked. See setTransferHandler. */
         this.transferHandler = null;
+        /** The call's tools (services/tools/agent-tool-session.js), or null. */
+        this.toolSession = null;
         /** True once the caller has been handed to a human and this engine is out of the bridge. */
         this.transferred = false;
         this._endCallPending = false;
@@ -360,6 +364,9 @@ class SipVoiceStream {
                 }
             }
 
+            // The agent's tools (webhook tools, connected apps, WhatsApp). Never blocks the call.
+            await attachToolSession(this, this.agent, this.userId, { testCall: this.testCall, callId: this.callId, lead: this.lead, logPrefix: `[SIP] [${this.callId}]` });
+
             this.active = true;
             await this._openRtpSocket();
             // Defer Deepgram/ElevenLabs until bridge is ready (setBridgeReady). Opening them
@@ -409,6 +416,7 @@ class SipVoiceStream {
         this._cleanedUp = true;
         this.active = false;
         console.log(`🧹 [SIP] [${this.callId}] cleanup | transcriptLen=${this.transcript.length} queueLen=${this.transcriptQueue.length}`);
+        if (this.toolSession) { finishToolSession(this.toolSession, this.callId); this.toolSession = null; }
         if (this.pendingPostInterruptTimer) { clearTimeout(this.pendingPostInterruptTimer); this.pendingPostInterruptTimer = null; }
         if (this.pendingVadInterruptTimer) { clearTimeout(this.pendingVadInterruptTimer); this.pendingVadInterruptTimer = null; }
         if (this.pendingIncompleteTimer) { clearTimeout(this.pendingIncompleteTimer); this.pendingIncompleteTimer = null; }
@@ -756,6 +764,30 @@ class SipVoiceStream {
      * Enable Human Transfer for this call. `fn(destinationId, reason)` resolves the JSON
      * string that transferCall() produced.
      */
+    /** Give this call its tools (services/tools/agent-tool-session.js). */
+    setToolSession(session) {
+        this.toolSession = session || null;
+    }
+
+    /**
+     * ElevenLabs closes its input stream once a flushed utterance is spoken, so a
+     * second utterance in the same turn (a tool filler, then the answer) needs a
+     * fresh socket. Same dance as the appointment narration.
+     */
+    async _freshTtsStream() {
+        if (this.elConnection) {
+            try { this.elConnection.terminate(); } catch (_) { }
+            this.elConnection = null;
+        }
+        this.elReady = false;
+        await this._initElevenLabs();
+        let attempts = 0;
+        while (!this.elReady && attempts < 15) {
+            await new Promise(r => setTimeout(r, 100));
+            attempts++;
+        }
+    }
+
     setTransferHandler(fn) {
         this.transferHandler = fn;
     }
@@ -962,7 +994,9 @@ class SipVoiceStream {
         // Use specialized phonecall models for English, fallback to nova-3 for ALL other languages.
         // Nova-2-phonecall is optimized for telephony but lacks support for many global languages.
         // Nova-3 is superior for multilingual/global language support and real-time performance.
-        const phoneSupported = ['en', 'en-US', 'en-GB', 'en-AU', 'en-IN'];
+        // Deepgram lists nova-2-phonecall for en / en-US only; other English accents go to nova-3,
+        // which covers en-GB, en-AU, en-IN and en-NZ.
+        const phoneSupported = ['en', 'en-US'];
         const selectedModel = phoneSupported.includes(dgLanguage) ? 'nova-2-phonecall' : 'nova-3';
         console.log(`🔌 [SIP] Deepgram Model: ${selectedModel}, Language: ${dgLanguage}`);
 
@@ -1341,6 +1375,8 @@ class SipVoiceStream {
                 agent: this.agent, settings: this.settings, kbContent: this.kbSystemContent,
                 commandTags: true, lead: this.lead,
                 humanTransfer: !!this.transferHandler,
+                connectedApps: this.toolSession ? this.toolSession.appNames() : [],
+                toolNames: this.toolSession ? this.toolSession.tools.filter(t => t.type !== 'integration').map(t => t.name) : [],
             });
 
             console.log(`🧠 [SIP] AI Streaming...`);
@@ -1351,13 +1387,25 @@ class SipVoiceStream {
                 ? this.transcript.slice(-MAX_HISTORY)
                 : this.transcript;
 
+            // The agent's tools as OpenAI functions, or null, in which case the request
+            // body is exactly what it always was (the Voice Quality compat contract).
+            const nativeTools = this.toolSession ? this.toolSession.openAiTools() : null;
+            // This turn's tool exchange, in OpenAI's shape. Kept out of this.transcript,
+            // which is persisted as plain {role, content} lines and sliced to the last 20:
+            // a slice that began on an orphaned `tool` message would be refused.
+            const toolMessages = [];
+            let toolRounds = 0;
+            let fullReply = "";
+
+            for (;;) {
             const response = await axios({
                 method: 'post',
                 url: 'https://openrouter.ai/api/v1/chat/completions',
                 data: {
                     model: openRouterModel,
-                    messages: [{ role: 'system', content: systemPrompt }, ...recentTranscript],
-                    stream: true
+                    messages: [{ role: 'system', content: systemPrompt }, ...recentTranscript, ...toolMessages],
+                    stream: true,
+                    ...(nativeTools ? { tools: nativeTools, tool_choice: toolRounds >= MAX_TOOL_ROUNDS ? 'none' : 'auto' } : {})
                 },
                 headers: {
                     'Authorization': `Bearer ${this.settings.openRouterKey}`,
@@ -1367,7 +1415,8 @@ class SipVoiceStream {
                 signal: this.abortController.signal
             });
 
-            let fullReply = "";
+            let roundReply = "";
+            const toolCalls = [];
             let firstContentReceived = false;
             // Prosody-aware (or legacy, per the agent's preset) TTS text chunking —
             // sends linguistically complete clauses instead of flushing on every comma.
@@ -1383,6 +1432,15 @@ class SipVoiceStream {
 
                     try {
                         const json = JSON.parse(line.slice(6));
+                        // A tool call streams as fragments keyed by index: the id and name
+                        // arrive once, the arguments a few characters at a time.
+                        for (const tc of json.choices?.[0]?.delta?.tool_calls || []) {
+                            const i = Number.isInteger(tc.index) ? tc.index : toolCalls.length;
+                            const slot = toolCalls[i] || (toolCalls[i] = { id: '', name: '', arguments: '' });
+                            if (tc.id) slot.id = tc.id;
+                            if (tc.function?.name) slot.name += tc.function.name;
+                            if (tc.function?.arguments) slot.arguments += tc.function.arguments;
+                        }
                         const content = json.choices?.[0]?.delta?.content || "";
                         if (content) {
                             if (!firstContentReceived) {
@@ -1390,7 +1448,7 @@ class SipVoiceStream {
                                 this.isAISpeaking = true;
                                 if (this.turnTimings && !this.turnTimings.llmFirstTokenAt) this.turnTimings.llmFirstTokenAt = Date.now();
                             }
-                            fullReply += content;
+                            roundReply += content;
                             for (const piece of chunker.push(content)) {
                                 const toSend = stripAppointmentCommands(piece);
                                 if (toSend) this._sendToTTS(toSend, false);
@@ -1400,14 +1458,54 @@ class SipVoiceStream {
                 }
             }
 
-            // Final flush (strip appointment commands so [[SLOTS]] etc. are never spoken)
-            const remainder = chunker.drain();
-            if (remainder && !this.interrupted) {
-                const toSend = stripAppointmentCommands(remainder);
-                if (toSend) this._sendToTTS(toSend, true);
-                else this._sendToTTS("", true);
-            } else if (!this.interrupted) {
-                this._sendToTTS("", true);
+                const pendingTools = toolCalls.filter(tc => tc && tc.name && this.toolSession?.has(tc.name));
+
+                // Final flush (strip appointment commands so [[SLOTS]] etc. are never spoken)
+                const remainder = chunker.drain();
+                if (remainder && !this.interrupted) {
+                    const toSend = stripAppointmentCommands(remainder);
+                    if (toSend) this._sendToTTS(toSend, true);
+                    else this._sendToTTS("", true);
+                } else if (!this.interrupted && (roundReply || pendingTools.length === 0)) {
+                    this._sendToTTS("", true); // Ensure generation trigger
+                }
+                fullReply += (fullReply && roundReply ? ' ' : '') + roundReply;
+
+                if (pendingTools.length === 0 || this.interrupted || toolRounds >= MAX_TOOL_ROUNDS) break;
+                toolRounds++;
+
+                // Models often go straight to the tool without a word. The caller would
+                // hear dead air for as long as the endpoint takes, so say something.
+                if (!roundReply.trim()) {
+                    const filler = toolFiller(this.agent?.language);
+                    this._sendToTTS(filler, true);
+                    fullReply += (fullReply ? ' ' : '') + filler;
+                }
+
+                toolMessages.push({
+                    role: 'assistant',
+                    content: roundReply || null,
+                    tool_calls: pendingTools.map((tc, i) => ({
+                        id: tc.id || `call_${toolRounds}_${i}`,
+                        type: 'function',
+                        function: { name: tc.name, arguments: tc.arguments || '{}' },
+                    })),
+                });
+                for (const [i, tc] of pendingTools.entries()) {
+                    let args = {};
+                    try { args = tc.arguments ? JSON.parse(tc.arguments) : {}; } catch (_) { args = {}; }
+                    console.log(`🛠️ [LLM] [${this.callId}] tool: ${tc.name}(${(tc.arguments || '').substring(0, 120)})`);
+                    const result = await this.toolSession.call(tc.name, args, { signal: this.abortController?.signal });
+                    toolMessages.push({ role: 'tool', tool_call_id: tc.id || `call_${toolRounds}_${i}`, content: result });
+                    this.transcript.push({ role: 'system', content: `TOOL RESULT (${tc.name}): ${result}` });
+                }
+                if (this.interrupted || !this.active) break;
+
+                // The filler ended its TTS stream, and ElevenLabs closes a stream once it
+                // has spoken it. Start a fresh one for the answer, as the appointment
+                // narration does.
+                await this._freshTtsStream();
+                if (this.interrupted) break;
             }
 
             if (fullReply && !this.interrupted) {

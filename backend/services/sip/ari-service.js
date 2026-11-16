@@ -200,6 +200,9 @@ async function originateCall(trunkId, destination, trunkHost, metadata = {}) {
     // match it literally, so the leading '+' has to go when one is configured.
     const dialPrefix = (metadata.dialPrefix || '').replace(/\D/g, '');
     if (dialPrefix) cleanNumber = `${dialPrefix}${cleanNumber.replace(/^\+/, '')}`;
+    // Some PBXs reject a destination that starts with "+". When the trunk opts
+    // in, send bare digits instead (no tech prefix is involved here).
+    else if (metadata.stripPlus) cleanNumber = cleanNumber.replace(/^\+/, '');
 
     const dialString = `PJSIP/${cleanNumber}@${endpointName}`;
 

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
+    Button,
     Dialog,
     DialogContent,
     DialogDescription,
@@ -10,13 +10,15 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Upload } from "lucide-react";
-import { toast } from "sonner";
+    Field,
+    Input,
+    toast,
+} from "@wixzel/react";
+import { UploadSimple } from "@phosphor-icons/react";
 import Papa from "papaparse";
 import axios from "axios";
+import { leadPhoneSummary } from "@/lib/phone-checks";
+import { FormIssues, type FormIssue } from "@/components/ui/form-issues";
 
 import { useTranslations } from "next-intl";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
@@ -28,10 +30,31 @@ export function ImportCsvDialog({ onSuccess }: { onSuccess?: () => void }) {
     const [loading, setLoading] = useState(false);
     const [file, setFile] = useState<File | null>(null);
     const [tags, setTags] = useState("");
+    // The file's number problems, shown as soon as it is picked rather than after the calls fail.
+    const [issues, setIssues] = useState<FormIssue[]>([]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setIssues([]);
         if (e.target.files && e.target.files[0]) {
-            setFile(e.target.files[0]);
+            const picked = e.target.files[0];
+            setFile(picked);
+            Papa.parse(picked, {
+                header: true,
+                skipEmptyLines: true,
+                complete: (results) => {
+                    const rows = results.data as Record<string, string>[];
+                    const hasPhoneColumn = (results.meta.fields || []).includes("phone");
+                    const found: FormIssue[] = [];
+                    if (rows.length > 0 && !hasPhoneColumn) {
+                        found.push({ level: "error", message: t("importCsv.issues.noPhoneColumn") });
+                    }
+                    const missing = rows.filter((r) => !String(r.phone || "").trim()).length;
+                    if (missing > 0 && hasPhoneColumn) {
+                        found.push({ level: "warning", message: t("importCsv.issues.rowsWithoutPhone", { count: missing }) });
+                    }
+                    setIssues([...found, ...leadPhoneSummary(rows.map((r) => String(r.phone || "")).filter((p) => p.trim()), c)]);
+                },
+            });
         }
     };
 
@@ -81,6 +104,7 @@ export function ImportCsvDialog({ onSuccess }: { onSuccess?: () => void }) {
                     setOpen(false);
                     setFile(null);
                     setTags("");
+                    setIssues([]);
                     onSuccess?.();
                 } catch (err: any) {
                     toast.error(err.response?.data?.message || t("toast.importFailed"));
@@ -98,50 +122,47 @@ export function ImportCsvDialog({ onSuccess }: { onSuccess?: () => void }) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline">
-                    <Upload className="me-2 h-4 w-4" />
+                <Button variant="secondary" iconStart={<UploadSimple />}>
                     {t("importCsv.trigger")}
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent size="sm">
                 <DialogHeader>
                     <DialogTitle>{t("importCsv.title")}</DialogTitle>
                     <DialogDescription>
                         {t("importCsv.description")}
                     </DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleSubmit}>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
-                            <Label htmlFor="csv-file">{t("importCsv.fileLabel")}</Label>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                    <div className="flex flex-col gap-4">
+                        <Field
+                            id="csv-file"
+                            label={t("importCsv.fileLabel")}
+                            hint={file ? `${t("importCsv.selected")} ${file.name}` : undefined}
+                        >
+                            {/* Wixzel has no file picker yet: a filled Input with the native button blended in. */}
                             <Input
-                                id="csv-file"
                                 type="file"
                                 accept=".csv"
                                 onChange={handleFileChange}
                                 required
+                                className="file:me-3 file:cursor-pointer file:border-0 file:bg-transparent file:font-medium file:text-fg"
                             />
-                            {file && (
-                                <p className="text-sm text-muted-foreground">
-                                    {t("importCsv.selected")} {file.name}
-                                </p>
-                            )}
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="bulk-tags">{t("importCsv.tagsLabel")}</Label>
+                            <FormIssues issues={issues} />
+                        </Field>
+                        <Field id="bulk-tags" label={t("importCsv.tagsLabel")}>
                             <Input
-                                id="bulk-tags"
                                 placeholder={t("importCsv.tagsPlaceholder")}
                                 value={tags}
                                 onChange={(e) => setTags(e.target.value)}
                             />
-                        </div>
+                        </Field>
                     </div>
                     <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                        <Button type="button" variant="secondary" onClick={() => setOpen(false)}>
                             {c("actions.cancel")}
                         </Button>
-                        <Button type="submit" disabled={loading}>
+                        <Button type="submit" variant="primary" loading={loading}>
                             {loading ? "Uploading..." : "Upload"}
                         </Button>
                     </DialogFooter>

@@ -4,14 +4,9 @@ import { useTranslations } from "next-intl";
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import axios from "axios";
-import { toast } from "sonner";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Download, ExternalLink, Loader2, LogOut, Send, Workflow } from "lucide-react";
+import { Badge, Button, CopyField, Input, Section, Switch, toast, useConfirm } from "@wixzel/react";
+import { CheckCircle, DownloadSimple, ArrowSquareOut, SignOut, PaperPlaneTilt, FlowArrow } from "@phosphor-icons/react";
+import { SectionLoading, SettingRow, SettingRows } from "@/components/settings/setting-row";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
 
@@ -42,6 +37,7 @@ export function N8nIntegration() {
     const [savingEvent, setSavingEvent] = useState<string | null>(null);
     const [urlInput, setUrlInput] = useState("");
     const [status, setStatus] = useState<Status>({ connected: false, url: "", events: {} });
+    const confirm = useConfirm();
 
     const fetchStatus = useCallback(async () => {
         try {
@@ -93,7 +89,13 @@ export function N8nIntegration() {
     };
 
     const handleDisconnect = async () => {
-        if (!confirm("Disconnect n8n? Events will stop flowing to your workflow. You can reconnect any time.")) return;
+        const ok = await confirm({
+            title: "Disconnect n8n?",
+            description: "Events will stop flowing to your workflow. You can reconnect any time.",
+            confirmLabel: t("disconnect"),
+            tone: "danger",
+        });
+        if (!ok) return;
         setDisconnecting(true);
         try {
             const token = localStorage.getItem("token");
@@ -142,148 +144,133 @@ export function N8nIntegration() {
     };
 
     if (loading) {
-        return (
-            <Card>
-                <CardContent className="py-10 flex items-center justify-center text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin me-2" /> {t("loading")}
-                </CardContent>
-            </Card>
-        );
+        return <SectionLoading>{t("loading")}</SectionLoading>;
     }
 
     return (
-        <Card>
-            <CardHeader>
-                <div className="flex items-start justify-between gap-4">
-                    <div>
-                        <CardTitle className="flex items-center gap-2">
-                            <Image src="/images/integrations/n8n.png" alt="n8n" width={24} height={24} className="shrink-0" />
-                            n8n
-                            {status.connected && (
-                                <Badge variant="outline" className="text-green-700 border-green-200 bg-green-50 ms-2">
-                                    <CheckCircle2 className="h-3 w-3 me-1" /> {t("connected")}
-                                </Badge>
-                            )}
-                        </CardTitle>
-                        <CardDescription className="mt-1">
-                            {t("n8n.description")}
-                        </CardDescription>
+        <Section
+            icon={<Image src="/images/integrations/n8n.png" alt="n8n" width={16} height={16} className="size-4 object-contain" />}
+            title={
+                <span className="flex flex-wrap items-center gap-2">
+                    n8n
+                    {status.connected && <Badge tone="success" dot>{t("connected")}</Badge>}
+                </span>
+            }
+            description={t("n8n.description")}
+            actions={
+                status.connected && (
+                    <Button
+                        variant="secondary"
+                        onClick={handleDisconnect}
+                        loading={disconnecting}
+                        iconStart={<SignOut />}
+                    >
+                        {t("disconnect")}
+                    </Button>
+                )
+            }
+        >
+            {!status.connected && (
+                <>
+                    <div className="flex flex-col gap-1 rounded-md bg-surface p-4 text-caption text-fg-muted">
+                        <p className="text-body-sm font-medium text-fg">{t("n8n.howToTitle")}</p>
+                        <p>{t.rich("n8n.step1", { b: (chunks) => <span className="font-medium text-fg">{chunks}</span>, code: (chunks) => <span className="font-medium text-fg">{chunks}</span> })}</p>
+                        <p>{t.rich("n8n.step2", { b: (chunks) => <span className="font-medium text-fg">{chunks}</span> })}</p>
+                        <p>{t.rich("n8n.step3", { shape: "{ event, timestamp, data }", code: (chunks) => <code className="rounded-xs bg-bg-muted px-1 py-0.5 font-mono">{chunks}</code> })}</p>
                     </div>
-                    {status.connected && (
+
+                    <div className="flex gap-2">
+                        <Input
+                            placeholder={t("n8n.urlPlaceholder")}
+                            value={urlInput}
+                            onChange={(e) => setUrlInput(e.target.value)}
+                            className="font-mono"
+                        />
                         <Button
-                            variant="outline"
-                            className="text-red-600 border-red-200 hover:bg-red-50 gap-2 shrink-0"
-                            onClick={handleDisconnect}
-                            disabled={disconnecting}
+                            variant="primary"
+                            onClick={handleConnect}
+                            loading={connecting}
+                            iconStart={<CheckCircle />}
                         >
-                            {disconnecting ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
-                            {t("disconnect")}
+                            {t("n8n.connect")}
                         </Button>
-                    )}
-                </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                {!status.connected && (
-                    <>
-                        <div className="rounded-xl border p-4 bg-muted/20 text-xs text-muted-foreground space-y-1">
-                            <p className="text-sm font-bold text-foreground">{t("n8n.howToTitle")}</p>
-                            <p>{t.rich("n8n.step1", { b: (chunks) => <span className="font-medium text-foreground">{chunks}</span>, code: (chunks) => <span className="font-medium text-foreground">{chunks}</span> })}</p>
-                            <p>{t.rich("n8n.step2", { b: (chunks) => <span className="font-medium text-foreground">{chunks}</span> })}</p>
-                            <p>{t.rich("n8n.step3", { shape: "{ event, timestamp, data }", code: (chunks) => <code className="px-1 py-0.5 bg-muted rounded">{chunks}</code> })}</p>
-                        </div>
+                    </div>
+                </>
+            )}
 
-                        <div className="flex gap-2">
-                            <Input
-                                placeholder={t("n8n.urlPlaceholder")}
-                                value={urlInput}
-                                onChange={(e) => setUrlInput(e.target.value)}
-                                className="font-mono text-sm"
-                            />
-                            <Button
-                                className="bg-[#EA4B71] hover:bg-[#d33a5f] text-white gap-2 shrink-0"
-                                onClick={handleConnect}
-                                disabled={connecting}
-                            >
-                                {connecting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-                                {t("n8n.connect")}
-                            </Button>
+            {status.connected && (
+                <>
+                    <div className="flex flex-wrap items-end gap-3 rounded-md bg-surface p-4">
+                        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                            <div className="text-caption font-medium text-fg-muted">{t("n8n.deliveringTo")}</div>
+                            <CopyField value={status.url} />
                         </div>
-                    </>
-                )}
+                        <Button
+                            variant="secondary"
+                            onClick={handleSendTest}
+                            loading={sendingTest}
+                            iconStart={<PaperPlaneTilt />}
+                        >
+                            {t("n8n.sendTest")}
+                        </Button>
+                    </div>
 
-                {status.connected && (
-                    <>
-                        <div className="rounded-xl border p-4 bg-muted/20 text-sm flex items-center justify-between gap-4 flex-wrap">
-                            <div className="space-y-1 min-w-0">
-                                <div className="text-xs font-bold uppercase text-muted-foreground">{t("n8n.deliveringTo")}</div>
-                                <div className="font-mono text-xs truncate max-w-[26rem]">{status.url}</div>
-                            </div>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="gap-2"
-                                onClick={handleSendTest}
-                                disabled={sendingTest}
-                            >
-                                {sendingTest ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                                {t("n8n.sendTest")}
-                            </Button>
-                        </div>
-
-                        <div className="rounded-xl border bg-muted/20 divide-y">
-                            {EVENT_KEYS.map((key) => {
-                                const enabled = status.events[key] !== false;
-                                return (
-                                    <div key={key} className="flex items-start justify-between gap-4 p-4">
-                                        <div className="space-y-0.5">
-                                            <Label className="text-sm font-bold">{t(`n8n.events.${key}.label`)}</Label>
-                                            <p className="text-xs text-muted-foreground">{t(`n8n.events.${key}.description`)}</p>
-                                        </div>
+                    <SettingRows inset>
+                        {EVENT_KEYS.map((key) => {
+                            const enabled = status.events[key] !== false;
+                            return (
+                                <SettingRow
+                                    key={key}
+                                    htmlFor={`n8n-event-${key}`}
+                                    label={t(`n8n.events.${key}.label`)}
+                                    description={t(`n8n.events.${key}.description`)}
+                                    control={
                                         <Switch
+                                            id={`n8n-event-${key}`}
                                             checked={enabled}
                                             disabled={savingEvent === key}
                                             onCheckedChange={(v) => toggleEvent(key, v)}
                                         />
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </>
-                )}
+                                    }
+                                />
+                            );
+                        })}
+                    </SettingRows>
+                </>
+            )}
 
-                <div className="rounded-xl border bg-muted/20">
-                    <div className="p-4 pb-2">
-                        <Label className="text-sm font-bold flex items-center gap-2">
-                            <Workflow className="h-4 w-4" /> {t("n8n.templatesTitle")}
-                        </Label>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                            {t("n8n.templatesHint")}
-                        </p>
-                    </div>
-                    <div className="divide-y">
-                        {TEMPLATES.map((tpl) => (
-                            <div key={tpl.file} className="flex items-center justify-between gap-4 p-4">
-                                <div className="space-y-0.5">
-                                    <p className="text-sm font-semibold">{t(`n8n.templates.${tpl.key}.name`)}</p>
-                                    <p className="text-xs text-muted-foreground">{t(`n8n.templates.${tpl.key}.description`)}</p>
-                                </div>
-                                <a href={`/n8n-templates/${tpl.file}`} download className="shrink-0">
-                                    <Button variant="outline" size="sm" className="gap-2">
-                                        <Download className="h-4 w-4" /> {t("n8n.download")}
-                                    </Button>
-                                </a>
-                            </div>
-                        ))}
-                    </div>
+            <div className="flex flex-col gap-3 rounded-md bg-surface p-4">
+                <div className="flex flex-col gap-0.5">
+                    <h3 className="flex items-center gap-2 text-body-sm font-medium">
+                        <FlowArrow className="size-4 text-fg-muted" /> {t("n8n.templatesTitle")}
+                    </h3>
+                    <p className="text-caption text-fg-muted">
+                        {t("n8n.templatesHint")}
+                    </p>
                 </div>
+                <div className="flex flex-col divide-y divide-border">
+                    {TEMPLATES.map((tpl) => (
+                        <div key={tpl.file} className="flex items-center justify-between gap-4 py-3 last:pb-0">
+                            <div className="flex min-w-0 flex-col gap-0.5">
+                                <p className="text-body-sm font-medium">{t(`n8n.templates.${tpl.key}.name`)}</p>
+                                <p className="text-caption text-fg-muted">{t(`n8n.templates.${tpl.key}.description`)}</p>
+                            </div>
+                            <Button variant="secondary" size="sm" asChild iconStart={<DownloadSimple />}>
+                                <a href={`/n8n-templates/${tpl.file}`} download>
+                                    {t("n8n.download")}
+                                </a>
+                            </Button>
+                        </div>
+                    ))}
+                </div>
+            </div>
 
-                <p className="text-[11px] text-muted-foreground flex items-center gap-1">
-                    {t("n8n.newToN8n")}{" "}
-                    <a href="https://n8n.io" target="_blank" rel="noreferrer" className="underline inline-flex items-center gap-0.5">
-                        n8n.io <ExternalLink className="h-3 w-3" />
-                    </a>
-                </p>
-            </CardContent>
-        </Card>
+            <p className="flex items-center gap-1 text-caption text-fg-muted">
+                {t("n8n.newToN8n")}{" "}
+                <a href="https://n8n.io" target="_blank" rel="noreferrer" className="inline-flex items-center gap-0.5 text-accent-ink underline">
+                    n8n.io <ArrowSquareOut className="size-3" />
+                </a>
+            </p>
+        </Section>
     );
 }

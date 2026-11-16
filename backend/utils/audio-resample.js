@@ -137,4 +137,81 @@ class Mulaw8kToPcm16k {
     }
 }
 
-module.exports = { Pcm24kToMulaw8k, Mulaw8kToPcm16k, TAPS, NUM_TAPS, DECIMATION };
+
+// ─── Any whole-ratio rate → 8 kHz µ-law ──────────────────────
+
+/**
+ * PCM s16le at `sourceRate` (8000, 16000 or 24000) → µ-law @ 8 kHz, for
+ * transports that hand over wideband audio (a meeting bot's mixed stream).
+ *
+ * The same windowed-sinc low-pass and polyphase walk as Pcm24kToMulaw8k, with
+ * the taps designed for the source rate; 8000 passes straight to the encoder.
+ */
+const tapsCache = new Map();
+function tapsFor(sourceRate) {
+    if (tapsCache.has(sourceRate)) return tapsCache.get(sourceRate);
+    const taps = new Float32Array(NUM_TAPS);
+    const fc = CUTOFF_HZ / sourceRate;
+    const mid = (NUM_TAPS - 1) / 2;
+    let sum = 0;
+    for (let i = 0; i < NUM_TAPS; i++) {
+        const n = i - mid;
+        const sinc = n === 0 ? 2 * fc : Math.sin(2 * Math.PI * fc * n) / (Math.PI * n);
+        const hamming = 0.54 - 0.46 * Math.cos((2 * Math.PI * i) / (NUM_TAPS - 1));
+        taps[i] = sinc * hamming;
+        sum += taps[i];
+    }
+    for (let i = 0; i < NUM_TAPS; i++) taps[i] /= sum;
+    tapsCache.set(sourceRate, taps);
+    return taps;
+}
+
+class PcmToMulaw8k {
+    /** @param {number} sourceRate 8000, 16000 or 24000 */
+    constructor(sourceRate) {
+        if (![8000, 16000, 24000].includes(sourceRate)) throw new Error(`Unsupported source rate ${sourceRate}`);
+        this.sourceRate = sourceRate;
+        this._factor = sourceRate / 8000;
+        this._taps = this._factor === 1 ? null : tapsFor(sourceRate);
+        this._history = new Float32Array(NUM_TAPS - 1);
+        this._nextOut = 0;
+        this._consumed = 0;
+    }
+
+    /**
+     * @param {Buffer} pcm  PCM s16le at the source rate
+     * @returns {Buffer}    G.711 µ-law at 8 kHz
+     */
+    process(pcm) {
+        const inCount = pcm.length >> 1;
+        if (inCount === 0) return Buffer.alloc(0);
+        if (!this._taps) {
+            const out = Buffer.allocUnsafe(inCount);
+            for (let i = 0; i < inCount; i++) out[i] = linearToMulawSample(pcm.readInt16LE(i * 2));
+            return out;
+        }
+        const histLen = NUM_TAPS - 1;
+        const window = new Float32Array(histLen + inCount);
+        window.set(this._history, 0);
+        for (let i = 0; i < inCount; i++) window[histLen + i] = pcm.readInt16LE(i * 2);
+
+        const end = this._consumed + inCount;
+        const out = Buffer.allocUnsafe(Math.max(0, Math.ceil((end - this._nextOut) / this._factor)));
+        let written = 0;
+        for (let n = this._nextOut; n < end; n += this._factor) {
+            const p = n - this._consumed + histLen;
+            let acc = 0;
+            for (let t = 0; t < NUM_TAPS; t++) acc += this._taps[t] * window[p - t];
+            let sample = Math.round(acc);
+            if (sample > 32767) sample = 32767;
+            else if (sample < -32768) sample = -32768;
+            out[written++] = linearToMulawSample(sample);
+            this._nextOut = n + this._factor;
+        }
+        this._consumed = end;
+        this._history.set(window.subarray(window.length - histLen));
+        return written === out.length ? out : out.subarray(0, written);
+    }
+}
+
+module.exports = { Pcm24kToMulaw8k, Mulaw8kToPcm16k, PcmToMulaw8k, TAPS, NUM_TAPS, DECIMATION };

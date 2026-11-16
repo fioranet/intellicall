@@ -29,7 +29,8 @@
     "port": "{transport} · Port {port}",
     "never": "Jamais",
     "edit": "Modifier",
-    "delete": "Supprimer"
+    "delete": "Supprimer",
+    "moreIssues": "(+{count} de plus ; ouvrez Modifier pour tout voir)"
   },
   "info": {
     "title": "Fonctionnement des trunks SIP",
@@ -54,6 +55,8 @@
     "tls": "TLS (chiffré)",
     "transportHint": "Consultez la documentation de votre fournisseur. La plupart utilisent UDP.",
     "usernameLabel": "Nom d'utilisateur",
+    "usernameInvalid": "Le nom d'utilisateur SIP ne peut pas contenir {chars}. Utilisez uniquement des lettres, des chiffres et . _ - + (si votre fournisseur vous a donné une adresse e-mail comme nom d'utilisateur, demandez-lui un nom d'utilisateur simple).",
+    "usernameSpaces": "des espaces",
     "passwordLabel": "Mot de passe",
     "authRealmLabel": "Domaine d'authentification",
     "authRealmPlaceholder": "sip.fournisseur.com",
@@ -66,7 +69,8 @@
     "codecsHint": "Codecs audio séparés par des virgules",
     "dialPrefixLabel": "Préfixe de numérotation",
     "dialPrefixPlaceholder": "999",
-    "dialPrefixHint": "Préfixe technique facultatif ajouté avant le numéro lors de l'appel"
+    "dialPrefixHint": "Préfixe technique facultatif ajouté avant le numéro lors de l'appel",
+    "stripPlusLabel": "Envoyer les numéros sans le signe + (certains PBX refusent un + initial)"
   },
   "debug": {
     "registration": {
@@ -107,6 +111,20 @@
     "reloadFailed": "Échec du rechargement",
     "updated": "Trunk SIP mis à jour",
     "created": "Trunk SIP créé",
-    "saveFailed": "Échec de l'enregistrement du trunk SIP"
+    "saveFailed": "Échec de l'enregistrement du trunk SIP",
+    "savedNotLoaded": "Trunk SIP enregistré, mais Asterisk ne l'a pas chargé"
+  },
+  "checks": {
+    "ownHost": "C’est l’adresse de l’Asterisk de ce serveur : celle que vous donnez à votre opérateur pour qu’il vous envoie des appels. Saisissez plutôt ici l’hôte SIP de votre opérateur. Les appels via ce trunk reviendraient vers ce serveur et échoueraient.",
+    "hostPlaceholder": "L’hôte SIP contient encore le texte d’exemple du préréglage. Remplacez-le par l’hôte fourni par votre opérateur.",
+    "hostFormat": "Saisissez uniquement le nom d’hôte ou l’adresse IP dans Hôte SIP (par exemple sip.telnyx.com). N’incluez pas sip:, de noms d’utilisateur ni de chemins, et indiquez le port dans Port.",
+    "realmPlaceholder": "Le domaine d’authentification contient encore un texte d’exemple. Remplacez-le ou laissez-le vide.",
+    "portRange": "Le port doit être un nombre entre 1 et 65535 (généralement 5060).",
+    "tlsOn5060": "TLS utilise normalement le port 5061 ; le port 5060 sert à UDP et TCP. Vérifiez les paramètres de votre opérateur.",
+    "port5061NotTls": "Le port 5061 est normalement réservé à TLS. En UDP ou TCP, utilisez 5060 sauf indication contraire de votre opérateur.",
+    "ipHostDomainRealm": "L’hôte SIP est une adresse IP, mais le domaine d’authentification est {realm}. Pour la plupart des opérateurs, l’hôte SIP est ce même domaine. Vérifiez que l’IP est celle de votre opérateur et non l’adresse fournie pour les appels entrants.",
+    "usernameNoPassword": "Il y a un nom d’utilisateur mais pas de mot de passe. La plupart des opérateurs refusent les appels sans les deux (erreur 401 ou 407).",
+    "passwordNoUsername": "Le mot de passe est ignoré sans nom d’utilisateur.",
+    "stripPlusWithPrefix": "Avec un préfixe de numérotation, les numéros sont toujours envoyés sans le +, donc l’option « sans le signe + » ne change rien."
   }
 }

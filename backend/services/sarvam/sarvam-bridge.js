@@ -6,8 +6,10 @@ const { mulawToPcm16 } = require('../../utils/audio-codec');
 const AppointmentService = require('../appointment-tool-service');
 const { narrateAppointmentResult } = require('../appointment-result-narration');
 const { parseTransferTag, transferFailureSentence } = require('../../utils/human-transfer');
+const { MAX_TOOL_ROUNDS, toolFiller } = require('../tools/tool-rounds');
 const {
     shouldInterruptWhileSpeaking, isDuplicateTail, isAgentEcho, AGENT_ECHO_WINDOW_MS,
+    shouldCancelGoodbye, isCallerActivity,
 } = require('../../utils/turn-taking');
 
 // ─── Sarvam AI endpoints ─────────────────────────────────────
@@ -182,7 +184,9 @@ function parseBookDateTime(content) {
  *   onError(service, code, message)— surface into CallLog errors
  */
 class SarvamBridge {
-    constructor({ callId, settings, agent, lead, testCall = false, testPhrase = '' }) {
+    constructor({ callId, settings, agent, lead, testCall = false, testPhrase = '', idleTimeoutMs = IDLE_TIMEOUT_MS }) {
+        /** Silence from the caller this long ends the call. A meeting passes a longer one. */
+        this.idleTimeoutMs = idleTimeoutMs;
         this.callId = callId;
         this.settings = settings;
         this.agent = agent;
@@ -258,9 +262,13 @@ class SarvamBridge {
          * transport has no second leg to bridge, so the capability is never offered there.
          */
         this.transferHandler = null;
+        /** The call's tools (services/tools/agent-tool-session.js), or null. */
+        this.toolSession = null;
         /** True once the caller has been handed to a human and this engine is out of the bridge. */
         this.transferred = false;
         this._endCallRequested = false;
+        /** Why the hang-up is under way: 'agent' ([[END_CALL]]) or 'idle' (silent-call timeout). */
+        this._endCallReason = null;
         this._connectedAt = 0;
 
         // Idle (connected-but-silent) detection
@@ -341,11 +349,12 @@ class SarvamBridge {
         if (this._idleWatchdog) return;
         this._idleWatchdog = setInterval(() => {
             if (!this.active || this._endCallRequested) return;
-            if (Date.now() - this._lastActivityAt < IDLE_TIMEOUT_MS) return;
+            if (Date.now() - this._lastActivityAt < this.idleTimeoutMs) return;
             console.log(`💤 [Sarvam] [${this.callId}] No activity for ${IDLE_TIMEOUT_MS}ms — ending call`);
             this._pushTranscript('assistant', IDLE_HANGUP_MESSAGE);
             this._sendToTts(IDLE_HANGUP_MESSAGE, true);
             this._endCallRequested = true;
+            this._endCallReason = 'idle';
             if (this.onEndCall) this.onEndCall();
         }, IDLE_CHECK_INTERVAL_MS);
         if (typeof this._idleWatchdog.unref === 'function') this._idleWatchdog.unref();
@@ -686,6 +695,9 @@ class SarvamBridge {
      */
     _maybeBargeIn(text) {
         if (!this._agentIsTalking()) return;
+        // Once the call is ending, noise or the caller's own "thanks, bye" must not cancel the
+        // hang-up (see shouldCancelGoodbye for the agent vs idle rule).
+        if (this._endCallRequested && !this._keepsCallOpen(text)) return;
         if (!shouldInterruptWhileSpeaking(text, { minWords: BARGE_IN_MIN_WORDS })) return;
         console.log(`🎤 [Sarvam] [${this.callId}] Barge-in: "${text.substring(0, 40)}"`);
         this._stopSpeaking();
@@ -720,6 +732,24 @@ class SarvamBridge {
         this.partialTranscript = '';
         this.lastFinalText = finalText;
         this.lastFinalAt = Date.now();
+
+        // The call is ending. A farewell or a stray noise transcript gets no reply — answering
+        // it would start a new turn over the closing line. A real sentence re-opens the call.
+        if (this._endCallRequested) {
+            if (!this._keepsCallOpen(finalText)) {
+                console.log(`👋 [Sarvam] [${this.callId}] Ignored during goodbye: "${finalText.substring(0, 60)}"`);
+                return;
+            }
+            // Same as a barge-in: stop a goodbye that is still streaming (not just clear the
+            // transport's buffer), cancel the hang-up and count the caller as present.
+            if (this._agentIsTalking()) {
+                this._stopSpeaking();
+            } else {
+                this._cancelEndCall();
+                this._touchActivity();
+            }
+            if (this.onBargeIn) this.onBargeIn();
+        }
 
         // The agent has gone quiet: take the turn immediately, whatever its length. A one-word
         // "yes"/"അതെ"/"ഇല്ല" answering a yes/no question is real content, and there is nothing
@@ -764,6 +794,12 @@ class SarvamBridge {
             if (this.pendingDispatchTimer) { clearInterval(this.pendingDispatchTimer); this.pendingDispatchTimer = null; }
         };
         if (!this.active || !this.pendingTurn) { stop(); return true; }
+        // Held from before the agent decided to hang up — same rule as a fresh turn.
+        if (this._endCallRequested && !this._keepsCallOpen(this.pendingTurn)) {
+            this.pendingTurn = '';
+            stop();
+            return true;
+        }
         // Safety valve: if "still speaking" ever sticks — a TTS socket dying before its
         // end-of-generation event, say — the caller must not be left holding an unanswered
         // reply for the rest of the call. Speak it anyway past the cap.
@@ -828,62 +864,123 @@ class SarvamBridge {
             agent: this.agent, settings: this.settings, kbContent: this.kbContent,
             commandTags: true, lead: this.lead,
             humanTransfer: !!this.transferHandler,
+            connectedApps: this.toolSession ? this.toolSession.appNames() : [],
+            toolNames: this.toolSession ? this.toolSession.tools.filter(t => t.type !== 'integration').map(t => t.name) : [],
         });
         const recent = this.llmMessages.slice(-MAX_LLM_HISTORY);
 
+        // The agent's tools as OpenAI-style functions (Sarvam's chat API is OpenAI-
+        // compatible), or null, in which case the request is exactly what it always was.
+        const nativeTools = this.toolSession ? this.toolSession.openAiTools() : null;
+        // This turn's tool exchange, kept out of llmMessages so the history slice above
+        // can never begin on an orphaned `tool` message. History gets a TOOL RESULT
+        // system line instead.
+        const toolMessages = [];
+        let toolRounds = 0;
+
         let fullReply = '';
         try {
-            const response = await axios({
-                method: 'post',
-                url: LLM_URL,
-                // reasoning_effort:null DISABLES Sarvam's hybrid reasoning — otherwise it streams
-                // thinking tokens (delta.reasoning_content) BEFORE any spoken content, adding seconds
-                // to time-to-first-token. temperature 0.2 is the docs' recommended value with reasoning
-                // off; max_tokens caps replies short (safe only because reasoning is disabled).
-                data: {
-                    model: LLM_MODEL,
-                    messages: [{ role: 'system', content: systemPrompt }, ...recent],
-                    stream: true,
-                    reasoning_effort: null,
-                    temperature: 0.2,
-                    max_tokens: 300,
-                },
-                headers: { 'Authorization': `Bearer ${this._key()}`, 'Content-Type': 'application/json' },
-                responseType: 'stream',
-                signal: this.abortController.signal,
-            });
+            for (;;) {
+                let roundReply = '';
+                const toolCalls = [];
+                const response = await axios({
+                    method: 'post',
+                    url: LLM_URL,
+                    // reasoning_effort:null DISABLES Sarvam's hybrid reasoning — otherwise it streams
+                    // thinking tokens (delta.reasoning_content) BEFORE any spoken content, adding seconds
+                    // to time-to-first-token. temperature 0.2 is the docs' recommended value with reasoning
+                    // off; max_tokens caps replies short (safe only because reasoning is disabled).
+                    data: {
+                        model: LLM_MODEL,
+                        messages: [{ role: 'system', content: systemPrompt }, ...recent, ...toolMessages],
+                        stream: true,
+                        reasoning_effort: null,
+                        temperature: 0.2,
+                        max_tokens: 300,
+                        // The agent's tools, when it has any; on the last round the model must answer in words.
+                        ...(nativeTools ? { tools: nativeTools, tool_choice: toolRounds >= MAX_TOOL_ROUNDS ? 'none' : 'auto' } : {}),
+                    },
+                    headers: { 'Authorization': `Bearer ${this._key()}`, 'Content-Type': 'application/json' },
+                    responseType: 'stream',
+                    signal: this.abortController.signal,
+                });
 
-            let chunkBuffer = '';
-            for await (const chunk of response.data) {
-                if (this.interrupted) break;
-                const lines = chunk.toString().split('\n').filter(l => l.trim() !== '');
-                for (const line of lines) {
-                    if (line.includes('[DONE]')) break;
-                    if (!line.startsWith('data: ')) continue;
-                    try {
-                        const json = JSON.parse(line.slice(6));
-                        const delta = json.choices?.[0]?.delta || {};
-                        // Reasoning is disabled, but never speak a thinking token if one slips through.
-                        if (delta.reasoning_content && !delta.content) continue;
-                        const content = delta.content || '';
-                        if (!content) continue;
-                        if (this._turn && !this._turn.llmAt) this._turn.llmAt = Date.now();
-                        fullReply += content;
-                        chunkBuffer += content;
-                        // Buffer clause text as it streams; the trailing flush below speaks the reply.
-                        const sentenceEnd = /[.!?\n।]/.test(content);
-                        const clauseEnd = /[,;:]/.test(content) && chunkBuffer.trim().length >= MIN_COMMA_CHUNK_CHARS;
-                        // "4,999" / "4.5": a separator inside a number is not a clause boundary —
-                        // breaking there makes TTS read the halves as two separate numbers.
-                        const midNumber = /\d[.,]$/.test(chunkBuffer.trimEnd());
-                        if ((sentenceEnd || clauseEnd) && !midNumber) {
-                            this._speakChunk(chunkBuffer, false);
-                            chunkBuffer = '';
-                        }
-                    } catch (_) { }
+                let chunkBuffer = '';
+                for await (const chunk of response.data) {
+                    if (this.interrupted) break;
+                    const lines = chunk.toString().split('\n').filter(l => l.trim() !== '');
+                    for (const line of lines) {
+                        if (line.includes('[DONE]')) break;
+                        if (!line.startsWith('data: ')) continue;
+                        try {
+                            const json = JSON.parse(line.slice(6));
+                            const delta = json.choices?.[0]?.delta || {};
+                            // A tool call streams as fragments keyed by index: the id and name
+                            // arrive once, the arguments a few characters at a time.
+                            for (const tc of delta.tool_calls || []) {
+                                const i = Number.isInteger(tc.index) ? tc.index : toolCalls.length;
+                                const slot = toolCalls[i] || (toolCalls[i] = { id: '', name: '', arguments: '' });
+                                if (tc.id) slot.id = tc.id;
+                                if (tc.function?.name) slot.name += tc.function.name;
+                                if (tc.function?.arguments) slot.arguments += tc.function.arguments;
+                            }
+                            // Reasoning is disabled, but never speak a thinking token if one slips through.
+                            if (delta.reasoning_content && !delta.content) continue;
+                            const content = delta.content || '';
+                            if (!content) continue;
+                            if (this._turn && !this._turn.llmAt) this._turn.llmAt = Date.now();
+                            roundReply += content;
+                            chunkBuffer += content;
+                            // Buffer clause text as it streams; the trailing flush below speaks the reply.
+                            const sentenceEnd = /[.!?\n।]/.test(content);
+                            const clauseEnd = /[,;:]/.test(content) && chunkBuffer.trim().length >= MIN_COMMA_CHUNK_CHARS;
+                            // "4,999" / "4.5": a separator inside a number is not a clause boundary —
+                            // breaking there makes TTS read the halves as two separate numbers.
+                            const midNumber = /\d[.,]$/.test(chunkBuffer.trimEnd());
+                            if ((sentenceEnd || clauseEnd) && !midNumber) {
+                                this._speakChunk(chunkBuffer, false);
+                                chunkBuffer = '';
+                            }
+                        } catch (_) { }
+                    }
                 }
+                if (!this.interrupted) this._speakChunk(chunkBuffer, true);
+                fullReply += (fullReply && roundReply ? ' ' : '') + roundReply;
+
+                const pendingTools = toolCalls.filter(tc => tc && tc.name && this.toolSession?.has(tc.name));
+                if (pendingTools.length === 0 || this.interrupted || toolRounds >= MAX_TOOL_ROUNDS) break;
+                toolRounds++;
+
+                // Straight to the tool without a word would leave the caller in silence.
+                if (!roundReply.trim()) {
+                    const filler = toolFiller(this._language());
+                    this._sendToTts(filler, true);
+                    fullReply += (fullReply ? ' ' : '') + filler;
+                }
+
+                toolMessages.push({
+                    role: 'assistant',
+                    content: roundReply || null,
+                    tool_calls: pendingTools.map((tc, i) => ({
+                        id: tc.id || `call_${toolRounds}_${i}`,
+                        type: 'function',
+                        function: { name: tc.name, arguments: tc.arguments || '{}' },
+                    })),
+                });
+                for (const [i, tc] of pendingTools.entries()) {
+                    let args = {};
+                    try { args = tc.arguments ? JSON.parse(tc.arguments) : {}; } catch (_) { args = {}; }
+                    console.log(`🛠️ [Sarvam] [${this.callId}] tool: ${tc.name}(${(tc.arguments || '').substring(0, 120)})`);
+                    const result = await this.toolSession.call(tc.name, args, { signal: this.abortController?.signal });
+                    toolMessages.push({ role: 'tool', tool_call_id: tc.id || `call_${toolRounds}_${i}`, content: result });
+                    const line = `TOOL RESULT (${tc.name}): ${result}`;
+                    this.llmMessages.push({ role: 'system', content: line });
+                    // Straight onto the transcript, not through _pushTranscript: that also
+                    // streams to onTranscript, and a browser session would show raw tool output.
+                    this.transcript.push({ role: 'system', content: line, timestamp: new Date() });
+                }
+                if (this.interrupted || !this.active) break;
             }
-            if (!this.interrupted) this._speakChunk(chunkBuffer, true);
 
             if (fullReply && !this.interrupted) {
                 console.log(`🤖 [Sarvam LLM] [${this.callId}] Reply: "${fullReply.substring(0, 100)}"`);
@@ -950,6 +1047,7 @@ class SarvamBridge {
         }
 
         this._endCallRequested = true;
+        this._endCallReason = 'agent';
         console.log(`📴 [Sarvam] [${this.callId}] Agent requested end of call`);
         if (this.onEndCall) this.onEndCall();
     }
@@ -960,9 +1058,15 @@ class SarvamBridge {
      * genuine [[END_CALL]] can still end the call; without this, one cancelled attempt
      * would silently disable end-of-call detection for the rest of the conversation.
      */
+    /** Does this utterance keep a call that is ending on the line? */
+    _keepsCallOpen(text) {
+        return shouldCancelGoodbye(text, { idle: this._endCallReason === 'idle' });
+    }
+
     _cancelEndCall() {
         if (!this._endCallRequested) return;
         this._endCallRequested = false;
+        this._endCallReason = null;
         console.log(`🙅 [Sarvam] [${this.callId}] End of call cancelled — caller spoke again`);
     }
 
@@ -972,6 +1076,11 @@ class SarvamBridge {
      */
     setTransferHandler(fn) {
         this.transferHandler = fn;
+    }
+
+    /** Give this call its tools (services/tools/agent-tool-session.js). */
+    setToolSession(session) {
+        this.toolSession = session || null;
     }
 
     /**
@@ -1282,7 +1391,10 @@ class SarvamBridge {
 
     _pushTranscript(role, content) {
         this.transcript.push({ role, content, timestamp: new Date() });
-        this._touchActivity();
+        // Idle detection tracks the CALLER. The agent's own replies don't count, and neither
+        // does a stray one-word transcript of background noise — otherwise a noisy line keeps
+        // the agent answering itself and the silent call is never ended.
+        if (role === 'user' && isCallerActivity(content)) this._touchActivity();
         if (this.onTranscript) this.onTranscript(role, content);
     }
 

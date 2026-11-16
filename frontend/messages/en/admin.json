@@ -121,7 +121,22 @@
       "saved": "{provider} credentials saved",
       "saveFailed": "Failed to save"
     },
-    "hubspotLegacyNotice": "HubSpot closed new public app registrations on 23 June 2026, so these fields only apply if you registered an app before then. New connections use a service key instead — each user pastes one from their own HubSpot account under Settings → Integrations."
+    "hubspotLegacyNotice": "HubSpot closed new public app registrations on 23 June 2026, so these fields only apply if you registered an app before then. New connections use a service key instead — each user pastes one from their own HubSpot account under Settings → Integrations.",
+    "metaTitle": "Meta (WhatsApp)",
+    "metaDescription": "Your Meta app for WhatsApp. With an Embedded Signup configuration, users connect their business number from the WhatsApp page in a Meta popup; its webhook receives every connected number's messages.",
+    "metaEnvNotice": "These values are set in the server's environment (META_APP_ID and the rest). Anything saved here is kept but the environment wins while it is set.",
+    "metaAppId": "App ID",
+    "metaAppSecret": "App Secret",
+    "metaEsConfigId": "Embedded Signup Config ID",
+    "metaEsConfigIdHint": "From the app's WhatsApp > Embedded Signup page. Without it, users can only connect with their own Meta app.",
+    "metaVerifyToken": "Webhook Verify Token",
+    "metaVerifyTokenHint": "Any secret string. Paste the same one into the app's WhatsApp > Configuration > Webhook.",
+    "metaSystemUserToken": "System User Token",
+    "metaSystemUserTokenHint": "A permanent token of a system user on the business, with whatsapp_business_messaging and whatsapp_business_management.",
+    "metaSystemUserId": "System User ID",
+    "metaSystemUserIdHint": "The system user that is added to each connected WhatsApp Business Account after Embedded Signup.",
+    "metaWebhookUrl": "Webhook callback URL",
+    "metaWebhookHint": "In the Meta app, open WhatsApp > Configuration, choose Edit next to Webhook, paste this URL and the verify token above, then subscribe to the messages field."
   },
   "loading": "Loading…",
   "support": {
@@ -250,6 +265,29 @@
       "trialFailed": "Failed to update trial limits",
       "deleted": "Plan deleted",
       "deleteFailed": "Failed to delete plan"
+    },
+    "tools": "{count} Tools",
+    "unlimitedTools": "Unlimited tools",
+    "mcpServers": "{count} Connected apps",
+    "unlimitedMcpServers": "Unlimited connected apps",
+    "whatsappAccounts": "{count} WhatsApp numbers",
+    "unlimitedWhatsappAccounts": "Unlimited WhatsApp numbers",
+    "whatsappMessages": "{count} WhatsApp msgs/mo",
+    "unlimitedWhatsappMessages": "Unlimited WhatsApp messages",
+    "noWhatsapp": "No WhatsApp",
+    "noMeetings": "No meetings",
+    "meetingsIncluded": "Meetings included",
+    "zeroUnlimited": "0 means unlimited.",
+    "featuresTitle": "Features",
+    "featureMeetings": "Meetings",
+    "featureMeetingsHint": "Agents can join Zoom, Google Meet and Teams meetings. Meetings count as calls.",
+    "featureWhatsapp": "WhatsApp",
+    "featureWhatsappHint": "Agents can answer WhatsApp chats and send messages during calls.",
+    "limitFields": {
+      "tools": "Tools",
+      "mcpServers": "Connected apps",
+      "whatsappAccounts": "WhatsApp numbers",
+      "whatsappMessagesPerMonth": "WhatsApp messages/mo"
     }
   },
   "settings": {

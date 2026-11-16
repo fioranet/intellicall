@@ -79,7 +79,16 @@ const adminSettingsSchema = new mongoose.Schema({
         agents: { type: Number, default: 1 },
         campaigns: { type: Number, default: 1 },
         leads: { type: Number, default: 10 },
-        callsPerMonth: { type: Number, default: 5 }
+        callsPerMonth: { type: Number, default: 5 },
+        tools: { type: Number, default: 2 },
+        mcpServers: { type: Number, default: 1 },
+        whatsappAccounts: { type: Number, default: 1 },
+        whatsappMessagesPerMonth: { type: Number, default: 50 }
+    },
+    /** Features a trial account (no plan) may use. */
+    trialFeatures: {
+        meetings: { type: Boolean, default: true },
+        whatsapp: { type: Boolean, default: true }
     },
     integrations: {
         // Google Calendar and Google Sheets share one OAuth client.
@@ -99,6 +108,21 @@ const adminSettingsSchema = new mongoose.Schema({
             clientId: { type: String, default: '' },
             clientSecret: { type: String, default: '' },
             callbackUrl: { type: String, default: '' }
+        },
+        /**
+         * The platform's Meta app, for WhatsApp Embedded Signup (the "Connect with
+         * Meta" popup) and the shared webhook door. Env vars META_APP_ID,
+         * META_APP_SECRET, META_ES_CONFIG_ID, META_WEBHOOK_VERIFY_TOKEN,
+         * META_SYSTEM_USER_TOKEN and META_SYSTEM_USER_ID are the fallback. Without
+         * either, users connect numbers manually with their own Meta app.
+         */
+        meta: {
+            appId: { type: String, default: '' },
+            appSecret: { type: String, default: '' },
+            esConfigId: { type: String, default: '' },
+            webhookVerifyToken: { type: String, default: '' },
+            systemUserToken: { type: String, default: '' },
+            systemUserId: { type: String, default: '' }
         }
     }
 }, {

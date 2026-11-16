@@ -1,20 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
+    Button,
     Dialog,
     DialogContent,
     DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+    Field,
+    Input,
+    toast,
+} from "@wixzel/react";
 import axios from "axios";
-import { toast } from "sonner";
 import { CustomFieldsEditor, sanitizeCustomFields, type CustomFieldRow } from "./custom-fields-editor";
+import { leadPhoneIssue } from "@/lib/phone-checks";
+import { FormIssues, hasErrors } from "@/components/ui/form-issues";
 
 import { useTranslations } from "next-intl";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
@@ -57,6 +59,9 @@ export function EditLeadDialog({ lead, open, onOpenChange, onSuccess }: EditLead
         setCustomFields(toFieldRows(lead));
     }, [lead]);
 
+    const phoneIssue = leadPhoneIssue(formData.phone, c);
+    const issues = phoneIssue ? [phoneIssue] : [];
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -88,19 +93,17 @@ export function EditLeadDialog({ lead, open, onOpenChange, onSuccess }: EditLead
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent size="sm">
                 <DialogHeader>
                     <DialogTitle>{t("edit.title")}</DialogTitle>
                     <DialogDescription>
                         {t("edit.description")}
                     </DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleSubmit}>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
-                            <Label htmlFor="edit-name">{t("edit.nameLabel")}</Label>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                    <div className="flex flex-col gap-4">
+                        <Field id="edit-name" label={t("edit.nameLabel")}>
                             <Input
-                                id="edit-name"
                                 value={formData.name}
                                 onChange={(e) =>
                                     setFormData({ ...formData, name: e.target.value })
@@ -108,11 +111,9 @@ export function EditLeadDialog({ lead, open, onOpenChange, onSuccess }: EditLead
                                 placeholder={t("edit.namePlaceholder")}
                                 required
                             />
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="edit-phone">{t("edit.phoneLabel")}</Label>
+                        </Field>
+                        <Field id="edit-phone" label={t("edit.phoneLabel")}>
                             <Input
-                                id="edit-phone"
                                 type="tel"
                                 value={formData.phone}
                                 onChange={(e) =>
@@ -121,25 +122,24 @@ export function EditLeadDialog({ lead, open, onOpenChange, onSuccess }: EditLead
                                 placeholder="+1234567890"
                                 required
                             />
-                        </div>
+                            <FormIssues issues={issues} />
+                        </Field>
                         <CustomFieldsEditor fields={customFields} onChange={setCustomFields} idPrefix="edit-field" />
-                        <div className="grid gap-2">
-                            <Label htmlFor="edit-tags">{t("edit.tagsLabel")}</Label>
+                        <Field id="edit-tags" label={t("edit.tagsLabel")}>
                             <Input
-                                id="edit-tags"
                                 value={formData.tags}
                                 onChange={(e) =>
                                     setFormData({ ...formData, tags: e.target.value })
                                 }
                                 placeholder={t("edit.tagsPlaceholder")}
                             />
-                        </div>
+                        </Field>
                     </div>
                     <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                        <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
                             {c("actions.cancel")}
                         </Button>
-                        <Button type="submit" disabled={loading}>
+                        <Button type="submit" variant="primary" loading={loading} disabled={hasErrors(issues)}>
                             {loading ? "Saving..." : "Save Changes"}
                         </Button>
                     </DialogFooter>

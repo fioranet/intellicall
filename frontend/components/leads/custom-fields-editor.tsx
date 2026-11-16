@@ -1,9 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Plus, X } from "lucide-react";
+import { Button, Input, Label } from "@wixzel/react";
+import { Plus, X } from "@phosphor-icons/react";
 
 import { useTranslations } from "next-intl";
 export interface CustomFieldRow {
@@ -36,17 +34,16 @@ export function CustomFieldsEditor({
     };
 
     return (
-        <div className="grid gap-2">
-            <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-1.5">
+            <div className="flex items-center justify-between gap-2">
                 <Label>{t("customFields.title")}</Label>
                 <Button
                     type="button"
-                    variant="outline"
-                    size="sm"
-                    className="h-7 px-2 text-xs"
+                    variant="secondary"
+                    size="xs"
+                    iconStart={<Plus />}
                     onClick={() => onChange([...fields, { name: "", value: "" }])}
                 >
-                    <Plus className="h-3 w-3" />
                     {t("customFields.addField")}
                 </Button>
             </div>
@@ -69,15 +66,15 @@ export function CustomFieldsEditor({
                     <Button
                         type="button"
                         variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 shrink-0"
+                        size="icon-sm"
+                        className="shrink-0"
                         onClick={() => onChange(fields.filter((_, idx) => idx !== i))}
                     >
-                        <X className="h-4 w-4" />
+                        <X />
                     </Button>
                 </div>
             ))}
-            <p className="text-[11px] text-muted-foreground leading-snug">
+            <p className="text-caption text-fg-muted">
                 {"Use any field in your agent as {{field_name}} — e.g. {{appointment_date}} in the opening message or script."}
             </p>
         </div>

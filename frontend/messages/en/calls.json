@@ -27,7 +27,11 @@
     "noLogs": "No logs found.",
     "pending": "Pending",
     "notAvailable": "Not available",
-    "details": "Details"
+    "details": "Details",
+    "analyzing": "Analyzing…",
+    "notAnalyzed": "Not analyzed",
+    "nothingToAnalyze": "Nobody spoke on this call, so there is nothing to analyze.",
+    "notAutoAnalyzed": "This call wasn't analyzed automatically. Open Details and click Analyze Now."
   },
   "detail": {
     "title": "Call Log Details",
@@ -50,6 +54,9 @@
     "roleAgent": "AI AGENT",
     "roleLead": "LEAD",
     "roleSystem": "SYSTEM",
+    "failedNoConversation": "The call ended before the agent and caller spoke.",
+    "noConversation": "No conversation was recorded",
+    "noConversationHint": "See the {tab} tab for what went wrong.",
     "voiceQuality": {
       "title": "Voice Quality",
       "turns": "Turns",
@@ -80,6 +87,16 @@
         "unavailable": "Unavailable",
         "failed": "Failed"
       }
+    },
+    "analyzeNow": "Analyze Now",
+    "analyzingNow": "Analyzing...",
+    "tools": {
+      "title": "Tools used",
+      "ok": "OK",
+      "failed": "Failed",
+      "viaApp": "via {app}",
+      "viaWhatsApp": "via WhatsApp",
+      "noArguments": "Called without arguments."
     }
   },
   "toast": {
@@ -89,5 +106,17 @@
     "fetchFailed": "Failed to fetch call logs",
     "noExportData": "No data to export",
     "exported": "Exported successfully"
+  },
+  "meeting": {
+    "label": "Meeting",
+    "title": "Meeting",
+    "platform": "Platform",
+    "botName": "Name in the meeting",
+    "link": "Meeting link",
+    "speaks": "Speaks",
+    "speaksAlways": "Always",
+    "speaksAddressed": "When addressed by name",
+    "mutedReplies": "Replies held back by the name gate",
+    "endReason": "Ended because"
   }
 }

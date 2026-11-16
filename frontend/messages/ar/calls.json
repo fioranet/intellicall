@@ -27,7 +27,11 @@
     "noLogs": "لم يتم العثور على سجلات.",
     "pending": "قيد الانتظار",
     "notAvailable": "غير متاح",
-    "details": "التفاصيل"
+    "details": "التفاصيل",
+    "analyzing": "جارٍ التحليل…",
+    "notAnalyzed": "لم يُحلَّل",
+    "nothingToAnalyze": "لم يتحدّث أحد في هذه المكالمة، لذا لا يوجد ما يُحلَّل.",
+    "notAutoAnalyzed": "لم تُحلَّل هذه المكالمة تلقائيًا. افتح التفاصيل وانقر على «حلّل الآن»."
   },
   "detail": {
     "title": "تفاصيل سجل المكالمة",
@@ -50,6 +54,9 @@
     "roleAgent": "وكيل الذكاء الاصطناعي",
     "roleLead": "العميل المحتمل",
     "roleSystem": "النظام",
+    "failedNoConversation": "انتهت المكالمة قبل أن يتحدث الوكيل والمتصل.",
+    "noConversation": "لم يتم تسجيل أي محادثة",
+    "noConversationHint": "راجع تبويب {tab} لمعرفة ما الذي حدث.",
     "voiceQuality": {
       "title": "جودة الصوت",
       "turns": "الأدوار",
@@ -80,6 +87,16 @@
         "unavailable": "غير متاح",
         "failed": "فشلت"
       }
+    },
+    "analyzeNow": "حلّل الآن",
+    "analyzingNow": "جارٍ التحليل...",
+    "tools": {
+      "title": "الأدوات المستخدمة",
+      "ok": "نجح",
+      "failed": "فشل",
+      "viaApp": "عبر {app}",
+      "viaWhatsApp": "عبر WhatsApp",
+      "noArguments": "تم الاستدعاء بدون وسائط."
     }
   },
   "toast": {
@@ -89,5 +106,17 @@
     "fetchFailed": "تعذّر جلب سجلات المكالمات",
     "noExportData": "لا توجد بيانات للتصدير",
     "exported": "تم التصدير بنجاح"
+  },
+  "meeting": {
+    "label": "اجتماع",
+    "title": "الاجتماع",
+    "platform": "المنصة",
+    "botName": "الاسم في الاجتماع",
+    "link": "رابط الاجتماع",
+    "speaks": "يتحدث",
+    "speaksAlways": "دائمًا",
+    "speaksAddressed": "عند مناداته باسمه",
+    "mutedReplies": "ردود حجبها فلتر الاسم",
+    "endReason": "انتهى بسبب"
   }
 }

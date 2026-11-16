@@ -11,6 +11,8 @@ const WebhookService = require('../services/webhook-service');
 const AdminSettings = require('../models/AdminSettings');
 const { missingEngineKeys } = require('../utils/engine-keys');
 
+const { webhookOrigin } = require('../utils/public-url');
+
 const router = express.Router();
 
 // Request timeout for test call. SIP/Asterisk + trunk can be slow to originate; use 55s default so setup can complete.
@@ -262,7 +264,7 @@ router.post('/ai-test', auth, async (req, res) => {
 
         const twilio = require('twilio');
         const client = twilio(settings.twilioSid, settings.twilioToken);
-        const baseUrl = process.env.BASE_URL || `http://${req.get('host')}`;
+        const baseUrl = webhookOrigin(req);
 
         // Find or create a lead for Twilio test if none exists
         let twilioLead = lead;
@@ -409,7 +411,7 @@ router.post('/dial', auth, requireActivePlan, checkLimit('calls'), async (req, r
         }
 
         const client = twilio(settings.twilioSid, settings.twilioToken);
-        const baseUrl = process.env.BASE_URL || `http://${req.get('host')}`;
+        const baseUrl = webhookOrigin(req);
 
         const call = await client.calls.create({
             url: `${baseUrl}/api/twilio/voice?userId=${req.user._id}&agentId=${agent._id}&leadId=${lead._id}`,

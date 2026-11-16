@@ -336,6 +336,17 @@ router.get('/integrations', auth, isAdmin, async (req, res) => {
                         clientId: integrations.slack?.clientId || '',
                         clientSecret: integrations.slack?.clientSecret || '',
                         callbackUrl: integrations.slack?.callbackUrl || ''
+                    },
+                    meta: {
+                        appId: integrations.meta?.appId || '',
+                        appSecret: integrations.meta?.appSecret || '',
+                        esConfigId: integrations.meta?.esConfigId || '',
+                        webhookVerifyToken: integrations.meta?.webhookVerifyToken || '',
+                        systemUserToken: integrations.meta?.systemUserToken || '',
+                        systemUserId: integrations.meta?.systemUserId || '',
+                        // What the admin pastes into the Meta app's WhatsApp webhook settings.
+                        webhookUrl: `${require('../utils/public-url').externalOrigin(req)}/api/webhooks/whatsapp`,
+                        envConfigured: Boolean(process.env.META_APP_ID && process.env.META_APP_SECRET && process.env.META_ES_CONFIG_ID && process.env.META_WEBHOOK_VERIFY_TOKEN)
                     }
                 }
             }
@@ -358,6 +369,14 @@ router.patch('/integrations', auth, isAdmin, async (req, res) => {
                     update[`integrations.${provider}.${field}`] = incoming[field].trim();
                 }
             }
+        }
+        const meta = req.body?.meta;
+        if (meta && typeof meta === 'object') {
+            for (const field of ['appId', 'appSecret', 'esConfigId', 'webhookVerifyToken', 'systemUserToken', 'systemUserId']) {
+                if (typeof meta[field] === 'string') update[`integrations.meta.${field}`] = meta[field].trim();
+            }
+            // Settings take effect at once for new connections and webhooks.
+            try { require('../services/whatsapp/config').invalidate(); } catch (_) { /* not installed */ }
         }
         if (!Object.keys(update).length) {
             return res.status(400).json({ status: 'error', message: 'No valid fields provided' });

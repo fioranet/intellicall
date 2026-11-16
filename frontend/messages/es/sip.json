@@ -29,7 +29,8 @@
     "port": "{transport} · Puerto {port}",
     "never": "Nunca",
     "edit": "Editar",
-    "delete": "Eliminar"
+    "delete": "Eliminar",
+    "moreIssues": "(+{count} más; abre Editar para verlos todos)"
   },
   "info": {
     "title": "Cómo funcionan las troncales SIP",
@@ -54,6 +55,8 @@
     "tls": "TLS (cifrado)",
     "transportHint": "Consulta la documentación de tu proveedor. La mayoría usa UDP.",
     "usernameLabel": "Usuario",
+    "usernameInvalid": "El usuario SIP no puede contener {chars}. Usa solo letras, números y . _ - + (si tu proveedor te dio una dirección de correo como usuario, pídele un usuario simple).",
+    "usernameSpaces": "espacios",
     "passwordLabel": "Contraseña",
     "authRealmLabel": "Dominio de autenticación",
     "authRealmPlaceholder": "sip.proveedor.com",
@@ -66,7 +69,8 @@
     "codecsHint": "Códecs de audio separados por comas",
     "dialPrefixLabel": "Prefijo de marcación",
     "dialPrefixPlaceholder": "999",
-    "dialPrefixHint": "Prefijo técnico opcional que se antepone al número al marcar"
+    "dialPrefixHint": "Prefijo técnico opcional que se antepone al número al marcar",
+    "stripPlusLabel": "Enviar los números sin el signo + (algunas centralitas rechazan un + inicial)"
   },
   "debug": {
     "registration": {
@@ -107,6 +111,20 @@
     "reloadFailed": "La recarga falló",
     "updated": "Troncal SIP actualizada",
     "created": "Troncal SIP creada",
-    "saveFailed": "No se pudo guardar la troncal SIP"
+    "saveFailed": "No se pudo guardar la troncal SIP",
+    "savedNotLoaded": "Troncal SIP guardada, pero Asterisk no la cargó"
+  },
+  "checks": {
+    "ownHost": "Esa es la dirección del propio Asterisk de este servidor: la que le das a tu operador para que te envíe llamadas. Introduce aquí el host SIP de tu operador. Las llamadas por este troncal volverían a este servidor y fallarían.",
+    "hostPlaceholder": "El host SIP todavía tiene el texto de ejemplo del preajuste. Sustitúyelo por el host que te dio tu proveedor.",
+    "hostFormat": "Introduce solo el nombre de host o la dirección IP en Host SIP (por ejemplo sip.telnyx.com). No incluyas sip:, nombres de usuario ni rutas, y pon el puerto en Puerto.",
+    "realmPlaceholder": "El dominio de autenticación todavía tiene texto de ejemplo. Sustitúyelo o déjalo en blanco.",
+    "portRange": "El puerto debe ser un número entre 1 y 65535 (normalmente 5060).",
+    "tlsOn5060": "TLS suele usar el puerto 5061; el 5060 es para UDP y TCP. Revisa la configuración de tu proveedor.",
+    "port5061NotTls": "El puerto 5061 suele ser para TLS. Con UDP o TCP, usa el 5060 salvo que tu proveedor indique otra cosa.",
+    "ipHostDomainRealm": "El host SIP es una dirección IP, pero el dominio de autenticación es {realm}. En la mayoría de operadores el host SIP es ese mismo dominio. Asegúrate de que la IP sea la de tu operador y no la dirección que te dieron para las llamadas entrantes.",
+    "usernameNoPassword": "Hay un nombre de usuario pero no una contraseña. La mayoría de operadores rechazan las llamadas sin ambos (error 401 o 407).",
+    "passwordNoUsername": "La contraseña se ignora si no hay nombre de usuario.",
+    "stripPlusWithPrefix": "Con un prefijo de marcación, los números siempre se envían sin el +, así que la opción \"sin el signo +\" no cambia nada."
   }
 }

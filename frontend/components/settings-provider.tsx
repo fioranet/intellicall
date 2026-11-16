@@ -6,6 +6,7 @@ import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { isLocale } from "@/i18n/config";
 import { setLocaleCookie, applyDocumentDir } from "@/lib/locale-client";
+import { applyBrandColour, DEFAULT_BRAND_COLOUR } from "@/lib/brand-colour";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
 
@@ -32,7 +33,7 @@ export interface PublicSiteConfig {
 
 const DEFAULT_BRANDING: BrandingConfig = {
     appName: 'IntelliCallAI',
-    primaryColor: '#8078F0',
+    primaryColor: DEFAULT_BRAND_COLOUR,
     logoLight: '/images/logo_black.png',
     logoDark: '/images/logo_white.png',
     favicon: '/favicon.ico'
@@ -62,6 +63,14 @@ export function toExternalHref(url: string): string {
     if (!t) return "#";
     if (/^https?:\/\//i.test(t)) return t;
     return `https://${t}`;
+}
+
+// The files at the default logo paths are blank on purpose, so IntelliCall's logo can't flash
+// before an admin's own has loaded. Once the settings have arrived and they still point at a
+// blank file, no logo was ever chosen, so the real one shows. Anything an admin uploaded (or
+// restored with Reset Branding) is a different path and is used as it is.
+function logoToShow(saved: string | undefined, blank: string, stock: string): string {
+    return !saved || saved === blank ? stock : saved;
 }
 
 // Resolve branding URLs: uploaded files are served from the backend, defaults from frontend
@@ -124,12 +133,12 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
                         const newBranding: BrandingConfig = {
                             appName: b.appName || DEFAULT_BRANDING.appName,
                             primaryColor: b.primaryColor || DEFAULT_BRANDING.primaryColor,
-                            logoLight: b.logoLight || DEFAULT_BRANDING.logoLight,
-                            logoDark: b.logoDark || DEFAULT_BRANDING.logoDark,
+                            logoLight: logoToShow(b.logoLight, DEFAULT_BRANDING.logoLight, "/images/originals/logo_black.png"),
+                            logoDark: logoToShow(b.logoDark, DEFAULT_BRANDING.logoDark, "/images/originals/logo_white.png"),
                             favicon: b.favicon || DEFAULT_BRANDING.favicon,
                         };
                         setBranding(newBranding);
-                        document.documentElement.style.setProperty('--brand-primary', newBranding.primaryColor);
+                        applyBrandColour(newBranding.primaryColor);
                     }
                     setShowCodeCanyonButton(Boolean(d.showCodeCanyonButton));
                     setShowSelfHostingSection(Boolean(d.showSelfHostingSection));

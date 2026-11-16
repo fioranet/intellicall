@@ -3,63 +3,39 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { ChatText, Plus, Star, Trash, PencilSimple } from "@phosphor-icons/react";
 import {
-    MessageSquare,
-    Plus,
-    Star,
-    Trash2,
-    Pencil,
-    Loader2,
-    ToggleLeft,
-    ToggleRight,
-} from "lucide-react";
-import { AdminNav } from "@/components/admin/nav";
-import { Button } from "@/components/ui/button";
-import {
-    Card,
-    CardContent,
-    CardHeader,
-} from "@/components/ui/card";
-import {
+    Spinner,
+    Button,
     Table,
     TableBody,
     TableCell,
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table";
-import {
     Dialog,
     DialogContent,
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import {
+    ConfirmDialog,
+    Input,
+    Textarea,
+    Label,
+    Field,
+    Switch,
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
+    EmptyState,
+    PageHeader,
+    Tooltip,
+} from "@wixzel/react";
+import { AdminNav } from "@/components/admin/nav";
 import axios from "axios";
-import { toast } from "sonner";
+import { toast } from "@wixzel/react";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
 
@@ -184,150 +160,140 @@ export default function AdminTestimonialsPage() {
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground font-sora">{t("testimonials.title")}</h1>
-                    <p className="text-muted-foreground">{t("testimonials.subtitle")}</p>
-                </div>
-                <Button onClick={openCreate} className="shadow-lg">
-                    <Plus className="me-2 h-4 w-4" />
-                    {t("testimonials.add")}
-                </Button>
-            </div>
+        <div className="flex flex-col gap-6">
+            <PageHeader
+                title={t("testimonials.title")}
+                description={t("testimonials.subtitle")}
+                actions={
+                    <Button variant="primary" iconStart={<Plus />} onClick={openCreate}>
+                        {t("testimonials.add")}
+                    </Button>
+                }
+            />
 
             <AdminNav currentPath={pathname} />
 
-            <Card className="rounded-2xl border-border shadow-sm overflow-hidden">
-                <CardContent className="p-0">
-                    {loading ? (
-                        <div className="flex h-64 items-center justify-center">
-                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                        </div>
-                    ) : testimonials.length === 0 ? (
-                        <Empty className="py-16">
-                            <EmptyHeader>
-                                <EmptyMedia variant="icon"><MessageSquare /></EmptyMedia>
-                                <EmptyTitle>{t("testimonials.emptyTitle")}</EmptyTitle>
-                                <EmptyDescription>{t("testimonials.emptyDescription")}</EmptyDescription>
-                            </EmptyHeader>
-                        </Empty>
-                    ) : (
-                        <Table>
-                            <TableHeader>
-                                <TableRow className="hover:bg-transparent">
-                                    <TableHead className="font-semibold px-6">{t("testimonials.table.quote")}</TableHead>
-                                    <TableHead className="font-semibold">{t("testimonials.table.author")}</TableHead>
-                                    <TableHead className="font-semibold">{t("testimonials.table.role")}</TableHead>
-                                    <TableHead className="font-semibold">{t("testimonials.table.rating")}</TableHead>
-                                    <TableHead className="font-semibold">{t("testimonials.table.visible")}</TableHead>
-                                    <TableHead className="text-end px-6 font-semibold">{t("testimonials.table.actions")}</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {testimonials.map((item) => (
-                                    <TableRow key={item._id} className="group hover:bg-muted/50 transition-colors">
-                                        <TableCell className="px-6 py-4 max-w-xs">
-                                            <p className="text-sm text-muted-foreground italic truncate max-w-[260px]">
-                                                "{item.quote}"
-                                            </p>
-                                        </TableCell>
-                                        <TableCell className="font-semibold text-foreground">{item.author}</TableCell>
-                                        <TableCell className="text-sm text-muted-foreground">{item.role}</TableCell>
-                                        <TableCell>
-                                            <div className="flex gap-0.5">
-                                                {Array.from({ length: item.rating || 5 }, (_, i) => (
-                                                    <Star key={i} className="h-4 w-4 fill-brand text-brand" />
-                                                ))}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <button
-                                                onClick={() => handleToggleActive(item)}
-                                                className="flex items-center gap-1.5 text-sm"
-                                                title={item.isActive ? t("testimonials.hideTitle") : t("testimonials.showTitle")}
+            {loading ? (
+                <div className="flex h-64 items-center justify-center rounded-lg bg-card">
+                    <Spinner size="xl" />
+                </div>
+            ) : testimonials.length === 0 ? (
+                <EmptyState
+                    icon={<ChatText />}
+                    title={t("testimonials.emptyTitle")}
+                    description={t("testimonials.emptyDescription")}
+                />
+            ) : (
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>{t("testimonials.table.quote")}</TableHead>
+                            <TableHead>{t("testimonials.table.author")}</TableHead>
+                            <TableHead>{t("testimonials.table.role")}</TableHead>
+                            <TableHead>{t("testimonials.table.rating")}</TableHead>
+                            <TableHead>{t("testimonials.table.visible")}</TableHead>
+                            <TableHead align="end">{t("testimonials.table.actions")}</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {testimonials.map((item) => (
+                            <TableRow key={item._id}>
+                                <TableCell className="max-w-xs">
+                                    <p className="text-fg-muted italic truncate max-w-[260px]">
+                                        "{item.quote}"
+                                    </p>
+                                </TableCell>
+                                <TableCell className="font-medium">{item.author}</TableCell>
+                                <TableCell className="text-fg-muted">{item.role}</TableCell>
+                                <TableCell>
+                                    <div className="flex gap-0.5 text-accent-ink">
+                                        {Array.from({ length: item.rating || 5 }, (_, i) => (
+                                            <Star key={i} className="size-4" />
+                                        ))}
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                    <Tooltip content={item.isActive ? t("testimonials.hideTitle") : t("testimonials.showTitle")}>
+                                        <label className="flex w-fit cursor-pointer items-center gap-2">
+                                            <Switch
+                                                size="sm"
+                                                checked={!!item.isActive}
+                                                onCheckedChange={() => handleToggleActive(item)}
+                                            />
+                                            <span className={item.isActive ? "font-medium text-success-ink" : "text-fg-muted"}>
+                                                {item.isActive ? t("testimonials.visible") : t("testimonials.hidden")}
+                                            </span>
+                                        </label>
+                                    </Tooltip>
+                                </TableCell>
+                                <TableCell align="end">
+                                    <div className="flex items-center justify-end gap-1">
+                                        <Tooltip content={t("testimonials.table.editTitle")}>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon-sm"
+                                                onClick={() => openEdit(item)}
+                                                aria-label={t("testimonials.table.editTitle")}
                                             >
-                                                {item.isActive ? (
-                                                    <><ToggleRight className="h-5 w-5 text-green-500" /><span className="text-green-600 font-medium">{t("testimonials.visible")}</span></>
-                                                ) : (
-                                                    <><ToggleLeft className="h-5 w-5 text-muted-foreground" /><span className="text-muted-foreground">{t("testimonials.hidden")}</span></>
-                                                )}
-                                            </button>
-                                        </TableCell>
-                                        <TableCell className="text-end px-6">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => openEdit(item)}
-                                                    title={t("testimonials.table.editTitle")}
-                                                >
-                                                    <Pencil className="h-4 w-4" />
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => setDeletingId(item._id)}
-                                                    className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                                                    title={t("testimonials.table.deleteTitle")}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    )}
-                </CardContent>
-            </Card>
+                                                <PencilSimple />
+                                            </Button>
+                                        </Tooltip>
+                                        <Tooltip content={t("testimonials.table.deleteTitle")}>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon-sm"
+                                                onClick={() => setDeletingId(item._id)}
+                                                aria-label={t("testimonials.table.deleteTitle")}
+                                            >
+                                                <Trash />
+                                            </Button>
+                                        </Tooltip>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            )}
 
             {/* Create / Edit Dialog */}
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-                <DialogContent className="sm:max-w-[500px]">
+                <DialogContent size="md">
                     <DialogHeader>
                         <DialogTitle>{editingTestimonial ? t("testimonials.edit") : t("testimonials.add")}</DialogTitle>
                     </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="t-quote">{t("testimonials.quoteLabel")}</Label>
+                    <div className="flex flex-col gap-4">
+                        <Field label={t("testimonials.quoteLabel")} id="t-quote">
                             <Textarea
-                                id="t-quote"
                                 placeholder={t("testimonials.quotePlaceholder")}
                                 rows={3}
                                 value={formData.quote}
                                 onChange={(e) => setFormData({ ...formData, quote: e.target.value })}
                             />
-                        </div>
+                        </Field>
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="t-author">{t("testimonials.authorLabel")}</Label>
+                            <Field label={t("testimonials.authorLabel")} id="t-author">
                                 <Input
-                                    id="t-author"
                                     placeholder={t("testimonials.authorPlaceholder")}
                                     value={formData.author}
                                     onChange={(e) => setFormData({ ...formData, author: e.target.value })}
                                 />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="t-role">{t("testimonials.roleLabel")}</Label>
+                            </Field>
+                            <Field label={t("testimonials.roleLabel")} id="t-role">
                                 <Input
-                                    id="t-role"
                                     placeholder={t("testimonials.rolePlaceholder")}
                                     value={formData.role}
                                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                                 />
-                            </div>
+                            </Field>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="t-rating">{t("testimonials.ratingLabel")}</Label>
+                            <Field label={t("testimonials.ratingLabel")} id="t-rating">
                                 <Select
                                     value={String(formData.rating)}
                                     onValueChange={(v) => setFormData({ ...formData, rating: Number(v) })}
                                 >
-                                    <SelectTrigger id="t-rating">
+                                    <SelectTrigger>
                                         <SelectValue placeholder={t("testimonials.ratingPlaceholder")} />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -338,16 +304,16 @@ export default function AdminTestimonialsPage() {
                                         ))}
                                     </SelectContent>
                                 </Select>
-                            </div>
-                            <div className="space-y-2">
-                                <Label>{t("testimonials.showOnLanding")}</Label>
-                                <div className="flex items-center gap-2 pt-2">
+                            </Field>
+                            <div className="flex flex-col gap-1.5">
+                                <Label htmlFor="t-active">{t("testimonials.showOnLanding")}</Label>
+                                <div className="flex h-control-md items-center gap-2">
                                     <Switch
                                         id="t-active"
                                         checked={formData.isActive}
                                         onCheckedChange={(v) => setFormData({ ...formData, isActive: v })}
                                     />
-                                    <label htmlFor="t-active" className="text-sm text-muted-foreground cursor-pointer">
+                                    <label htmlFor="t-active" className="text-body-sm text-fg-muted cursor-pointer">
                                         {formData.isActive ? t("testimonials.visible") : t("testimonials.hidden")}
                                     </label>
                                 </div>
@@ -355,9 +321,8 @@ export default function AdminTestimonialsPage() {
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsModalOpen(false)}>{c("actions.cancel")}</Button>
-                        <Button onClick={handleSave} disabled={isSaving}>
-                            {isSaving && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
+                        <Button variant="secondary" onClick={() => setIsModalOpen(false)}>{c("actions.cancel")}</Button>
+                        <Button variant="primary" onClick={handleSave} loading={isSaving}>
                             {editingTestimonial ? t("testimonials.saveChanges") : t("testimonials.add")}
                         </Button>
                     </DialogFooter>
@@ -365,25 +330,16 @@ export default function AdminTestimonialsPage() {
             </Dialog>
 
             {/* Delete Confirmation */}
-            <AlertDialog open={!!deletingId} onOpenChange={(open) => !open && setDeletingId(null)}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>{t("testimonials.deleteTitle")}</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            {t("testimonials.deleteDescription")}
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>{c("actions.cancel")}</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={handleDelete}
-                            className="bg-red-600 hover:bg-red-700 text-white"
-                        >
-                            {c("actions.delete")}
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            <ConfirmDialog
+                open={!!deletingId}
+                onOpenChange={(open) => !open && setDeletingId(null)}
+                title={t("testimonials.deleteTitle")}
+                description={t("testimonials.deleteDescription")}
+                cancelLabel={c("actions.cancel")}
+                confirmLabel={c("actions.delete")}
+                tone="danger"
+                onConfirm={handleDelete}
+            />
         </div>
     );
 }

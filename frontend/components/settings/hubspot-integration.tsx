@@ -3,18 +3,12 @@
 import { useTranslations } from "next-intl";
 import { useSettings } from "@/components/settings-provider";
 import { useState, useEffect, useCallback } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import axios from "axios";
-import { toast } from "sonner";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { Badge, Button, Field, Input, Section, Separator, Switch, toast, useConfirm } from "@wixzel/react";
 import Image from "next/image";
-import { CheckCircle2, ExternalLink, KeyRound, Loader2, LogOut } from "lucide-react";
+import { ArrowSquareOut, Key, SignOut } from "@phosphor-icons/react";
+import { SectionLoading, SettingRow, SettingRows } from "@/components/settings/setting-row";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
 
@@ -38,12 +32,15 @@ export function HubSpotIntegration() {
     const { branding } = useSettings();
     const searchParams = useSearchParams();
     const router = useRouter();
+    // The card is mounted on /integrations now and used to live on /settings: clear the query where it is.
+    const pathname = usePathname();
     const [loading, setLoading] = useState(true);
     const [savingPref, setSavingPref] = useState<string | null>(null);
     const [disconnecting, setDisconnecting] = useState(false);
     const [serviceKey, setServiceKey] = useState("");
     const [savingKey, setSavingKey] = useState(false);
     const [replacingKey, setReplacingKey] = useState(false);
+    const confirm = useConfirm();
     const [status, setStatus] = useState<Status>({
         connected: false,
         hubDomain: "",
@@ -87,12 +84,12 @@ export function HubSpotIntegration() {
         if (p === "connected") {
             toast.success(t("toast.hubspotConnected"));
             fetchStatus();
-            router.replace("/settings");
+            router.replace(pathname);
         } else if (p === "error") {
             toast.error(t("toast.hubspotConnectFailed"));
-            router.replace("/settings");
+            router.replace(pathname);
         }
-    }, [searchParams, fetchStatus, router, t]);
+    }, [searchParams, fetchStatus, router, pathname, t]);
 
     const handleSaveKey = async () => {
         const key = serviceKey.trim();
@@ -134,7 +131,13 @@ export function HubSpotIntegration() {
     };
 
     const handleDisconnect = async () => {
-        if (!confirm("Disconnect HubSpot? New leads will no longer sync, but contacts already pushed to HubSpot stay there.")) return;
+        const ok = await confirm({
+            title: "Disconnect HubSpot?",
+            description: "New leads will no longer sync, but contacts already pushed to HubSpot stay there.",
+            confirmLabel: t("disconnect"),
+            tone: "danger",
+        });
+        if (!ok) return;
         setDisconnecting(true);
         try {
             const token = localStorage.getItem("token");
@@ -168,23 +171,14 @@ export function HubSpotIntegration() {
     };
 
     if (loading) {
-        return (
-            <Card>
-                <CardContent className="py-10 flex items-center justify-center text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin me-2" /> {t("loadingIntegrations")}
-                </CardContent>
-            </Card>
-        );
+        return <SectionLoading>{t("loadingIntegrations")}</SectionLoading>;
     }
 
     const showKeyForm = !status.connected || replacingKey;
 
     const keyForm = (
-        <div className="space-y-2">
-            <Label htmlFor="hubspot-service-key" className="text-sm font-bold">
-                {t("hubspot.serviceKeyLabel")}
-            </Label>
-            <div className="flex flex-col sm:flex-row gap-2">
+        <Field label={t("hubspot.serviceKeyLabel")} hint={t("hubspot.serviceKeyHint")} id="hubspot-service-key">
+            <div className="flex flex-col gap-2 sm:flex-row">
                 <Input
                     id="hubspot-service-key"
                     type="password"
@@ -201,17 +195,17 @@ export function HubSpotIntegration() {
                 />
                 <div className="flex gap-2">
                     <Button
-                        className="bg-orange-500 hover:bg-orange-600 gap-2 shrink-0"
+                        variant="primary"
                         onClick={handleSaveKey}
-                        disabled={savingKey || !serviceKey.trim()}
+                        disabled={!serviceKey.trim()}
+                        loading={savingKey}
+                        iconStart={<Key />}
                     >
-                        {savingKey ? <Loader2 className="h-4 w-4 animate-spin" /> : <KeyRound className="h-4 w-4" />}
                         {t("hubspot.serviceKeySave")}
                     </Button>
                     {replacingKey && (
                         <Button
                             variant="ghost"
-                            className="shrink-0"
                             onClick={() => {
                                 setReplacingKey(false);
                                 setServiceKey("");
@@ -223,106 +217,91 @@ export function HubSpotIntegration() {
                     )}
                 </div>
             </div>
-            <p className="text-xs text-muted-foreground">{t("hubspot.serviceKeyHint")}</p>
-            <a
-                href={SERVICE_KEY_DOCS}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-xs text-orange-600 hover:underline"
-            >
-                {t("hubspot.serviceKeyDocs")} <ExternalLink className="h-3 w-3" />
-            </a>
-        </div>
+        </Field>
     );
 
     return (
-        <Card>
-            <CardHeader>
-                <div className="flex items-start justify-between gap-4">
-                    <div>
-                        <CardTitle className="flex items-center gap-2">
-                            <Image src="/images/integrations/hubspot.png" alt="HubSpot" width={24} height={24} className="shrink-0" />
-                            {t("hubspot.title")}
-                            {status.connected && (
-                                <Badge variant="outline" className="text-green-700 border-green-200 bg-green-50 ms-2">
-                                    <CheckCircle2 className="h-3 w-3 me-1" /> {t("connected")}
-                                </Badge>
-                            )}
-                        </CardTitle>
-                        <CardDescription className="mt-1">
-                            {t("hubspot.description")}
-                        </CardDescription>
-                    </div>
-                    {status.connected && (
-                        <Button
-                            variant="outline"
-                            className="text-red-600 border-red-200 hover:bg-red-50 gap-2 shrink-0"
-                            onClick={handleDisconnect}
-                            disabled={disconnecting}
-                        >
-                            {disconnecting ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
-                            {t("disconnect")}
+        <Section
+            icon={<Image src="/images/integrations/hubspot.png" alt="HubSpot" width={16} height={16} className="size-4 object-contain" />}
+            title={
+                <span className="flex flex-wrap items-center gap-2">
+                    {t("hubspot.title")}
+                    {status.connected && <Badge tone="success" dot>{t("connected")}</Badge>}
+                </span>
+            }
+            description={t("hubspot.description")}
+            actions={
+                status.connected && (
+                    <Button
+                        variant="secondary"
+                        onClick={handleDisconnect}
+                        loading={disconnecting}
+                        iconStart={<SignOut />}
+                    >
+                        {t("disconnect")}
+                    </Button>
+                )
+            }
+        >
+            {status.connected && (
+                <div className="flex flex-col items-start gap-1">
+                    {status.hubDomain && (
+                        <p className="text-caption text-fg-muted">
+                            {t("hubspot.connectedTo")} <span className="font-medium text-fg">{status.hubDomain}</span>
+                        </p>
+                    )}
+                    <p className="text-caption text-fg-muted">
+                        {status.authMode === "serviceKey"
+                            ? t("hubspot.connectedVia", { last4: status.keyLast4 })
+                            : t("hubspot.connectedViaOAuth")}
+                    </p>
+                    {status.authMode === "serviceKey" && !replacingKey && (
+                        <Button variant="link" size="sm" onClick={() => setReplacingKey(true)}>
+                            {t("hubspot.serviceKeyReplace")}
                         </Button>
                     )}
                 </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                {status.connected && (
-                    <div className="space-y-1">
-                        {status.hubDomain && (
-                            <p className="text-xs text-muted-foreground">
-                                {t("hubspot.connectedTo")} <span className="font-medium text-foreground">{status.hubDomain}</span>
-                            </p>
-                        )}
-                        <p className="text-xs text-muted-foreground">
-                            {status.authMode === "serviceKey"
-                                ? t("hubspot.connectedVia", { last4: status.keyLast4 })
-                                : t("hubspot.connectedViaOAuth")}
-                        </p>
-                        {status.authMode === "serviceKey" && !replacingKey && (
-                            <Button
-                                variant="link"
-                                className="h-auto p-0 text-xs text-orange-600"
-                                onClick={() => setReplacingKey(true)}
-                            >
-                                {t("hubspot.serviceKeyReplace")}
-                            </Button>
-                        )}
+            )}
+
+            {showKeyForm && (
+                <div className="flex flex-col items-start gap-2">
+                    <div className="w-full">{keyForm}</div>
+                    <Button variant="link" size="sm" asChild iconEnd={<ArrowSquareOut />}>
+                        <a href={SERVICE_KEY_DOCS} target="_blank" rel="noopener noreferrer">
+                            {t("hubspot.serviceKeyDocs")}
+                        </a>
+                    </Button>
+                </div>
+            )}
+
+            {!status.connected && status.oauthAvailable && (
+                <>
+                    <Separator />
+                    <div className="flex flex-col items-start gap-2">
+                        <h3 className="text-body-sm font-medium">{t("hubspot.legacyOAuthTitle")}</h3>
+                        <p className="text-caption text-fg-muted">{t("hubspot.legacyOAuthHint")}</p>
+                        <Button variant="secondary" onClick={handleConnect} iconStart={<ArrowSquareOut />}>
+                            {t("hubspot.connect")}
+                        </Button>
                     </div>
-                )}
+                </>
+            )}
 
-                {showKeyForm && keyForm}
-
-                {!status.connected && status.oauthAvailable && (
-                    <>
-                        <Separator />
-                        <div className="space-y-2">
-                            <Label className="text-sm font-bold">{t("hubspot.legacyOAuthTitle")}</Label>
-                            <p className="text-xs text-muted-foreground">{t("hubspot.legacyOAuthHint")}</p>
-                            <Button variant="outline" className="gap-2" onClick={handleConnect}>
-                                <ExternalLink className="h-4 w-4" />
-                                {t("hubspot.connect")}
-                            </Button>
-                        </div>
-                    </>
-                )}
-
-                <div className="rounded-xl border p-4 bg-muted/20">
-                    <div className="flex items-start justify-between gap-4">
-                        <div className="space-y-0.5">
-                            <Label className="text-sm font-bold">{t("hubspot.syncLeads")}</Label>
-                            <p className="text-xs text-muted-foreground">
-                                {t("hubspot.syncLeadsHint", { appName: branding.appName })}
-                            </p>
-                        </div>
+            <SettingRows inset>
+                <SettingRow
+                    htmlFor="hubspot-sync-leads"
+                    label={t("hubspot.syncLeads")}
+                    description={t("hubspot.syncLeadsHint", { appName: branding.appName })}
+                    control={
                         <Switch
+                            id="hubspot-sync-leads"
                             checked={status.syncLeads}
                             disabled={!status.connected || savingPref === "syncLeads"}
                             onCheckedChange={(v) => togglePref("syncLeads", v)}
                         />
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
+                    }
+                />
+            </SettingRows>
+        </Section>
     );
 }

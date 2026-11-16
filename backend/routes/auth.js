@@ -92,7 +92,7 @@ router.get('/google-sheets', async (req, res) => {
     if (sheetsProblem) {
         console.error(`[GoogleSheets] ${describeGoogleCredentialProblem(sheetsProblem)}`);
         const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
-        return res.redirect(`${CLIENT_URL}/settings?google_sheets=${sheetsProblem}`);
+        return res.redirect(`${CLIENT_URL}/integrations?google_sheets=${sheetsProblem}`);
     }
 
     // Dynamically construct redirect URI based on current request host
@@ -122,11 +122,11 @@ router.get('/google-sheets/callback', async (req, res) => {
         );
 
         const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
-        res.redirect(`${CLIENT_URL}/settings?google_sheets=connected`);
+        res.redirect(`${CLIENT_URL}/integrations?google_sheets=connected`);
     } catch (err) {
         console.error('Google Sheets OAuth Error:', err);
         const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
-        res.redirect(`${CLIENT_URL}/settings?google_sheets=error`);
+        res.redirect(`${CLIENT_URL}/integrations?google_sheets=error`);
     }
 });
 
@@ -140,7 +140,7 @@ router.get('/google-calendar', async (req, res) => {
     if (calendarProblem) {
         console.error(`[GoogleCalendar] ${describeGoogleCredentialProblem(calendarProblem)}`);
         const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
-        return res.redirect(`${CLIENT_URL}/settings?google_calendar=${calendarProblem}`);
+        return res.redirect(`${CLIENT_URL}/integrations?google_calendar=${calendarProblem}`);
     }
 
     const redirectUri = callbackUrl(req, 'google-calendar');
@@ -179,10 +179,10 @@ router.get('/google-calendar/callback', async (req, res) => {
             { upsert: true }
         );
 
-        res.redirect(`${CLIENT_URL}/settings?google_calendar=connected`);
+        res.redirect(`${CLIENT_URL}/integrations?google_calendar=connected`);
     } catch (err) {
         console.error('Google Calendar OAuth Error:', err);
-        res.redirect(`${CLIENT_URL}/settings?google_calendar=error`);
+        res.redirect(`${CLIENT_URL}/integrations?google_calendar=error`);
     }
 });
 
@@ -243,10 +243,10 @@ router.get('/hubspot/callback', async (req, res) => {
             { upsert: true }
         );
 
-        res.redirect(`${CLIENT_URL}/settings?hubspot=connected`);
+        res.redirect(`${CLIENT_URL}/integrations?hubspot=connected`);
     } catch (err) {
         console.error('HubSpot OAuth Error:', err.response?.data || err.message);
-        res.redirect(`${CLIENT_URL}/settings?hubspot=error`);
+        res.redirect(`${CLIENT_URL}/integrations?hubspot=error`);
     }
 });
 
@@ -291,10 +291,10 @@ router.get('/slack/callback', async (req, res) => {
             { upsert: true }
         );
 
-        res.redirect(`${CLIENT_URL}/settings?slack=connected`);
+        res.redirect(`${CLIENT_URL}/integrations?slack=connected`);
     } catch (err) {
         console.error('Slack OAuth Error:', err.slack || err.response?.data || err.message);
-        res.redirect(`${CLIENT_URL}/settings?slack=error`);
+        res.redirect(`${CLIENT_URL}/integrations?slack=error`);
     }
 });
 

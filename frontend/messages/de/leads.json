@@ -48,10 +48,14 @@
   },
   "importCsv": {
     "trigger": "CSV importieren", "title": "Leads aus CSV importieren",
-    "description": "Laden Sie eine CSV-Datei mit den Spalten hoch: name, phone, company (optional)",
+    "description": "Laden Sie eine CSV-Datei mit den Spalten hoch: name, phone, company (optional). Schreiben Sie Telefonnummern mit Ländervorwahl, zum Beispiel +1 415 555 2671.",
     "fileLabel": "CSV-Datei", "selected": "Ausgewählt:",
     "tagsLabel": "Tags zu allen hinzufügen (durch Komma getrennt)",
-    "tagsPlaceholder": "neue-leads, kampagne-1"
+    "tagsPlaceholder": "neue-leads, kampagne-1",
+    "issues": {
+      "noPhoneColumn": "Die Datei hat keine Spalte „phone“, daher würden keine Leads importiert. Nennen Sie die Spalte phone (kleingeschrieben).",
+      "rowsWithoutPhone": "{count, plural, one {# Zeile hat keine Telefonnummer und wird übersprungen} other {# Zeilen haben keine Telefonnummer und werden übersprungen}}."
+    }
   },
   "toast": {
     "fetchFailed": "Leads konnten nicht abgerufen werden",

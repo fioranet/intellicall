@@ -2,8 +2,8 @@
 
 import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import { Spinner } from "@wixzel/react";
+import { toast } from "@wixzel/react";
 import { useTranslations } from "next-intl";
 
 function AuthCallbackContent() {
@@ -42,8 +42,8 @@ function AuthCallbackContent() {
     return (
         <div className="flex min-h-screen items-center justify-center">
             <div className="flex flex-col items-center gap-4">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="text-muted-foreground">{t("callback.completing")}</p>
+                <Spinner size="xl" className="text-accent-ink" />
+                <p className="text-fg-muted">{t("callback.completing")}</p>
             </div>
         </div>
     );
@@ -53,7 +53,7 @@ export default function AuthCallbackPage() {
     return (
         <Suspense fallback={
             <div className="flex min-h-screen items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <Spinner size="xl" className="text-accent-ink" />
             </div>
         }>
             <AuthCallbackContent />

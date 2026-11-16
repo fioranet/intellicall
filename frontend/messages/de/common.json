@@ -34,5 +34,29 @@
     "title": "Sind Sie sicher?", "deleteTitle": "Dieses Element löschen?",
     "deleteDescription": "Diese Aktion kann nicht rückgängig gemacht werden."
   },
-  "selfHost": { "badge": "Self-Hosting", "buyOn": "Auf {marketplace} kaufen" }
+  "selfHost": { "badge": "Self-Hosting", "buyOn": "Auf {marketplace} kaufen" },
+  "formChecks": {
+    "e164NoPlus": "{label}: Beginnen Sie mit + und der Ländervorwahl, zum Beispiel +1 415 555 2671.",
+    "e164NotNumber": "{label}: {number} ist keine Telefonnummer. Prüfen Sie die Ländervorwahl und die Anzahl der Ziffern.",
+    "e164Unusual": "{label}: {number} sieht nicht wie eine echte Nummer für ihre Ländervorwahl aus. Prüfen Sie sie vor dem Speichern.",
+    "leadNoCountryCode": "Keine Ländervorwahl. Anrufe gehen davon aus, dass der Lead im selben Land ist wie die Nummer, von der Sie anrufen. Ist der Lead woanders, schlägt der Anruf fehl: Fügen Sie die Ländervorwahl hinzu, zum Beispiel +1 415 555 2671.",
+    "leadNotNumber": "{number} ist keine Telefonnummer: Prüfen Sie die Ländervorwahl und die Anzahl der Ziffern.",
+    "leadUnusual": "{number} sieht nicht wie eine echte Nummer für ihre Ländervorwahl aus. Der Anbieter lehnt sie möglicherweise ab.",
+    "summaryNoCountryCode": "{count, plural, one {# Nummer hat} other {# Nummern haben}} keine Ländervorwahl ({examples}). Sie werden im Land der Nummer gewählt, von der Sie anrufen; fügen Sie bei Leads in anderen Ländern die Ländervorwahl hinzu.",
+    "summaryNotNumber": "{count, plural, one {# Nummer ist keine Telefonnummer} other {# Nummern sind keine Telefonnummern}} ({examples}). Anrufe an sie schlagen fehl: Korrigieren Sie sie zuerst in der Datei.",
+    "summaryUnusual": "{count, plural, one {# Nummer sieht} other {# Nummern sehen}} für ihre Ländervorwahl nicht echt aus ({examples}). Der Anbieter lehnt sie möglicherweise ab."
+  },
+  "ui": {
+    "moreInformation": "Weitere Informationen",
+    "reveal": "Anzeigen",
+    "hide": "Ausblenden",
+    "breadcrumb": "Brotkrumen-Navigation",
+    "steps": "Schritte",
+    "stepError": "Prüfen",
+    "typeToConfirm": "Zum Bestätigen {text} eingeben",
+    "navigation": "Navigation",
+    "collapseSidebar": "Seitenleiste einklappen",
+    "expandSidebar": "Seitenleiste ausklappen",
+    "notifications": "Benachrichtigungen"
+  }
 }

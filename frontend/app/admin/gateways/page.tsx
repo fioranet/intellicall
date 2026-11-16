@@ -2,28 +2,24 @@
 
 import { useTranslations } from "next-intl";
 import Image from "next/image";
+import { ShieldCheck, FloppyDisk } from "@phosphor-icons/react";
 import {
-    CreditCard,
-    ShieldCheck,
-    Settings2,
-    Loader2,
-    Save
-} from "lucide-react";
-import {
+    Spinner,
     Card,
     CardContent,
-    CardDescription,
     CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+    Button,
+    Switch,
+    Label,
+    Input,
+    Field,
+    PageHeader,
+    Separator,
+} from "@wixzel/react";
 import { AdminNav } from "@/components/admin/nav";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { toast } from "sonner";
+import { toast } from "@wixzel/react";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
 
@@ -113,7 +109,7 @@ export default function AdminGatewaysPage() {
     if (loading) {
         return (
             <div className="flex h-64 items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <Spinner size="xl" />
             </div>
         );
     }
@@ -167,72 +163,68 @@ export default function AdminGatewaysPage() {
     ];
 
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground font-sora">{t("gateways.title")}</h1>
-                    <p className="text-muted-foreground">{t("gateways.subtitle")}</p>
-                </div>
-                <Button
-                    onClick={() => handleSaveAll()}
-                    disabled={saving !== 'idle'}
-                    className="shadow-lg min-w-[160px]"
-                >
-                    {saving === 'saving' ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : (saving === 'saved' ? <ShieldCheck className="me-2 h-4 w-4" /> : <Save className="me-2 h-4 w-4" />)}
-                    {saving === 'saved' ? 'Saved' : (saving === 'saving' ? 'Saving...' : 'Save All Changes')}
-                </Button>
-            </div>
+        <div className="flex flex-col gap-6">
+            <PageHeader
+                title={t("gateways.title")}
+                description={t("gateways.subtitle")}
+                actions={
+                    <Button
+                        variant="primary"
+                        onClick={() => handleSaveAll()}
+                        disabled={saving !== 'idle'}
+                        loading={saving === 'saving'}
+                        iconStart={saving === 'saved' ? <ShieldCheck /> : <FloppyDisk />}
+                        className="min-w-[160px]"
+                    >
+                        {saving === 'saved' ? 'Saved' : (saving === 'saving' ? 'Saving...' : 'Save All Changes')}
+                    </Button>
+                }
+            />
 
             <AdminNav currentPath="/admin/gateways" />
 
             <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {GATEWAY_CONFIG.map((gateway) => (
-                    <Card key={gateway.id} className="rounded-xl border-border shadow-sm overflow-hidden">
-                        <CardHeader className="px-4 py-3 border-b border-border flex flex-row items-center justify-between space-y-0 bg-muted/20 h-14">
-                            <div className="flex items-center">
-                                <div className="relative h-10 w-32 overflow-hidden flex items-center">
-                                    <Image src={gateway.logo} alt={gateway.name} fill className="object-contain object-left dark:hidden" />
-                                    <Image src={gateway.logoDark} alt={gateway.name} fill className="object-contain object-left hidden dark:block" />
-                                </div>
+                    <Card key={gateway.id}>
+                        <CardHeader className="flex-row items-center justify-between gap-4">
+                            <div className="relative h-10 w-32 overflow-hidden flex items-center">
+                                <Image src={gateway.logo} alt={gateway.name} fill className="object-contain object-left dark:hidden" />
+                                <Image src={gateway.logoDark} alt={gateway.name} fill className="object-contain object-left hidden dark:block" />
                             </div>
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-3">
                                 <div className="flex items-center gap-2">
-                                    <Label htmlFor={`${gateway.id}-test`} className="text-[10px] font-medium uppercase text-muted-foreground">{t("gateways.testMode")}</Label>
+                                    <Label htmlFor={`${gateway.id}-test`} className="text-caption text-fg-muted">{t("gateways.testMode")}</Label>
                                     <Switch
                                         id={`${gateway.id}-test`}
+                                        size="sm"
                                         checked={(gateways as any)[gateway.id].testMode}
                                         onCheckedChange={(checked) => handleUpdateGateway(gateway.id, 'testMode', checked)}
                                         disabled={saving === 'auto'}
-                                        className="scale-75 origin-right"
                                     />
                                 </div>
-                                <div className="h-4 w-[1px] bg-border" />
+                                <Separator orientation="vertical" className="h-4" />
                                 <div className="flex items-center gap-2">
-                                    <Label htmlFor={`${gateway.id}-enabled`} className="text-[10px] font-medium uppercase text-muted-foreground">{t("gateways.enabled")}</Label>
+                                    <Label htmlFor={`${gateway.id}-enabled`} className="text-caption text-fg-muted">{t("gateways.enabled")}</Label>
                                     <Switch
                                         id={`${gateway.id}-enabled`}
                                         checked={(gateways as any)[gateway.id].enabled}
                                         onCheckedChange={(checked) => handleUpdateGateway(gateway.id, 'enabled', checked)}
                                         disabled={saving === 'auto'}
-                                        className="scale-90 origin-right"
                                     />
                                 </div>
                             </div>
                         </CardHeader>
-                        <CardContent className="p-4 space-y-3 bg-card/50">
+                        <CardContent className="flex flex-col gap-3">
                             {gateway.fields.map((field) => (
-                                <div key={field.key} className="grid gap-1.5">
-                                    <div className="flex justify-between items-baseline">
-                                        <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{field.label}</Label>
-                                    </div>
+                                <Field key={field.key} label={field.label}>
                                     <Input
                                         placeholder={field.placeholder}
                                         type={field.type}
+                                        size="sm"
                                         value={(gateways as any)[gateway.id][field.key]}
                                         onChange={(e) => handleUpdateGateway(gateway.id, field.key, e.target.value)}
-                                        className="h-8 text-xs bg-background"
                                     />
-                                </div>
+                                </Field>
                             ))}
                         </CardContent>
                     </Card>

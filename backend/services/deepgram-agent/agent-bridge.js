@@ -6,6 +6,8 @@ const AppointmentService = require('../appointment-tool-service');
 const AGENT_WS_URL = 'wss://agent.deepgram.com/v1/agent/converse';
 /** Deepgram-managed LLM — no endpoint/key needed. Managed catalog also includes gpt-4.1-mini etc. */
 const MANAGED_THINK_MODEL = 'gpt-4o-mini';
+/** Languages flux-general-multi understands (besides English, which has its own Flux model). */
+const FLUX_MULTI_LANGUAGES = ['es', 'fr', 'de', 'hi', 'ru', 'pt', 'ja', 'it', 'nl'];
 /**
  * Deepgram closes the socket after ~10s without any client message ("We waited too long
  * for a websocket message"), so KeepAlive has to be comfortably under that — caller audio
@@ -43,7 +45,9 @@ const IDLE_HANGUP_MESSAGE = "I haven't heard back from you, so I'll go ahead and
  *   onAgentAudioDone()             — agent finished sending audio for the current turn
  */
 class DeepgramAgentBridge {
-    constructor({ callId, settings, agent, lead }) {
+    constructor({ callId, settings, agent, lead, idleTimeoutMs = IDLE_TIMEOUT_MS }) {
+        /** Silence from the caller this long ends the call. A meeting passes a longer one. */
+        this.idleTimeoutMs = idleTimeoutMs;
         this.callId = callId;
         this.settings = settings;
         this.agent = agent;
@@ -72,6 +76,8 @@ class DeepgramAgentBridge {
          * browser test this stays null, and the capability is never offered to the model.
          */
         this.transferHandler = null;
+        /** The call's tools (services/tools/agent-tool-session.js), or null. Set before connect(). */
+        this.toolSession = null;
 
         // end_call state — armed when the tool fires, released on AgentAudioDone
         this._endCallRequested = false;
@@ -94,14 +100,29 @@ class DeepgramAgentBridge {
 
     _listenProvider() {
         const lang = this.agent?.language || 'en';
-        if (lang === 'en') {
-            // Flux is Deepgram's voice-agent STT with model-based end-of-turn detection (English)
+        const base = lang.split('-')[0];
+        // Flux is Deepgram's voice-agent STT with model-based end-of-turn detection. Flux takes
+        // its language from the model, so no `language` field is sent with it.
+        if (base === 'en') {
             return { type: 'deepgram', model: 'flux-general-en', version: 'v2' };
         }
-        return { type: 'deepgram', model: 'nova-3' };
+        if (lang === 'multi') {
+            return { type: 'deepgram', model: 'flux-general-multi', version: 'v2' };
+        }
+        if (FLUX_MULTI_LANGUAGES.includes(base)) {
+            return { type: 'deepgram', model: 'flux-general-multi', version: 'v2', language_hints: [lang] };
+        }
+        // Languages Flux doesn't cover yet. The language goes on the provider: the top-level
+        // agent.language is deprecated.
+        return { type: 'deepgram', model: 'nova-3', language: lang };
     }
 
     _speakConfig() {
+        // Deepgram's own Aura voices: no ElevenLabs key or endpoint involved. The voice model
+        // is language-specific (aura-2-livia-it speaks Italian), so no language_code either.
+        if (this.agent?.deepgramVoice) {
+            return { provider: { type: 'deepgram', model: this.agent.deepgramVoice } };
+        }
         const lang = this.agent?.language || 'en';
         const voiceId = this.agent?.voiceId || '21m00Tcm4TlvDq8ikWAM';
         // Per-agent ElevenLabs model override (Voice Quality settings). Deepgram orchestrates
@@ -113,7 +134,8 @@ class DeepgramAgentBridge {
             model_id: resolveElevenLabsModel(this.agent),
         };
         if (lang !== 'en' && lang !== 'multi') {
-            provider.language_code = lang.split('-')[0];
+            // `language` replaced the deprecated `language_code` on this provider.
+            provider.language = lang.split('-')[0];
         }
         return {
             provider,
@@ -158,6 +180,8 @@ class DeepgramAgentBridge {
                 },
             });
         }
+
+        if (this.toolSession) fns.push(...this.toolSession.deepgramFunctions());
 
         if (!this.agent?.appointmentBookingEnabled) return fns;
 
@@ -210,6 +234,8 @@ class DeepgramAgentBridge {
             commandTags: false, // native function calling — no [[..]] text protocol
             lead: this.lead,
             humanTransfer: !!this.transferHandler,
+            connectedApps: this.toolSession ? this.toolSession.appNames() : [],
+            toolNames: this.toolSession ? this.toolSession.tools.filter(t => t.type !== 'integration').map(t => t.name) : [],
         });
 
         const think = {
@@ -226,7 +252,8 @@ class DeepgramAgentBridge {
                 output: { encoding: 'mulaw', sample_rate: 8000, container: 'none' },
             },
             agent: {
-                language: this.agent?.language === 'multi' ? 'multi' : (this.agent?.language || 'en'),
+                // No top-level `language`: it is deprecated in favour of the listen/speak
+                // provider fields set in _listenProvider() and _speakConfig().
                 listen: { provider: this._listenProvider() },
                 think,
                 speak: this._speakConfig(),
@@ -256,6 +283,15 @@ class DeepgramAgentBridge {
         this.transferHandler = fn;
     }
 
+    /**
+     * Give this call its tools (services/tools/agent-tool-session.js): the account's
+     * webhook tools, connected apps and WhatsApp built-ins. Must be called before
+     * connect(), since the function list goes out with the setup message.
+     */
+    setToolSession(session) {
+        this.toolSession = session || null;
+    }
+
     /** kbContent is preloaded by the adapter (one Mongo fetch per call) and passed here. */
     setKbContent(kbContent) {
         this.kbContent = kbContent || '';
@@ -279,7 +315,7 @@ class DeepgramAgentBridge {
         if (this._idleWatchdog) return;
         this._idleWatchdog = setInterval(() => {
             if (!this.active || this._endCallArmed || this._endCallFired) return;
-            if (Date.now() - this._lastActivityAt < IDLE_TIMEOUT_MS) return;
+            if (Date.now() - this._lastActivityAt < this.idleTimeoutMs) return;
             console.log(`💤 [DG Agent] [${this.callId}] No activity for ${IDLE_TIMEOUT_MS}ms — ending call`);
             this._endCallReason = 'idle timeout';
             this.injectAgentMessage(IDLE_HANGUP_MESSAGE);
@@ -542,6 +578,7 @@ class DeepgramAgentBridge {
             case 'cancel_appointment':
                 return AppointmentService.cancelAppointment(userId, clientPhone, args.date, args.time);
             default:
+                if (this.toolSession?.has(name)) return this.toolSession.call(name, args);
                 return `Unknown function: ${name}`;
         }
     }

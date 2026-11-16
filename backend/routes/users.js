@@ -14,7 +14,8 @@ const router = express.Router();
 router.post('/signup', async (req, res) => {
     const schema = joi.object({
         name: joi.string().min(2).max(50).required(),
-        email: joi.string().email().required(),
+        // Stored lowercased by the schema, so normalize before the duplicate check
+        email: joi.string().trim().lowercase().email().required(),
         password: joi.string().min(8).required(),
         role: joi.string().valid('admin', 'user').default('user')
     });
@@ -66,7 +67,7 @@ router.post('/signup', async (req, res) => {
 
 router.post('/login', async (req, res) => {
     const schema = joi.object({
-        email: joi.string().email().required(),
+        email: joi.string().trim().lowercase().email().required(),
         password: joi.string().required()
     });
 
@@ -74,7 +75,24 @@ router.post('/login', async (req, res) => {
         const data = await schema.validateAsync(req.body);
 
         const user = await User.findOne({ email: data.email }).select('+password').populate('plan');
-        if (!user || !(await bcrypt.compare(data.password, user.password))) {
+        if (!user) {
+            return res.status(401).json({
+                status: 'error',
+                message: 'Invalid email or password'
+            });
+        }
+
+        // Accounts created through Google sign-in have no password hash, and
+        // bcrypt.compare throws on a missing hash.
+        if (!user.password) {
+            return res.status(401).json({
+                status: 'error',
+                code: 'PASSWORD_NOT_SET',
+                message: 'This account was created with Google sign-in. Please sign in with Google, or set a password from Settings after signing in.'
+            });
+        }
+
+        if (!(await bcrypt.compare(data.password, user.password))) {
             return res.status(401).json({
                 status: 'error',
                 message: 'Invalid email or password'
@@ -120,9 +138,53 @@ router.get('/', auth, requireAdmin, async (req, res) => {
 router.get('/me', auth, async (req, res) => {
     try {
         const user = await User.findById(req.user._id).select('-password').populate('plan');
+        const hasPassword = !!(await User.exists({ _id: req.user._id, password: { $exists: true, $nin: [null, ''] } }));
         res.status(200).json({
             status: 'success',
-            data: { user }
+            data: { user, hasPassword }
+        });
+    } catch (err) {
+        res.status(500).json({ status: 'error', message: err.message });
+    }
+});
+
+// POST /api/users/password — change the password, or set one for the first
+// time on a Google-only account (no current password to check in that case).
+router.post('/password', auth, async (req, res) => {
+    const schema = joi.object({
+        currentPassword: joi.string().allow(''),
+        newPassword: joi.string().min(8).required()
+    });
+
+    // An automation API key must not be able to take over the account login
+    if (req.headers['x-api-key']) {
+        return res.status(403).json({ status: 'error', message: 'Sign in to change your password' });
+    }
+
+    try {
+        const data = await schema.validateAsync(req.body);
+
+        const user = await User.findById(req.user._id).select('+password');
+        if (!user) {
+            return res.status(404).json({ status: 'error', message: 'User not found' });
+        }
+
+        if (user.password) {
+            if (!data.currentPassword || !(await bcrypt.compare(data.currentPassword, user.password))) {
+                return res.status(400).json({
+                    status: 'error',
+                    message: 'Current password is incorrect'
+                });
+            }
+        }
+
+        const hadPassword = !!user.password;
+        user.password = await bcrypt.hash(data.newPassword, 12);
+        await user.save();
+
+        res.status(200).json({
+            status: 'success',
+            message: hadPassword ? 'Password updated' : 'Password set. You can now sign in with your email and password.'
         });
     } catch (err) {
         res.status(500).json({ status: 'error', message: err.message });

@@ -34,5 +34,29 @@
     "title": "Êtes-vous sûr ?", "deleteTitle": "Supprimer cet élément ?",
     "deleteDescription": "Cette action est irréversible."
   },
-  "selfHost": { "badge": "Auto-hébergé", "buyOn": "Acheter sur {marketplace}" }
+  "selfHost": { "badge": "Auto-hébergé", "buyOn": "Acheter sur {marketplace}" },
+  "formChecks": {
+    "e164NoPlus": "{label} : commencez par + et l’indicatif du pays, par exemple +1 415 555 2671.",
+    "e164NotNumber": "{label} : {number} n’est pas un numéro de téléphone. Vérifiez l’indicatif du pays et le nombre de chiffres.",
+    "e164Unusual": "{label} : {number} ne ressemble pas à un vrai numéro pour son indicatif. Vérifiez-le avant d’enregistrer.",
+    "leadNoCountryCode": "Pas d’indicatif de pays. Les appels supposeront que le prospect se trouve dans le même pays que le numéro depuis lequel vous appelez. S’il est ailleurs, l’appel échoue : ajoutez l’indicatif, par exemple +1 415 555 2671.",
+    "leadNotNumber": "{number} n’est pas un numéro de téléphone : vérifiez l’indicatif du pays et le nombre de chiffres.",
+    "leadUnusual": "{number} ne ressemble pas à un vrai numéro pour son indicatif. L’opérateur pourrait le refuser.",
+    "summaryNoCountryCode": "{count, plural, one {# numéro n’a pas} other {# numéros n’ont pas}} d’indicatif de pays ({examples}). Ils seront composés dans le pays du numéro depuis lequel vous appelez ; ajoutez l’indicatif aux prospects situés ailleurs.",
+    "summaryNotNumber": "{count, plural, one {# numéro n’est pas un numéro de téléphone} other {# numéros ne sont pas des numéros de téléphone}} ({examples}). Les appels vers eux échoueront : corrigez-les d’abord dans le fichier.",
+    "summaryUnusual": "{count, plural, one {# numéro ne semble pas réel} other {# numéros ne semblent pas réels}} pour leur indicatif ({examples}). L’opérateur pourrait les refuser."
+  },
+  "ui": {
+    "moreInformation": "Plus d'informations",
+    "reveal": "Afficher",
+    "hide": "Masquer",
+    "breadcrumb": "Fil d'Ariane",
+    "steps": "Étapes",
+    "stepError": "À vérifier",
+    "typeToConfirm": "Saisissez {text} pour confirmer",
+    "navigation": "Navigation",
+    "collapseSidebar": "Réduire la barre latérale",
+    "expandSidebar": "Développer la barre latérale",
+    "notifications": "Notifications"
+  }
 }

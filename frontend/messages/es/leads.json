@@ -48,10 +48,14 @@
   },
   "importCsv": {
     "trigger": "Importar CSV", "title": "Importar contactos desde CSV",
-    "description": "Sube un archivo CSV con las columnas: name, phone, company (opcional)",
+    "description": "Sube un archivo CSV con las columnas: name, phone, company (opcional). Escribe los números de teléfono con el código de país, por ejemplo +1 415 555 2671.",
     "fileLabel": "Archivo CSV", "selected": "Seleccionado:",
     "tagsLabel": "Añadir etiquetas a todos (separadas por comas)",
-    "tagsPlaceholder": "contactos-nuevos, campana-1"
+    "tagsPlaceholder": "contactos-nuevos, campana-1",
+    "issues": {
+      "noPhoneColumn": "El archivo no tiene una columna \"phone\", así que no se importaría ningún cliente potencial. Llama a la columna phone (en minúsculas).",
+      "rowsWithoutPhone": "{count, plural, one {# fila no tiene} other {# filas no tienen}} número de teléfono y se omitirán."
+    }
   },
   "toast": {
     "fetchFailed": "No se pudieron obtener los contactos",

@@ -1,5 +1,6 @@
 const express = require('express');
 const CallLog = require('../models/CallLog');
+const User = require('../models/User');
 const Lead = require('../models/Lead');
 const Agent = require('../models/Agent');
 const Campaign = require('../models/Campaign');
@@ -197,10 +198,29 @@ router.get('/:id/recording', auth, async (req, res) => {
  */
 router.post('/:id/analyze', auth, async (req, res) => {
     try {
+        // Scoped like GET /:id. Without this any signed-in user could analyze anyone's
+        // call by id, on the owner's OpenRouter key, and learn whose call it is.
+        const query = { _id: req.params.id };
+        if (!req.user.isSuperAdmin) {
+            query.userId = req.user._id;
+        }
+        if (!await CallLog.exists(query)) {
+            return res.status(404).json({ status: 'error', message: 'Call log not found' });
+        }
+
         const result = await analyzeCallLog(req.params.id);
 
-        if (!result) {
-            return res.status(500).json({ status: 'error', message: 'Failed to analyze transcript' });
+        if (!result || result.error) {
+            let message = result?.error || 'Failed to analyze transcript';
+            // An admin looking at another account's call: the key that's missing is theirs.
+            const isAdmin = req.user.role === 'admin' || req.user.isSuperAdmin;
+            if (result?.code === 'no_openrouter_key' && isAdmin && String(result.ownerId) !== String(req.user._id)) {
+                const owner = await User.findById(result.ownerId).select('email').lean();
+                message = `This call belongs to ${owner?.email || 'another account'}. Analysis runs on that account's own keys, `
+                    + `and it has no key that can analyse this call. Ask them to add an OpenRouter key in Settings; `
+                    + `your own keys aren't used for their calls.`;
+            }
+            return res.status(422).json({ status: 'error', message });
         }
 
         res.status(200).json({

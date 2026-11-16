@@ -63,7 +63,16 @@
     "inboundAgentHint": "Les appels entrants vers ce numéro seront traités par l'agent sélectionné.",
     "fallbackLabel": "Numéro de repli",
     "optional": "(facultatif)",
-    "fallbackHint": "Si aucun agent n'est assigné, les appels entrants seront transférés vers ce numéro au lieu d'être raccrochés."
+    "fallbackHint": "Si aucun agent n'est assigné, les appels entrants seront transférés vers ce numéro au lieu d'être raccrochés.",
+    "issues": {
+      "noTrunk": "Choisissez le trunk SIP auquel appartient ce numéro. Un numéro SIP ne peut ni appeler ni répondre sans trunk.",
+      "trunkInactive": "Le trunk SIP « {name} » est inactif : les appels sur ce numéro échoueront tant qu’il ne sera pas réactivé.",
+      "trunkCallerId": "Le trunk SIP « {name} » a l’identifiant d’appelant par défaut {callerId} : les appels sortants de ce numéro afficheront ce numéro à la place. Effacez l’identifiant du trunk si ce n’est pas voulu.",
+      "fallbackIsSelf": "Le numéro de repli ne peut pas être ce même numéro : l’appel serait renvoyé vers lui-même.",
+      "noAgentHangsUp": "Aucun agent entrant n’est choisi : les appels entrants vers ce numéro seront raccrochés.",
+      "fallbackUnused": "Le numéro de repli n’est utilisé que si aucun agent n’est choisi : il ne servira pas tant qu’un agent est défini.",
+      "noAgents": "Vous n’avez pas encore d’agent. Créez-en un dans Agents pour répondre aux appels sur ce numéro."
+    }
   },
   "toast": {
     "loadFailed": "Échec du chargement des numéros de téléphone",

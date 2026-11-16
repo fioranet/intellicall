@@ -2,14 +2,12 @@
 
 import { useTranslations } from "next-intl";
 import { useState, useEffect, useCallback } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import axios from "axios";
-import { toast } from "sonner";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Badge, Button, Section, toast, useConfirm } from "@wixzel/react";
 import Image from "next/image";
-import { CheckCircle2, ExternalLink, Loader2, LogOut } from "lucide-react";
+import { ArrowSquareOut, SignOut } from "@phosphor-icons/react";
+import { SectionLoading } from "@/components/settings/setting-row";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
 
@@ -17,10 +15,13 @@ export function GoogleCalendarIntegration() {
     const t = useTranslations("settings");
     const searchParams = useSearchParams();
     const router = useRouter();
+    // The card is mounted on /integrations now and used to live on /settings: clear the query where it is.
+    const pathname = usePathname();
     const [loading, setLoading] = useState(true);
     const [disconnecting, setDisconnecting] = useState(false);
     const [connected, setConnected] = useState(false);
     const [email, setEmail] = useState("");
+    const confirm = useConfirm();
 
     const fetchStatus = useCallback(async () => {
         try {
@@ -49,20 +50,20 @@ export function GoogleCalendarIntegration() {
         if (p === "connected") {
             toast.success(t("toast.calendarConnected"));
             fetchStatus();
-            router.replace("/settings");
+            router.replace(pathname);
         } else if (p === "error") {
             toast.error(t("toast.calendarConnectFailed"));
-            router.replace("/settings");
+            router.replace(pathname);
         } else if (p === "not_configured") {
             toast.error(t("toast.googleOAuthNotConfigured"));
-            router.replace("/settings");
+            router.replace(pathname);
         } else if (p === "invalid_client_id") {
             // Caught before the redirect, so the admin sees this instead of
             // Google's own "Error 401: invalid_client" page.
             toast.error(t("toast.googleOAuthInvalidClientId"));
-            router.replace("/settings");
+            router.replace(pathname);
         }
-    }, [searchParams, fetchStatus, router]);
+    }, [searchParams, fetchStatus, router, pathname]);
 
     const handleConnect = () => {
         const userStr = localStorage.getItem("user");
@@ -80,7 +81,13 @@ export function GoogleCalendarIntegration() {
     };
 
     const handleDisconnect = async () => {
-        if (!confirm("Disconnect Google Calendar? Existing events remain on your calendar but new appointments will no longer sync.")) return;
+        const ok = await confirm({
+            title: "Disconnect Google Calendar?",
+            description: "Existing events remain on your calendar but new appointments will no longer sync.",
+            confirmLabel: t("disconnect"),
+            tone: "danger",
+        });
+        if (!ok) return;
         setDisconnecting(true);
         try {
             const token = localStorage.getItem("token");
@@ -98,63 +105,43 @@ export function GoogleCalendarIntegration() {
     };
 
     if (loading) {
-        return (
-            <Card>
-                <CardContent className="py-10 flex items-center justify-center text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin me-2" /> {t("loading")}
-                </CardContent>
-            </Card>
-        );
+        return <SectionLoading>{t("loading")}</SectionLoading>;
     }
 
     return (
-        <Card>
-            <CardHeader>
-                <div className="flex items-start justify-between gap-4">
-                    <div>
-                        <CardTitle className="flex items-center gap-2">
-                            <Image src="/images/integrations/calendar.png" alt={t("googleCalendar.title")} width={24} height={24} className="shrink-0" />
-                            {t("googleCalendar.title")}
-                            {connected && (
-                                <Badge variant="outline" className="text-green-700 border-green-200 bg-green-50 ms-2">
-                                    <CheckCircle2 className="h-3 w-3 me-1" /> {t("connected")}
-                                </Badge>
-                            )}
-                        </CardTitle>
-                        <CardDescription className="mt-1">
-                            {t("googleCalendar.description")}
-                        </CardDescription>
-                    </div>
-                    {connected ? (
-                        <Button
-                            variant="outline"
-                            className="text-red-600 border-red-200 hover:bg-red-50 gap-2 shrink-0"
-                            onClick={handleDisconnect}
-                            disabled={disconnecting}
-                        >
-                            {disconnecting ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
-                            {t("disconnect")}
-                        </Button>
-                    ) : (
-                        <Button
-                            className="bg-blue-600 hover:bg-blue-700 gap-2 shrink-0"
-                            onClick={handleConnect}
-                        >
-                            <ExternalLink className="h-4 w-4" />
-                            {t("googleCalendar.connect")}
-                        </Button>
-                    )}
-                </div>
-            </CardHeader>
+        <Section
+            icon={<Image src="/images/integrations/calendar.png" alt={t("googleCalendar.title")} width={16} height={16} className="size-4 object-contain" />}
+            title={
+                <span className="flex flex-wrap items-center gap-2">
+                    {t("googleCalendar.title")}
+                    {connected && <Badge tone="success" dot>{t("connected")}</Badge>}
+                </span>
+            }
+            description={t("googleCalendar.description")}
+            actions={
+                connected ? (
+                    <Button
+                        variant="secondary"
+                        onClick={handleDisconnect}
+                        loading={disconnecting}
+                        iconStart={<SignOut />}
+                    >
+                        {t("disconnect")}
+                    </Button>
+                ) : (
+                    <Button variant="primary" onClick={handleConnect} iconStart={<ArrowSquareOut />}>
+                        {t("googleCalendar.connect")}
+                    </Button>
+                )
+            }
+        >
             {connected && (
-                <CardContent className="space-y-3">
-                    <div className="rounded-xl border p-4 bg-muted/20 text-sm space-y-1">
-                        <div className="text-xs font-bold uppercase text-muted-foreground">{t("googleCalendar.connectedAccount")}</div>
-                        <div className="font-medium break-all">{email || t("googleCalendar.primaryAccount")}</div>
-                        <div className="text-xs text-muted-foreground">{t.rich("googleCalendar.syncTarget", { b: (chunks) => <span className="font-medium text-foreground">{chunks}</span> })}</div>
-                    </div>
-                </CardContent>
+                <div className="flex flex-col gap-1 rounded-md bg-surface p-4 text-body-sm">
+                    <div className="text-caption font-medium text-fg-muted">{t("googleCalendar.connectedAccount")}</div>
+                    <div className="font-medium break-all">{email || t("googleCalendar.primaryAccount")}</div>
+                    <div className="text-caption text-fg-muted">{t.rich("googleCalendar.syncTarget", { b: (chunks) => <span className="font-medium text-fg">{chunks}</span> })}</div>
+                </div>
             )}
-        </Card>
+        </Section>
     );
 }

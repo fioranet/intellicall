@@ -2,27 +2,43 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar as CalendarIcon, Clock, User, Phone, CheckCircle2, XCircle, AlertCircle, Plus, Trash2, CalendarDays, Bot, LayoutGrid, List, Pencil } from "lucide-react";
-import { toast } from "sonner";
-import axios from "axios";
-import { format } from "date-fns";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { AvailabilityManager } from "@/components/appointments/availability-manager";
-import { EditAppointmentDialog } from "@/components/appointments/edit-appointment-dialog";
 import {
+    Badge,
+    type BadgeProps,
+    Button,
+    Card,
+    CardContent,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+    Chip,
+    Chips,
+    EmptyState,
+    PageHeader,
+    Skeleton,
     Table,
     TableBody,
     TableCell,
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table";
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+    toast,
+} from "@wixzel/react";
+import { Calendar, Clock, User, Phone, CheckCircle, XCircle, CalendarDots, Robot, SquaresFour, List, PencilSimple } from "@phosphor-icons/react";
+import axios from "axios";
+import { format } from "date-fns";
+import { AvailabilityManager } from "@/components/appointments/availability-manager";
+import { EditAppointmentDialog } from "@/components/appointments/edit-appointment-dialog";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
+
+/** Appointment statuses as Badge tones. */
+const statusTone = (status: string): BadgeProps["tone"] =>
+    status === 'scheduled' ? "accent" : status === 'completed' ? "success" : "danger";
 
 export default function AppointmentsPage() {
     const t = useTranslations("appointments");
@@ -67,62 +83,45 @@ export default function AppointmentsPage() {
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between gap-4 flex-wrap">
-                <div>
-                    <h1 className="text-3xl font-bold">{t("title")}</h1>
-                    <p className="text-muted-foreground">
-                        {t("subtitle")}
-                    </p>
-                </div>
-            </div>
+        <div className="flex flex-col gap-6">
+            <PageHeader title={t("title")} description={t("subtitle")} />
 
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-                <div className="flex items-center justify-between">
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <div className="flex flex-wrap items-center justify-between gap-3">
                     <TabsList>
-                        <TabsTrigger value="appointments" className="gap-2">
-                            <CalendarIcon className="h-4 w-4" />
+                        <TabsTrigger value="appointments">
+                            <Calendar />
                             {t("tabs.appointments")}
                         </TabsTrigger>
-                        <TabsTrigger value="slots" className="gap-2">
-                            <Clock className="h-4 w-4" />
+                        <TabsTrigger value="slots">
+                            <Clock />
                             {t("tabs.availability")}
                         </TabsTrigger>
                     </TabsList>
 
                     {activeTab === "appointments" && (
-                        <div className="flex items-center gap-1 border rounded-lg p-1 bg-muted/40">
-                            <Button
-                                variant={viewMode === "card" ? "secondary" : "ghost"}
-                                size="sm"
-                                className="h-8 w-8 p-0"
-                                onClick={() => setViewMode("card")}
-                            >
-                                <LayoutGrid className="h-4 w-4" />
-                            </Button>
-                            <Button
-                                variant={viewMode === "list" ? "secondary" : "ghost"}
-                                size="sm"
-                                className="h-8 w-8 p-0"
-                                onClick={() => setViewMode("list")}
-                            >
-                                <List className="h-4 w-4" />
-                            </Button>
-                        </div>
+                        <Chips
+                            type="single"
+                            value={viewMode}
+                            onValueChange={(value) => value && setViewMode(value as "card" | "list")}
+                        >
+                            <Chip value="card" icon={<SquaresFour />} />
+                            <Chip value="list" icon={<List />} />
+                        </Chips>
                     )}
                 </div>
 
-                <TabsContent value="appointments" className="space-y-4">
+                <TabsContent value="appointments">
                     {loading ? (
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                             {Array.from({ length: 3 }).map((_, i) => (
                                 <Card key={i}>
-                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardHeader className="flex-row items-center justify-between">
                                         <Skeleton className="h-4 w-1/2" />
-                                        <Skeleton className="h-4 w-4 rounded-full" />
+                                        <Skeleton className="size-4 rounded-full" />
                                     </CardHeader>
-                                    <CardContent>
-                                        <Skeleton className="h-8 w-full mb-2" />
+                                    <CardContent className="flex flex-col gap-2">
+                                        <Skeleton className="h-8 w-full" />
                                         <Skeleton className="h-4 w-2/3" />
                                     </CardContent>
                                 </Card>
@@ -133,135 +132,130 @@ export default function AppointmentsPage() {
                             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                                 {appointments.map((app) => (
                                     <Card key={app._id} className={app.status === 'canceled' ? 'opacity-60' : ''}>
-                                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                            <CardTitle className="text-sm font-medium">
+                                        <CardHeader className="flex-row items-center justify-between gap-2">
+                                            <CardTitle>
                                                 {format(new Date(app.dateTime), "PPP")}
                                             </CardTitle>
-                                            <Badge variant={app.status === 'scheduled' ? 'default' : app.status === 'completed' ? 'outline' : 'destructive'}>
+                                            <Badge tone={statusTone(app.status)} dot className="capitalize">
                                                 {app.status}
                                             </Badge>
                                         </CardHeader>
-                                        <CardContent className="space-y-2">
-                                            <div className="text-2xl font-bold">{format(new Date(app.dateTime), "p")}</div>
-                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                <User className="h-3 w-3" />
+                                        <CardContent className="flex flex-col gap-2">
+                                            <div className="text-heading-lg tabular-nums">{format(new Date(app.dateTime), "p")}</div>
+                                            <div className="flex items-center gap-2 text-caption text-fg-muted">
+                                                <User className="size-3.5 text-fg-subtle" />
                                                 {(app.clientName && app.clientName.trim()) || (app.leadId && [app.leadId.firstName, app.leadId.lastName].filter(Boolean).join(" ").trim()) || app.clientPhone || t("card.client")}
                                             </div>
-                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                <Phone className="h-3 w-3" />
+                                            <div className="flex items-center gap-2 text-caption text-fg-muted">
+                                                <Phone className="size-3.5 text-fg-subtle" />
                                                 <span className="ltr-data">{app.clientPhone}</span>
                                             </div>
-                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                <Bot className="h-3 w-3" />
+                                            <div className="flex items-center gap-2 text-caption text-fg-muted">
+                                                <Robot className="size-3.5 text-fg-subtle" />
                                                 {t("card.agent", { name: app.agentId?.name || t("card.deletedAgent") })}
                                             </div>
-
-                                            {app.status === 'scheduled' && (
-                                                <div className="space-y-2 pt-2 mt-2 border-t">
-                                                    <div className="flex gap-2">
-                                                        <Button size="sm" variant="outline" className="h-8 flex-1 gap-1 text-green-600 border-green-200 hover:bg-green-50" onClick={() => updateStatus(app._id, 'completed')}>
-                                                            <CheckCircle2 className="h-3 w-3" /> {t("card.complete")}
-                                                        </Button>
-                                                        <Button size="sm" variant="outline" className="h-8 flex-1 gap-1 text-red-600 border-red-200 hover:bg-red-50" onClick={() => updateStatus(app._id, 'canceled')}>
-                                                            <XCircle className="h-3 w-3" /> {t("card.cancel")}
-                                                        </Button>
-                                                    </div>
-                                                    <EditAppointmentDialog
-                                                        appointment={app}
-                                                        onUpdated={fetchAppointments}
-                                                        trigger={
-                                                            <Button size="sm" variant="outline" className="h-8 w-full gap-1">
-                                                                <Pencil className="h-3 w-3" /> {t("card.edit")}
-                                                            </Button>
-                                                        }
-                                                    />
-                                                </div>
-                                            )}
                                         </CardContent>
+
+                                        {app.status === 'scheduled' && (
+                                            <CardFooter className="flex-col items-stretch">
+                                                <div className="flex gap-2">
+                                                    <Button size="sm" className="flex-1" iconStart={<CheckCircle className="text-success-ink" />} onClick={() => updateStatus(app._id, 'completed')}>
+                                                        {t("card.complete")}
+                                                    </Button>
+                                                    <Button size="sm" className="flex-1" iconStart={<XCircle className="text-danger-ink" />} onClick={() => updateStatus(app._id, 'canceled')}>
+                                                        {t("card.cancel")}
+                                                    </Button>
+                                                </div>
+                                                <EditAppointmentDialog
+                                                    appointment={app}
+                                                    onUpdated={fetchAppointments}
+                                                    trigger={
+                                                        <Button size="sm" block iconStart={<PencilSimple />}>
+                                                            {t("card.edit")}
+                                                        </Button>
+                                                    }
+                                                />
+                                            </CardFooter>
+                                        )}
                                     </Card>
                                 ))}
                             </div>
                         ) : (
-                            <div className="rounded-xl border bg-card">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>{t("table.dateTime")}</TableHead>
-                                            <TableHead>{t("table.lead")}</TableHead>
-                                            <TableHead>{t("table.phone")}</TableHead>
-                                            <TableHead>{t("table.agent")}</TableHead>
-                                            <TableHead>{t("table.status")}</TableHead>
-                                            <TableHead className="text-end">{t("table.actions")}</TableHead>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>{t("table.dateTime")}</TableHead>
+                                        <TableHead>{t("table.lead")}</TableHead>
+                                        <TableHead>{t("table.phone")}</TableHead>
+                                        <TableHead>{t("table.agent")}</TableHead>
+                                        <TableHead>{t("table.status")}</TableHead>
+                                        <TableHead align="end">{t("table.actions")}</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {appointments.map((app) => (
+                                        <TableRow key={app._id} className={app.status === 'canceled' ? 'opacity-60' : ''}>
+                                            <TableCell className="py-2.5">
+                                                <div className="flex flex-col">
+                                                    <span className="font-medium">{format(new Date(app.dateTime), "PPP")}</span>
+                                                    <span className="text-caption text-fg-muted">{format(new Date(app.dateTime), "p")}</span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex items-center gap-2">
+                                                    <User className="size-3.5 text-fg-subtle" />
+                                                    {(app.clientName && app.clientName.trim()) || (app.leadId && [app.leadId.firstName, app.leadId.lastName].filter(Boolean).join(" ").trim()) || app.clientPhone || "Client"}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex items-center gap-2">
+                                                    <Phone className="size-3.5 text-fg-subtle" />
+                                                    <span className="ltr-data">{app.clientPhone}</span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex items-center gap-2">
+                                                    <Robot className="size-3.5 text-fg-subtle" />
+                                                    {app.agentId?.name || "Deleted Agent"}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge tone={statusTone(app.status)} dot className="capitalize">
+                                                    {app.status}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell align="end">
+                                                {app.status === 'scheduled' && (
+                                                    <div className="flex justify-end gap-1">
+                                                        <EditAppointmentDialog
+                                                            appointment={app}
+                                                            onUpdated={fetchAppointments}
+                                                            trigger={
+                                                                <Button size="icon-sm" variant="ghost" title={t("table.editTitle")} aria-label={t("table.editTitle")}>
+                                                                    <PencilSimple />
+                                                                </Button>
+                                                            }
+                                                        />
+                                                        <Button size="icon-sm" variant="ghost" onClick={() => updateStatus(app._id, 'completed')} title={t("table.completeTitle")} aria-label={t("table.completeTitle")}>
+                                                            <CheckCircle className="text-success-ink" />
+                                                        </Button>
+                                                        <Button size="icon-sm" variant="ghost" onClick={() => updateStatus(app._id, 'canceled')} title={t("table.cancelTitle")} aria-label={t("table.cancelTitle")}>
+                                                            <XCircle className="text-danger-ink" />
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                            </TableCell>
                                         </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {appointments.map((app) => (
-                                            <TableRow key={app._id} className={app.status === 'canceled' ? 'opacity-60' : ''}>
-                                                <TableCell className="font-medium">
-                                                    <div className="flex flex-col">
-                                                        <span>{format(new Date(app.dateTime), "PPP")}</span>
-                                                        <span className="text-muted-foreground text-xs">{format(new Date(app.dateTime), "p")}</span>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <div className="flex items-center gap-2">
-                                                        <User className="h-3 w-3 text-muted-foreground" />
-                                                        {(app.clientName && app.clientName.trim()) || (app.leadId && [app.leadId.firstName, app.leadId.lastName].filter(Boolean).join(" ").trim()) || app.clientPhone || "Client"}
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <div className="flex items-center gap-2">
-                                                        <Phone className="h-3 w-3 text-muted-foreground" />
-                                                        <span className="ltr-data">{app.clientPhone}</span>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <div className="flex items-center gap-2">
-                                                        <Bot className="h-3 w-3 text-muted-foreground" />
-                                                        {app.agentId?.name || "Deleted Agent"}
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Badge variant={app.status === 'scheduled' ? 'default' : app.status === 'completed' ? 'outline' : 'destructive'} className="capitalize">
-                                                        {app.status}
-                                                    </Badge>
-                                                </TableCell>
-                                                <TableCell className="text-end">
-                                                    {app.status === 'scheduled' && (
-                                                        <div className="flex justify-end gap-2">
-                                                            <EditAppointmentDialog
-                                                                appointment={app}
-                                                                onUpdated={fetchAppointments}
-                                                                trigger={
-                                                                    <Button size="icon" variant="ghost" className="h-8 w-8 hover:bg-muted" title={t("table.editTitle")}>
-                                                                        <Pencil className="h-4 w-4" />
-                                                                    </Button>
-                                                                }
-                                                            />
-                                                            <Button size="icon" variant="ghost" className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50" onClick={() => updateStatus(app._id, 'completed')} title={t("table.completeTitle")}>
-                                                                <CheckCircle2 className="h-4 w-4" />
-                                                            </Button>
-                                                            <Button size="icon" variant="ghost" className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => updateStatus(app._id, 'canceled')} title={t("table.cancelTitle")}>
-                                                                <XCircle className="h-4 w-4" />
-                                                            </Button>
-                                                        </div>
-                                                    )}
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </div>
+                                    ))}
+                                </TableBody>
+                            </Table>
                         )
                     ) : (
-                        <Card className="col-span-full py-12 flex flex-col items-center justify-center text-center">
-                            <CalendarDays className="h-12 w-12 text-muted-foreground/20 mb-4" />
-                            <CardDescription>{t("table.empty")}</CardDescription>
-                        </Card>
+                        <EmptyState icon={<CalendarDots />} title={t("table.empty")} />
                     )}
                 </TabsContent>
 
-                <TabsContent value="slots" className="space-y-4">
+                <TabsContent value="slots">
                     <AvailabilityManager />
                 </TabsContent>
             </Tabs>

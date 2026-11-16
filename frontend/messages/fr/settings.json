@@ -149,7 +149,6 @@
       "apiKeys": "Clés API",
       "webhooks": "Webhooks",
       "email": "E-mail",
-      "integrations": "Intégrations",
       "billing": "Formule et facturation",
       "transactions": "Historique des transactions"
     }
@@ -166,7 +165,7 @@
     "keyErrorSuffix": "Veuillez vérifier votre clé.",
     "validKey": "Clé API valide",
     "deepgram": "Clé API Deepgram",
-    "deepgramHint": "Alimente la reconnaissance vocale — ainsi que le moteur à faible latence « Deepgram Voice Agent », sélectionnable par agent (qui utilise également votre voix ElevenLabs mais ne nécessite pas de clé OpenRouter).",
+    "deepgramHint": "Alimente la reconnaissance vocale et le moteur à faible latence « Deepgram Voice Agent » sélectionnable par agent, qui ne nécessite pas de clé OpenRouter et peut parler avec les voix Aura de Deepgram ou votre voix ElevenLabs.",
     "sarvam": "Clé API Sarvam AI",
     "sarvamHint": "Alimente le moteur autonome « Sarvam AI » pour les langues indiennes (reconnaissance vocale, raisonnement et voix entièrement sur Sarvam). Sélectionnable par agent — aucune autre clé requise.",
     "gemini": "Clé API Gemini",
@@ -448,5 +447,21 @@
       "720": "12 heures avant",
       "1440": "24 heures avant"
     }
+  },
+  "password": {
+    "changeTitle": "Mot de passe",
+    "setTitle": "Définir un mot de passe",
+    "changeDescription": "Modifiez le mot de passe utilisé pour vous connecter avec votre e-mail.",
+    "setDescription": "Votre compte a été créé via la connexion Google. Définissez un mot de passe pour pouvoir aussi vous connecter avec votre e-mail.",
+    "current": "Mot de passe actuel",
+    "new": "Nouveau mot de passe",
+    "confirm": "Confirmer le nouveau mot de passe",
+    "changeButton": "Mettre à jour le mot de passe",
+    "setButton": "Définir le mot de passe",
+    "tooShort": "Le mot de passe doit contenir au moins 8 caractères",
+    "mismatch": "Les mots de passe ne correspondent pas",
+    "updated": "Mot de passe mis à jour",
+    "set": "Mot de passe défini. Vous pouvez maintenant vous connecter avec votre e-mail et votre mot de passe.",
+    "failed": "Échec de la mise à jour du mot de passe"
   }
 }

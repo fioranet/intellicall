@@ -2,7 +2,6 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
     Table,
     TableBody,
@@ -10,21 +9,16 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { UserCog, Loader2, Lock } from "lucide-react";
+    Badge,
+    Spinner,
+    EmptyState,
+    PageHeader,
+} from "@wixzel/react";
+import { UserGear, Lock } from "@phosphor-icons/react";
 import { CreateUserDialog } from "@/components/users/create-user-dialog";
 import { EditUserDialog } from "@/components/users/edit-user-dialog";
-import {
-    Empty,
-    EmptyContent,
-    EmptyDescription,
-    EmptyHeader,
-    EmptyMedia,
-    EmptyTitle,
-} from "@/components/ui/empty";
 import axios from "axios";
-import { toast } from "sonner";
+import { toast } from "@wixzel/react";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
 
@@ -39,14 +33,12 @@ interface User {
     createdAt: string;
 }
 
-const getRoleBadgeStyles = (role: string) => {
+const getRoleBadgeTone = (role: string) => {
     switch (role) {
         case 'admin':
-            return "bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors";
-        case 'member':
-            return "bg-muted/50 text-muted-foreground border-muted-foreground/20 hover:bg-muted/70 transition-colors";
+            return "accent" as const;
         default:
-            return "bg-secondary text-secondary-foreground";
+            return "neutral" as const;
     }
 };
 
@@ -97,54 +89,41 @@ export default function UsersPage() {
     if (isLoading) {
         return (
             <div className="flex min-h-[400px] items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <Spinner size="xl" />
             </div>
         );
     }
 
     if (userRole === 'member') {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4">
-                <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center">
-                    <Lock className="h-10 w-10 text-muted-foreground" />
-                </div>
-                <div className="space-y-2">
-                    <h2 className="text-2xl font-bold tracking-tight">{t("accessDenied.title")}</h2>
-                    <p className="text-muted-foreground max-w-[500px]">
-                        {t("accessDenied.description")}
-                    </p>
-                </div>
+            <div className="flex min-h-[60vh] items-center justify-center">
+                <EmptyState
+                    icon={<Lock />}
+                    title={t("accessDenied.title")}
+                    description={t("accessDenied.description")}
+                    className="w-full max-w-xl"
+                />
             </div>
         );
     }
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold">{t("title")}</h1>
-                    <p className="text-muted-foreground">{t("subtitle")}</p>
-                </div>
-                <CreateUserDialog onUserCreated={fetchUsers} />
-            </div>
+        <div className="flex flex-col gap-6">
+            <PageHeader
+                title={t("title")}
+                description={t("subtitle")}
+                actions={<CreateUserDialog onUserCreated={fetchUsers} />}
+            />
 
             {users.length === 0 ? (
-                <Empty className="border border-dashed">
-                    <EmptyHeader>
-                        <EmptyMedia variant="icon">
-                            <UserCog />
-                        </EmptyMedia>
-                        <EmptyTitle>{t("empty.title")}</EmptyTitle>
-                        <EmptyDescription>
-                            {t("empty.description")}
-                        </EmptyDescription>
-                    </EmptyHeader>
-                    <EmptyContent>
-                        <CreateUserDialog onUserCreated={fetchUsers} />
-                    </EmptyContent>
-                </Empty>
+                <EmptyState
+                    icon={<UserGear />}
+                    title={t("empty.title")}
+                    description={t("empty.description")}
+                    actions={<CreateUserDialog onUserCreated={fetchUsers} />}
+                />
             ) : (
-                <div className="rounded-md border">
+                <>
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -153,15 +132,16 @@ export default function UsersPage() {
                                 <TableHead>{t("table.role")}</TableHead>
                                 <TableHead>{t("table.sharedAccess")}</TableHead>
                                 <TableHead>{t("table.joined")}</TableHead>
+                                <TableHead />
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {users.map((user) => (
                                 <TableRow key={user._id}>
-                                    <TableCell className="font-medium">{user.name}</TableCell>
+                                    <TableCell className="py-2.5 font-medium">{user.name}</TableCell>
                                     <TableCell><span className="ltr-data">{user.email}</span></TableCell>
                                     <TableCell>
-                                        <Badge variant="outline" className={getRoleBadgeStyles(user.role)}>
+                                        <Badge tone={getRoleBadgeTone(user.role)}>
                                             {user.role}
                                         </Badge>
                                     </TableCell>
@@ -169,9 +149,9 @@ export default function UsersPage() {
                                         <div className="flex flex-col gap-2 max-w-[300px]">
                                             {user.sharedTags && user.sharedTags.length > 0 && (
                                                 <div className="flex flex-wrap gap-1">
-                                                    <span className="text-xs text-muted-foreground w-full">{t("table.tags")}</span>
+                                                    <span className="text-caption text-fg-muted w-full">{t("table.tags")}</span>
                                                     {user.sharedTags.map(tag => (
-                                                        <Badge key={tag} variant="secondary" className="text-[10px] px-1 py-0 h-5">
+                                                        <Badge key={tag} size="sm">
                                                             {tag}
                                                         </Badge>
                                                     ))}
@@ -179,12 +159,12 @@ export default function UsersPage() {
                                             )}
                                             {user.sharedAgents && user.sharedAgents.length > 0 && (
                                                 <div className="flex flex-wrap gap-1">
-                                                    <span className="text-xs text-muted-foreground w-full">{t("table.agents")}</span>
+                                                    <span className="text-caption text-fg-muted w-full">{t("table.agents")}</span>
                                                     {user.sharedAgents.map(agent => {
                                                         const name = typeof agent === 'string' ? t("table.unknown") : agent.name;
                                                         const id = typeof agent === 'string' ? agent : agent._id;
                                                         return (
-                                                            <Badge key={id} variant="outline" className="text-[10px] px-1 py-0 h-5 border-blue-200 text-blue-700 dark:text-blue-300 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20">
+                                                            <Badge key={id} size="sm" tone="info">
                                                                 {name}
                                                             </Badge>
                                                         );
@@ -193,12 +173,12 @@ export default function UsersPage() {
                                             )}
                                             {user.sharedCampaigns && user.sharedCampaigns.length > 0 && (
                                                 <div className="flex flex-wrap gap-1">
-                                                    <span className="text-xs text-muted-foreground w-full">{t("table.campaigns")}</span>
+                                                    <span className="text-caption text-fg-muted w-full">{t("table.campaigns")}</span>
                                                     {user.sharedCampaigns.map(campaign => {
                                                         const name = typeof campaign === 'string' ? t("table.unknown") : campaign.name;
                                                         const id = typeof campaign === 'string' ? campaign : campaign._id;
                                                         return (
-                                                            <Badge key={id} variant="outline" className="text-[10px] px-1 py-0 h-5 border-purple-200 text-purple-700 dark:text-purple-300 dark:border-purple-800 bg-purple-50 dark:bg-purple-900/20">
+                                                            <Badge key={id} size="sm" tone="accent">
                                                                 {name}
                                                             </Badge>
                                                         );
@@ -206,14 +186,14 @@ export default function UsersPage() {
                                                 </div>
                                             )}
                                             {(!user.sharedTags?.length && !user.sharedAgents?.length && !user.sharedCampaigns?.length) && (
-                                                <span className="text-xs text-muted-foreground italic">{t("table.none")}</span>
+                                                <span className="text-caption text-fg-muted italic">{t("table.none")}</span>
                                             )}
                                         </div>
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell className="text-fg-muted">
                                         {new Date(user.createdAt).toLocaleDateString()}
                                     </TableCell>
-                                    <TableCell className="text-end">
+                                    <TableCell align="end">
                                         <EditUserDialog
                                             user={{
                                                 ...user,
@@ -227,7 +207,7 @@ export default function UsersPage() {
                             ))}
                         </TableBody>
                     </Table>
-                </div>
+                </>
             )}
         </div>
     );

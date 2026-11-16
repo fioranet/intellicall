@@ -92,5 +92,29 @@
   "selfHost": {
     "badge": "Self Host",
     "buyOn": "Buy on {marketplace}"
+  },
+  "formChecks": {
+    "e164NoPlus": "{label}: start with + and the country code, for example +1 415 555 2671.",
+    "e164NotNumber": "{label}: {number} isn't a phone number. Check the country code and the number of digits.",
+    "e164Unusual": "{label}: {number} doesn't look like a real number for its country code. Check it before saving.",
+    "leadNoCountryCode": "No country code. Calls will assume the lead is in the same country as the number you call from. If the lead is elsewhere, the call fails: add the country code, for example +1 415 555 2671.",
+    "leadNotNumber": "{number} isn't a phone number: check the country code and the number of digits.",
+    "leadUnusual": "{number} doesn't look like a real number for its country code. The carrier may reject it.",
+    "summaryNoCountryCode": "{count, plural, one {# number has} other {# numbers have}} no country code ({examples}). They will be dialled in the country of the number you call from; add the country code to any lead that is elsewhere.",
+    "summaryNotNumber": "{count, plural, one {# number isn't a phone number} other {# numbers aren't phone numbers}} ({examples}). Calls to them will fail: fix them in the file first.",
+    "summaryUnusual": "{count, plural, one {# number doesn't look real} other {# numbers don't look real}} for their country code ({examples}). The carrier may reject them."
+  },
+  "ui": {
+    "moreInformation": "More information",
+    "reveal": "Reveal",
+    "hide": "Hide",
+    "breadcrumb": "Breadcrumb",
+    "steps": "Steps",
+    "stepError": "Needs attention",
+    "typeToConfirm": "Type {text} to confirm",
+    "navigation": "Navigation",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar",
+    "notifications": "Notifications"
   }
 }

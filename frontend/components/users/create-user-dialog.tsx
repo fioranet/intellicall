@@ -2,8 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
+    Button,
     Dialog,
     DialogContent,
     DialogDescription,
@@ -11,19 +11,17 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
+    Input,
+    Field,
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select";
-import { toast } from "sonner";
+} from "@wixzel/react";
+import { toast } from "@wixzel/react";
 import axios from "axios";
-import { Plus } from "lucide-react";
+import { Plus } from "@phosphor-icons/react";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
 
@@ -74,21 +72,19 @@ export function CreateUserDialog({ onUserCreated }: CreateUserDialogProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button><Plus className="h-4 w-4" />{t("create.trigger")}</Button>
+                <Button variant="primary" iconStart={<Plus />}>{t("create.trigger")}</Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent size="sm">
                 <DialogHeader>
                     <DialogTitle>{t("create.title")}</DialogTitle>
                     <DialogDescription>
                         {t("create.description")}
                     </DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleSubmit}>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
-                            <Label htmlFor="user-name">{t("create.nameLabel")}</Label>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                    <div className="flex flex-col gap-4">
+                        <Field label={t("create.nameLabel")} id="user-name">
                             <Input
-                                id="user-name"
                                 value={formData.name}
                                 onChange={(e) =>
                                     setFormData({ ...formData, name: e.target.value })
@@ -97,11 +93,9 @@ export function CreateUserDialog({ onUserCreated }: CreateUserDialogProps) {
                                 required
                                 disabled={isLoading}
                             />
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="user-email">{t("create.emailLabel")}</Label>
+                        </Field>
+                        <Field label={t("create.emailLabel")} id="user-email">
                             <Input
-                                id="user-email"
                                 type="email"
                                 value={formData.email}
                                 onChange={(e) =>
@@ -111,11 +105,9 @@ export function CreateUserDialog({ onUserCreated }: CreateUserDialogProps) {
                                 required
                                 disabled={isLoading}
                             />
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="user-password">{t("create.passwordLabel")}</Label>
+                        </Field>
+                        <Field label={t("create.passwordLabel")} id="user-password">
                             <Input
-                                id="user-password"
                                 type="password"
                                 value={formData.password}
                                 onChange={(e) =>
@@ -125,9 +117,8 @@ export function CreateUserDialog({ onUserCreated }: CreateUserDialogProps) {
                                 required
                                 disabled={isLoading}
                             />
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="user-role">{t("create.roleLabel")}</Label>
+                        </Field>
+                        <Field label={t("create.roleLabel")} id="user-role">
                             <Select
                                 value={formData.role}
                                 onValueChange={(value) =>
@@ -136,7 +127,7 @@ export function CreateUserDialog({ onUserCreated }: CreateUserDialogProps) {
                                 required
                                 disabled={isLoading}
                             >
-                                <SelectTrigger id="user-role">
+                                <SelectTrigger>
                                     <SelectValue placeholder={t("roles.placeholder")} />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -144,13 +135,13 @@ export function CreateUserDialog({ onUserCreated }: CreateUserDialogProps) {
                                     <SelectItem value="member">{t("roles.member")}</SelectItem>
                                 </SelectContent>
                             </Select>
-                        </div>
+                        </Field>
                     </div>
                     <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={isLoading}>
+                        <Button type="button" variant="secondary" onClick={() => setOpen(false)} disabled={isLoading}>
                             {c("actions.cancel")}
                         </Button>
-                        <Button type="submit" disabled={isLoading}>
+                        <Button type="submit" variant="primary" loading={isLoading}>
                             {isLoading ? "Creating..." : "Create User"}
                         </Button>
                     </DialogFooter>

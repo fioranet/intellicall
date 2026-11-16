@@ -2,37 +2,34 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useState, useCallback } from "react";
+import { Headset, ChatText, PaperPlaneTilt, Clock, User, Envelope } from "@phosphor-icons/react";
 import {
-    HeadphonesIcon,
-    Loader2,
-    MessageSquare,
-    Send,
-    Clock,
-    User,
-    ShieldCheck,
-    Mail,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-    Sheet,
-    SheetContent,
-    SheetHeader,
-    SheetTitle,
-} from "@/components/ui/sheet";
-import {
+    Spinner,
+    Button,
+    Card,
+    Textarea,
+    Badge,
+    Drawer,
+    DrawerContent,
+    DrawerHeader,
+    DrawerBody,
+    DrawerFooter,
+    DrawerTitle,
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
+    Label,
+    Chips,
+    Chip,
+    EmptyState,
+    PageHeader,
+    Transcript,
+    Message,
+} from "@wixzel/react";
 import axios from "axios";
-import { toast } from "sonner";
+import { toast } from "@wixzel/react";
 import { cn } from "@/lib/utils";
 import { useSettings, formatTime } from "@/components/settings-provider";
 import { AdminNav } from "@/components/admin/nav";
@@ -56,11 +53,11 @@ interface SupportTicket {
     updatedAt: string;
 }
 
-const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline"; className?: string }> = {
-    open: { label: "Open", variant: "secondary", className: "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/20" },
-    in_progress: { label: "In Progress", variant: "default", className: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20" },
-    resolved: { label: "Resolved", variant: "outline", className: "bg-green-500/10 text-green-700 dark:text-green-400 border-green-200 dark:border-green-500/20" },
-    closed: { label: "Closed", variant: "secondary", className: "bg-muted text-muted-foreground" },
+const statusConfig: Record<string, { label: string; tone: "info" | "warning" | "success" | "neutral" }> = {
+    open: { label: "Open", tone: "info" },
+    in_progress: { label: "In Progress", tone: "warning" },
+    resolved: { label: "Resolved", tone: "success" },
+    closed: { label: "Closed", tone: "neutral" },
 };
 
 export default function AdminSupportPage() {
@@ -170,169 +167,131 @@ export default function AdminSupportPage() {
     const filteredTickets = tickets;
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h2 className="text-3xl font-bold tracking-tight">{t("support.title")}</h2>
-                <p className="text-muted-foreground">{t("support.subtitle")}</p>
-            </div>
+        <div className="flex flex-col gap-6">
+            <PageHeader title={t("support.title")} description={t("support.subtitle")} />
             <AdminNav currentPath="/admin/support" />
-            <div className="flex items-center gap-4 flex-wrap">
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-[160px]">
-                        <SelectValue placeholder={t("support.statusFilter")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">{t("support.all")}</SelectItem>
-                        <SelectItem value="open">{t("support.open")}</SelectItem>
-                        <SelectItem value="in_progress">{t("support.inProgress")}</SelectItem>
-                        <SelectItem value="resolved">{t("support.resolved")}</SelectItem>
-                        <SelectItem value="closed">{t("support.closed")}</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
+            <Chips
+                type="single"
+                value={statusFilter}
+                onValueChange={(value) => value && setStatusFilter(value)}
+                aria-label={t("support.statusFilter")}
+            >
+                <Chip value="all">{t("support.all")}</Chip>
+                <Chip value="open">{t("support.open")}</Chip>
+                <Chip value="in_progress">{t("support.inProgress")}</Chip>
+                <Chip value="resolved">{t("support.resolved")}</Chip>
+                <Chip value="closed">{t("support.closed")}</Chip>
+            </Chips>
 
-            <Card>
-                <CardContent className="p-0">
-                    {loading ? (
-                        <div className="flex items-center justify-center py-16">
-                            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                        </div>
-                    ) : filteredTickets.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-                            <HeadphonesIcon className="h-12 w-12 text-muted-foreground mb-4" />
-                            <p className="font-medium text-foreground">{t("support.emptyTitle")}</p>
-                            <p className="text-sm text-muted-foreground mt-1">{t("support.emptyDescription")}</p>
-                        </div>
-                    ) : (
-                        <div className="divide-y divide-border">
-                            {filteredTickets.map((ticket) => {
-                                const status = statusConfig[ticket.status] || statusConfig.open;
-                                const user = ticket.userId as { _id: string; name: string; email: string };
-                                return (
-                                    <button
-                                        key={ticket._id}
-                                        type="button"
-                                        className={cn(
-                                            "w-full flex items-center gap-4 p-4 text-start hover:bg-muted/50 transition-colors",
-                                            selectedTicket?._id === ticket._id && "bg-muted/50"
-                                        )}
-                                        onClick={() => openDetail(ticket)}
-                                    >
-                                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                                            <MessageSquare className="h-5 w-5 text-primary" />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="font-semibold truncate">{ticket.subject}</p>
-                                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                                                <User className="h-3 w-3" />
-                                                {user?.name || "Unknown"} · {user?.email}
-                                            </p>
-                                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                                                <Clock className="h-3 w-3" />
-                                                {formatTime(ticket.updatedAt, timeFormat)}
-                                            </p>
-                                        </div>
-                                        <Badge variant={status.variant} className={cn("shrink-0", status.className)}>
-                                            {status.label}
-                                        </Badge>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
+            {loading ? (
+                <div className="flex items-center justify-center rounded-lg bg-card py-16">
+                    <Spinner size="xl" />
+                </div>
+            ) : filteredTickets.length === 0 ? (
+                <EmptyState
+                    icon={<Headset />}
+                    title={t("support.emptyTitle")}
+                    description={t("support.emptyDescription")}
+                />
+            ) : (
+                <Card className="divide-y divide-border overflow-hidden">
+                    {filteredTickets.map((ticket) => {
+                        const status = statusConfig[ticket.status] || statusConfig.open;
+                        const user = ticket.userId as { _id: string; name: string; email: string };
+                        return (
+                            <button
+                                key={ticket._id}
+                                type="button"
+                                className={cn(
+                                    "flex w-full items-center gap-4 px-4 py-3 text-start transition-colors wx-focus",
+                                    "hover:bg-[color-mix(in_oklab,var(--wx-color-card),var(--wx-color-fg)_3%)]",
+                                    selectedTicket?._id === ticket._id && "bg-accent-subtle hover:bg-accent-subtle"
+                                )}
+                                onClick={() => openDetail(ticket)}
+                            >
+                                <span className="grid size-9 shrink-0 place-items-center rounded-md bg-accent-subtle text-accent-ink [&_svg]:size-5">
+                                    <ChatText />
+                                </span>
+                                <div className="flex-1 min-w-0">
+                                    <p className="truncate text-body-sm font-medium">{ticket.subject}</p>
+                                    <p className="mt-0.5 flex items-center gap-1 text-caption text-fg-muted">
+                                        <User className="size-3" />
+                                        {user?.name || "Unknown"} · <span className="ltr-data">{user?.email}</span>
+                                    </p>
+                                    <p className="mt-0.5 flex items-center gap-1 text-caption text-fg-muted">
+                                        <Clock className="size-3" />
+                                        {formatTime(ticket.updatedAt, timeFormat)}
+                                    </p>
+                                </div>
+                                <Badge tone={status.tone} dot>
+                                    {status.label}
+                                </Badge>
+                            </button>
+                        );
+                    })}
+                </Card>
+            )}
 
-            {/* Ticket detail sheet */}
-            <Sheet open={!!selectedTicket} onOpenChange={(open) => !open && setSelectedTicket(null)}>
-                <SheetContent className="flex flex-col w-full sm:max-w-lg overflow-hidden p-0">
-                    <SheetHeader className="p-4 border-b shrink-0 space-y-2">
-                        <SheetTitle className="text-start truncate pe-8">{selectedTicket?.subject}</SheetTitle>
-                        <div className="text-start space-y-2 text-muted-foreground text-sm">
-                            {selectedTicket && (
-                                <>
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                        <Badge
-                                            variant={statusConfig[selectedTicket.status]?.variant}
-                                            className={statusConfig[selectedTicket.status]?.className}
-                                        >
-                                            {statusConfig[selectedTicket.status]?.label}
-                                        </Badge>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <User className="h-3.5 w-3.5" />
-                                        <span>{(selectedTicket.userId as { name?: string })?.name}</span>
-                                        <Mail className="h-3.5 w-3.5 ms-2" />
-                                        <span>{(selectedTicket.userId as { email?: string })?.email}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Label className="text-xs text-muted-foreground">{t("support.statusLabel")}</Label>
-                                        <Select
-                                            value={selectedTicket.status}
-                                            onValueChange={updateStatus}
-                                            disabled={statusUpdating}
-                                        >
-                                            <SelectTrigger className="h-8 w-[140px]">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="open">{t("support.open")}</SelectItem>
-                                                <SelectItem value="in_progress">{t("support.inProgress")}</SelectItem>
-                                                <SelectItem value="resolved">{t("support.resolved")}</SelectItem>
-                                                <SelectItem value="closed">{t("support.closed")}</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        {statusUpdating && <Loader2 className="h-4 w-4 animate-spin" />}
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                    </SheetHeader>
-                    <ScrollArea className="flex-1 p-4">
-                        {messagesLoading ? (
-                            <div className="flex justify-center py-8">
-                                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                            </div>
-                        ) : (
-                            <div className="space-y-4">
-                                {messages.map((msg) => (
-                                    <div
-                                        key={msg._id}
-                                        className={cn(
-                                            "flex gap-3",
-                                            msg.authorRole === "admin" && "flex-row-reverse"
-                                        )}
+            {/* Ticket detail drawer */}
+            <Drawer open={!!selectedTicket} onOpenChange={(open) => !open && setSelectedTicket(null)}>
+                <DrawerContent side="right" style={{ "--wx-drawer-size": "512px" } as React.CSSProperties}>
+                    <DrawerHeader className="gap-2">
+                        <DrawerTitle className="truncate">{selectedTicket?.subject}</DrawerTitle>
+                        {selectedTicket && (
+                            <div className="flex flex-col gap-2 text-body-sm text-fg-muted">
+                                <Badge tone={statusConfig[selectedTicket.status]?.tone} dot>
+                                    {statusConfig[selectedTicket.status]?.label}
+                                </Badge>
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <User className="size-3.5" />
+                                    <span>{(selectedTicket.userId as { name?: string })?.name}</span>
+                                    <Envelope className="ms-2 size-3.5" />
+                                    <span className="ltr-data">{(selectedTicket.userId as { email?: string })?.email}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Label htmlFor="ticket-status" className="text-caption text-fg-muted">{t("support.statusLabel")}</Label>
+                                    <Select
+                                        value={selectedTicket.status}
+                                        onValueChange={updateStatus}
+                                        disabled={statusUpdating}
                                     >
-                                        <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0">
-                                            {msg.authorRole === "admin" ? (
-                                                <ShieldCheck className="h-4 w-4 text-primary" />
-                                            ) : (
-                                                <User className="h-4 w-4 text-muted-foreground" />
-                                            )}
-                                        </div>
-                                        <div
-                                            className={cn(
-                                                "rounded-lg px-3 py-2 max-w-[85%]",
-                                                msg.authorRole === "admin"
-                                                    ? "bg-primary text-primary-foreground"
-                                                    : "bg-muted"
-                                            )}
-                                        >
-                                            <p className="text-xs font-medium opacity-90">
-                                                {msg.authorId?.name} {msg.authorRole === "admin" && "· Support"}
-                                            </p>
-                                            <p className="text-sm mt-0.5 whitespace-pre-wrap break-words">{msg.body}</p>
-                                            <p className="text-[10px] opacity-70 mt-1">
-                                                {formatTime(msg.createdAt, timeFormat)}
-                                            </p>
-                                        </div>
-                                    </div>
-                                ))}
+                                        <SelectTrigger id="ticket-status" size="sm" className="w-[140px]">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="open">{t("support.open")}</SelectItem>
+                                            <SelectItem value="in_progress">{t("support.inProgress")}</SelectItem>
+                                            <SelectItem value="resolved">{t("support.resolved")}</SelectItem>
+                                            <SelectItem value="closed">{t("support.closed")}</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    {statusUpdating && <Spinner />}
+                                </div>
                             </div>
                         )}
-                    </ScrollArea>
+                    </DrawerHeader>
+                    <DrawerBody>
+                        {messagesLoading ? (
+                            <div className="flex justify-center py-8">
+                                <Spinner size="xl" />
+                            </div>
+                        ) : (
+                            <Transcript>
+                                {messages.map((msg) => (
+                                    <Message
+                                        key={msg._id}
+                                        from={msg.authorRole === "admin" ? "person" : "agent"}
+                                        name={<>{msg.authorId?.name} {msg.authorRole === "admin" && "· Support"}</>}
+                                        time={formatTime(msg.createdAt, timeFormat)}
+                                    >
+                                        <p className="whitespace-pre-wrap break-words">{msg.body}</p>
+                                    </Message>
+                                ))}
+                            </Transcript>
+                        )}
+                    </DrawerBody>
                     {selectedTicket && (selectedTicket.status === "open" || selectedTicket.status === "in_progress" || selectedTicket.status === "resolved") && (
-                        <div className="p-4 border-t shrink-0 space-y-2">
+                        <DrawerFooter className="flex-col items-stretch">
                             <Textarea
                                 placeholder={t("support.replyPlaceholder")}
                                 value={replyBody}
@@ -340,14 +299,20 @@ export default function AdminSupportPage() {
                                 rows={3}
                                 className="resize-none"
                             />
-                            <Button onClick={sendReply} disabled={sending || !replyBody.trim()} className="w-full">
-                                {sending ? <Loader2 className="h-4 w-4 animate-spin me-2" /> : <Send className="h-4 w-4 me-2" />}
+                            <Button
+                                variant="primary"
+                                block
+                                onClick={sendReply}
+                                disabled={!replyBody.trim()}
+                                loading={sending}
+                                iconStart={<PaperPlaneTilt />}
+                            >
                                 {t("support.sendReply")}
                             </Button>
-                        </div>
+                        </DrawerFooter>
                     )}
-                </SheetContent>
-            </Sheet>
+                </DrawerContent>
+            </Drawer>
         </div>
     );
 }

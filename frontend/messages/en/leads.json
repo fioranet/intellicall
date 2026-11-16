@@ -69,11 +69,15 @@
   "importCsv": {
     "trigger": "Import CSV",
     "title": "Import Leads from CSV",
-    "description": "Upload a CSV file with columns: name, phone, company (optional)",
+    "description": "Upload a CSV file with columns: name, phone, company (optional). Write phone numbers with the country code, for example +1 415 555 2671.",
     "fileLabel": "CSV File",
     "selected": "Selected:",
     "tagsLabel": "Add Tags to all (comma separated)",
-    "tagsPlaceholder": "new-leads, campaign-1"
+    "tagsPlaceholder": "new-leads, campaign-1",
+    "issues": {
+      "noPhoneColumn": "The file has no \"phone\" column, so no leads would be imported. Name the column phone (lowercase).",
+      "rowsWithoutPhone": "{count, plural, one {# row has} other {# rows have}} no phone number and will be skipped."
+    }
   },
   "toast": {
     "fetchFailed": "Failed to fetch leads",

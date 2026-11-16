@@ -199,7 +199,16 @@ async function handleVoice(req, res) {
                 };
             }
 
-            await CallLog.findOneAndUpdate({ callSid }, logData, { upsert: true });
+            try {
+                await CallLog.findOneAndUpdate({ callSid }, logData, { upsert: true });
+            } catch (logErr) {
+                // The campaign runner inserts this row as soon as Twilio accepts the call, so the
+                // two upserts can race on the unique callSid. Losing that race only means the row
+                // already exists — update it rather than failing the call with an error message.
+                if (logErr?.code !== 11000) throw logErr;
+                const { $setOnInsert, ...update } = logData;
+                await CallLog.updateOne({ callSid }, update);
+            }
         }
 
         if (agent.useCustomVoice) {
