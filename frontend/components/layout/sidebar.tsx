@@ -23,15 +23,13 @@ const mainMenuItems = [
     { key: "campaigns", href: "/campaigns", icon: Megaphone },
     { key: "callLogs", href: "/call-logs", icon: Phone },
     { key: "appointments", href: "/appointments", icon: Calendar },
-    { key: "support", href: "/support", icon: Headset },
+    { key: "support", href: "https://www.nuvv.com.br/suporte", icon: Headset, external: true },
 ];
 
 const secondaryMenuItems = [
     { key: "admin", href: "/admin", icon: ShieldCheck, adminOnly: true },
     { key: "settings", href: "/settings", icon: Gear },
 ];
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
 
 /**
  * The console's nav, inside Wixzel's AppShell: on the page from the md
@@ -42,8 +40,6 @@ export function Sidebar() {
     const t = useTranslations("nav");
     const pathname = usePathname();
     const [user, setUser] = useState<any>(null);
-    const [pendingSupportCount, setPendingSupportCount] = useState(0);
-    const [myPendingSupportCount, setMyPendingSupportCount] = useState(0);
 
     useEffect(() => {
         try {
@@ -55,45 +51,6 @@ export function Sidebar() {
             console.error("Error parsing user:", error);
         }
     }, [pathname]);
-
-    useEffect(() => {
-        const isAdminUser = user?.role === "admin" || user?.isSuperAdmin;
-        if (!isAdminUser) {
-            setPendingSupportCount(0);
-            return;
-        }
-        const token = localStorage.getItem("token");
-        if (!token) return;
-        fetch(`${API_BASE_URL}/support/tickets/pending-count`, {
-            headers: { Authorization: `Bearer ${token}` },
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                if (data?.status === "success" && typeof data?.data?.count === "number") {
-                    setPendingSupportCount(data.data.count);
-                }
-            })
-            .catch(() => setPendingSupportCount(0));
-    }, [user?.role, user?.isSuperAdmin, pathname]);
-
-    useEffect(() => {
-        if (!user) {
-            setMyPendingSupportCount(0);
-            return;
-        }
-        const token = localStorage.getItem("token");
-        if (!token) return;
-        fetch(`${API_BASE_URL}/support/tickets/my-pending-count`, {
-            headers: { Authorization: `Bearer ${token}` },
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                if (data?.status === "success" && typeof data?.data?.count === "number") {
-                    setMyPendingSupportCount(data.data.count);
-                }
-            })
-            .catch(() => setMyPendingSupportCount(0));
-    }, [user, pathname]);
 
     const isActive = (href: string) => pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
     const isAdminUser = Boolean(user && (user.role === "admin" || user.isSuperAdmin));
@@ -109,22 +66,20 @@ export function Sidebar() {
                 {mainMenuItems.map((item: any) => {
                     if (item.adminOnly && !isAdminUser) return null;
                     const Icon = item.icon;
-                    const showMyPendingDot = item.href === "/support" && myPendingSupportCount > 0;
                     return (
                         <SidebarItem
                             key={item.href}
                             asChild
-                            active={isActive(item.href)}
+                            active={!item.external && isActive(item.href)}
                             icon={<Icon />}
-                            aside={showMyPendingDot && (
-                                <span
-                                    role="status"
-                                    className="size-2 rounded-full bg-danger"
-                                    aria-label={t("badge.myOpenTickets", { count: myPendingSupportCount })}
-                                />
-                            )}
                         >
-                            <Link href={item.href}>{t(`main.${item.key}`)}</Link>
+                            {item.external ? (
+                                <a href={item.href} target="_blank" rel="noopener noreferrer">
+                                    {t(`main.${item.key}`)}
+                                </a>
+                            ) : (
+                                <Link href={item.href}>{t(`main.${item.key}`)}</Link>
+                            )}
                         </SidebarItem>
                     );
                 })}
@@ -134,20 +89,12 @@ export function Sidebar() {
                     {secondaryMenuItems.map((item) => {
                         if (item.adminOnly && !isAdminUser) return null;
                         const Icon = item.icon;
-                        const showPendingDot = item.adminOnly && pendingSupportCount > 0;
                         return (
                             <SidebarItem
                                 key={item.href}
                                 asChild
                                 active={isActive(item.href)}
                                 icon={<Icon />}
-                                aside={showPendingDot && (
-                                    <span
-                                        role="status"
-                                        className="size-2 rounded-full bg-danger"
-                                        aria-label={t("badge.pendingTickets", { count: pendingSupportCount })}
-                                    />
-                                )}
                             >
                                 <Link href={item.href}>{t(`secondary.${item.key}`)}</Link>
                             </SidebarItem>

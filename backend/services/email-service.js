@@ -29,7 +29,8 @@ class EmailService {
                 if (throwOnError) throw new Error(msg);
                 return;
             }
-            if (!settings.emailNotifications.brevoKey) {
+            const brevoKey = settings.emailNotifications.brevoKey || process.env.BREVO_API_KEY;
+            if (!brevoKey) {
                 const msg = 'Brevo API Key is missing.';
                 if (throwOnError) throw new Error(msg);
                 return;
@@ -58,14 +59,14 @@ class EmailService {
 
             // 6. Deliver via Brevo SDK (v4+)
             const { BrevoClient } = require('@getbrevo/brevo');
-            const client = new BrevoClient({ apiKey: config.brevoKey });
+            const client = new BrevoClient({ apiKey: brevoKey });
 
             const response = await client.transactionalEmails.sendTransacEmail({
                 subject: subject,
                 htmlContent: htmlContent,
                 sender: {
-                    name: config.senderName || appName,
-                    email: config.senderEmail || 'notifications@intellicall.ai'
+                    name: config.senderName || process.env.BREVO_SENDER_NAME || appName,
+                    email: config.senderEmail || process.env.BREVO_SENDER_EMAIL || 'notificacoes@nuvv.com.br'
                 },
                 to: [{ email: config.recipientEmail }]
             });

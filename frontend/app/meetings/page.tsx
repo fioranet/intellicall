@@ -25,6 +25,17 @@ export default function MeetingsPage() {
     const [hostedUrl, setHostedUrl] = useState(DEFAULT_HOSTED_URL);
     const [agents, setAgents] = useState<AgentRef[]>([]);
     const [meetings, setMeetings] = useState<Meeting[] | null>(null);
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    useEffect(() => {
+        try {
+            const u = localStorage.getItem("user");
+            if (u) {
+                const parsed = JSON.parse(u);
+                setIsAdmin(Boolean(parsed.role === "admin" || parsed.isSuperAdmin));
+            }
+        } catch {}
+    }, []);
 
     const loadMeetings = useCallback(async () => {
         try {
@@ -88,7 +99,7 @@ export default function MeetingsPage() {
 
             {integration === undefined && <Skeleton className="h-64 rounded-lg" />}
 
-            {integration !== undefined && (
+            {integration !== undefined && isAdmin && (
                 <AttendeeCard
                     integration={integration}
                     hostedUrl={hostedUrl}

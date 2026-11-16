@@ -389,7 +389,8 @@ class GeminiLiveBridge {
         const resuming = !!this._resumptionHandle;
         console.log(`🤖 [Gemini] [${this.callId}] Connecting (model=${MODEL}, resume=${resuming}, attempt=${this.reconnectAttempts})`);
 
-        const url = `${LIVE_WS_HOST}${LIVE_WS_PATH}?key=${encodeURIComponent(this.settings.geminiKey)}`;
+        const geminiKey = this.settings?.geminiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY;
+        const url = `${LIVE_WS_HOST}${LIVE_WS_PATH}?key=${encodeURIComponent(geminiKey)}`;
         this.ws = new WebSocket(url);
 
         this.ws.on('open', () => {

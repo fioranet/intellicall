@@ -50,6 +50,17 @@ export default function PhoneNumbersPage() {
         isModelConfigured: true
     });
     const [sipOriginationUri, setSipOriginationUri] = useState('');
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    useEffect(() => {
+        try {
+            const u = localStorage.getItem("user");
+            if (u) {
+                const parsed = JSON.parse(u);
+                setIsAdmin(Boolean(parsed.role === "admin" || parsed.isSuperAdmin));
+            }
+        } catch {}
+    }, []);
 
     const fetchNumbers = useCallback(async () => {
         try {
@@ -368,33 +379,35 @@ export default function PhoneNumbersPage() {
                 )}
 
                 {/* SIP info (show when there are SIP numbers or none yet to educate) */}
-                <Section icon={<HardDrives />} title={t("sipInfo.title")}>
-                    <div className="flex flex-col items-start gap-3 text-body-sm text-fg-muted">
-                        <p>
-                            {t.rich("sipInfo.body", { b: (chunks) => <strong className="font-semibold text-fg">{chunks}</strong> })}
-                        </p>
-                        {sipOriginationUri && (
-                            <div className="flex w-full flex-col gap-1.5">
-                                <p>
-                                    {t.rich("sipInfo.originationBody", { b: (chunks) => <strong className="font-semibold text-fg">{chunks}</strong> })}
-                                </p>
-                                {/* Not a secret, so the only button in the field is Copy. */}
-                                <CopyField
-                                    dir="ltr"
-                                    value={sipOriginationUri}
-                                    onClickCapture={(e) => {
-                                        if ((e.target as HTMLElement).closest("button")) toast.success(t("toast.uriCopied"));
-                                    }}
-                                />
-                            </div>
-                        )}
-                        <Button size="sm" asChild iconStart={<HardDrives />}>
-                            <Link href="/sip-trunks">
-                                {t("sipInfo.manageTrunks")}
-                            </Link>
-                        </Button>
-                    </div>
-                </Section>
+                {isAdmin && (
+                    <Section icon={<HardDrives />} title={t("sipInfo.title")}>
+                        <div className="flex flex-col items-start gap-3 text-body-sm text-fg-muted">
+                            <p>
+                                {t.rich("sipInfo.body", { b: (chunks) => <strong className="font-semibold text-fg">{chunks}</strong> })}
+                            </p>
+                            {sipOriginationUri && (
+                                <div className="flex w-full flex-col gap-1.5">
+                                    <p>
+                                        {t.rich("sipInfo.originationBody", { b: (chunks) => <strong className="font-semibold text-fg">{chunks}</strong> })}
+                                    </p>
+                                    {/* Not a secret, so the only button in the field is Copy. */}
+                                    <CopyField
+                                        dir="ltr"
+                                        value={sipOriginationUri}
+                                        onClickCapture={(e) => {
+                                            if ((e.target as HTMLElement).closest("button")) toast.success(t("toast.uriCopied"));
+                                        }}
+                                    />
+                                </div>
+                            )}
+                            <Button size="sm" asChild iconStart={<HardDrives />}>
+                                <Link href="/sip-trunks">
+                                    {t("sipInfo.manageTrunks")}
+                                </Link>
+                            </Button>
+                        </div>
+                    </Section>
+                )}
             </div>
 
             <PhoneNumberDialog

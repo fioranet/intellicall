@@ -125,12 +125,14 @@ class SipGeminiLiveStream {
             }
             // Self-contained engine: speech recognition, reasoning and speech generation
             // all happen inside one model, so only the Gemini key is required.
-            if (!this.settings.geminiKey) {
-                const msg = 'Missing API keys: Gemini. Please configure it in Settings.';
+            const geminiKey = this.settings.geminiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY;
+            if (!geminiKey) {
+                const msg = 'Missing API keys: Gemini. Please configure it in Settings or system environment.';
                 console.error(`❌ [SIP Gemini] ${msg}`);
                 this._pushError('system', 'missing_keys', msg);
                 return false;
             }
+            this.settings.geminiKey = geminiKey;
 
             this.bridge = new GeminiLiveBridge({
                 callId: this.callId, settings: this.settings, agent: this.agent, lead: this.lead

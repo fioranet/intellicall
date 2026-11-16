@@ -152,7 +152,13 @@ function meetingJson(doc) {
     };
 }
 
-const integrationFor = (req) => MeetingIntegration.findOne({ createdBy: req.user._id, provider: 'attendee' }).lean();
+const integrationFor = async (req) => {
+    let doc = await MeetingIntegration.findOne({ createdBy: req.user._id, provider: 'attendee' }).lean();
+    if (!doc) {
+        doc = await MeetingIntegration.findOne({ provider: 'attendee', status: 'connected' }).sort({ createdAt: 1 }).lean();
+    }
+    return doc;
+};
 
 // ── The integration ────────────────────────────────────────────────────────
 

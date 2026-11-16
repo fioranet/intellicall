@@ -153,6 +153,7 @@ function SettingsPageContent() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [user, setUser] = useState<any>(null);
+    const isAdmin = Boolean(user && (user.role === "admin" || user.isSuperAdmin));
     const [hasPassword, setHasPassword] = useState(true);
     const [passwordForm, setPasswordForm] = useState({ current: "", next: "", confirm: "" });
     const [savingPassword, setSavingPassword] = useState(false);
@@ -741,10 +742,12 @@ function SettingsPageContent() {
                         <Gear />
                         {t("page.tabs.preferences")}
                     </TabsTrigger>
-                    <TabsTrigger value="api-keys">
-                        <Key />
-                        {t("page.tabs.apiKeys")}
-                    </TabsTrigger>
+                    {isAdmin && (
+                        <TabsTrigger value="api-keys">
+                            <Key />
+                            {t("page.tabs.apiKeys")}
+                        </TabsTrigger>
+                    )}
                     <TabsTrigger value="webhooks">
                         <WebhooksLogo />
                         {t("page.tabs.webhooks")}
@@ -757,120 +760,124 @@ function SettingsPageContent() {
                         <CreditCard />
                         {t("page.tabs.billing")}
                     </TabsTrigger>
-                    <TabsTrigger value="transactions">
-                        <ShoppingBag />
-                        {t("page.tabs.transactions")}
-                    </TabsTrigger>
+                    {isAdmin && (
+                        <TabsTrigger value="transactions">
+                            <ShoppingBag />
+                            {t("page.tabs.transactions")}
+                        </TabsTrigger>
+                    )}
                 </TabsList>
 
-                <TabsContent value="api-keys">
-                    <Section icon={<Key />} title={t("credentials.title")} description={t("credentials.description")}>
-                        <form onSubmit={handleSaveSettings} className="flex flex-col gap-6">
-                            <div className="grid gap-5 md:grid-cols-2">
-                                <Field label={t("credentials.twilioSid")} id="twilio-sid">
-                                    <Input
-                                        value={apiKeys.twilioSid}
-                                        onChange={(e) =>
-                                            setApiKeys({ ...apiKeys, twilioSid: e.target.value })
-                                        }
-                                        placeholder={t("credentials.twilioSidPlaceholder")}
-                                        className="font-mono"
-                                    />
-                                </Field>
+                {isAdmin && (
+                    <TabsContent value="api-keys">
+                        <Section icon={<Key />} title={t("credentials.title")} description={t("credentials.description")}>
+                            <form onSubmit={handleSaveSettings} className="flex flex-col gap-6">
+                                <div className="grid gap-5 md:grid-cols-2">
+                                    <Field label={t("credentials.twilioSid")} id="twilio-sid">
+                                        <Input
+                                            value={apiKeys.twilioSid}
+                                            onChange={(e) =>
+                                                setApiKeys({ ...apiKeys, twilioSid: e.target.value })
+                                            }
+                                            placeholder={t("credentials.twilioSidPlaceholder")}
+                                            className="font-mono"
+                                        />
+                                    </Field>
 
-                                <Field label={t("credentials.twilioToken")} id="twilio-token">
-                                    <Input
-                                        type="password"
-                                        value={apiKeys.twilioToken}
-                                        onChange={(e) =>
-                                            setApiKeys({ ...apiKeys, twilioToken: e.target.value })
-                                        }
-                                        placeholder="••••••••••••••••••••••••••••••••"
-                                        className="font-mono"
-                                    />
-                                </Field>
+                                    <Field label={t("credentials.twilioToken")} id="twilio-token">
+                                        <Input
+                                            type="password"
+                                            value={apiKeys.twilioToken}
+                                            onChange={(e) =>
+                                                setApiKeys({ ...apiKeys, twilioToken: e.target.value })
+                                            }
+                                            placeholder="••••••••••••••••••••••••••••••••"
+                                            className="font-mono"
+                                        />
+                                    </Field>
 
-                                <Field label={t("credentials.openRouter")} id="openrouter-key">
-                                    <Input
-                                        type="password"
-                                        value={apiKeys.openRouterKey}
-                                        onChange={(e) =>
-                                            setApiKeys({ ...apiKeys, openRouterKey: e.target.value })
+                                    <Field label={t("credentials.openRouter")} id="openrouter-key">
+                                        <Input
+                                            type="password"
+                                            value={apiKeys.openRouterKey}
+                                            onChange={(e) =>
+                                                setApiKeys({ ...apiKeys, openRouterKey: e.target.value })
+                                            }
+                                            placeholder="sk-or-••••••••••••••••••••••••••••"
+                                            className="font-mono"
+                                        />
+                                    </Field>
+                                    <Field
+                                        label={t("credentials.elevenLabs")}
+                                        id="elevenlabs-key"
+                                        error={elevenLabsKeyError ? `${elevenLabsKeyError}. ${t("credentials.keyErrorSuffix")}` : undefined}
+                                        labelAside={
+                                            verifyingElevenLabs ? (
+                                                <span className="flex items-center gap-1 text-accent-ink">
+                                                    <Spinner size="sm" />
+                                                    {t("credentials.verifying")}
+                                                </span>
+                                            ) : !elevenLabsKeyError && apiKeys.elevenLabsKey ? (
+                                                <span className="flex items-center gap-1 font-medium text-success-ink">
+                                                    <Check className="size-3" /> {t("credentials.validKey")}
+                                                </span>
+                                            ) : undefined
                                         }
-                                        placeholder="sk-or-••••••••••••••••••••••••••••"
-                                        className="font-mono"
-                                    />
-                                </Field>
-                                <Field
-                                    label={t("credentials.elevenLabs")}
-                                    id="elevenlabs-key"
-                                    error={elevenLabsKeyError ? `${elevenLabsKeyError}. ${t("credentials.keyErrorSuffix")}` : undefined}
-                                    labelAside={
-                                        verifyingElevenLabs ? (
-                                            <span className="flex items-center gap-1 text-accent-ink">
-                                                <Spinner size="sm" />
-                                                {t("credentials.verifying")}
-                                            </span>
-                                        ) : !elevenLabsKeyError && apiKeys.elevenLabsKey ? (
-                                            <span className="flex items-center gap-1 font-medium text-success-ink">
-                                                <Check className="size-3" /> {t("credentials.validKey")}
-                                            </span>
-                                        ) : undefined
-                                    }
-                                >
-                                    <Input
-                                        type="password"
-                                        value={apiKeys.elevenLabsKey}
-                                        onChange={(e) =>
-                                            setApiKeys({ ...apiKeys, elevenLabsKey: e.target.value })
-                                        }
-                                        placeholder="••••••••••••••••••••••••••••••••"
-                                        className="font-mono"
-                                    />
-                                </Field>
-                                <Field label={t("credentials.deepgram")} hint={t("credentials.deepgramHint")} id="deepgram-key">
-                                    <Input
-                                        type="password"
-                                        value={apiKeys.deepgramKey}
-                                        onChange={(e) =>
-                                            setApiKeys({ ...apiKeys, deepgramKey: e.target.value })
-                                        }
-                                        placeholder="••••••••••••••••••••••••••••••••"
-                                        className="font-mono"
-                                    />
-                                </Field>
-                                <Field label={t("credentials.sarvam")} hint={t("credentials.sarvamHint")} id="sarvam-key">
-                                    <Input
-                                        type="password"
-                                        value={apiKeys.sarvamKey}
-                                        onChange={(e) =>
-                                            setApiKeys({ ...apiKeys, sarvamKey: e.target.value })
-                                        }
-                                        placeholder="••••••••••••••••••••••••••••••••"
-                                        className="font-mono"
-                                    />
-                                </Field>
-                                <Field label={t("credentials.gemini")} hint={t("credentials.geminiHint")} id="gemini-key">
-                                    <Input
-                                        type="password"
-                                        value={apiKeys.geminiKey}
-                                        onChange={(e) =>
-                                            setApiKeys({ ...apiKeys, geminiKey: e.target.value })
-                                        }
-                                        placeholder="••••••••••••••••••••••••••••••••"
-                                        className="font-mono"
-                                    />
-                                </Field>
-                            </div>
+                                    >
+                                        <Input
+                                            type="password"
+                                            value={apiKeys.elevenLabsKey}
+                                            onChange={(e) =>
+                                                setApiKeys({ ...apiKeys, elevenLabsKey: e.target.value })
+                                            }
+                                            placeholder="••••••••••••••••••••••••••••••••"
+                                            className="font-mono"
+                                        />
+                                    </Field>
+                                    <Field label={t("credentials.deepgram")} hint={t("credentials.deepgramHint")} id="deepgram-key">
+                                        <Input
+                                            type="password"
+                                            value={apiKeys.deepgramKey}
+                                            onChange={(e) =>
+                                                setApiKeys({ ...apiKeys, deepgramKey: e.target.value })
+                                            }
+                                            placeholder="••••••••••••••••••••••••••••••••"
+                                            className="font-mono"
+                                        />
+                                    </Field>
+                                    <Field label={t("credentials.sarvam")} hint={t("credentials.sarvamHint")} id="sarvam-key">
+                                        <Input
+                                            type="password"
+                                            value={apiKeys.sarvamKey}
+                                            onChange={(e) =>
+                                                setApiKeys({ ...apiKeys, sarvamKey: e.target.value })
+                                            }
+                                            placeholder="••••••••••••••••••••••••••••••••"
+                                            className="font-mono"
+                                        />
+                                    </Field>
+                                    <Field label={t("credentials.gemini")} hint={t("credentials.geminiHint")} id="gemini-key">
+                                        <Input
+                                            type="password"
+                                            value={apiKeys.geminiKey}
+                                            onChange={(e) =>
+                                                setApiKeys({ ...apiKeys, geminiKey: e.target.value })
+                                            }
+                                            placeholder="••••••••••••••••••••••••••••••••"
+                                            className="font-mono"
+                                        />
+                                    </Field>
+                                </div>
 
-                            <div className="flex flex-wrap gap-2">
-                                <Button type="submit" variant="primary" loading={saving}>
-                                    {c("actions.saveChanges")}
-                                </Button>
-                            </div>
-                        </form>
-                    </Section>
-                </TabsContent>
+                                <div className="flex flex-wrap gap-2">
+                                    <Button type="submit" variant="primary" loading={saving}>
+                                        {c("actions.saveChanges")}
+                                    </Button>
+                                </div>
+                            </form>
+                        </Section>
+                    </TabsContent>
+                )}
                 <TabsContent value="webhooks">
                     <Section
                         className="max-w-3xl"
@@ -985,16 +992,6 @@ function SettingsPageContent() {
                         </SettingRows>
 
                         <div className="grid gap-5 md:grid-cols-2">
-                            <Field label={t("emailNotifications.brevoKey")} hint={t("emailNotifications.brevoKeyHint")} id="brevo-key">
-                                <Input
-                                    type="password"
-                                    placeholder={t("emailNotifications.brevoKeyPlaceholder")}
-                                    value={emailSettings.brevoKey}
-                                    onChange={(e) => setEmailSettings({ ...emailSettings, brevoKey: e.target.value })}
-                                    className="font-mono"
-                                />
-                            </Field>
-
                             <Field label={t("emailNotifications.recipientEmail")} hint={t("emailNotifications.recipientEmailHint")} id="recipient-email">
                                 <Input
                                     type="email"
@@ -1004,21 +1001,35 @@ function SettingsPageContent() {
                                 />
                             </Field>
 
-                            <Field label={t("emailNotifications.senderName")} id="sender-name">
-                                <Input
-                                    placeholder={branding.appName}
-                                    value={emailSettings.senderName}
-                                    onChange={(e) => setEmailSettings({ ...emailSettings, senderName: e.target.value })}
-                                />
-                            </Field>
+                            {isAdmin && (
+                                <>
+                                    <Field label={t("emailNotifications.brevoKey")} hint={t("emailNotifications.brevoKeyHint")} id="brevo-key">
+                                        <Input
+                                            type="password"
+                                            placeholder={t("emailNotifications.brevoKeyPlaceholder")}
+                                            value={emailSettings.brevoKey}
+                                            onChange={(e) => setEmailSettings({ ...emailSettings, brevoKey: e.target.value })}
+                                            className="font-mono"
+                                        />
+                                    </Field>
 
-                            <Field label={t("emailNotifications.senderEmail")} id="sender-email">
-                                <Input
-                                    placeholder="notifications@yourdomain.com"
-                                    value={emailSettings.senderEmail}
-                                    onChange={(e) => setEmailSettings({ ...emailSettings, senderEmail: e.target.value })}
-                                />
-                            </Field>
+                                    <Field label={t("emailNotifications.senderName")} id="sender-name">
+                                        <Input
+                                            placeholder={branding.appName}
+                                            value={emailSettings.senderName}
+                                            onChange={(e) => setEmailSettings({ ...emailSettings, senderName: e.target.value })}
+                                        />
+                                    </Field>
+
+                                    <Field label={t("emailNotifications.senderEmail")} id="sender-email">
+                                        <Input
+                                            placeholder="notifications@yourdomain.com"
+                                            value={emailSettings.senderEmail}
+                                            onChange={(e) => setEmailSettings({ ...emailSettings, senderEmail: e.target.value })}
+                                        />
+                                    </Field>
+                                </>
+                            )}
                         </div>
 
                         <div className="flex flex-col gap-3 border-t border-border pt-4">
@@ -1176,14 +1187,25 @@ function SettingsPageContent() {
                                                 </ul>
                                             </CardContent>
                                             <CardFooter>
-                                                <Button
-                                                    block
-                                                    variant={isCurrent ? "secondary" : "primary"}
-                                                    disabled={isCurrent}
-                                                    onClick={() => handleUpgrade(plan)}
-                                                >
-                                                    {isCurrent ? t("billing.currentPlan") : t("billing.upgradePlan")}
-                                                </Button>
+                                                {isCurrent ? (
+                                                    <Button block variant="secondary" disabled>
+                                                        {t("billing.currentPlan")}
+                                                    </Button>
+                                                ) : isAdmin ? (
+                                                    <Button
+                                                        block
+                                                        variant="primary"
+                                                        onClick={() => handleUpgrade(plan)}
+                                                    >
+                                                        {t("billing.upgradePlan")}
+                                                    </Button>
+                                                ) : (
+                                                    <Button block variant="outline" asChild>
+                                                        <a href="https://www.nuvv.com.br/suporte" target="_blank" rel="noopener noreferrer">
+                                                            Solicitar com Nuvv
+                                                        </a>
+                                                    </Button>
+                                                )}
                                             </CardFooter>
                                         </Card>
                                     );
@@ -1193,63 +1215,65 @@ function SettingsPageContent() {
                     </div>
                 </TabsContent>
 
-                <TabsContent value="transactions">
-                    <Section icon={<ShoppingBag />} title={t("transactions.title")} description={t("transactions.description")}>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>{t("transactions.date")}</TableHead>
-                                    <TableHead>{t("transactions.plan")}</TableHead>
-                                    <TableHead>{t("transactions.amount")}</TableHead>
-                                    <TableHead>{t("transactions.method")}</TableHead>
-                                    <TableHead align="end">{t("transactions.status")}</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {loadingTransactions ? (
-                                    Array(3).fill(0).map((_, i) => (
-                                        <TableRow key={i}>
-                                            <TableCell colSpan={5}>
-                                                <Skeleton className="h-4 w-full" />
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                                ) : transactions.length === 0 ? (
+                {isAdmin && (
+                    <TabsContent value="transactions">
+                        <Section icon={<ShoppingBag />} title={t("transactions.title")} description={t("transactions.description")}>
+                            <Table>
+                                <TableHeader>
                                     <TableRow>
-                                        <TableCell colSpan={5} align="center" className="py-12 text-fg-muted">
-                                            {t("transactions.empty")}
-                                        </TableCell>
+                                        <TableHead>{t("transactions.date")}</TableHead>
+                                        <TableHead>{t("transactions.plan")}</TableHead>
+                                        <TableHead>{t("transactions.amount")}</TableHead>
+                                        <TableHead>{t("transactions.method")}</TableHead>
+                                        <TableHead align="end">{t("transactions.status")}</TableHead>
                                     </TableRow>
-                                ) : (
-                                    transactions.map((tx) => (
-                                        <TableRow key={tx._id}>
-                                            <TableCell className="font-medium">
-                                                {new Date(tx.createdAt).toLocaleDateString()}
-                                            </TableCell>
-                                            <TableCell className="font-semibold">
-                                                {tx.plan?.name || t("transactions.premiumPlan")}
-                                            </TableCell>
-                                            <TableCell>
-                                                {currency}{tx.amount}
-                                            </TableCell>
-                                            <TableCell className="capitalize text-fg-subtle">
-                                                {tx.paymentGateway}
-                                            </TableCell>
-                                            <TableCell align="end">
-                                                <Badge
-                                                    dot
-                                                    tone={tx.status === 'completed' ? 'success' : tx.status === 'pending' ? 'warning' : 'danger'}
-                                                >
-                                                    {tx.status}
-                                                </Badge>
+                                </TableHeader>
+                                <TableBody>
+                                    {loadingTransactions ? (
+                                        Array(3).fill(0).map((_, i) => (
+                                            <TableRow key={i}>
+                                                <TableCell colSpan={5}>
+                                                    <Skeleton className="h-4 w-full" />
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    ) : transactions.length === 0 ? (
+                                        <TableRow>
+                                            <TableCell colSpan={5} align="center" className="py-12 text-fg-muted">
+                                                {t("transactions.empty")}
                                             </TableCell>
                                         </TableRow>
-                                    ))
-                                )}
-                            </TableBody>
-                        </Table>
-                    </Section>
-                </TabsContent>
+                                    ) : (
+                                        transactions.map((tx) => (
+                                            <TableRow key={tx._id}>
+                                                <TableCell className="font-medium">
+                                                    {new Date(tx.createdAt).toLocaleDateString()}
+                                                </TableCell>
+                                                <TableCell className="font-semibold">
+                                                    {tx.plan?.name || t("transactions.premiumPlan")}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {currency}{tx.amount}
+                                                </TableCell>
+                                                <TableCell className="capitalize text-fg-subtle">
+                                                    {tx.paymentGateway}
+                                                </TableCell>
+                                                <TableCell align="end">
+                                                    <Badge
+                                                        dot
+                                                        tone={tx.status === 'completed' ? 'success' : tx.status === 'pending' ? 'warning' : 'danger'}
+                                                    >
+                                                        {tx.status}
+                                                    </Badge>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </Section>
+                    </TabsContent>
+                )}
 
                 <TabsContent value="system">
                     <div className="flex max-w-3xl flex-col gap-6">

@@ -29,7 +29,8 @@ function missingEngineKeys(settings, agent, provider) {
         return missing;
     }
     if (isGemini) {
-        if (!settings?.geminiKey) missing.push('Gemini');
+        const hasGemini = Boolean(settings?.geminiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY);
+        if (!hasGemini) missing.push('Gemini');
         return missing;
     }
     if (!settings?.deepgramKey) missing.push('Deepgram');

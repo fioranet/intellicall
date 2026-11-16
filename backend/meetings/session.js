@@ -49,9 +49,12 @@ const live = new Map();
 const liveMeetingCount = () => live.size;
 const isMeetingLive = (callId) => live.has(callId);
 
-/** The owner's Attendee, opened for one request. Null when they have none. */
+/** The owner's Attendee, opened for one request. Null when they have none (falls back to master). */
 async function credentialsFor(userId) {
-    const doc = await MeetingIntegration.findOne({ createdBy: userId, provider: 'attendee' }).lean();
+    let doc = await MeetingIntegration.findOne({ createdBy: userId, provider: 'attendee' }).lean();
+    if (!doc) {
+        doc = await MeetingIntegration.findOne({ provider: 'attendee', status: 'connected' }).sort({ createdAt: 1 }).lean();
+    }
     if (!doc) return null;
     const apiKey = open(doc.apiKeyEncrypted, 'MeetingIntegration.apiKey');
     return apiKey ? { baseUrl: doc.baseUrl, apiKey } : null;
